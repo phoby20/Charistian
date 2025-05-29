@@ -27,5 +27,15 @@
   "smart": "스마트",
   "enterprise": "엔터프라이즈",
   "registrationFailed": "교회 등록에 실패했습니다",
-  "churchExists": "이미 등록된 교회입니다"
+  "churchExists": "이미 등록된 교회입니다",
+  "siteTitle": "교회 관리 시스템",
+  "home": "홈",
+  "login": "로그인",
+  "logout": "로그아웃",
+  "language": "언어",
+  "visitor": "방문자",
+  "general": "일반",
+  "admin": "관리자",
+  "super_admin": "최고 관리자",
+  "master": "마스터"
 }

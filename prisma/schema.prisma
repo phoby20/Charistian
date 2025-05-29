@@ -140,7 +140,6 @@ model ChurchApplication {
   region            String       // 새 필드 추가
   address           String
   contactName       String
-  contactPosition   String
   contactPhone      String
   contactGender     String
   contactBirthDate  DateTime

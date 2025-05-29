@@ -73,7 +73,6 @@ export async function POST(req: NextRequest) {
       superAdminEmail: formData.get("superAdminEmail") as string,
       password: formData.get("password") as string,
       contactName: formData.get("contactName") as string,
-      contactPosition: formData.get("contactPosition") as string,
       contactPhone: formData.get("contactPhone") as string,
       contactGender: formData.get("contactGender") as string,
       contactBirthDate: new Date(formData.get("contactBirthDate") as string),
@@ -93,7 +92,6 @@ export async function POST(req: NextRequest) {
       !data.superAdminEmail ||
       !data.password ||
       !data.contactName ||
-      !data.contactPosition ||
       !data.contactPhone ||
       !data.contactGender ||
       !data.contactBirthDate ||
@@ -180,7 +178,6 @@ export async function POST(req: NextRequest) {
         superAdminEmail: data.superAdminEmail.toLowerCase(),
         password: hashedPassword,
         contactName: data.contactName,
-        contactPosition: data.contactPosition,
         contactPhone: data.contactPhone,
         contactGender: data.contactGender,
         contactBirthDate: data.contactBirthDate,

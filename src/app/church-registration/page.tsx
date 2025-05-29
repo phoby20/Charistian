@@ -90,7 +90,6 @@ export default function ChurchRegistrationPage() {
             required
           />
           <Input label={t("contactName")} name="contactName" required />
-          <Input label={t("contactPosition")} name="contactPosition" required />
           <Input label={t("contactPhone")} name="contactPhone" required />
           <Select
             label={t("contactGender")}

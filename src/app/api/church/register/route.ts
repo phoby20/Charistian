@@ -6,12 +6,68 @@ import * as bcrypt from "bcrypt";
 const validPlans = ["FREE", "SMART", "ENTERPRISE"] as const;
 type Plan = (typeof validPlans)[number];
 
+const validCities = [
+  "Seoul",
+  "Busan",
+  "Daegu",
+  "Incheon",
+  "Gwangju",
+  "Daejeon",
+  "Ulsan",
+  "Suwon",
+  "Jeju",
+  "Goyang",
+  "Changwon",
+  "Seongnam",
+  "Tokyo",
+  "Osaka",
+  "Kyoto",
+  "Yokohama",
+  "Nagoya",
+  "Sapporo",
+  "Fukuoka",
+  "Kobe",
+  "Hiroshima",
+  "Sendai",
+  "Chiba",
+  "Kawasaki",
+];
+
+const validRegionsByCity: Record<string, string[]> = {
+  Seoul: ["Gangnam", "Seocho", "Songpa"],
+  Busan: ["Haeundae", "Suyeong", "Busanjin"],
+  Daegu: ["Suseong", "Dalseo"],
+  Incheon: ["Namdong", "Yeonsu"],
+  Gwangju: ["Bukgu", "Gwangsan"],
+  Daejeon: ["Yuseong", "Jung"],
+  Ulsan: ["Namgu", "Jung"],
+  Suwon: ["Yeongtong", "Paldal"],
+  Jeju: ["JejuCity", "Seogwipo"],
+  Goyang: ["Ilsanseo", "Deogyang"],
+  Changwon: ["Seongsan", "Uichang"],
+  Seongnam: ["Bundang", "Sujeong"],
+  Tokyo: ["Shibuya", "Shinjuku", "Minato"],
+  Osaka: ["Umeda", "Namba", "Kita"],
+  Kyoto: ["Shimogyo", "Nakagyo"],
+  Yokohama: ["Naka", "Minami"],
+  Nagoya: ["Naka", "Higashi"],
+  Sapporo: ["Chuo", "Kita"],
+  Fukuoka: ["Hakata", "Chuo"],
+  Kobe: ["Chuo", "Nada"],
+  Hiroshima: ["Naka", "Minami"],
+  Sendai: ["Aoba", "Miyagino"],
+  Chiba: ["Chuo", "Mihama"],
+  Kawasaki: ["Kawasaki", "Nakahara"],
+};
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const data = {
       churchName: formData.get("churchName") as string,
       address: formData.get("address") as string,
+      city: formData.get("city") as string,
+      region: formData.get("region") as string,
       country: formData.get("country") as string,
       churchPhone: formData.get("churchPhone") as string,
       superAdminEmail: formData.get("superAdminEmail") as string,
@@ -30,6 +86,8 @@ export async function POST(req: NextRequest) {
     if (
       !data.churchName ||
       !data.address ||
+      !data.city ||
+      !data.region ||
       !data.country ||
       !data.churchPhone ||
       !data.superAdminEmail ||
@@ -43,6 +101,30 @@ export async function POST(req: NextRequest) {
     ) {
       return NextResponse.json(
         { error: "모든 필수 필드를 입력해주세요." },
+        { status: 400 }
+      );
+    }
+
+    // Country 검증
+    if (!["Korea", "Japan"].includes(data.country)) {
+      return NextResponse.json(
+        { error: "유효하지 않은 국가입니다." },
+        { status: 400 }
+      );
+    }
+
+    // City 검증
+    if (!validCities.includes(data.city)) {
+      return NextResponse.json(
+        { error: "유효하지 않은 도시입니다." },
+        { status: 400 }
+      );
+    }
+
+    // Region 검증
+    if (!validRegionsByCity[data.city]?.includes(data.region)) {
+      return NextResponse.json(
+        { error: "유효하지 않은 지역입니다." },
         { status: 400 }
       );
     }
@@ -91,6 +173,8 @@ export async function POST(req: NextRequest) {
       data: {
         churchName: data.churchName,
         address: data.address,
+        city: data.city,
+        region: data.region,
         country: data.country,
         churchPhone: data.churchPhone,
         superAdminEmail: data.superAdminEmail.toLowerCase(),

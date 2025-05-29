@@ -136,6 +136,8 @@ model ChurchApplication {
   superAdminEmail   String
   password          String
   country           String
+  city              String       // 새 필드 추가
+  region            String       // 새 필드 추가
   address           String
   contactName       String
   contactPosition   String

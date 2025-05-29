@@ -7,11 +7,17 @@ import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { regionsByCity } from "@/data/regions/regions";
+import { citiesByCountry } from "@/data/cities";
+import { countryOptions } from "@/data/country";
 
 export default function ChurchRegistrationPage() {
   const { t } = useTranslation("common");
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string>("Korea"); // 기본값을 "Korea"로 설정
+  const [selectedCity, setSelectedCity] = useState<string>("Seoul");
+  const [selectedRegion, setSelectedRegion] = useState<string>("Gangnam");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,8 +48,34 @@ export default function ChurchRegistrationPage() {
         <h1 className="text-2xl font-bold mb-6">{t("churchRegistration")}</h1>
         <form onSubmit={handleSubmit}>
           <Input label={t("churchName")} name="churchName" required />
+          <Select
+            label={t("country")}
+            name="country"
+            options={countryOptions}
+            required
+            value={selectedCountry}
+            onChange={(e) => {
+              setSelectedCountry(e.target.value);
+              setSelectedCity(""); // 도시 초기화
+            }}
+          />
+          <Select
+            label={t("city")}
+            name="city"
+            options={citiesByCountry[selectedCountry] || []}
+            required
+            value={selectedCity}
+            onChange={(e) => setSelectedCity(e.target.value)}
+          />
+          <Select
+            label={t("region")}
+            name="region"
+            value={selectedRegion}
+            options={regionsByCity[selectedCity] || []}
+            onChange={(e) => setSelectedRegion(e.target.value)}
+            required
+          />
           <Input label={t("address")} name="address" required />
-          <Input label={t("country")} name="country" required />
           <Input label={t("churchPhone")} name="churchPhone" required />
           <Input
             label={t("superAdminEmail")}

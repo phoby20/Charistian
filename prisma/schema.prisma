@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  password      String
+  name          String
+  birthDate     DateTime
+  phone         String?
+  kakaoId       String?
+  lineId        String?
+  address       String?
+  country       String
+  region        String
+  gender        String
+  profileImage  String?
+  role          Role       @default(GENERAL)
+  churchId      String?
+  church        Church?    @relation(fields: [churchId], references: [id])
+  groups        Group[]    @relation("UserGroups")
+  subGroups     SubGroup[] @relation("UserSubGroups")
+  teams         Team[]     @relation("UserTeams")
+  duties        Duty[]     @relation("UserDuties")
+  creations     Creation[]
+  purchases     Purchase[]
+  state         UserState  @default(APPROVED)
+  attendances   Attendance[] @relation("UserAttendance")
+  checkedAttendances Attendance[] @relation("CheckedBy")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Church {
+  id                String    @id @default(uuid())
+  name              String
+  address           String
+  country           String
+  phone             String
+  buildingImage     String?
+  plan              Plan      @default(FREE)
+  state             ChurchState @default(PENDING)
+  users             User[]
+  groups            Group[]
+  subGroups         SubGroup[] @relation("ChurchSubGroups")
+  teams             Team[]
+  duties            Duty[]
+  creations         Creation[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Group {
+  id            String    @id @default(uuid())
+  name          String
+  churchId      String
+  church        Church    @relation(fields: [churchId], references: [id])
+  users         User[]    @relation("UserGroups")
+  subGroups     SubGroup[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model SubGroup {
+  id            String    @id @default(uuid())
+  name          String
+  groupId       String
+  group         Group     @relation(fields: [groupId], references: [id])
+  churchId      String
+  church        Church    @relation("ChurchSubGroups", fields: [churchId], references: [id])
+  users         User[]    @relation("UserSubGroups")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Team {
+  id            String    @id @default(uuid())
+  name          String
+  churchId      String
+  church        Church    @relation(fields: [churchId], references: [id])
+  users         User[]    @relation("UserTeams")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Duty {
+  id            String    @id @default(uuid())
+  name          String
+  churchId      String
+  church        Church    @relation(fields: [churchId], references: [id])
+  users         User[]    @relation("UserDuties")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Creation {
+  id            String    @id @default(uuid())
+  title         String
+  description   String
+  type          CreationType
+  fileUrl       String
+  audioUrl      String?
+  price         Float?
+  isPublic      Boolean   @default(false)
+  creatorId     String
+  creator       User      @relation(fields: [creatorId], references: [id])
+  churchId      String
+  church        Church    @relation(fields: [churchId], references: [id])
+  purchases     Purchase[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Purchase {
+  id            String    @id @default(uuid())
+  creationId    String
+  creation      Creation  @relation(fields: [creationId], references: [id])
+  buyerId       String
+  buyer         User      @relation(fields: [buyerId], references: [id])
+  amount        Float
+  creatorProfit Float
+  churchProfit  Float
+  serviceFee    Float
+  createdAt     DateTime  @default(now())
+}
+
+model ChurchApplication {
+  id                String    @id @default(uuid())
+  churchName        String
+  superAdminEmail   String
+  password          String
+  country           String
+  address           String
+  contactName       String
+  contactPosition   String
+  contactPhone      String
+  contactGender     String
+  contactBirthDate  DateTime
+  contactImage      String?
+  churchPhone       String
+  buildingImage     String?
+  plan              Plan
+  state             ChurchState @default(PENDING)
+  rejectionReason   String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Attendance {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation("UserAttendance", fields: [userId], references: [id])
+  date          DateTime
+  status        String
+  checkedById   String
+  checkedBy     User      @relation("CheckedBy", fields: [checkedById], references: [id])
+  createdAt     DateTime  @default(now())
+}
+
+enum Role {
+  VISITOR
+  GENERAL
+  ADMIN
+  SUPER_ADMIN
+  MASTER
+}
+
+enum Plan {
+  FREE
+  SMART
+  ENTERPRISE
+}
+
+enum CreationType {
+  SCORE
+  ILLUSTRATION
+}
+
+enum ChurchState {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum UserState {
+  PENDING
+  APPROVED
+  REJECTED
+}

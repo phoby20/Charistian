@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslation } from "next-i18next";
 import Link from "next/link";
 import { Menu, X, User, LogOut, ChevronDown } from "lucide-react";
@@ -16,7 +15,6 @@ interface UserInfo {
 
 export default function Header() {
   const { t, i18n } = useTranslation("common");
-  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
@@ -71,7 +69,9 @@ export default function Header() {
         credentials: "include",
       });
       setUser(null);
-      router.push("/login");
+      if (typeof window !== "undefined") {
+        window.location.href = "/login"; // Redirect to login page
+      }
     } catch (error) {
       console.error("Error logging out:", error);
     }

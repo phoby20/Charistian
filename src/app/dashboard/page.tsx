@@ -1,4 +1,3 @@
-// src/app/[locale]/dashboard/page.tsx
 "use client";
 
 import { useTranslation } from "next-i18next";
@@ -26,7 +25,30 @@ export default function DashboardPage() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [selectedChurchId, setSelectedChurchId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
+  // Fetch current user role
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const response = await fetch("/api/auth/me", {
+          credentials: "include",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUserRole(data.user.role);
+        } else {
+          setError(t("authError"));
+        }
+      } catch (err) {
+        console.error("Error fetching user role:", err);
+        setError(t("serverError"));
+      }
+    };
+    fetchUserRole();
+  }, [t]);
+
+  // Fetch pending data
   useEffect(() => {
     const fetchPendingData = async () => {
       try {
@@ -87,35 +109,50 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen p-8 bg-gray-100">
       <h1 className="text-3xl font-bold mb-6">{t("dashboard")}</h1>
-      <h2 className="text-xl font-semibold mb-4">{t("pendingChurches")}</h2>
-      {pendingChurches.map((church) => (
-        <div key={church.id} className="bg-white p-4 mb-4 rounded-md shadow-md">
-          <p>
-            {church.name} - {church.address}
-          </p>
-          <Button onClick={() => handleApproveChurch(church.id)}>
-            {t("approve")}
-          </Button>
-          <Button
-            variant="danger"
-            onClick={() => {
-              setSelectedChurchId(church.id);
-              setModalOpen(true);
-            }}
-          >
-            {t("reject")}
-          </Button>
-        </div>
-      ))}
+      {userRole === "MASTER" ? (
+        <>
+          <h2 className="text-xl font-semibold mb-4">{t("pendingChurches")}</h2>
+          {pendingChurches.length === 0 ? (
+            <p className="text-gray-600">{t("noPendingChurches")}</p>
+          ) : (
+            pendingChurches.map((church) => (
+              <div
+                key={church.id}
+                className="bg-white p-4 mb-4 rounded-md shadow-md"
+              >
+                <p>
+                  {church.name} - {church.address}
+                </p>
+                <Button onClick={() => handleApproveChurch(church.id)}>
+                  {t("approve")}
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => {
+                    setSelectedChurchId(church.id);
+                    setModalOpen(true);
+                  }}
+                >
+                  {t("reject")}
+                </Button>
+              </div>
+            ))
+          )}
+        </>
+      ) : null}
       <h2 className="text-xl font-semibold mb-4">{t("pendingUsers")}</h2>
-      {pendingUsers.map((user) => (
-        <div key={user.id} className="bg-white p-4 mb-4 rounded-md shadow-md">
-          <p>
-            {user.name} - {user.email}
-          </p>
-          {/* Add approval/rejection buttons for users if needed */}
-        </div>
-      ))}
+      {pendingUsers.length === 0 ? (
+        <p className="text-gray-600">{t("noPendingUsers")}</p>
+      ) : (
+        pendingUsers.map((user) => (
+          <div key={user.id} className="bg-white p-4 mb-4 rounded-md shadow-md">
+            <p>
+              {user.name} - {user.email}
+            </p>
+            {/* Add approval/rejection buttons for users if needed */}
+          </div>
+        ))
+      )}
       <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)}>
         <h2 className="text-lg font-semibold mb-4">{t("rejectionReason")}</h2>
         <textarea
@@ -128,6 +165,7 @@ export default function DashboardPage() {
       {error && (
         <Modal isOpen={!!error} onClose={() => setError(null)}>
           <p>{error}</p>
+          <Button onClick={() => setError(null)}>{t("close")}</Button>
         </Modal>
       )}
     </div>

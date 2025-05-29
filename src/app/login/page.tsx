@@ -5,12 +5,10 @@ import { useTranslation } from "next-i18next";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { appWithTranslation } from "next-i18next";
 
 function LoginPage() {
   const { t } = useTranslation("common");
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -31,7 +29,9 @@ function LoginPage() {
         return;
       }
 
-      router.push("/dashboard");
+      if (typeof window !== "undefined") {
+        window.location.href = "/dashboard";
+      }
     } catch (err) {
       setError(
         t("serverError", {

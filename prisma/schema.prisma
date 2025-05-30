@@ -33,7 +33,6 @@ model User {
   purchases     Purchase[]
   state         UserState  @default(APPROVED)
   rejectionReason String?
-  position      String?
   attendances   Attendance[] @relation("UserAttendance")
   checkedAttendances Attendance[] @relation("CheckedBy")
   createdAt     DateTime   @default(now())
@@ -44,8 +43,8 @@ model Church {
   id                String    @id @default(uuid())
   name              String
   country           String
-  city              String       // 새 필드 추가
-  region            String       // 새 필드 추가
+  city              String
+  region            String
   address           String
   phone             String
   buildingImage     String?

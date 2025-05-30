@@ -12,7 +12,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  churchId: string; // Added churchId to User interface
+  churchId: string;
 }
 
 export default function DashboardPage() {
@@ -25,10 +25,14 @@ export default function DashboardPage() {
   const [isImageModalOpen, setImageModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [selectedChurchId, setSelectedChurchId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null); // 사용자 거부용
+  const [rejectionType, setRejectionType] = useState<"church" | "user" | null>(
+    null
+  ); // 거부 대상 구분
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [userChurchId, setUserChurchId] = useState<string | null>(null); // Store current user's churchId
+  const [userChurchId, setUserChurchId] = useState<string | null>(null);
 
   // Fetch current user role and churchId
   useEffect(() => {
@@ -40,7 +44,7 @@ export default function DashboardPage() {
         if (response.ok) {
           const data = await response.json();
           setUserRole(data.user.role);
-          setUserChurchId(data.user.churchId); // Set the current user's churchId
+          setUserChurchId(data.user.churchId);
         } else {
           setError(t("authError"));
         }
@@ -69,10 +73,10 @@ export default function DashboardPage() {
             );
             setPendingUsers(filteredUsers);
           } else {
-            setPendingUsers([]); // No churchId, show no users
+            setPendingUsers([]);
           }
         } else {
-          setPendingUsers([]); // Non-SUPER_ADMIN/ADMIN roles see no users
+          setPendingUsers([]);
         }
       } catch (err) {
         console.error("Error fetching pending data:", err);
@@ -80,7 +84,6 @@ export default function DashboardPage() {
       }
     };
 
-    // Only fetch data if userRole and userChurchId are set
     if (userRole !== null && userChurchId !== null) {
       fetchPendingData();
     }
@@ -121,8 +124,49 @@ export default function DashboardPage() {
       setRejectionModalOpen(false);
       setRejectionReason("");
       setSelectedChurchId(null);
+      setRejectionType(null);
     } catch (err) {
       console.error("Error rejecting church:", err);
+      setError(t("serverError"));
+    }
+  };
+
+  const handleApproveUser = async (userId: string) => {
+    try {
+      const response = await fetch("/api/users/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      if (!response.ok) throw new Error("Failed to approve user");
+      setPendingUsers(pendingUsers.filter((user) => user.id !== userId));
+    } catch (err) {
+      console.error("Error approving user:", err);
+      setError(t("serverError"));
+    }
+  };
+
+  const handleRejectUser = async () => {
+    if (!selectedUserId) return;
+    try {
+      const response = await fetch("/api/users/reject", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: selectedUserId,
+          reason: rejectionReason,
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to reject user");
+      setPendingUsers(
+        pendingUsers.filter((user) => user.id !== selectedUserId)
+      );
+      setRejectionModalOpen(false);
+      setRejectionReason("");
+      setSelectedUserId(null);
+      setRejectionType(null);
+    } catch (err) {
+      console.error("Error rejecting user:", err);
       setError(t("serverError"));
     }
   };
@@ -130,6 +174,26 @@ export default function DashboardPage() {
   const openImageModal = (imageUrl: string) => {
     setSelectedImage(imageUrl);
     setImageModalOpen(true);
+  };
+
+  const handleOpenRejectionModal = (type: "church" | "user", id: string) => {
+    setRejectionType(type);
+    if (type === "church") {
+      setSelectedChurchId(id);
+      setSelectedUserId(null);
+    } else {
+      setSelectedUserId(id);
+      setSelectedChurchId(null);
+    }
+    setRejectionModalOpen(true);
+  };
+
+  const handleRejectSubmit = () => {
+    if (rejectionType === "church") {
+      handleRejectChurch();
+    } else if (rejectionType === "user") {
+      handleRejectUser();
+    }
   };
 
   return (
@@ -153,10 +217,7 @@ export default function DashboardPage() {
                     key={church.id}
                     church={church}
                     onApprove={handleApproveChurch}
-                    onReject={(id) => {
-                      setSelectedChurchId(id);
-                      setRejectionModalOpen(true);
-                    }}
+                    onReject={(id) => handleOpenRejectionModal("church", id)}
                     onImageClick={openImageModal}
                   />
                 ))}
@@ -186,7 +247,22 @@ export default function DashboardPage() {
                     <p className="text-sm text-gray-500">
                       {t("churchId")}: {user.churchId}
                     </p>
-                    {/* 사용자 승인/거부 버튼이 필요하면 추가 */}
+                    <div className="mt-4 flex space-x-2">
+                      <Button
+                        onClick={() => handleApproveUser(user.id)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
+                      >
+                        {t("approve")}
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          handleOpenRejectionModal("user", user.id)
+                        }
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md"
+                      >
+                        {t("reject")}
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -197,20 +273,32 @@ export default function DashboardPage() {
         {/* 거부 모달 */}
         <Modal
           isOpen={isRejectionModalOpen}
-          onClose={() => setRejectionModalOpen(false)}
+          onClose={() => {
+            setRejectionModalOpen(false);
+            setRejectionReason("");
+            setSelectedChurchId(null);
+            setSelectedUserId(null);
+            setRejectionType(null);
+          }}
         >
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            {t("rejectionReason")}
+            {rejectionType === "user"
+              ? t("userRejectionReason")
+              : t("rejectionReason")}
           </h2>
           <textarea
             className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             value={rejectionReason}
             onChange={(e) => setRejectionReason(e.target.value)}
-            placeholder={t("enterRejectionReason")}
+            placeholder={
+              rejectionType === "user"
+                ? t("enterUserRejectionReason")
+                : t("enterRejectionReason")
+            }
           />
           <div className="flex justify-end mt-4">
             <Button
-              onClick={handleRejectChurch}
+              onClick={handleRejectSubmit}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
             >
               {t("confirm")}
@@ -230,14 +318,6 @@ export default function DashboardPage() {
         {error && (
           <Modal isOpen={!!error} onClose={() => setError(null)}>
             <p className="text-red-600">{error}</p>
-            <div className="flex justify-end mt-4">
-              <Button
-                onClick={() => setError(null)}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md"
-              >
-                {t("close")}
-              </Button>
-            </div>
           </Modal>
         )}
       </div>

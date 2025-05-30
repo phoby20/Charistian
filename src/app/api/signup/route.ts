@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
     if (!data.country) missingFields.push("country");
     if (!data.city) missingFields.push("city");
     if (!data.region) missingFields.push("region");
+    if (!data.position) missingFields.push("position");
     if (!data.churchId) missingFields.push("churchId");
 
     if (missingFields.length > 0) {
@@ -87,6 +88,7 @@ export async function POST(req: NextRequest) {
         country: data.country,
         region: data.region,
         churchId: data.churchId,
+        position: data.position,
         profileImage: data.profileImage || null,
         role: "GENERAL",
         state: "PENDING",

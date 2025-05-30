@@ -19,7 +19,7 @@ model User {
   address       String?
   country       String?
   region        String?
-  city          String?       // 새 필드 추가
+  city          String?
   gender        String
   profileImage  String?
   role          Role       @default(GENERAL)
@@ -32,6 +32,8 @@ model User {
   creations     Creation[]
   purchases     Purchase[]
   state         UserState  @default(APPROVED)
+  rejectionReason String?
+  position      String?
   attendances   Attendance[] @relation("UserAttendance")
   checkedAttendances Attendance[] @relation("CheckedBy")
   createdAt     DateTime   @default(now())

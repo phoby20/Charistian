@@ -114,5 +114,13 @@
   "searchPlaceholder": "教会やユーザーを検索...",
   "birthDate": "生年月日",
   "kakaoId": "カカオID",
-  "lineId": "ラインID"
+  "lineId": "ラインID",
+  "noPendingChurches": "保留中の教会はありません。",
+  "noPendingUsers": "保留中のユーザーはありません。",
+  "enterRejectionReason": "教会の拒否理由を入力してください",
+  "userRejectionReason": "ユーザーの拒否理由",
+  "enterUserRejectionReason": "ユーザーの拒否理由を入力してください",
+  "close": "閉じる",
+  "authError": "認証エラーが発生しました。",
+  "churchId": "教会ID"
 }

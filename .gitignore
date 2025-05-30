@@ -44,5 +44,6 @@ next-env.d.ts
 
 /src/prisma/dev.db
 *.db
+dev.db-journal
 
 /public/uploads

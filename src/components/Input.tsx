@@ -6,7 +6,9 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 const Input: FC<InputProps> = ({ label, ...props }) => (
   <div className="mb-4">
-    <label className="block text-sm font-medium text-gray-700">{label}</label>
+    <label className="block text-sm font-medium text-gray-500 mb-1">
+      {label}
+    </label>
     <input className="mt-1 p-2 border rounded-md w-full" {...props} />
   </div>
 );

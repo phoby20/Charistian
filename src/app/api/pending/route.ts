@@ -21,7 +21,7 @@ export async function GET() {
     });
     const pendingUsers = await prisma.user.findMany({
       where: { state: "PENDING" },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, churchId: true },
     });
     return NextResponse.json(
       { pendingChurches, pendingUsers },

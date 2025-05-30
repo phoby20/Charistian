@@ -1,4 +1,3 @@
-// src/app/dashboard/page.tsx
 "use client";
 
 import { useTranslation } from "next-i18next";
@@ -13,6 +12,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  churchId: string; // Added churchId to User interface
 }
 
 export default function DashboardPage() {
@@ -28,8 +28,9 @@ export default function DashboardPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userChurchId, setUserChurchId] = useState<string | null>(null); // Store current user's churchId
 
-  // Fetch current user role
+  // Fetch current user role and churchId
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
@@ -39,6 +40,7 @@ export default function DashboardPage() {
         if (response.ok) {
           const data = await response.json();
           setUserRole(data.user.role);
+          setUserChurchId(data.user.churchId); // Set the current user's churchId
         } else {
           setError(t("authError"));
         }
@@ -58,14 +60,31 @@ export default function DashboardPage() {
         if (!response.ok) throw new Error("Failed to fetch data");
         const { pendingChurches, pendingUsers } = await response.json();
         setPendingChurches(pendingChurches);
-        setPendingUsers(pendingUsers);
+
+        // Filter pendingUsers based on churchId for SUPER_ADMIN or ADMIN
+        if (userRole === "SUPER_ADMIN" || userRole === "ADMIN") {
+          if (userChurchId) {
+            const filteredUsers = pendingUsers.filter(
+              (user: User) => user.churchId === userChurchId
+            );
+            setPendingUsers(filteredUsers);
+          } else {
+            setPendingUsers([]); // No churchId, show no users
+          }
+        } else {
+          setPendingUsers([]); // Non-SUPER_ADMIN/ADMIN roles see no users
+        }
       } catch (err) {
         console.error("Error fetching pending data:", err);
         setError(t("serverError"));
       }
     };
-    fetchPendingData();
-  }, []);
+
+    // Only fetch data if userRole and userChurchId are set
+    if (userRole !== null && userChurchId !== null) {
+      fetchPendingData();
+    }
+  }, [userRole, userChurchId]);
 
   const handleApproveChurch = async (applicationId: string) => {
     try {
@@ -146,27 +165,34 @@ export default function DashboardPage() {
           </section>
         )}
 
-        <section>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-            {t("pendingUsers")}
-          </h2>
-          {pendingUsers.length === 0 ? (
-            <p className="text-gray-500 italic">{t("noPendingUsers")}</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pendingUsers.map((user) => (
-                <div
-                  key={user.id}
-                  className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
-                >
-                  <p className="text-lg font-bold text-gray-900">{user.name}</p>
-                  <p className="text-sm text-gray-600">{user.email}</p>
-                  {/* 사용자 승인/거부 버튼이 필요하면 추가 */}
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        {(userRole === "SUPER_ADMIN" || userRole === "ADMIN") && (
+          <section>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              {t("pendingUsers")}
+            </h2>
+            {pendingUsers.length === 0 ? (
+              <p className="text-gray-500 italic">{t("noPendingUsers")}</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pendingUsers.map((user) => (
+                  <div
+                    key={user.id}
+                    className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+                  >
+                    <p className="text-lg font-bold text-gray-900">
+                      {user.name}
+                    </p>
+                    <p className="text-sm text-gray-600">{user.email}</p>
+                    <p className="text-sm text-gray-500">
+                      {t("churchId")}: {user.churchId}
+                    </p>
+                    {/* 사용자 승인/거부 버튼이 필요하면 추가 */}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* 거부 모달 */}
         <Modal

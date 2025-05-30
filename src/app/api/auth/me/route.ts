@@ -12,7 +12,17 @@ export async function GET(req: NextRequest) {
     const payload = verifyToken(token);
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      select: { id: true, email: true, name: true, role: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        churchId: true,
+        profileImage: true,
+        birthDate: true,
+        phone: true,
+        kakaoId: true,
+      },
     });
 
     if (!user) {

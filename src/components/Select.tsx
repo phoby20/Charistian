@@ -7,7 +7,9 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 const Select: FC<SelectProps> = ({ label, options, ...props }) => (
   <div className="mb-4">
-    <label className="block text-sm font-medium text-gray-700">{label}</label>
+    <label className="block text-sm font-medium text-gray-500 mb-1">
+      {label}
+    </label>
     <select className="mt-1 p-2 border rounded-md w-full" {...props}>
       {options.map((option) => (
         <option key={option.value} value={option.value}>

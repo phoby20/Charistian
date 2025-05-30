@@ -22,7 +22,9 @@ async function main() {
           create: {
             name: "Master Church",
             address: "Master Address",
-            country: "South Korea",
+            city: "Seoul",
+            region: "Gangnam",
+            country: "Korea",
             phone: "000-0000-0000", // Renamed from phone to phone
             plan: "ENTERPRISE",
             state: "APPROVED", // Changed from status to state

@@ -17,8 +17,9 @@ model User {
   kakaoId       String?
   lineId        String?
   address       String?
-  country       String
-  region        String
+  country       String?
+  region        String?
+  city          String?       // 새 필드 추가
   gender        String
   profileImage  String?
   role          Role       @default(GENERAL)
@@ -40,8 +41,10 @@ model User {
 model Church {
   id                String    @id @default(uuid())
   name              String
-  address           String
   country           String
+  city              String       // 새 필드 추가
+  region            String       // 새 필드 추가
+  address           String
   phone             String
   buildingImage     String?
   plan              Plan      @default(FREE)

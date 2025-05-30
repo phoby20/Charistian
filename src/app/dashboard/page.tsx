@@ -4,16 +4,10 @@ import { useTranslation } from "next-i18next";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import { useState, useEffect } from "react";
-import { ChurchApplication } from "@prisma/client";
-import ChurchApplicationCard from "@/components/ChurchApplicationCard";
+import { ChurchApplication, User } from "@prisma/client";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  churchId: string;
-}
+import PendingChurches from "@/components/PendingChurches";
+import PendingUsers from "@/components/PendingUsers";
 
 export default function DashboardPage() {
   const { t } = useTranslation("common");
@@ -25,10 +19,10 @@ export default function DashboardPage() {
   const [isImageModalOpen, setImageModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [selectedChurchId, setSelectedChurchId] = useState<string | null>(null);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null); // 사용자 거부용
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [rejectionType, setRejectionType] = useState<"church" | "user" | null>(
     null
-  ); // 거부 대상 구분
+  );
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -65,7 +59,6 @@ export default function DashboardPage() {
         const { pendingChurches, pendingUsers } = await response.json();
         setPendingChurches(pendingChurches);
 
-        // Filter pendingUsers based on churchId for SUPER_ADMIN or ADMIN
         if (userRole === "SUPER_ADMIN" || userRole === "ADMIN") {
           if (userChurchId) {
             const filteredUsers = pendingUsers.filter(
@@ -203,72 +196,20 @@ export default function DashboardPage() {
           {t("dashboard")}
         </h1>
 
-        {userRole === "MASTER" && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-              {t("pendingChurches")}
-            </h2>
-            {pendingChurches.length === 0 ? (
-              <p className="text-gray-500 italic">{t("noPendingChurches")}</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {pendingChurches.map((church) => (
-                  <ChurchApplicationCard
-                    key={church.id}
-                    church={church}
-                    onApprove={handleApproveChurch}
-                    onReject={(id) => handleOpenRejectionModal("church", id)}
-                    onImageClick={openImageModal}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
+        <PendingChurches
+          pendingChurches={pendingChurches}
+          userRole={userRole}
+          onApproveChurch={handleApproveChurch}
+          onRejectChurch={(id) => handleOpenRejectionModal("church", id)}
+          onImageClick={openImageModal}
+        />
 
-        {(userRole === "SUPER_ADMIN" || userRole === "ADMIN") && (
-          <section>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-              {t("pendingUsers")}
-            </h2>
-            {pendingUsers.length === 0 ? (
-              <p className="text-gray-500 italic">{t("noPendingUsers")}</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {pendingUsers.map((user) => (
-                  <div
-                    key={user.id}
-                    className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
-                  >
-                    <p className="text-lg font-bold text-gray-900">
-                      {user.name}
-                    </p>
-                    <p className="text-sm text-gray-600">{user.email}</p>
-                    <p className="text-sm text-gray-500">
-                      {t("churchId")}: {user.churchId}
-                    </p>
-                    <div className="mt-4 flex space-x-2">
-                      <Button
-                        onClick={() => handleApproveUser(user.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
-                      >
-                        {t("approve")}
-                      </Button>
-                      <Button
-                        onClick={() =>
-                          handleOpenRejectionModal("user", user.id)
-                        }
-                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md"
-                      >
-                        {t("reject")}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
+        <PendingUsers
+          pendingUsers={pendingUsers}
+          userRole={userRole}
+          onApproveUser={handleApproveUser}
+          onRejectUser={(id) => handleOpenRejectionModal("user", id)}
+        />
 
         {/* 거부 모달 */}
         <Modal
@@ -318,6 +259,14 @@ export default function DashboardPage() {
         {error && (
           <Modal isOpen={!!error} onClose={() => setError(null)}>
             <p className="text-red-600">{error}</p>
+            <div className="flex justify-end mt-4">
+              <Button
+                onClick={() => setError(null)}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md"
+              >
+                {t("close")}
+              </Button>
+            </div>
           </Modal>
         )}
       </div>

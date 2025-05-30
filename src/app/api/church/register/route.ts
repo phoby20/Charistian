@@ -2,63 +2,48 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { uploadFile } from "@/lib/vercelBlob";
 import * as bcrypt from "bcrypt";
+import { regionsByCityKorea } from "@/data/regions/regionsKorea";
+import { regionsByCityJapan } from "@/data/regions/regionsJapan";
 
 const validPlans = ["FREE", "SMART", "ENTERPRISE"] as const;
 type Plan = (typeof validPlans)[number];
 
-const validCities = [
-  "Seoul",
-  "Busan",
-  "Daegu",
-  "Incheon",
-  "Gwangju",
-  "Daejeon",
-  "Ulsan",
-  "Suwon",
-  "Jeju",
-  "Goyang",
-  "Changwon",
-  "Seongnam",
-  "Tokyo",
-  "Osaka",
-  "Kyoto",
-  "Yokohama",
-  "Nagoya",
-  "Sapporo",
-  "Fukuoka",
-  "Kobe",
-  "Hiroshima",
-  "Sendai",
-  "Chiba",
-  "Kawasaki",
-];
+type RegionMap = Record<string, { value: string; label: string }[]>;
 
-const validRegionsByCity: Record<string, string[]> = {
-  Seoul: ["Gangnam", "Seocho", "Songpa"],
-  Busan: ["Haeundae", "Suyeong", "Busanjin"],
-  Daegu: ["Suseong", "Dalseo"],
-  Incheon: ["Namdong", "Yeonsu"],
-  Gwangju: ["Bukgu", "Gwangsan"],
-  Daejeon: ["Yuseong", "Jung"],
-  Ulsan: ["Namgu", "Jung"],
-  Suwon: ["Yeongtong", "Paldal"],
-  Jeju: ["JejuCity", "Seogwipo"],
-  Goyang: ["Ilsanseo", "Deogyang"],
-  Changwon: ["Seongsan", "Uichang"],
-  Seongnam: ["Bundang", "Sujeong"],
-  Tokyo: ["Shibuya", "Shinjuku", "Minato"],
-  Osaka: ["Umeda", "Namba", "Kita"],
-  Kyoto: ["Shimogyo", "Nakagyo"],
-  Yokohama: ["Naka", "Minami"],
-  Nagoya: ["Naka", "Higashi"],
-  Sapporo: ["Chuo", "Kita"],
-  Fukuoka: ["Hakata", "Chuo"],
-  Kobe: ["Chuo", "Nada"],
-  Hiroshima: ["Naka", "Minami"],
-  Sendai: ["Aoba", "Miyagino"],
-  Chiba: ["Chuo", "Mihama"],
-  Kawasaki: ["Kawasaki", "Nakahara"],
+function extractValidCities(data: RegionMap): string[] {
+  const result: string[] = [];
+  for (const [city, regions] of Object.entries(data)) {
+    if (regions.length > 0) {
+      result.push(city);
+    }
+  }
+  return result;
+}
+
+type Region = {
+  value: string;
+  label: string;
 };
+function convertRegionsFormat(
+  input: Record<string, Region[]>
+): Record<string, string[]> {
+  const result: Record<string, string[]> = {};
+  for (const [city, regions] of Object.entries(input)) {
+    if (regions.length === 0) continue; // 빈 배열은 무시
+    result[city] = regions.map((region) => region.value);
+  }
+  return result;
+}
+
+const validRegionsByCity: Record<string, string[]> = convertRegionsFormat({
+  ...regionsByCityKorea,
+  ...regionsByCityJapan,
+});
+
+const validCities: string[] = extractValidCities({
+  ...regionsByCityKorea,
+  ...regionsByCityJapan,
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -82,23 +67,24 @@ export async function POST(req: NextRequest) {
     };
 
     // 입력 검증
-    if (
-      !data.churchName ||
-      !data.address ||
-      !data.city ||
-      !data.region ||
-      !data.country ||
-      !data.churchPhone ||
-      !data.superAdminEmail ||
-      !data.password ||
-      !data.contactName ||
-      !data.contactPhone ||
-      !data.contactGender ||
-      !data.contactBirthDate ||
-      !data.plan
-    ) {
+    const missingFields: string[] = [];
+    if (!data.churchName) missingFields.push("churchName");
+    if (!data.address) missingFields.push("address");
+    if (!data.city) missingFields.push("city");
+    if (!data.region) missingFields.push("region");
+    if (!data.country) missingFields.push("country");
+    if (!data.churchPhone) missingFields.push("churchPhone");
+    if (!data.superAdminEmail) missingFields.push("superAdminEmail");
+    if (!data.password) missingFields.push("password");
+    if (!data.contactName) missingFields.push("contactName");
+    if (!data.contactPhone) missingFields.push("contactPhone");
+    if (!data.contactGender) missingFields.push("contactGender");
+    if (!data.contactBirthDate) missingFields.push("contactBirthDate");
+    if (!data.plan) missingFields.push("plan");
+
+    if (missingFields.length > 0) {
       return NextResponse.json(
-        { error: "모든 필수 필드를 입력해주세요." },
+        { error: `누락된 필수 필드: ${missingFields.join(", ")}` },
         { status: 400 }
       );
     }

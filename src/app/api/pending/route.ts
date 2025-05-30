@@ -6,7 +6,18 @@ export async function GET() {
   try {
     const pendingChurches = await prisma.churchApplication.findMany({
       where: { state: "PENDING" },
-      select: { id: true, churchName: true, address: true },
+      select: {
+        id: true,
+        churchName: true,
+        address: true,
+        country: true,
+        city: true,
+        region: true,
+        contactName: true,
+        contactPhone: true,
+        plan: true,
+        buildingImage: true,
+      },
     });
     const pendingUsers = await prisma.user.findMany({
       where: { state: "PENDING" },

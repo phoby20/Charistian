@@ -1,15 +1,13 @@
+// src/app/dashboard/page.tsx
 "use client";
 
 import { useTranslation } from "next-i18next";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import { useState, useEffect } from "react";
-
-interface Church {
-  id: string;
-  name: string;
-  address: string;
-}
+import { ChurchApplication } from "@prisma/client";
+import ChurchApplicationCard from "@/components/ChurchApplicationCard";
+import ImagePreviewModal from "@/components/ImagePreviewModal";
 
 interface User {
   id: string;
@@ -19,11 +17,15 @@ interface User {
 
 export default function DashboardPage() {
   const { t } = useTranslation("common");
-  const [pendingChurches, setPendingChurches] = useState<Church[]>([]);
+  const [pendingChurches, setPendingChurches] = useState<ChurchApplication[]>(
+    []
+  );
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isRejectionModalOpen, setRejectionModalOpen] = useState(false);
+  const [isImageModalOpen, setImageModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [selectedChurchId, setSelectedChurchId] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
 
@@ -97,7 +99,7 @@ export default function DashboardPage() {
       setPendingChurches(
         pendingChurches.filter((church) => church.id !== selectedChurchId)
       );
-      setModalOpen(false);
+      setRejectionModalOpen(false);
       setRejectionReason("");
       setSelectedChurchId(null);
     } catch (err) {
@@ -106,68 +108,113 @@ export default function DashboardPage() {
     }
   };
 
+  const openImageModal = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+    setImageModalOpen(true);
+  };
+
   return (
-    <div className="min-h-screen p-8 bg-gray-100">
-      <h1 className="text-3xl font-bold mb-6">{t("dashboard")}</h1>
-      {userRole === "MASTER" ? (
-        <>
-          <h2 className="text-xl font-semibold mb-4">{t("pendingChurches")}</h2>
-          {pendingChurches.length === 0 ? (
-            <p className="text-gray-600">{t("noPendingChurches")}</p>
-          ) : (
-            pendingChurches.map((church) => (
-              <div
-                key={church.id}
-                className="bg-white p-4 mb-4 rounded-md shadow-md"
-              >
-                <p>
-                  {church.name} - {church.address}
-                </p>
-                <Button onClick={() => handleApproveChurch(church.id)}>
-                  {t("approve")}
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={() => {
-                    setSelectedChurchId(church.id);
-                    setModalOpen(true);
-                  }}
-                >
-                  {t("reject")}
-                </Button>
+    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-50 to-gray-200">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-extrabold text-gray-900 mb-8">
+          {t("dashboard")}
+        </h1>
+
+        {userRole === "MASTER" && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              {t("pendingChurches")}
+            </h2>
+            {pendingChurches.length === 0 ? (
+              <p className="text-gray-500 italic">{t("noPendingChurches")}</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pendingChurches.map((church) => (
+                  <ChurchApplicationCard
+                    key={church.id}
+                    church={church}
+                    onApprove={handleApproveChurch}
+                    onReject={(id) => {
+                      setSelectedChurchId(id);
+                      setRejectionModalOpen(true);
+                    }}
+                    onImageClick={openImageModal}
+                  />
+                ))}
               </div>
-            ))
+            )}
+          </section>
+        )}
+
+        <section>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+            {t("pendingUsers")}
+          </h2>
+          {pendingUsers.length === 0 ? (
+            <p className="text-gray-500 italic">{t("noPendingUsers")}</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pendingUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300"
+                >
+                  <p className="text-lg font-bold text-gray-900">{user.name}</p>
+                  <p className="text-sm text-gray-600">{user.email}</p>
+                  {/* 사용자 승인/거부 버튼이 필요하면 추가 */}
+                </div>
+              ))}
+            </div>
           )}
-        </>
-      ) : null}
-      <h2 className="text-xl font-semibold mb-4">{t("pendingUsers")}</h2>
-      {pendingUsers.length === 0 ? (
-        <p className="text-gray-600">{t("noPendingUsers")}</p>
-      ) : (
-        pendingUsers.map((user) => (
-          <div key={user.id} className="bg-white p-4 mb-4 rounded-md shadow-md">
-            <p>
-              {user.name} - {user.email}
-            </p>
-            {/* Add approval/rejection buttons for users if needed */}
+        </section>
+
+        {/* 거부 모달 */}
+        <Modal
+          isOpen={isRejectionModalOpen}
+          onClose={() => setRejectionModalOpen(false)}
+        >
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            {t("rejectionReason")}
+          </h2>
+          <textarea
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            value={rejectionReason}
+            onChange={(e) => setRejectionReason(e.target.value)}
+            placeholder={t("enterRejectionReason")}
+          />
+          <div className="flex justify-end mt-4">
+            <Button
+              onClick={handleRejectChurch}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+            >
+              {t("confirm")}
+            </Button>
           </div>
-        ))
-      )}
-      <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)}>
-        <h2 className="text-lg font-semibold mb-4">{t("rejectionReason")}</h2>
-        <textarea
-          className="w-full p-2 border rounded-md"
-          value={rejectionReason}
-          onChange={(e) => setRejectionReason(e.target.value)}
-        />
-        <Button onClick={handleRejectChurch}>{t("confirm")}</Button>
-      </Modal>
-      {error && (
-        <Modal isOpen={!!error} onClose={() => setError(null)}>
-          <p>{error}</p>
-          <Button onClick={() => setError(null)}>{t("close")}</Button>
         </Modal>
-      )}
+
+        {/* 이미지 확대 모달 */}
+        <ImagePreviewModal
+          isOpen={isImageModalOpen}
+          onClose={() => setImageModalOpen(false)}
+          imageUrl={selectedImage}
+          alt="Building image"
+        />
+
+        {/* 에러 모달 */}
+        {error && (
+          <Modal isOpen={!!error} onClose={() => setError(null)}>
+            <p className="text-red-600">{error}</p>
+            <div className="flex justify-end mt-4">
+              <Button
+                onClick={() => setError(null)}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md"
+              >
+                {t("close")}
+              </Button>
+            </div>
+          </Modal>
+        )}
+      </div>
     </div>
   );
 }

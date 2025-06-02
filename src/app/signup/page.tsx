@@ -10,7 +10,7 @@ import { appWithTranslation } from "next-i18next";
 import { citiesByCountry } from "@/data/cities";
 import { regionsByCity } from "@/data/regions";
 import { countryOptions } from "@/data/country";
-import { X } from "lucide-react"; // Import icon for dismissible error
+import { X } from "lucide-react";
 
 function SignupPage() {
   const { t } = useTranslation("common");
@@ -22,7 +22,11 @@ function SignupPage() {
   const [churches, setChurches] = useState<{ value: string; label: string }[]>(
     []
   );
+  const [positions, setPositions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Added for loading state
   const [formData, setFormData] = useState({
     name: "",
     birthDate: "",
@@ -41,7 +45,7 @@ function SignupPage() {
     churchId: "",
   });
 
-  // 초기 설정: Country, City, Region 설정 (API 호출 X)
+  // Initial setup: Country, City, Region
   useEffect(() => {
     if (countryOptions.length > 0 && isInitialLoad) {
       const defaultCountry = countryOptions[0].value || "";
@@ -56,12 +60,13 @@ function SignupPage() {
         city: defaultCity,
         region: defaultRegion,
         churchId: "",
+        position: "",
       }));
       setIsInitialLoad(false);
     }
   }, [isInitialLoad]);
 
-  // Country 변경 시 City와 Region 초기화
+  // Country change: Reset City, Region, Church, Position
   useEffect(() => {
     if (selectedCountry && !isInitialLoad) {
       const defaultCity = citiesByCountry[selectedCountry]?.[0]?.value || "";
@@ -74,12 +79,14 @@ function SignupPage() {
         city: defaultCity,
         region: defaultRegion,
         churchId: "",
+        position: "",
       }));
       setChurches([]);
+      setPositions([]);
     }
   }, [selectedCountry, isInitialLoad]);
 
-  // City 변경 시 Region 초기화
+  // City change: Reset Region, Church, Position
   useEffect(() => {
     if (selectedCity && !isInitialLoad) {
       const defaultRegion = regionsByCity[selectedCity]?.[0]?.value || "";
@@ -89,12 +96,14 @@ function SignupPage() {
         city: selectedCity,
         region: defaultRegion,
         churchId: "",
+        position: "",
       }));
       setChurches([]);
+      setPositions([]);
     }
   }, [selectedCity, isInitialLoad]);
 
-  // Region 변경 시 Church 목록 가져오기 (초기 로딩 제외)
+  // Region change: Fetch Churches
   useEffect(() => {
     const fetchChurches = async () => {
       if (selectedCountry && selectedCity && selectedRegion && !isInitialLoad) {
@@ -116,20 +125,58 @@ function SignupPage() {
             );
           } else {
             setChurches([]);
+            setPositions([]);
             setError(t("noChurchesFound"));
           }
         } catch (err) {
           console.error("Error fetching churches:", err);
           setChurches([]);
+          setPositions([]);
           setError(t("serverError"));
         }
       } else {
         setChurches([]);
+        setPositions([]);
       }
     };
 
     fetchChurches();
   }, [selectedRegion, isInitialLoad, selectedCountry, selectedCity]);
+
+  // Church change: Fetch Positions
+  useEffect(() => {
+    const fetchPositions = async () => {
+      if (formData.churchId && !isInitialLoad) {
+        try {
+          const response = await fetch(
+            `/api/churches/${encodeURIComponent(formData.churchId)}/positions`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setPositions(
+              data.map((position: { id: string; name: string }) => ({
+                value: position.id,
+                label: position.name,
+              }))
+            );
+            setFormData((prev) => ({ ...prev, position: "" }));
+          } else {
+            setPositions([]);
+            setError(t("noPositionsFound"));
+          }
+        } catch (err) {
+          console.error("Error fetching positions:", err);
+          setPositions([]);
+          setError(t("serverError"));
+        }
+      } else {
+        setPositions([]);
+        setFormData((prev) => ({ ...prev, position: "" }));
+      }
+    };
+
+    fetchPositions();
+  }, [formData.churchId, isInitialLoad]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -155,26 +202,30 @@ function SignupPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    setIsSubmitting(true);
+    const formDataToSubmit = new FormData(e.currentTarget);
 
     if (
-      !formData.get("city") ||
-      !formData.get("region") ||
-      !formData.get("churchId")
+      !formDataToSubmit.get("city") ||
+      !formDataToSubmit.get("region") ||
+      !formDataToSubmit.get("churchId") ||
+      !formDataToSubmit.get("position")
     ) {
       setError(t("pleaseFillAllFields"));
+      setIsSubmitting(false);
       return;
     }
 
     try {
       const response = await fetch("/api/signup", {
         method: "POST",
-        body: formData,
+        body: formDataToSubmit,
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         setError(errorData.error || t("signupFailed"));
+        setIsSubmitting(false);
         return;
       }
 
@@ -182,30 +233,24 @@ function SignupPage() {
     } catch (err) {
       console.error("Signup error:", err);
       setError(t("serverError"));
+      setIsSubmitting(false);
     }
   };
-
-  const positions = [
-    { value: "PASTOR", label: t("pastor") },
-    { value: "EVANGELIST", label: t("evangelist") },
-    { value: "DEACON", label: t("deacon") },
-    { value: "ELDER", label: t("elder") },
-  ];
 
   const clearError = () => setError(null);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 transition-colors duration-300">
-      <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 sm:p-10 transition-all duration-300 transform hover:shadow-2xl">
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-8 text-center tracking-tight">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4 sm:p-6">
+      <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-8 sm:p-12">
+        <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-8 text-center">
           {t("signup")}
         </h1>
         {error && (
-          <div className="mb-6 flex items-center justify-between bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-300 p-4 rounded-lg text-sm animate-fade-in">
+          <div className="mb-6 flex items-center justify-between bg-red-50 text-red-600 p-4 rounded-lg text-sm animate-slide-in">
             <span>{error}</span>
             <button
               onClick={clearError}
-              className="hover:text-red-800 dark:hover:text-red-100 transition-colors"
+              className="hover:text-red-800 transition-colors"
               aria-label="Dismiss error"
             >
               <X size={16} />
@@ -214,166 +259,139 @@ function SignupPage() {
         )}
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          <div className="relative">
-            <Input
-              label={t("name")}
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-              className="peer w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 placeholder-transparent"
-              placeholder={t("name")}
-            />
-          </div>
-          <div className="relative">
-            <Input
-              label={t("birthDate")}
-              type="date"
-              name="birthDate"
-              value={formData.birthDate}
-              onChange={handleInputChange}
-              required
-              className="peer w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
-            />
-          </div>
-          <div className="relative">
-            <Input
-              label={t("email")}
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-              className="peer w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 placeholder-transparent"
-              placeholder={t("email")}
-            />
-          </div>
-          <div className="relative">
-            <Input
-              label={t("password")}
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              required
-              className="peer w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 placeholder-transparent"
-              placeholder={t("password")}
-            />
-          </div>
-          <div className="relative">
-            <Input
-              label={t("phone")}
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className="peer w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 placeholder-transparent"
-              placeholder={t("phone")}
-            />
-          </div>
-          <div className="relative">
-            <Input
-              label={t("kakaoId")}
-              name="kakaoId"
-              value={formData.kakaoId}
-              onChange={handleInputChange}
-              className="peer w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 placeholder-transparent"
-              placeholder={t("kakaoId")}
-            />
-          </div>
-          <div className="relative">
-            <Input
-              label={t("lineId")}
-              name="lineId"
-              value={formData.lineId}
-              onChange={handleInputChange}
-              className="peer w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 placeholder-transparent"
-              placeholder={t("lineId")}
-            />
-          </div>
-          <div className="relative">
-            <Select
-              label={t("gender")}
-              name="gender"
-              options={[
-                { value: "M", label: t("male") },
-                { value: "F", label: t("female") },
-              ]}
-              value={formData.gender}
-              onChange={handleInputChange}
-              required
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 appearance-none"
-            />
-          </div>
-          <div className="relative">
-            <Input
-              label={t("address")}
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              className="peer w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 placeholder-transparent"
-              placeholder={t("address")}
-            />
-          </div>
-          <div className="relative">
-            <Select
-              label={t("country")}
-              name="country"
-              options={countryOptions}
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
-              required
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 appearance-none"
-            />
-          </div>
-          <div className="relative">
-            <Select
-              label={t("city")}
-              name="city"
-              options={citiesByCountry[selectedCountry] || []}
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              required
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 appearance-none"
-            />
-          </div>
-          <div className="relative">
-            <Select
-              label={t("region")}
-              name="region"
-              options={regionsByCity[selectedCity] || []}
-              value={selectedRegion}
-              onChange={(e) => setSelectedRegion(e.target.value)}
-              required
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 appearance-none"
-            />
-          </div>
-          <div className="relative">
-            <Select
-              label={t("church")}
-              name="churchId"
-              options={churches}
-              value={formData.churchId}
-              onChange={handleInputChange}
-              required
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 appearance-none"
-            />
-          </div>
-          <div className="relative">
-            <Select
-              label={t("position")}
-              name="position"
-              options={positions}
-              value={formData.position}
-              onChange={handleInputChange}
-              required
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 appearance-none"
-            />
-          </div>
-          <div className="col-span-1 sm:col-span-2 relative">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <Input
+            label={t("name")}
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
+            placeholder={t("name")}
+          />
+          <Input
+            label={t("birthDate")}
+            type="date"
+            name="birthDate"
+            value={formData.birthDate}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
+          />
+          <Input
+            label={t("email")}
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
+            placeholder={t("email")}
+          />
+          <Input
+            label={t("password")}
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
+            placeholder={t("password")}
+          />
+          <Input
+            label={t("phone")}
+            type="tel"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
+            placeholder={t("phone")}
+          />
+          <Input
+            label={t("kakaoId")}
+            name="kakaoId"
+            value={formData.kakaoId}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
+            placeholder={t("kakaoId")}
+          />
+          <Input
+            label={t("lineId")}
+            name="lineId"
+            value={formData.lineId}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
+            placeholder={t("lineId")}
+          />
+          <Select
+            label={t("gender")}
+            name="gender"
+            options={[
+              { value: "M", label: t("male") },
+              { value: "F", label: t("female") },
+            ]}
+            value={formData.gender}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
+          />
+          <Input
+            label={t("address")}
+            name="address"
+            value={formData.address}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
+            placeholder={t("address")}
+          />
+          <Select
+            label={t("country")}
+            name="country"
+            options={countryOptions}
+            value={selectedCountry}
+            onChange={(e) => setSelectedCountry(e.target.value)}
+            required
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
+          />
+          <Select
+            label={t("city")}
+            name="city"
+            options={citiesByCountry[selectedCountry] || []}
+            value={selectedCity}
+            onChange={(e) => setSelectedCity(e.target.value)}
+            required
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
+          />
+          <Select
+            label={t("region")}
+            name="region"
+            options={regionsByCity[selectedCity] || []}
+            value={selectedRegion}
+            onChange={(e) => setSelectedRegion(e.target.value)}
+            required
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
+          />
+          <Select
+            label={t("church")}
+            name="churchId"
+            options={churches}
+            value={formData.churchId}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
+          />
+          <Select
+            label={t("position")}
+            name="position"
+            options={positions}
+            value={formData.position}
+            onChange={handleInputChange}
+            required
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
+            disabled={!formData.churchId || positions.length === 0}
+          />
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("profileImage")}{" "}
               <span className="text-gray-400">({t("optional")})</span>
             </label>
@@ -381,16 +399,43 @@ function SignupPage() {
               type="file"
               name="profileImage"
               accept="image/*"
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-50 dark:file:bg-gray-600 file:text-blue-700 dark:file:text-gray-300 hover:file:bg-blue-100 dark:hover:file:bg-gray-500"
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-all duration-200"
               onChange={handleFileChange}
             />
           </div>
-          <div className="col-span-1 sm:col-span-2 flex justify-center mt-4">
+          <div className="col-span-1 md:col-span-2 flex justify-center mt-6">
             <Button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto"
+              disabled={isSubmitting}
+              className="relative bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {t("signup")}
+              {isSubmitting ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin h-5 w-5 mr-2 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8H4z"
+                    ></path>
+                  </svg>
+                  {t("submitting")}
+                </span>
+              ) : (
+                t("signup")
+              )}
             </Button>
           </div>
         </form>

@@ -19,6 +19,7 @@ function SignupPage() {
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [selectedCity, setSelectedCity] = useState<string>("");
   const [selectedRegion, setSelectedRegion] = useState<string>("");
+  const [selectedChurch, setSelectedChurch] = useState<string>("");
   const [churches, setChurches] = useState<{ value: string; label: string }[]>(
     []
   );
@@ -123,6 +124,7 @@ function SignupPage() {
                 label: church.name,
               }))
             );
+            setSelectedChurch(data[0]?.id || "");
           } else {
             setChurches([]);
             setPositions([]);
@@ -146,10 +148,10 @@ function SignupPage() {
   // Church change: Fetch Positions
   useEffect(() => {
     const fetchPositions = async () => {
-      if (formData.churchId && !isInitialLoad) {
+      if (selectedChurch && !isInitialLoad) {
         try {
           const response = await fetch(
-            `/api/churches/${encodeURIComponent(formData.churchId)}/positions`
+            `/api/churches/${encodeURIComponent(selectedChurch)}/positions`
           );
           if (response.ok) {
             const data = await response.json();
@@ -170,13 +172,14 @@ function SignupPage() {
           setError(t("serverError"));
         }
       } else {
+        console.log("errer");
         setPositions([]);
         setFormData((prev) => ({ ...prev, position: "" }));
       }
     };
 
     fetchPositions();
-  }, [formData.churchId, isInitialLoad]);
+  }, [formData.churchId, isInitialLoad, selectedChurch]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -205,13 +208,26 @@ function SignupPage() {
     setIsSubmitting(true);
     const formDataToSubmit = new FormData(e.currentTarget);
 
-    if (
-      !formDataToSubmit.get("city") ||
-      !formDataToSubmit.get("region") ||
-      !formDataToSubmit.get("churchId") ||
-      !formDataToSubmit.get("position")
-    ) {
-      setError(t("pleaseFillAllFields"));
+    if (!formDataToSubmit.get("city")) {
+      setError(t("pleaseFillCityFields"));
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formDataToSubmit.get("region")) {
+      setError(t("pleaseFillRegionFields"));
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formDataToSubmit.get("churchId")) {
+      setError(t("pleaseFillChurchFields"));
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formDataToSubmit.get("position")) {
+      setError(t("pleaseFillPositionFields"));
       setIsSubmitting(false);
       return;
     }
@@ -375,8 +391,10 @@ function SignupPage() {
             label={t("church")}
             name="churchId"
             options={churches}
-            value={formData.churchId}
-            onChange={handleInputChange}
+            value={selectedChurch}
+            onChange={(e) => {
+              setSelectedChurch(e.target.value);
+            }}
             required
             className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
           />
@@ -388,7 +406,7 @@ function SignupPage() {
             onChange={handleInputChange}
             required
             className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
-            disabled={!formData.churchId || positions.length === 0}
+            disabled={!selectedChurch || positions.length === 0}
           />
           <div className="col-span-1 md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">

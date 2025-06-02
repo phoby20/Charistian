@@ -38,7 +38,7 @@ export default function PendingUsers({
               <p className="text-lg font-bold text-gray-900">{user.name}</p>
               <p className="text-sm text-gray-600">{user.email}</p>
               <p className="text-sm text-gray-500">
-                {t("churchId")}: {user.churchId}
+                {t("position")}: {user.position}
               </p>
               <div className="mt-4 flex space-x-2">
                 <Button

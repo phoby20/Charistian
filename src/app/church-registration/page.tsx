@@ -1,4 +1,3 @@
-// src/app/church/register/page.tsx
 "use client";
 
 import { useTranslation } from "next-i18next";
@@ -12,6 +11,7 @@ import { regionsByCity } from "@/data/regions";
 import { citiesByCountry } from "@/data/cities";
 import { countryOptions } from "@/data/country";
 import Loading from "@/components/Loading";
+import { ChurchPosition } from "@prisma/client";
 
 export default function ChurchRegistrationPage() {
   const { t } = useTranslation("common");
@@ -19,6 +19,7 @@ export default function ChurchRegistrationPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState(1);
+  const [positions, setPositions] = useState<ChurchPosition[]>([]); // 직책 리스트 상태 추가
   const [formData, setFormData] = useState<{
     churchName: string;
     country: string;
@@ -35,6 +36,7 @@ export default function ChurchRegistrationPage() {
     plan: string;
     buildingImage?: File;
     contactImage?: File;
+    positionId?: string; // 선택된 직책 ID 추가
   }>({
     churchName: "",
     country: countryOptions[0].value,
@@ -52,6 +54,7 @@ export default function ChurchRegistrationPage() {
     plan: "FREE",
     buildingImage: undefined,
     contactImage: undefined,
+    positionId: "", // 초기값
   });
   const [selectedCountry, setSelectedCountry] = useState<string>(
     countryOptions[0].value
@@ -85,6 +88,48 @@ export default function ChurchRegistrationPage() {
     }));
   }, [selectedCity]);
 
+  // region 또는 churchName 변경 시 positions 불러오기
+  useEffect(() => {
+    if (formData.churchName && formData.region) {
+      fetchPositions();
+    } else {
+      setPositions([]); // churchName 또는 region이 없으면 positions 초기화
+    }
+  }, [formData.churchName, formData.region]);
+
+  // 직책 데이터를 가져오는 함수
+  const fetchPositions = async () => {
+    try {
+      const response = await fetch(
+        `/api/positions?churchName=${encodeURIComponent(
+          formData.churchName
+        )}&region=${encodeURIComponent(formData.region)}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      if (!response.ok) {
+        const { error } = await response.json();
+        console.error("Fetch positions error:", error);
+        setPositions([]);
+        return;
+      }
+      const { positions } = await response.json();
+      setPositions(positions || []);
+      // 첫 번째 직책을 기본값으로 설정 (선택 사항)
+      if (positions && positions.length > 0) {
+        setFormData((prev) => ({ ...prev, positionId: positions[0].id }));
+      } else {
+        setFormData((prev) => ({ ...prev, positionId: "" }));
+      }
+    } catch (err) {
+      console.error("Error fetching positions:", err);
+      setPositions([]);
+      setFormData((prev) => ({ ...prev, positionId: "" }));
+    }
+  };
+
   // formData 업데이트
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -114,7 +159,6 @@ export default function ChurchRegistrationPage() {
         let width = img.width;
         let height = img.height;
 
-        // 가로 크기를 600px로 조정, 비율 유지
         if (width > maxWidth) {
           height = (maxWidth / width) * height;
           width = maxWidth;
@@ -137,7 +181,7 @@ export default function ChurchRegistrationPage() {
             }
           },
           file.type,
-          0.8 // JPEG 품질 80%
+          0.8
         );
       };
       img.onerror = (err) => reject(err);
@@ -205,10 +249,12 @@ export default function ChurchRegistrationPage() {
     if (!formData.contactGender) missingFields.push(t("contactGender"));
     if (!formData.contactBirthDate) missingFields.push(t("contactBirthDate"));
     if (!formData.plan) missingFields.push(t("plan"));
+    if (!formData.positionId) missingFields.push(t("position")); // 직책 필수 필드 추가
 
     if (missingFields.length > 0) {
       console.log("누락된 필드:", missingFields);
       setError(`${t("pleaseFillAllFields")}: ${missingFields.join(", ")}`);
+      setIsLoading(false);
       return;
     }
 
@@ -229,6 +275,7 @@ export default function ChurchRegistrationPage() {
       "plan",
       "buildingImage",
       "contactImage",
+      "positionId", // FormData에 positionId 추가
     ];
     keys.forEach((key) => {
       const value = formData[key];
@@ -246,6 +293,7 @@ export default function ChurchRegistrationPage() {
       const result = await response.json();
       if (!response.ok) {
         setError(result.error || t("registrationFailed"));
+        setIsLoading(false);
         return;
       }
 
@@ -254,6 +302,7 @@ export default function ChurchRegistrationPage() {
     } catch (err) {
       console.error("등록 오류:", err);
       setError(t("serverError"));
+      setIsLoading(false);
     }
   };
 
@@ -388,6 +437,18 @@ export default function ChurchRegistrationPage() {
         type="date"
         name="contactBirthDate"
         value={formData.contactBirthDate}
+        onChange={handleInputChange}
+        required
+      />
+      <Select
+        label={t("position")}
+        name="positionId"
+        options={
+          positions.length > 0
+            ? positions.map((pos) => ({ value: pos.id, label: pos.name }))
+            : [{ value: "", label: t("noPositionsAvailable") }]
+        }
+        value={formData.positionId}
         onChange={handleInputChange}
         required
       />

@@ -76,7 +76,7 @@ export default function ChurchRegistrationPage() {
 
   // city 변경 시 region 초기화
   useEffect(() => {
-    const defaultRegion = regionsByCity[selectedCity]?.[0]?.value || "";
+    const defaultRegion = regionsByCity[selectedCity][0]?.value || "";
     setSelectedRegion(defaultRegion);
     setFormData((prev) => ({
       ...prev,
@@ -288,7 +288,11 @@ export default function ChurchRegistrationPage() {
         name="region"
         value={selectedRegion}
         options={regionsByCity[selectedCity] || []}
-        onChange={(e) => setSelectedRegion(e.target.value)}
+        onChange={(e) => {
+          const value = e.target.value;
+          setSelectedRegion(value);
+          setFormData((prev) => ({ ...prev, region: value }));
+        }}
         required
       />
       <Input

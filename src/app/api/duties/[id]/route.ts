@@ -66,13 +66,13 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const role = await prisma.duty.update({
+    const duty = await prisma.duty.update({
       where: { id, churchId },
       data: { name },
     });
 
     return NextResponse.json(
-      { message: "Duty updated", role },
+      { message: "Duty updated", duty },
       { status: 200 }
     );
   } catch (error) {

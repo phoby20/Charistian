@@ -7,12 +7,13 @@ import PositionManagement from "@/components/PositionManagement";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
 import { useAuth } from "@/context/AuthContext";
+import DutyManagement from "@/components/DutyManagement";
 
 export default function MasterManagementPage() {
   const { t } = useTranslation("common");
   const router = useRouter();
   const { user, isLoading, error } = useAuth();
-  const [activeTab, setActiveTab] = useState<"positions" | "roles">(
+  const [activeTab, setActiveTab] = useState<"positions" | "roles" | "duty">(
     "positions"
   );
 
@@ -62,6 +63,16 @@ export default function MasterManagementPage() {
             >
               {t("roleManagement")}
             </button>
+            <button
+              onClick={() => setActiveTab("duty")}
+              className={`px-4 py-2 text-sm font-medium ${
+                activeTab === "duty"
+                  ? "border-b-2 border-blue-600 text-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {t("dutyManagement")}
+            </button>
           </nav>
         </div>
         {/* 탭 컨텐츠 */}
@@ -71,6 +82,9 @@ export default function MasterManagementPage() {
           )}
           {activeTab === "roles" && (
             <RoleManagement userRole={user.role} churchId={user.churchId} />
+          )}
+          {activeTab === "duty" && (
+            <DutyManagement userRole={user.role} churchId={user.churchId} />
           )}
         </div>
         {error && (

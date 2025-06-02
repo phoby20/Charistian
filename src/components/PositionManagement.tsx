@@ -1,10 +1,10 @@
-// src/components/PositionManagement.tsx
 "use client";
 
 import { useTranslation } from "next-i18next";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Button from "./Button";
 import { useRouter } from "next/navigation";
+import { MoreVertical } from "lucide-react";
 
 interface Position {
   id: string;
@@ -25,14 +25,33 @@ export default function PositionManagement({
   const [editingPosition, setEditingPosition] = useState<Position | null>(null);
   const [editingNewName, setEditingNewName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const { t } = useTranslation("common");
   const router = useRouter();
+  const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     if ((userRole === "SUPER_ADMIN" || userRole === "MASTER") && churchId) {
       fetchPositions();
     }
   }, [userRole, churchId]);
+
+  // 외부 클릭 시 풀다운 메뉴 닫기
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      let isOutside = true;
+      menuRefs.current.forEach((ref) => {
+        if (ref && ref.contains(event.target as Node)) {
+          isOutside = false;
+        }
+      });
+      if (isOutside) {
+        setOpenMenuId(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const fetchPositions = async () => {
     try {
@@ -41,7 +60,14 @@ export default function PositionManagement({
         credentials: "include",
       });
       if (!response.ok) {
-        const { error } = await response.json();
+        const text = await response.text();
+        console.error("Fetch positions error response:", text);
+        let error = "Unknown error";
+        try {
+          error = JSON.parse(text).error || t("failedToFetchPositions");
+        } catch {
+          error = t("serverError");
+        }
         if (response.status === 401) {
           setError(t("invalidToken"));
           router.push("/login");
@@ -51,13 +77,13 @@ export default function PositionManagement({
           setError(t("unauthorized"));
           return;
         }
-        throw new Error(error || t("failedToFetchPositions"));
+        throw new Error(error);
       }
       const { positions } = await response.json();
       setPositions(positions || []);
     } catch (err) {
       console.error("Error fetching positions:", err);
-      setError(err instanceof Error ? err.message : t("serverError"));
+      setError(t("serverError"));
     }
   };
 
@@ -76,7 +102,14 @@ export default function PositionManagement({
         body: JSON.stringify({ name: newPositionName }),
       });
       if (!response.ok) {
-        const { error } = await response.json();
+        const text = await response.text();
+        console.error("Add position error response:", text);
+        let error = "Unknown error";
+        try {
+          error = JSON.parse(text).error || t("failedToAddPosition");
+        } catch {
+          error = t("serverError");
+        }
         if (response.status === 401) {
           setError(t("invalidToken"));
           router.push("/login");
@@ -86,11 +119,12 @@ export default function PositionManagement({
           setError(t("unauthorized"));
           return;
         }
-        throw new Error(error || t("failedToAddPosition"));
+        throw new Error(error);
       }
       const { position } = await response.json();
       setPositions([...positions, position]);
       setNewPositionName("");
+      await fetchPositions();
     } catch (err) {
       console.error("Error adding position:", err);
       setError(t("serverError"));
@@ -112,8 +146,14 @@ export default function PositionManagement({
         body: JSON.stringify({ newName: editingNewName }),
       });
       if (!response.ok) {
-        const { error } = await response.json();
-        console.error("Update error:", error);
+        const text = await response.text();
+        console.error("Update position error response:", text);
+        let error = "Unknown error";
+        try {
+          error = JSON.parse(text).error || t("failedToUpdatePosition");
+        } catch {
+          error = t("serverError");
+        }
         if (response.status === 401) {
           setError(t("invalidToken"));
           router.push("/login");
@@ -127,12 +167,13 @@ export default function PositionManagement({
           setError(t("positionNotFound"));
           return;
         }
-        throw new Error(error || t("failedToUpdatePosition"));
+        throw new Error(error);
       }
       const { position } = await response.json();
       setPositions(positions.map((p) => (p.id === position.id ? position : p)));
       setEditingPosition(null);
       setEditingNewName("");
+      setOpenMenuId(null);
     } catch (err) {
       console.error("Error updating position:", err);
       setError(t("serverError"));
@@ -146,8 +187,14 @@ export default function PositionManagement({
         credentials: "include",
       });
       if (!response.ok) {
-        const { error } = await response.json();
-        console.error("Delete error:", error);
+        const text = await response.text();
+        console.error("Delete position error response:", text);
+        let error = "Unknown error";
+        try {
+          error = JSON.parse(text).error || t("failedToDeletePosition");
+        } catch {
+          error = t("serverError");
+        }
         if (response.status === 401) {
           setError(t("invalidToken"));
           router.push("/login");
@@ -161,9 +208,10 @@ export default function PositionManagement({
           setError(t("positionNotFound"));
           return;
         }
-        throw new Error(error || t("failedToDeletePosition"));
+        throw new Error(error);
       }
       setPositions(positions.filter((p) => p.id !== id));
+      setOpenMenuId(null);
     } catch (err) {
       console.error("Error deleting position:", err);
       setError(t("serverError"));
@@ -176,7 +224,7 @@ export default function PositionManagement({
         {t("positionManagement")}
       </h2>
       <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="mb-4">
+        <div className="mb-10 flex items-center space-x-4">
           <input
             type="text"
             value={newPositionName}
@@ -186,7 +234,7 @@ export default function PositionManagement({
           />
           <Button
             onClick={handleAddPosition}
-            className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
           >
             {t("addPosition")}
           </Button>
@@ -196,14 +244,17 @@ export default function PositionManagement({
         ) : (
           <ul className="space-y-2">
             {positions.map((position) => (
-              <li key={position.id} className="flex items-center space-x-2">
+              <li
+                key={position.id}
+                className="flex items-center space-x-2 relative"
+              >
                 {editingPosition?.id === position.id ? (
                   <>
                     <input
                       type="text"
                       value={editingNewName}
                       onChange={(e) => setEditingNewName(e.target.value)}
-                      className="p-2 border border-gray-300 rounded-md"
+                      className="p-2 border border-gray-300 rounded-md flex-1"
                     />
                     <Button
                       onClick={handleUpdatePosition}
@@ -215,6 +266,7 @@ export default function PositionManagement({
                       onClick={() => {
                         setEditingPosition(null);
                         setEditingNewName("");
+                        setOpenMenuId(null);
                       }}
                       className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-md"
                     >
@@ -224,21 +276,47 @@ export default function PositionManagement({
                 ) : (
                   <>
                     <span className="flex-1">{position.name}</span>
-                    <Button
-                      onClick={() => {
-                        setEditingPosition(position);
-                        setEditingNewName(position.name);
-                      }}
-                      className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded-md"
-                    >
-                      {t("edit")}
-                    </Button>
-                    <Button
-                      onClick={() => handleDeletePosition(position.id)}
-                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md"
-                    >
-                      {t("delete")}
-                    </Button>
+                    <div className="relative">
+                      <button
+                        onClick={() =>
+                          setOpenMenuId(
+                            openMenuId === position.id ? null : position.id
+                          )
+                        }
+                        className="p-1 text-gray-600 hover:text-gray-800"
+                      >
+                        <MoreVertical className="w-5 h-5" />
+                      </button>
+                      {openMenuId === position.id && (
+                        <div
+                          ref={(el) => {
+                            if (el) {
+                              menuRefs.current.set(position.id, el);
+                            } else {
+                              menuRefs.current.delete(position.id);
+                            }
+                          }}
+                          className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10"
+                        >
+                          <button
+                            onClick={() => {
+                              setEditingPosition(position);
+                              setEditingNewName(position.name);
+                              setOpenMenuId(null);
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            {t("edit")}
+                          </button>
+                          <button
+                            onClick={() => handleDeletePosition(position.id)}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                          >
+                            {t("delete")}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
               </li>

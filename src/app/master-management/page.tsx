@@ -1,8 +1,7 @@
-// src/app/master-management/page.tsx
 "use client";
 
 import { useTranslation } from "next-i18next";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import RoleManagement from "@/components/RoleManagement";
 import PositionManagement from "@/components/PositionManagement";
 import { useRouter } from "next/navigation";
@@ -13,6 +12,9 @@ export default function MasterManagementPage() {
   const { t } = useTranslation("common");
   const router = useRouter();
   const { user, isLoading, error } = useAuth();
+  const [activeTab, setActiveTab] = useState<"positions" | "roles">(
+    "positions"
+  );
 
   useEffect(() => {
     if (
@@ -37,8 +39,40 @@ export default function MasterManagementPage() {
         <h1 className="text-3xl font-extrabold text-gray-900 mb-8">
           {t("masterManagement")}
         </h1>
-        <PositionManagement userRole={user.role} churchId={user.churchId} />
-        <RoleManagement userRole={user.role} churchId={user.churchId} />
+        {/* 탭 네비게이션 */}
+        <div className="mb-6">
+          <nav className="flex space-x-4 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab("positions")}
+              className={`px-4 py-2 text-sm font-medium ${
+                activeTab === "positions"
+                  ? "border-b-2 border-blue-600 text-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {t("positionManagement")}
+            </button>
+            <button
+              onClick={() => setActiveTab("roles")}
+              className={`px-4 py-2 text-sm font-medium ${
+                activeTab === "roles"
+                  ? "border-b-2 border-blue-600 text-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {t("roleManagement")}
+            </button>
+          </nav>
+        </div>
+        {/* 탭 컨텐츠 */}
+        <div>
+          {activeTab === "positions" && (
+            <PositionManagement userRole={user.role} churchId={user.churchId} />
+          )}
+          {activeTab === "roles" && (
+            <RoleManagement userRole={user.role} churchId={user.churchId} />
+          )}
+        </div>
         {error && (
           <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md">
             {error}

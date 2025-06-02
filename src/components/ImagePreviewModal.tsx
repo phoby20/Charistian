@@ -1,6 +1,5 @@
 // src/components/ImagePreviewModal.tsx
-import { useTranslation } from "next-i18next";
-import Button from "@/components/Button";
+"use client";
 import Modal from "@/components/Modal";
 import Image from "next/image";
 
@@ -17,8 +16,6 @@ export default function ImagePreviewModal({
   imageUrl,
   alt,
 }: ImagePreviewModalProps) {
-  const { t } = useTranslation("common");
-
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       {imageUrl && (
@@ -32,14 +29,7 @@ export default function ImagePreviewModal({
           />
         </div>
       )}
-      <div className="flex justify-end mt-4">
-        <Button
-          onClick={onClose}
-          className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md"
-        >
-          {t("close")!}
-        </Button>
-      </div>
+      <div className="flex justify-end mt-4"></div>
     </Modal>
   );
 }

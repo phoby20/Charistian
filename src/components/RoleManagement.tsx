@@ -1,10 +1,10 @@
-// src/components/RoleManagement.tsx
 "use client";
 
 import { useTranslation } from "next-i18next";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Button from "./Button";
 import { useRouter } from "next/navigation";
+import { MoreVertical } from "lucide-react";
 
 interface Role {
   id: string;
@@ -24,14 +24,33 @@ export default function RoleManagement({
   const [newRoleName, setNewRoleName] = useState("");
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const { t } = useTranslation("common");
   const router = useRouter();
+  const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     if ((userRole === "MASTER" || userRole === "SUPER_ADMIN") && churchId) {
       fetchRoles();
     }
   }, [userRole, churchId]);
+
+  // 외부 클릭 시 풀다운 메뉴 닫기
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      let isOutside = true;
+      menuRefs.current.forEach((ref) => {
+        if (ref && ref.contains(event.target as Node)) {
+          isOutside = false;
+        }
+      });
+      if (isOutside) {
+        setOpenMenuId(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const fetchRoles = async () => {
     try {
@@ -45,8 +64,8 @@ export default function RoleManagement({
         let error = "Unknown error";
         try {
           error = JSON.parse(text).error || t("failedToFetchRoles");
-        } catch (err) {
-          error = t("serverError", { error: err });
+        } catch {
+          error = t("serverError");
         }
         if (response.status === 401) {
           setError(t("invalidToken"));
@@ -87,8 +106,8 @@ export default function RoleManagement({
         let error = "Unknown error";
         try {
           error = JSON.parse(text).error || t("failedToAddRole");
-        } catch (err) {
-          error = t("serverError", { error: err });
+        } catch {
+          error = t("serverError");
         }
         if (response.status === 401) {
           setError(t("invalidToken"));
@@ -104,7 +123,7 @@ export default function RoleManagement({
       const { duty } = await response.json();
       setRoles([...roles, duty]);
       setNewRoleName("");
-      await fetchRoles(); // 최신 데이터 동기화
+      await fetchRoles();
     } catch (err) {
       console.error("Error adding role:", err);
       setError(t("serverError"));
@@ -131,8 +150,8 @@ export default function RoleManagement({
         let error = "Unknown error";
         try {
           error = JSON.parse(text).error || t("failedToUpdateRole");
-        } catch (err) {
-          error = t("serverError", { error: err });
+        } catch {
+          error = t("serverError");
         }
         if (response.status === 401) {
           setError(t("invalidToken"));
@@ -149,9 +168,10 @@ export default function RoleManagement({
         }
         throw new Error(error);
       }
-      const { role } = await response.json(); // 서버 응답의 'role' 키 사용
+      const { role } = await response.json();
       setRoles(roles.map((r) => (r.id === role.id ? role : r)));
       setEditingRole(null);
+      setOpenMenuId(null);
     } catch (err) {
       console.error("Error updating role:", err);
       setError(t("serverError"));
@@ -170,8 +190,8 @@ export default function RoleManagement({
         let error = "Unknown error";
         try {
           error = JSON.parse(text).error || t("failedToDeleteRole");
-        } catch (err) {
-          error = t("serverError", { error: err });
+        } catch {
+          error = t("serverError");
         }
         if (response.status === 401) {
           setError(t("invalidToken"));
@@ -189,6 +209,7 @@ export default function RoleManagement({
         throw new Error(error);
       }
       setRoles(roles.filter((r) => r.id !== id));
+      setOpenMenuId(null);
     } catch (err) {
       console.error("Error deleting role:", err);
       setError(t("serverError"));
@@ -201,7 +222,7 @@ export default function RoleManagement({
         {t("roleManagement")}
       </h2>
       <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="mb-4">
+        <div className="mb-10 flex items-center space-x-4">
           <input
             type="text"
             value={newRoleName}
@@ -211,7 +232,7 @@ export default function RoleManagement({
           />
           <Button
             onClick={handleAddRole}
-            className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
           >
             {t("addRole")}
           </Button>
@@ -221,7 +242,10 @@ export default function RoleManagement({
         ) : (
           <ul className="space-y-2">
             {roles.map((role) => (
-              <li key={role.id} className="flex items-center space-x-2">
+              <li
+                key={role.id}
+                className="flex items-center space-x-2 relative"
+              >
                 {editingRole?.id === role.id ? (
                   <>
                     <input
@@ -230,7 +254,7 @@ export default function RoleManagement({
                       onChange={(e) =>
                         setEditingRole({ ...editingRole, name: e.target.value })
                       }
-                      className="p-2 border border-gray-300 rounded-md"
+                      className="p-2 border border-gray-300 rounded-md flex-1"
                     />
                     <Button
                       onClick={handleUpdateRole}
@@ -239,7 +263,10 @@ export default function RoleManagement({
                       {t("save")}
                     </Button>
                     <Button
-                      onClick={() => setEditingRole(null)}
+                      onClick={() => {
+                        setEditingRole(null);
+                        setOpenMenuId(null);
+                      }}
                       className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-md"
                     >
                       {t("cancel")}
@@ -248,18 +275,44 @@ export default function RoleManagement({
                 ) : (
                   <>
                     <span className="flex-1">{role.name}</span>
-                    <Button
-                      onClick={() => setEditingRole(role)}
-                      className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded-md"
-                    >
-                      {t("edit")}
-                    </Button>
-                    <Button
-                      onClick={() => handleDeleteRole(role.id)}
-                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md"
-                    >
-                      {t("delete")}
-                    </Button>
+                    <div className="relative">
+                      <button
+                        onClick={() =>
+                          setOpenMenuId(openMenuId === role.id ? null : role.id)
+                        }
+                        className="p-1 text-gray-600 hover:text-gray-800"
+                      >
+                        <MoreVertical className="w-5 h-5" />
+                      </button>
+                      {openMenuId === role.id && (
+                        <div
+                          ref={(el) => {
+                            if (el) {
+                              menuRefs.current.set(role.id, el);
+                            } else {
+                              menuRefs.current.delete(role.id);
+                            }
+                          }}
+                          className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10"
+                        >
+                          <button
+                            onClick={() => {
+                              setEditingRole(role);
+                              setOpenMenuId(null);
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            {t("edit")}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteRole(role.id)}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                          >
+                            {t("delete")}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
               </li>

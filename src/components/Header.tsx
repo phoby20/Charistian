@@ -1,9 +1,9 @@
-// src/components/Header.tsx
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "next-i18next";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // useRouter 추가
 import {
   Menu,
   X,
@@ -22,35 +22,50 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  const router = useRouter(); // router 추가
 
   const langMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null); // 모바일 메뉴 ref 추가
 
-  // 외부 클릭으로 드롭다운 닫기
+  // 외부 클릭으로 드롭다운 및 모바일 메뉴 닫기
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        langMenuRef.current &&
-        !langMenuRef.current.contains(event.target as Node)
-      ) {
+    function handleClickOutside(event: MouseEvent | TouchEvent) {
+      const target = event.target as Node;
+      let isOutside = true;
+
+      // 언어 메뉴
+      if (langMenuRef.current && langMenuRef.current.contains(target)) {
+        isOutside = false;
+      }
+      // 사용자 메뉴
+      if (userMenuRef.current && userMenuRef.current.contains(target)) {
+        isOutside = false;
+      }
+      // 설정 메뉴
+      if (settingsMenuRef.current && settingsMenuRef.current.contains(target)) {
+        isOutside = false;
+      }
+      // 모바일 메뉴
+      if (mobileMenuRef.current && mobileMenuRef.current.contains(target)) {
+        isOutside = false;
+      }
+
+      if (isOutside) {
         setIsLangMenuOpen(false);
-      }
-      if (
-        userMenuRef.current &&
-        !userMenuRef.current.contains(event.target as Node)
-      ) {
         setIsUserMenuOpen(false);
-      }
-      if (
-        settingsMenuRef.current &&
-        !settingsMenuRef.current.contains(event.target as Node)
-      ) {
         setIsSettingsMenuOpen(false);
+        setIsMenuOpen(false); // 모바일 메뉴 닫기
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside); // 터치 이벤트 추가
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   // 언어 전환
@@ -63,10 +78,13 @@ export default function Header() {
   // 메뉴 토글
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  // 설정 메뉴 닫기
+  // 설정 메뉴 닫기 및 내비게이션
   const closeSettingsMenu = () => {
+    console.log("closeSettingsMenu called"); // 디버깅 로그
     setIsSettingsMenuOpen(false);
-    setIsMenuOpen(false); // 모바일 메뉴도 닫기
+    setIsMenuOpen(false);
+    console.log("Navigating to /master-management"); // 디버깅 로그
+    router.push("/master-management"); // 명시적 내비게이션
   };
 
   return (
@@ -121,7 +139,7 @@ export default function Header() {
                   <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
                     <Link
                       href="/master-management"
-                      onClick={closeSettingsMenu} // 설정 메뉴 닫기
+                      onClick={closeSettingsMenu}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       {t("masterManagement")}
@@ -204,12 +222,15 @@ export default function Header() {
 
       {/* 모바일 네비게이션 */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white shadow-md">
+        <div
+          className="md:hidden bg-white shadow-md"
+          ref={mobileMenuRef} // 모바일 메뉴 ref 설정
+        >
           <nav className="flex flex-col px-4 py-2 space-y-1">
             <Link
               href="/"
               onClick={toggleMenu}
-              className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+              className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
             >
               {t("home")}
             </Link>
@@ -217,7 +238,7 @@ export default function Header() {
               <Link
                 href="/dashboard"
                 onClick={toggleMenu}
-                className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
               >
                 {t("dashboard")}
               </Link>
@@ -226,7 +247,7 @@ export default function Header() {
               <Link
                 href="/church-registration"
                 onClick={toggleMenu}
-                className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
               >
                 {t("churchRegistration")}
               </Link>
@@ -235,18 +256,18 @@ export default function Header() {
               <div className="px-3 py-2">
                 <button
                   onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
-                  className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium w-full"
+                  className="flex items-center text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium w-full"
                 >
-                  <Settings className="w-5 h-5 mr-1" />
+                  <Settings className="w-5 h-5 mr-2" />
                   {t("settings")}
-                  <ChevronDown className="w-4 h-4 ml-1" />
+                  <ChevronDown className="w-4 h-4 ml-2" />
                 </button>
                 {isSettingsMenuOpen && (
-                  <div className="mt-1 pl-4">
+                  <div className="mt-2 pl-4">
                     <Link
                       href="/master-management"
-                      onClick={closeSettingsMenu} // 모바일에서도 설정 메뉴 닫기
-                      className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={closeSettingsMenu}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       {t("masterManagement")}
                     </Link>
@@ -257,19 +278,19 @@ export default function Header() {
             <div className="px-3 py-2">
               <button
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
-                className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium w-full"
+                className="flex items-center text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium w-full"
               >
                 <span className="text-sm font-medium">{t("language")}</span>
-                <ChevronDown className="w-4 h-4 ml-1" />
+                <ChevronDown className="w-4 h-4 ml-2" />
               </button>
               {isLangMenuOpen && (
-                <div className="mt-1 space-y-1 pl-4">
+                <div className="mt-2 pl-4">
                   <button
                     onClick={() => {
                       changeLanguage("ko");
                       toggleMenu();
                     }}
-                    className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     한국어
                   </button>
@@ -278,7 +299,7 @@ export default function Header() {
                       changeLanguage("en");
                       toggleMenu();
                     }}
-                    className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     English
                   </button>
@@ -289,20 +310,20 @@ export default function Header() {
               <div className="px-3 py-2">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium w-full"
+                  className="flex items-center text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium w-full"
                 >
-                  <UserIcon className="w-5 h-5 mr-1" />
+                  <UserIcon className="w-5 h-5 mr-2" />
                   {user.name} ({t(user.role.toLowerCase())})
-                  <ChevronDown className="w-4 h-4 ml-1" />
+                  <ChevronDown className="w-4 h-4 ml-2" />
                 </button>
                 {isUserMenuOpen && (
-                  <div className="mt-1 pl-4">
+                  <div className="mt-2 pl-4">
                     <button
                       onClick={() => {
                         logout();
                         toggleMenu();
                       }}
-                      className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       {t("logout")}
@@ -314,7 +335,7 @@ export default function Header() {
               <Link
                 href="/login"
                 onClick={toggleMenu}
-                className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="block text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
               >
                 {t("login")}
               </Link>

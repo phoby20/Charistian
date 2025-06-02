@@ -11,6 +11,7 @@ import { citiesByCountry } from "@/data/cities";
 import { regionsByCity } from "@/data/regions";
 import { countryOptions } from "@/data/country";
 import { X } from "lucide-react";
+import Loading from "@/components/Loading";
 
 function SignupPage() {
   const { t } = useTranslation("common");
@@ -256,6 +257,7 @@ function SignupPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white p-4 sm:p-6">
+      {isSubmitting || (isInitialLoad && <Loading />)}
       <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-8 sm:p-12">
         <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-8 text-center">
           {t("signup")}

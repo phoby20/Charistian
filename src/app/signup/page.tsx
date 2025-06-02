@@ -172,7 +172,6 @@ function SignupPage() {
           setError(t("serverError"));
         }
       } else {
-        console.log("errer");
         setPositions([]);
         setFormData((prev) => ({ ...prev, position: "" }));
       }

@@ -2,7 +2,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { User } from "@prisma/client";
 import { useTranslation } from "next-i18next";
 
@@ -20,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const pathname = usePathname(); // 현재 경로 가져오기
   const { t } = useTranslation("common");
 
   useEffect(() => {
@@ -35,7 +36,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(data.user);
         } else {
           setError(t("authError"));
-          router.push("/login");
         }
       } catch (err) {
         console.error("Error fetching user:", err);
@@ -45,8 +45,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }
     };
-    fetchUser();
-  }, [router]);
+    if (
+      pathname !== "/login" &&
+      pathname !== "/signup" &&
+      pathname !== "/church-registration"
+    ) {
+      console.log("pathname:", pathname);
+      fetchUser();
+    }
+  }, [router, pathname]);
 
   const logout = async () => {
     try {

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "next-i18next";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // useRouter 추가
+import { useRouter } from "next/navigation";
 import {
   Menu,
   X,
@@ -22,12 +22,12 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
-  const router = useRouter(); // router 추가
+  const router = useRouter();
 
   const langMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null); // 모바일 메뉴 ref 추가
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   // 외부 클릭으로 드롭다운 및 모바일 메뉴 닫기
   useEffect(() => {
@@ -35,19 +35,15 @@ export default function Header() {
       const target = event.target as Node;
       let isOutside = true;
 
-      // 언어 메뉴
       if (langMenuRef.current && langMenuRef.current.contains(target)) {
         isOutside = false;
       }
-      // 사용자 메뉴
       if (userMenuRef.current && userMenuRef.current.contains(target)) {
         isOutside = false;
       }
-      // 설정 메뉴
       if (settingsMenuRef.current && settingsMenuRef.current.contains(target)) {
         isOutside = false;
       }
-      // 모바일 메뉴
       if (mobileMenuRef.current && mobileMenuRef.current.contains(target)) {
         isOutside = false;
       }
@@ -56,12 +52,12 @@ export default function Header() {
         setIsLangMenuOpen(false);
         setIsUserMenuOpen(false);
         setIsSettingsMenuOpen(false);
-        setIsMenuOpen(false); // 모바일 메뉴 닫기
+        setIsMenuOpen(false);
       }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside); // 터치 이벤트 추가
+    document.addEventListener("touchstart", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
@@ -80,12 +76,13 @@ export default function Header() {
 
   // 설정 메뉴 닫기 및 내비게이션
   const closeSettingsMenu = () => {
-    console.log("closeSettingsMenu called"); // 디버깅 로그
     setIsSettingsMenuOpen(false);
     setIsMenuOpen(false);
-    console.log("Navigating to /master-management"); // 디버깅 로그
-    router.push("/master-management"); // 명시적 내비게이션
+    router.push("/master-management");
   };
+
+  // 로고 클릭 시 이동 경로 결정
+  const logoHref = user ? "/dashboard" : "/";
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -93,7 +90,7 @@ export default function Header() {
         <div className="flex justify-between items-center h-12">
           {/* 로고 및 사이트 제목 */}
           <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="flex items-center">
+            <Link href={logoHref} className="flex items-center">
               <span className="text-2xl font-bold text-blue-600">
                 {t("siteTitle", { defaultValue: "Church Management" })}
               </span>
@@ -102,20 +99,6 @@ export default function Header() {
 
           {/* 데스크톱 네비게이션 */}
           <nav className="hidden md:flex space-x-4 items-center">
-            <Link
-              href="/"
-              className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              {t("home")}
-            </Link>
-            {user && (
-              <Link
-                href="/dashboard"
-                className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                {t("dashboard")}
-              </Link>
-            )}
             {!user && (
               <Link
                 href="/church-registration"
@@ -222,27 +205,8 @@ export default function Header() {
 
       {/* 모바일 네비게이션 */}
       {isMenuOpen && (
-        <div
-          className="md:hidden bg-white shadow-md"
-          ref={mobileMenuRef} // 모바일 메뉴 ref 설정
-        >
+        <div className="md:hidden bg-white shadow-md" ref={mobileMenuRef}>
           <nav className="flex flex-col px-4 py-2 space-y-1">
-            <Link
-              href="/"
-              onClick={toggleMenu}
-              className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
-            >
-              {t("home")}
-            </Link>
-            {user && (
-              <Link
-                href="/dashboard"
-                onClick={toggleMenu}
-                className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
-              >
-                {t("dashboard")}
-              </Link>
-            )}
             {!user && (
               <Link
                 href="/church-registration"

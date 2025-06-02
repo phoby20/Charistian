@@ -60,7 +60,6 @@ export default function RoleManagement({
         throw new Error(error);
       }
       const { duties } = await response.json();
-      console.log("Fetched roles:", duties);
       setRoles(duties || []);
     } catch (err) {
       console.error("Error fetching roles:", err);
@@ -103,7 +102,6 @@ export default function RoleManagement({
         throw new Error(error);
       }
       const { duty } = await response.json();
-      console.log("Added role:", duty);
       setRoles([...roles, duty]);
       setNewRoleName("");
       await fetchRoles(); // 최신 데이터 동기화
@@ -119,7 +117,6 @@ export default function RoleManagement({
       return;
     }
     try {
-      console.log("Updating role:", editingRole);
       const response = await fetch(`/api/duties/${editingRole.id}`, {
         method: "PUT",
         headers: {
@@ -153,7 +150,6 @@ export default function RoleManagement({
         throw new Error(error);
       }
       const { role } = await response.json(); // 서버 응답의 'role' 키 사용
-      console.log("Updated role:", role);
       setRoles(roles.map((r) => (r.id === role.id ? role : r)));
       setEditingRole(null);
     } catch (err) {
@@ -164,7 +160,6 @@ export default function RoleManagement({
 
   const handleDeleteRole = async (id: string) => {
     try {
-      console.log("Deleting role ID:", id);
       const response = await fetch(`/api/duties/${id}`, {
         method: "DELETE",
         credentials: "include",
@@ -193,7 +188,6 @@ export default function RoleManagement({
         }
         throw new Error(error);
       }
-      console.log("Role deleted:", id);
       setRoles(roles.filter((r) => r.id !== id));
     } catch (err) {
       console.error("Error deleting role:", err);

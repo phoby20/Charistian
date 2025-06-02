@@ -54,7 +54,6 @@ export default function PositionManagement({
         throw new Error(error || t("failedToFetchPositions"));
       }
       const { positions } = await response.json();
-      console.log("Fetched positions:", positions);
       setPositions(positions || []);
     } catch (err) {
       console.error("Error fetching positions:", err);
@@ -90,7 +89,6 @@ export default function PositionManagement({
         throw new Error(error || t("failedToAddPosition"));
       }
       const { position } = await response.json();
-      console.log("Added position:", position);
       setPositions([...positions, position]);
       setNewPositionName("");
     } catch (err) {
@@ -105,7 +103,6 @@ export default function PositionManagement({
       return;
     }
     try {
-      console.log("Updating position:", editingPosition);
       const response = await fetch(`/api/positions/${editingPosition.id}`, {
         method: "PUT",
         headers: {
@@ -133,7 +130,6 @@ export default function PositionManagement({
         throw new Error(error || t("failedToUpdatePosition"));
       }
       const { position } = await response.json();
-      console.log("Updated position:", position);
       setPositions(positions.map((p) => (p.id === position.id ? position : p)));
       setEditingPosition(null);
       setEditingNewName("");
@@ -145,7 +141,6 @@ export default function PositionManagement({
 
   const handleDeletePosition = async (id: string) => {
     try {
-      console.log("Deleting position ID:", id);
       const response = await fetch(`/api/positions/${id}`, {
         method: "DELETE",
         credentials: "include",
@@ -168,7 +163,6 @@ export default function PositionManagement({
         }
         throw new Error(error || t("failedToDeletePosition"));
       }
-      console.log("Position deleted:", id);
       setPositions(positions.filter((p) => p.id !== id));
     } catch (err) {
       console.error("Error deleting position:", err);

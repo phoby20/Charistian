@@ -17,7 +17,6 @@ export async function PUT(req: NextRequest) {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
-    console.log("Received cookies:", cookieStore.getAll());
     if (!token) {
       console.error("No token found in cookies for /api/positions/[id]");
       return NextResponse.json({ error: "No token provided" }, { status: 401 });
@@ -26,7 +25,6 @@ export async function PUT(req: NextRequest) {
     let decoded: JwtPayload;
     try {
       decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-      console.log("Decoded JWT:", decoded);
     } catch (error) {
       console.error("Token verification failed", error);
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
@@ -49,10 +47,6 @@ export async function PUT(req: NextRequest) {
     const id = req.nextUrl.pathname.split("/").pop();
     const { newName } = await req.json();
 
-    console.log("Requested position ID:", id);
-    console.log("JWT churchId:", churchId);
-    console.log("New name:", newName);
-
     if (!id || !newName) {
       console.error("Missing position ID or new name");
       return NextResponse.json(
@@ -64,8 +58,6 @@ export async function PUT(req: NextRequest) {
     const existingPosition = await prisma.churchPosition.findUnique({
       where: { id },
     });
-
-    console.log("Existing position:", existingPosition);
 
     if (!existingPosition) {
       console.error(`Position with ID ${id} not found`);
@@ -137,7 +129,6 @@ export async function DELETE(req: NextRequest) {
     let decoded: JwtPayload;
     try {
       decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-      console.log("Decoded JWT:", decoded);
     } catch (error) {
       console.error("Token verification failed", error);
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
@@ -158,8 +149,6 @@ export async function DELETE(req: NextRequest) {
     }
 
     const id = req.nextUrl.pathname.split("/").pop();
-    console.log("Requested position ID:", id);
-    console.log("JWT churchId:", churchId);
 
     if (!id) {
       console.error("Missing position ID");
@@ -172,8 +161,6 @@ export async function DELETE(req: NextRequest) {
     const position = await prisma.churchPosition.findUnique({
       where: { id },
     });
-
-    console.log("Existing position:", position);
 
     if (!position || position.churchId !== churchId) {
       console.error(`Position with ID ${id} not found or churchId mismatch`);

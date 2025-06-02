@@ -17,7 +17,6 @@ export async function PUT(req: NextRequest) {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
-    console.log("Received cookies:", cookieStore.getAll());
     if (!token) {
       console.error("No token found in cookies for /api/duties/[id]");
       return NextResponse.json({ error: "No token provided" }, { status: 401 });
@@ -26,7 +25,6 @@ export async function PUT(req: NextRequest) {
     let decoded: JwtPayload;
     try {
       decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-      console.log("Decoded JWT:", decoded);
     } catch (error) {
       console.error("Token verification failed:", error);
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
@@ -48,9 +46,6 @@ export async function PUT(req: NextRequest) {
 
     const id = req.nextUrl.pathname.split("/").pop();
     const { name } = await req.json();
-
-    console.log("Requested duty ID:", id);
-    console.log("New name:", name);
 
     if (!id || !name) {
       console.error("Missing duty ID or name");
@@ -91,7 +86,6 @@ export async function DELETE(req: NextRequest) {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
-    console.log("Received cookies:", cookieStore.getAll());
     if (!token) {
       console.error("No token found in cookies for /api/duties/[id]");
       return NextResponse.json({ error: "No token provided" }, { status: 401 });
@@ -100,7 +94,6 @@ export async function DELETE(req: NextRequest) {
     let decoded: JwtPayload;
     try {
       decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-      console.log("Decoded JWT:", decoded);
     } catch (error) {
       console.error("Token verification failed:", error);
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
@@ -121,7 +114,6 @@ export async function DELETE(req: NextRequest) {
     }
 
     const id = req.nextUrl.pathname.split("/").pop();
-    console.log("Requested duty ID:", id);
 
     if (!id) {
       console.error("Missing duty ID");

@@ -6,6 +6,7 @@ import Input from "@/components/Input";
 import Button from "@/components/Button";
 import { FormEvent, useState } from "react";
 import { appWithTranslation } from "next-i18next";
+import Link from "next/link"; // Next.js Link 컴포넌트 추가
 
 function LoginPage() {
   const { t } = useTranslation("common");
@@ -56,6 +57,14 @@ function LoginPage() {
           <Button type="submit">{t("login")}</Button>
         </form>
         {error && <div className="mt-4 text-red-600 text-sm">{error}</div>}
+        <div className="mt-4 text-sm text-center">
+          <p>
+            {t("noAccount")}{" "}
+            <Link href="/signup" className="text-blue-600 hover:underline">
+              {t("signup")}
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

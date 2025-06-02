@@ -28,7 +28,8 @@ model User {
   groups        Group[]    @relation("UserGroups")
   subGroups     SubGroup[] @relation("UserSubGroups")
   teams         Team[]     @relation("UserTeams")
-  duties        Duty[]     @relation("UserDuties")
+  duties        Duty[]     @relation("UserDuties") // 직책
+  position      String?    // 직분 (예: 목사, 집사)
   creations     Creation[]
   purchases     Purchase[]
   state         UserState  @default(APPROVED)
@@ -54,10 +55,18 @@ model Church {
   groups            Group[]
   subGroups         SubGroup[] @relation("ChurchSubGroups")
   teams             Team[]
-  duties            Duty[]
+  duties            Duty[]     // 직책
+  positions         ChurchPosition[]   // 직분 목록 (예: ["목사", "집사"])
   creations         Creation[]
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+}
+
+model ChurchPosition {
+  id        String  @id @default(uuid())
+  name      String
+  churchId  String
+  church    Church  @relation(fields: [churchId], references: [id])
 }
 
 model Group {
@@ -95,7 +104,7 @@ model Team {
 
 model Duty {
   id            String    @id @default(uuid())
-  name          String
+  name          String    // 직책 이름
   churchId      String
   church        Church    @relation(fields: [churchId], references: [id])
   users         User[]    @relation("UserDuties")

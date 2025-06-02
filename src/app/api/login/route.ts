@@ -1,3 +1,4 @@
+// src/app/api/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import * as bcrypt from "bcrypt";
@@ -18,37 +19,46 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: `User not found${normalizedEmail}` },
-        { status: 401 }
-      );
+      console.error(`User not found: ${normalizedEmail}`);
+      return NextResponse.json({ error: "User not found" }, { status: 401 });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: `Password mismatch ${normalizedEmail}` },
-        { status: 401 }
-      );
+      console.error(`Password mismatch for user: ${normalizedEmail}`);
+      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
     const token = generateToken({
-      id: user.id,
+      userId: user.id, // userId로 변경하여 /api/duties와 일치
+      churchId: user.churchId, // churchId 추가
       role: user.role,
     } as TokenPayload);
-    const response = NextResponse.json({ message: "Login successful" });
+
+    console.log(`Generated token for user ${user.id}: ${token}`); // 디버깅 로그
+
+    const response = NextResponse.json({
+      message: "Login successful",
+      user: {
+        id: user.id,
+        name: user.name,
+        role: user.role,
+        churchId: user.churchId,
+      }, // 클라이언트에 사용자 정보 반환
+    });
     response.cookies.set("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production", // 로컬에서는 Secure 비활성화
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 7 * 24 * 60 * 60, // 7일
+      path: "/", // 모든 경로에서 쿠키 사용 가능
     });
+
+    console.log(`Set auth_token cookie for user ${user.id}`); // 디버깅 로그
+
     return response;
   } catch (error) {
     console.error("Login error:", error);
-    return NextResponse.json(
-      { error: `Server error ${error}` },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

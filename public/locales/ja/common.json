@@ -121,5 +121,21 @@
   "enterUserRejectionReason": "ユーザーの拒否理由を入力してください",
   "close": "閉じる",
   "authError": "認証エラーが発生しました。",
-  "churchId": "教会ID"
+  "churchId": "教会ID",
+  "noAccount": "まだアカウントをお持ちでないですか？",
+  "send": "送信",
+  "noAccount": "まだアカウントをお持ちでないですか？",
+  "roleManagement": "役割管理",
+  "enterRoleName": "役割名を入力してください",
+  "addRole": "役割を追加",
+  "noRoles": "役割がありません",
+  "roleNameRequired": "役割名は必須です",
+  "fialedToFetchRoles": "役割の取得に失敗しました",
+  "failedToAddRole": "役割の追加に失敗しました",
+  "failedToUpdateRole": "役割の更新に失敗しました",
+  "failedToDeleteRole": "役割の削除に失敗しました",
+  "invaildToken": "無効なトークンです",
+  "unauthorized": "権限がありません",
+  "churchNotFound": "教会が見つかりません",
+  "positionNameExists": "既に存在する役職名です"
 }

@@ -29,7 +29,7 @@ function convertRegionsFormat(
 ): Record<string, string[]> {
   const result: Record<string, string[]> = {};
   for (const [city, regions] of Object.entries(input)) {
-    if (regions.length === 0) continue; // 빈 배열은 무시
+    if (regions.length === 0) continue;
     result[city] = regions.map((region) => region.value);
   }
   return result;
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       contactName: formData.get("contactName") as string,
       contactPhone: formData.get("contactPhone") as string,
       contactGender: formData.get("contactGender") as string,
-      contactBirthDate: new Date(formData.get("contactBirthDate") as string),
+      contactBirthDate: undefined as Date | undefined,
       plan: formData.get("plan") as string,
       contactImage: undefined as string | undefined,
       buildingImage: undefined as string | undefined,
@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
 
     // 입력 검증
     const missingFields: string[] = [];
+    const contactBirthDateRaw = formData.get("contactBirthDate") as string;
     if (!data.churchName) missingFields.push("churchName");
     if (!data.address) missingFields.push("address");
     if (!data.city) missingFields.push("city");
@@ -79,7 +80,12 @@ export async function POST(req: NextRequest) {
     if (!data.contactName) missingFields.push("contactName");
     if (!data.contactPhone) missingFields.push("contactPhone");
     if (!data.contactGender) missingFields.push("contactGender");
-    if (!data.contactBirthDate) missingFields.push("contactBirthDate");
+    if (
+      !contactBirthDateRaw ||
+      isNaN(new Date(contactBirthDateRaw).getTime())
+    ) {
+      missingFields.push("contactBirthDate (유효한 날짜 형식이 아닙니다)");
+    }
     if (!data.plan) missingFields.push("plan");
 
     if (missingFields.length > 0) {
@@ -88,6 +94,8 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    data.contactBirthDate = new Date(contactBirthDateRaw);
 
     // Country 검증
     if (!["Korea", "Japan"].includes(data.country)) {
@@ -128,9 +136,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Plan 검증
-    const plan: Plan = validPlans.includes(data.plan.toUpperCase() as Plan)
-      ? (data.plan.toUpperCase() as Plan)
-      : "FREE";
+    if (!validPlans.includes(data.plan.toUpperCase() as Plan)) {
+      return NextResponse.json(
+        { error: "유효하지 않은 플랜입니다." },
+        { status: 400 }
+      );
+    }
+    const plan: Plan = data.plan.toUpperCase() as Plan;
 
     // 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -139,20 +151,41 @@ export async function POST(req: NextRequest) {
     const contactImage = formData.get("contactImage") as File;
     const buildingImage = formData.get("buildingImage") as File;
 
-    if (contactImage && contactImage.size > 0) {
-      data.contactImage = await uploadFile(
-        contactImage,
-        `contact_${data.contactName}_${Date.now()}.jpg`
-      );
+    if (contactImage && contactImage instanceof File && contactImage.size > 0) {
+      try {
+        data.contactImage = await uploadFile(
+          contactImage,
+          `contact_${data.contactName}_${Date.now()}.jpg`
+        );
+      } catch (fileError) {
+        console.error("Contact image upload failed:", fileError);
+        return NextResponse.json(
+          { error: "연락처 이미지 업로드 실패" },
+          { status: 500 }
+        );
+      }
     }
-    if (buildingImage && buildingImage.size > 0) {
-      data.buildingImage = await uploadFile(
-        buildingImage,
-        `building_${data.churchName}_${Date.now()}.jpg`
-      );
+    if (
+      buildingImage &&
+      buildingImage instanceof File &&
+      buildingImage.size > 0
+    ) {
+      try {
+        data.buildingImage = await uploadFile(
+          buildingImage,
+          `building_${data.churchName}_${Date.now()}.jpg`
+        );
+      } catch (fileError) {
+        console.error("Building image upload failed:", fileError);
+        return NextResponse.json(
+          { error: "건물 이미지 업로드 실패" },
+          { status: 500 }
+        );
+      }
     }
 
     // ChurchApplication 생성
+    console.log("Creating ChurchApplication with data:", data);
     await prisma.churchApplication.create({
       data: {
         churchName: data.churchName,
@@ -180,8 +213,12 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error("Error registering church application:", error);
+    const isDev = process.env.NODE_ENV === "development";
     return NextResponse.json(
-      { error: "서버 오류가 발생했습니다." },
+      {
+        error: "서버 오류가 발생했습니다.",
+        ...(isDev && { details: error }),
+      },
       { status: 500 }
     );
   }

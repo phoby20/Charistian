@@ -4,7 +4,7 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 
 export type TokenPayload = {
   // JWT 토큰의 페이로드 타입 정의
-  id: string; // 사용자 ID
+  userId: string; // 사용자 ID
   role: "MASTER" | "SUPER_ADMIN" | "ADMIN" | "GENERAL"; // 사용자 역할
   churchId?: string; // 교회 ID (선택적)
 };

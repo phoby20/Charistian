@@ -1,45 +1,31 @@
+// src/components/Header.tsx
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "next-i18next";
 import Link from "next/link";
-import { Menu, X, User, LogOut, ChevronDown } from "lucide-react";
+import {
+  Menu,
+  X,
+  User as UserIcon,
+  LogOut,
+  ChevronDown,
+  Settings,
+} from "lucide-react";
 import Button from "./Button";
-
-interface UserInfo {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-}
+import { useAuth } from "@/context/AuthContext";
 
 export default function Header() {
   const { t, i18n } = useTranslation("common");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<UserInfo | null>(null);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const langMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
-
-  // 사용자 인증 상태 확인
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const response = await fetch("/api/auth/me", {
-          credentials: "include",
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    }
-    fetchUser();
-  }, []);
+  const settingsMenuRef = useRef<HTMLDivElement>(null);
 
   // 외부 클릭으로 드롭다운 닫기
   useEffect(() => {
@@ -56,28 +42,16 @@ export default function Header() {
       ) {
         setIsUserMenuOpen(false);
       }
+      if (
+        settingsMenuRef.current &&
+        !settingsMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsSettingsMenuOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // 로그아웃 처리
-  const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-      setUser(null);
-      if (typeof window !== "undefined") {
-        window.location.href = "/login"; // Redirect to login page
-      }
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-    setIsUserMenuOpen(false);
-    setIsMenuOpen(false);
-  };
 
   // 언어 전환
   const changeLanguage = (lng: string) => {
@@ -88,6 +62,12 @@ export default function Header() {
 
   // 메뉴 토글
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  // 설정 메뉴 닫기
+  const closeSettingsMenu = () => {
+    setIsSettingsMenuOpen(false);
+    setIsMenuOpen(false); // 모바일 메뉴도 닫기
+  };
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -126,6 +106,30 @@ export default function Header() {
                 {t("churchRegistration")}
               </Link>
             )}
+            {/* 설정 메뉴 */}
+            {user && user.role === "SUPER_ADMIN" && (
+              <div className="relative" ref={settingsMenuRef}>
+                <button
+                  onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
+                  className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  <Settings className="w-5 h-5 mr-1" />
+                  {t("settings")}
+                  <ChevronDown className="w-4 h-4 ml-1" />
+                </button>
+                {isSettingsMenuOpen && (
+                  <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
+                    <Link
+                      href="/master-management"
+                      onClick={closeSettingsMenu} // 설정 메뉴 닫기
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      {t("masterManagement")}
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
             {/* 언어 선택 */}
             <div className="relative" ref={langMenuRef}>
               <button
@@ -159,14 +163,14 @@ export default function Header() {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  <User className="w-5 h-5 mr-1" />
+                  <UserIcon className="w-5 h-5 mr-1" />
                   {user.name} ({t(user.role.toLowerCase())})
                   <ChevronDown className="w-4 h-4 ml-1" />
                 </button>
                 {isUserMenuOpen && (
                   <div className="absolute right-0 z-50 bg-white shadow-lg rounded-md mt-1">
                     <button
-                      onClick={handleLogout}
+                      onClick={logout}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
@@ -227,6 +231,29 @@ export default function Header() {
                 {t("churchRegistration")}
               </Link>
             )}
+            {user && user.role === "SUPER_ADMIN" && (
+              <div className="px-3 py-2">
+                <button
+                  onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
+                  className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium w-full"
+                >
+                  <Settings className="w-5 h-5 mr-1" />
+                  {t("settings")}
+                  <ChevronDown className="w-4 h-4 ml-1" />
+                </button>
+                {isSettingsMenuOpen && (
+                  <div className="mt-1 pl-4">
+                    <Link
+                      href="/master-management"
+                      onClick={closeSettingsMenu} // 모바일에서도 설정 메뉴 닫기
+                      className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      {t("masterManagement")}
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="px-3 py-2">
               <button
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
@@ -264,7 +291,7 @@ export default function Header() {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium w-full"
                 >
-                  <User className="w-5 h-5 mr-1" />
+                  <UserIcon className="w-5 h-5 mr-1" />
                   {user.name} ({t(user.role.toLowerCase())})
                   <ChevronDown className="w-4 h-4 ml-1" />
                 </button>
@@ -272,7 +299,7 @@ export default function Header() {
                   <div className="mt-1 pl-4">
                     <button
                       onClick={() => {
-                        handleLogout();
+                        logout();
                         toggleMenu();
                       }}
                       className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"

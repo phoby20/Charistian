@@ -8,6 +8,7 @@ import { ChurchApplication, User } from "@prisma/client";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
 import PendingChurches from "@/components/PendingChurches";
 import PendingUsers from "@/components/PendingUsers";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const { t } = useTranslation("common");
@@ -27,6 +28,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userChurchId, setUserChurchId] = useState<string | null>(null);
+  const router = useRouter();
 
   // Fetch current user role and churchId
   useEffect(() => {
@@ -40,7 +42,7 @@ export default function DashboardPage() {
           setUserRole(data.user.role);
           setUserChurchId(data.user.churchId);
         } else {
-          setError(t("authError"));
+          router.push("/login");
         }
       } catch (err) {
         console.error("Error fetching user role:", err);
@@ -126,7 +128,7 @@ export default function DashboardPage() {
 
   const handleApproveUser = async (userId: string) => {
     try {
-      const response = await fetch("/api/users/approve", {
+      const response = await fetch("/api/user/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
@@ -142,7 +144,7 @@ export default function DashboardPage() {
   const handleRejectUser = async () => {
     if (!selectedUserId) return;
     try {
-      const response = await fetch("/api/users/reject", {
+      const response = await fetch("/api/user/reject", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

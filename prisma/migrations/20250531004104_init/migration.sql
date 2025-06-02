@@ -16,7 +16,9 @@ CREATE TABLE "User" (
     "profileImage" TEXT,
     "role" TEXT NOT NULL DEFAULT 'GENERAL',
     "churchId" TEXT,
+    "position" TEXT,
     "state" TEXT NOT NULL DEFAULT 'APPROVED',
+    "rejectionReason" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "User_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church" ("id") ON DELETE SET NULL ON UPDATE CASCADE
@@ -36,6 +38,14 @@ CREATE TABLE "Church" (
     "state" TEXT NOT NULL DEFAULT 'PENDING',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "ChurchPosition" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "churchId" TEXT NOT NULL,
+    CONSTRAINT "ChurchPosition_churchId_fkey" FOREIGN KEY ("churchId") REFERENCES "Church" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable

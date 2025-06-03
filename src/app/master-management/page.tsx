@@ -6,7 +6,7 @@ import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
 import GroupManagement from "@/components/GroupManagement";
 import PositionManagement from "@/components/PositionManagement";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Loading from "@/components/Loading";
 import { useAuth } from "@/context/AuthContext";
 import DutyManagement from "@/components/DutyManagement";
@@ -14,9 +14,19 @@ import DutyManagement from "@/components/DutyManagement";
 export default function MasterManagementPage() {
   const { t } = useTranslation("common");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, isLoading, error } = useAuth();
+
+  // URL 쿼리 파라미터에서 초기 탭 설정
+  const initialTab = searchParams.get("tab") as
+    | "positions"
+    | "groups"
+    | "duty"
+    | null;
   const [activeTab, setActiveTab] = useState<"positions" | "groups" | "duty">(
-    "positions"
+    initialTab && ["positions", "groups", "duty"].includes(initialTab)
+      ? initialTab
+      : "positions"
   );
 
   useEffect(() => {
@@ -27,6 +37,15 @@ export default function MasterManagementPage() {
       router.push("/dashboard");
     }
   }, [user, isLoading, router]);
+
+  // 탭 변경 시 URL 업데이트
+  const handleTabChange = (tab: "positions" | "groups" | "duty") => {
+    setActiveTab(tab);
+    // URL에 쿼리 파라미터 추가
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", tab);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -46,7 +65,7 @@ export default function MasterManagementPage() {
         <div className="mb-6">
           <nav className="flex space-x-4 border-b border-gray-200">
             <button
-              onClick={() => setActiveTab("positions")}
+              onClick={() => handleTabChange("positions")}
               className={`px-4 py-2 text-sm font-medium ${
                 activeTab === "positions"
                   ? "border-b-2 border-blue-600 text-blue-600"
@@ -56,7 +75,7 @@ export default function MasterManagementPage() {
               {t("positionManagement")}
             </button>
             <button
-              onClick={() => setActiveTab("groups")}
+              onClick={() => handleTabChange("groups")}
               className={`px-4 py-2 text-sm font-medium ${
                 activeTab === "groups"
                   ? "border-b-2 border-blue-600 text-blue-600"
@@ -66,7 +85,7 @@ export default function MasterManagementPage() {
               {t("groupManagement")}
             </button>
             <button
-              onClick={() => setActiveTab("duty")}
+              onClick={() => handleTabChange("duty")}
               className={`px-4 py-2 text-sm font-medium ${
                 activeTab === "duty"
                   ? "border-b-2 border-blue-600 text-blue-600"

@@ -9,8 +9,8 @@ interface UserDetailModalProps {
   user: User;
   isOpen: boolean;
   onClose: () => void;
-  onApprove: () => void;
-  onReject: () => void;
+  onApprove?: () => void;
+  onReject?: () => void;
 }
 
 export default function UserDetailModal({
@@ -151,18 +151,23 @@ export default function UserDetailModal({
 
         {/* Action Buttons */}
         <div className="flex justify-end mt-8 space-x-3">
-          <Button
-            onClick={onReject}
-            className="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors duration-200"
-          >
-            {t("reject")}
-          </Button>
-          <Button
-            onClick={onApprove}
-            className="px-4 py-2 text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors duration-200"
-          >
-            {t("approve")}
-          </Button>
+          {onReject ? (
+            <Button
+              onClick={onReject}
+              className="px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors duration-200"
+            >
+              {t("reject")}
+            </Button>
+          ) : null}
+
+          {onApprove ? (
+            <Button
+              onClick={onApprove}
+              className="px-4 py-2 text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors duration-200"
+            >
+              {t("approve")}
+            </Button>
+          ) : null}
         </div>
       </div>
     </Modal>

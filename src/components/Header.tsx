@@ -107,6 +107,12 @@ export default function Header() {
                 {t("churchRegistration")}
               </Link>
             )}
+            <Link
+              href="/members"
+              className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              {t("members")}
+            </Link>
             {/* 설정 메뉴 */}
             {user && user.role === "SUPER_ADMIN" && (
               <div className="relative" ref={settingsMenuRef}>

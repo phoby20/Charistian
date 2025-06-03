@@ -5,7 +5,6 @@ import { verifyToken } from "@/lib/jwt";
 export async function GET(req: NextRequest) {
   try {
     const token = req.cookies.get("token")?.value;
-    console.log("Token from cookies:", token); // 디버깅 로그
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

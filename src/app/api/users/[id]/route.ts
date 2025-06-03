@@ -53,6 +53,9 @@ export async function PUT(
       birthDate,
       gender,
       positionId,
+      groupId,
+      subGroupId,
+      dutyIds,
     } = data;
 
     if (!name || !email || !birthDate || !gender) {
@@ -74,13 +77,42 @@ export async function PUT(
         city: city || null,
         region: region || null,
         address: address || null,
-        birthDate: new Date(birthDate), // YYYY-MM-DD 또는 ISO 문자열 처리
+        birthDate: new Date(birthDate),
         gender,
         position: positionId,
+        groups: groupId
+          ? {
+              set: [{ id: groupId }],
+            }
+          : { set: [] },
+        subGroups: subGroupId
+          ? {
+              set: [{ id: subGroupId }],
+            }
+          : { set: [] },
+        duties: dutyIds
+          ? {
+              set: dutyIds.map((dutyId: string) => ({ id: dutyId })),
+            }
+          : { set: [] },
+      },
+      include: {
+        groups: { select: { id: true, name: true } },
+        subGroups: { select: { id: true, name: true, groupId: true } },
+        duties: { select: { id: true, name: true } },
       },
     });
 
-    return NextResponse.json({ user: updatedUser });
+    const formattedUser = {
+      ...updatedUser,
+      birthDate: updatedUser.birthDate.toISOString(),
+      createdAt: updatedUser.createdAt.toISOString(),
+      group: updatedUser.groups[0] || null,
+      subGroup: updatedUser.subGroups[0] || null,
+      duties: updatedUser.duties,
+    };
+
+    return NextResponse.json({ user: formattedUser });
   } catch (error) {
     console.error("사용자 업데이트 오류:", error);
     return NextResponse.json(

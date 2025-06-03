@@ -82,7 +82,6 @@ export default function GroupManagement({
         throw new Error(error);
       }
       const data = await response.json();
-      console.log("API response:", data);
       const duties = Array.isArray(data.duties) ? data.duties : [];
       setGroups(duties);
     } catch (err) {

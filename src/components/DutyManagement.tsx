@@ -54,7 +54,6 @@ export default function DutyManagement({
 
   const fetchDuties = async () => {
     try {
-      console.log("Sending request to /api/duties with credentials: include");
       const response = await fetch("/api/duties", {
         method: "GET",
         credentials: "include",

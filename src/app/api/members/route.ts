@@ -24,6 +24,25 @@ export async function GET() {
         profileImage: true,
         churchId: true,
         position: true,
+        groups: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        subGroups: {
+          select: {
+            id: true,
+            name: true,
+            groupId: true,
+          },
+        },
+        duties: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         createdAt: true,
       },
     });
@@ -41,22 +60,12 @@ export async function GET() {
         }
 
         return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          kakaoId: user.kakaoId,
-          lineId: user.lineId,
-          country: user.country,
-          city: user.city,
-          region: user.region,
-          address: user.address,
-          birthDate: user.birthDate,
-          gender: user.gender,
+          ...user,
           profileImage: user.profileImage,
-          churchId: user.churchId,
           position, // position name
-          createdAt: user.createdAt,
+          group: user.groups[0] || null, // 단일 그룹
+          subGroup: user.subGroups[0] || null, // 단일 서브그룹
+          duties: user.duties || [], // 빈 배열로 대체
         };
       })
     );

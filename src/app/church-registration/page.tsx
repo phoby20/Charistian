@@ -453,7 +453,7 @@ export default function ChurchRegistrationPage() {
           </div>
         </div>
         {step === 1 ? renderStep1() : renderStep2()}
-        <Modal isOpen={!!error} onClose={() => setError(null)}>
+        <Modal isOpen={!!error}>
           <p>{error}</p>
           <Button onClick={() => setError(null)}>{t("confirm")}</Button>
         </Modal>

@@ -15,11 +15,30 @@ interface Position {
   name: string;
 }
 
+interface Group {
+  id: string;
+  name: string;
+}
+
+interface SubGroup {
+  id: string;
+  name: string;
+  groupId: string;
+}
+
+interface Duty {
+  id: string;
+  name: string;
+}
+
 interface User
   extends Omit<PrismaUser, "position" | "birthDate" | "createdAt"> {
   position: Position | null;
   birthDate: string;
   createdAt: string;
+  group: Group | null;
+  subGroup: SubGroup | null;
+  duties: Duty[] | null; // null 가능성 추가
 }
 
 export default function MembersPage() {
@@ -30,6 +49,29 @@ export default function MembersPage() {
   const [userChurchId, setUserChurchId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  const fetchMembers = async () => {
+    try {
+      if (userRole !== "SUPER_ADMIN" && userRole !== "ADMIN") {
+        router.push("/login");
+        return;
+      }
+      if (!userChurchId) {
+        setMembers([]);
+        return;
+      }
+      const response = await fetch("/api/members");
+      if (!response.ok) throw new Error("Failed to fetch members");
+      const { members } = await response.json();
+      const filteredMembers = members.filter(
+        (user: User) => user.churchId === userChurchId
+      );
+      setMembers(filteredMembers);
+    } catch (err) {
+      console.error("Error fetching members:", err);
+      setError(t("serverError"));
+    }
+  };
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -53,33 +95,14 @@ export default function MembersPage() {
   }, [router]);
 
   useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        if (userRole !== "SUPER_ADMIN" && userRole !== "ADMIN") {
-          router.push("/login");
-          return;
-        }
-        if (!userChurchId) {
-          setMembers([]);
-          return;
-        }
-        const response = await fetch("/api/members");
-        if (!response.ok) throw new Error("Failed to fetch members");
-        const { members } = await response.json();
-        const filteredMembers = members.filter(
-          (user: User) => user.churchId === userChurchId
-        );
-        setMembers(filteredMembers);
-      } catch (err) {
-        console.error("Error fetching members:", err);
-        setError(t("serverError"));
-      }
-    };
-
     if (userRole !== null && userChurchId !== null) {
       fetchMembers();
     }
   }, [userRole, userChurchId, router]);
+
+  const handleUpdate = () => {
+    fetchMembers();
+  };
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-gray-50 to-gray-200">
@@ -123,6 +146,7 @@ export default function MembersPage() {
             user={selectedUser}
             isOpen={!!selectedUser}
             onClose={() => setSelectedUser(null)}
+            onUpdate={handleUpdate}
           />
         )}
 

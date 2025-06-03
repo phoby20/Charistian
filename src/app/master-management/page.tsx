@@ -1,8 +1,10 @@
+// src/app/master-management/page.tsx
+
 "use client";
 
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
-import RoleManagement from "@/components/RoleManagement";
+import GroupManagement from "@/components/GroupManagement";
 import PositionManagement from "@/components/PositionManagement";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
@@ -13,7 +15,7 @@ export default function MasterManagementPage() {
   const { t } = useTranslation("common");
   const router = useRouter();
   const { user, isLoading, error } = useAuth();
-  const [activeTab, setActiveTab] = useState<"positions" | "roles" | "duty">(
+  const [activeTab, setActiveTab] = useState<"positions" | "groups" | "duty">(
     "positions"
   );
 
@@ -54,14 +56,14 @@ export default function MasterManagementPage() {
               {t("positionManagement")}
             </button>
             <button
-              onClick={() => setActiveTab("roles")}
+              onClick={() => setActiveTab("groups")}
               className={`px-4 py-2 text-sm font-medium ${
-                activeTab === "roles"
+                activeTab === "groups"
                   ? "border-b-2 border-blue-600 text-blue-600"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              {t("roleManagement")}
+              {t("groupManagement")}
             </button>
             <button
               onClick={() => setActiveTab("duty")}
@@ -80,8 +82,8 @@ export default function MasterManagementPage() {
           {activeTab === "positions" && (
             <PositionManagement userRole={user.role} churchId={user.churchId} />
           )}
-          {activeTab === "roles" && (
-            <RoleManagement userRole={user.role} churchId={user.churchId} />
+          {activeTab === "groups" && (
+            <GroupManagement userRole={user.role} churchId={user.churchId} />
           )}
           {activeTab === "duty" && (
             <DutyManagement userRole={user.role} churchId={user.churchId} />

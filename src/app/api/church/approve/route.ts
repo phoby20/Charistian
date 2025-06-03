@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
-// 기본 직분 및 직책 데이터
+// 기본 직분, 직책, 그룹, 팀, 서브그룹 데이터
 const defaultPositions = [
   "목사(牧師)",
   "전도사(伝道師)",
@@ -29,6 +29,51 @@ const defaultDuties = [
   "청년부 서기(青年部 書記)",
   "청년부 회계(青年部 会計)",
 ];
+
+const defaultGroups = [
+  "유아부(幼兒部)",
+  "유치부(幼稚部)",
+  "초등부(小学部)",
+  "중등부(中学部)",
+  "고등부(高校部)",
+  "중고등부(中高等部)",
+  "청년부(青年部)",
+  "청장년부(靑長年部)",
+  "대학부(大學部)",
+  "장년부(長年部)",
+  "여성부(女性部)",
+  "남성부(男性部)",
+  "선교부(宣敎部)",
+  "청소년부(靑少年部)",
+  "무소속(無所属)",
+];
+
+const defaultTeams = [
+  "찬양팀(賛美チーム)",
+  "기도팀(祈禱チーム)",
+  "봉사팀(奉仕チーム)",
+  "행정팀(行政チーム)",
+  "재정팀(財政チーム)",
+  "교육팀(教育팀)",
+  "문화팀(文化チーム)",
+  "홍보팀(広報チーム)",
+  "사회봉사팀(社會奉仕チーム)",
+  "예배팀(礼拜チーム)",
+  "성경공부팀(聖經勉強チーム)",
+  "사역팀(事業チーム)",
+  "행사팀(行事チーム)",
+  "기획팀(企劃チーム)",
+  "음악팀(音樂チーム)",
+  "미디어팀(メディアチーム)",
+];
+
+const classSubGroups = ["1반", "2반", "3반"];
+const districtSubGroups = ["1교구(1教区)", "2교구(2教区)", "3교구(3教区)"];
+
+// SubGroupInput 인터페이스 정의
+interface SubGroupInput {
+  name: string;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -61,7 +106,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 트랜잭션으로 Church, User, ChurchPosition, Duty 생성 및 Application 업데이트
+    // 트랜잭션으로 Church, User, ChurchPosition, Duty, Group, SubGroup, Team 생성 및 Application 업데이트
     const [church, user, updatedApplication] = await prisma.$transaction(
       async (tx) => {
         // 1. 교회 생성
@@ -93,7 +138,9 @@ export async function POST(req: NextRequest) {
             profileImage: application.contactImage,
             role: "SUPER_ADMIN",
             state: "APPROVED",
-            churchId: church.id,
+            church: {
+              connect: { id: church.id },
+            },
           },
         });
 
@@ -115,7 +162,59 @@ export async function POST(req: NextRequest) {
           data: dutyData,
         });
 
-        // 5. ChurchApplication 상태 업데이트
+        // 5. 기본 그룹(Group) 및 서브그룹(SubGroup) 생성
+        const classGroupNames = [
+          "유아부(幼兒部)",
+          "유치부(幼稚部)",
+          "초등부(小学部)",
+          "중등부(中学部)",
+          "고등부(高校部)",
+          "중고등부(中高等部)",
+        ];
+        const districtGroupNames = [
+          "청년부(青年部)",
+          "청장년부(靑長年部)",
+          "대학부(大學部)",
+          "장년부(長年部)",
+        ];
+
+        // Group을 개별적으로 생성하여 id를 얻음
+        for (const name of defaultGroups) {
+          const group = await tx.group.create({
+            data: {
+              name,
+              churchId: church.id,
+            },
+          });
+
+          // SubGroup 생성
+          const subGroups: SubGroupInput[] = classGroupNames.includes(name)
+            ? classSubGroups.map((subGroupName) => ({ name: subGroupName }))
+            : districtGroupNames.includes(name)
+            ? districtSubGroups.map((subGroupName) => ({ name: subGroupName }))
+            : [];
+
+          if (subGroups.length > 0) {
+            await tx.subGroup.createMany({
+              data: subGroups.map((subGroup) => ({
+                name: subGroup.name,
+                groupId: group.id,
+                churchId: church.id,
+              })),
+            });
+          }
+        }
+
+        // 6. 기본 팀(Team) 생성
+        const teamData = defaultTeams.map((name) => ({
+          name,
+          churchId: church.id,
+        }));
+        await tx.team.createMany({
+          data: teamData,
+        });
+
+        // 7. ChurchApplication 상태 업데이트
         const updatedApplication = await tx.churchApplication.update({
           where: { id: applicationId },
           data: { state: "APPROVED" },
@@ -149,6 +248,12 @@ export async function POST(req: NextRequest) {
       if (error.code === "P2003") {
         return NextResponse.json(
           { error: "유효하지 않은 교회 ID입니다" },
+          { status: 400 }
+        );
+      }
+      if (error.code === "P2002") {
+        return NextResponse.json(
+          { error: "중복된 데이터가 존재합니다" },
           { status: 400 }
         );
       }

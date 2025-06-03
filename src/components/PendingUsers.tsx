@@ -40,6 +40,10 @@ export default function PendingUsers({
               <p className="text-sm text-gray-500">
                 {t("position")}: {user.position}
               </p>
+              <p className="text-sm text-gray-500">
+                {t("createdAt")}:{" "}
+                {new Date(user.createdAt).toLocaleDateString()}
+              </p>
               <div className="mt-4 flex space-x-2">
                 <Button
                   onClick={() => onApproveUser(user.id)}

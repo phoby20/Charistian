@@ -1,3 +1,4 @@
+// src/app/dashboard/page.tsx
 "use client";
 
 import { useTranslation } from "next-i18next";
@@ -7,11 +8,11 @@ import { useState, useEffect } from "react";
 import { ChurchApplication, User } from "@prisma/client";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
 import PendingChurches from "@/components/PendingChurches";
-import PendingUsers from "@/components/PendingUsers";
 import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const { t } = useTranslation("common");
+  const router = useRouter();
   const [pendingChurches, setPendingChurches] = useState<ChurchApplication[]>(
     []
   );
@@ -20,7 +21,6 @@ export default function DashboardPage() {
   const [isImageModalOpen, setImageModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [selectedChurchId, setSelectedChurchId] = useState<string | null>(null);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [rejectionType, setRejectionType] = useState<"church" | "user" | null>(
     null
   );
@@ -28,7 +28,6 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userChurchId, setUserChurchId] = useState<string | null>(null);
-  const router = useRouter();
 
   // Fetch current user role and churchId
   useEffect(() => {
@@ -50,7 +49,7 @@ export default function DashboardPage() {
       }
     };
     fetchUserRole();
-  }, [t]);
+  }, [router]);
 
   // Fetch pending data
   useEffect(() => {
@@ -126,58 +125,16 @@ export default function DashboardPage() {
     }
   };
 
-  const handleApproveUser = async (userId: string) => {
-    try {
-      const response = await fetch("/api/user/approve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      });
-      if (!response.ok) throw new Error("Failed to approve user");
-      setPendingUsers(pendingUsers.filter((user) => user.id !== userId));
-    } catch (err) {
-      console.error("Error approving user:", err);
-      setError(t("serverError"));
-    }
-  };
-
-  const handleRejectUser = async () => {
-    if (!selectedUserId) return;
-    try {
-      const response = await fetch("/api/user/reject", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: selectedUserId,
-          reason: rejectionReason,
-        }),
-      });
-      if (!response.ok) throw new Error("Failed to reject user");
-      setPendingUsers(
-        pendingUsers.filter((user) => user.id !== selectedUserId)
-      );
-      setRejectionModalOpen(false);
-      setRejectionReason("");
-      setSelectedUserId(null);
-      setRejectionType(null);
-    } catch (err) {
-      console.error("Error rejecting user:", err);
-      setError(t("serverError"));
-    }
-  };
-
   const openImageModal = (imageUrl: string) => {
     setSelectedImage(imageUrl);
     setImageModalOpen(true);
   };
 
-  const handleOpenRejectionModal = (type: "church" | "user", id: string) => {
+  const handleOpenRejectionModal = (type: "church", id: string) => {
     setRejectionType(type);
     if (type === "church") {
       setSelectedChurchId(id);
-      setSelectedUserId(null);
     } else {
-      setSelectedUserId(id);
       setSelectedChurchId(null);
     }
     setRejectionModalOpen(true);
@@ -186,8 +143,6 @@ export default function DashboardPage() {
   const handleRejectSubmit = () => {
     if (rejectionType === "church") {
       handleRejectChurch();
-    } else if (rejectionType === "user") {
-      handleRejectUser();
     }
   };
 
@@ -198,6 +153,17 @@ export default function DashboardPage() {
           {t("dashboard")}
         </h1>
 
+        {/* Warning Alert */}
+        {pendingUsers.length > 0 && (
+          <div
+            className="mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-md cursor-pointer hover:bg-yellow-200 transition-colors"
+            onClick={() => router.push("/pending-users")}
+          >
+            {t("pendingUsersWarning")}
+            {pendingUsers.length}
+          </div>
+        )}
+
         <PendingChurches
           pendingChurches={pendingChurches}
           userRole={userRole}
@@ -206,24 +172,8 @@ export default function DashboardPage() {
           onImageClick={openImageModal}
         />
 
-        <PendingUsers
-          pendingUsers={pendingUsers}
-          userRole={userRole}
-          onApproveUser={handleApproveUser}
-          onRejectUser={(id) => handleOpenRejectionModal("user", id)}
-        />
-
         {/* 거부 모달 */}
-        <Modal
-          isOpen={isRejectionModalOpen}
-          onClose={() => {
-            setRejectionModalOpen(false);
-            setRejectionReason("");
-            setSelectedChurchId(null);
-            setSelectedUserId(null);
-            setRejectionType(null);
-          }}
-        >
+        <Modal isOpen={isRejectionModalOpen}>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             {rejectionType === "user"
               ? t("userRejectionReason")
@@ -259,7 +209,7 @@ export default function DashboardPage() {
 
         {/* 에러 모달 */}
         {error && (
-          <Modal isOpen={!!error} onClose={() => setError(null)}>
+          <Modal isOpen={!!error}>
             <p className="text-red-600">{error}</p>
             <div className="flex justify-end mt-4">
               <Button

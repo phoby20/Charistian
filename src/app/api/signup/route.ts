@@ -89,6 +89,7 @@ export async function POST(req: NextRequest) {
         region: data.region,
         churchId: data.churchId,
         profileImage: data.profileImage || null,
+        position: data.position,
         role: "GENERAL",
         state: "PENDING",
       },

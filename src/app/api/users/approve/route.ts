@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await req.json();
+    console.log("Approving user with ID:", userId);
 
     if (!userId) {
       return NextResponse.json(

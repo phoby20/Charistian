@@ -2,13 +2,25 @@
 "use client";
 
 import { useTranslation } from "next-i18next";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import UserDetailModal from "@/components/UserDetailModal";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import Image from "next/image";
-import { User } from "@prisma/client";
-import { useEffect, useState } from "react";
+import { User as PrismaUser } from "@prisma/client";
+
+interface Position {
+  id: string;
+  name: string;
+}
+
+interface User
+  extends Omit<PrismaUser, "position" | "birthDate" | "createdAt"> {
+  position: Position | null;
+  birthDate: string;
+  createdAt: string;
+}
 
 export default function MembersPage() {
   const { t } = useTranslation("common");
@@ -19,7 +31,6 @@ export default function MembersPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  // Fetch user role and churchId
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
@@ -41,7 +52,6 @@ export default function MembersPage() {
     fetchUserRole();
   }, [router]);
 
-  // Fetch members
   useEffect(() => {
     const fetchMembers = async () => {
       try {
@@ -84,7 +94,7 @@ export default function MembersPage() {
             {members.map((user) => (
               <div
                 key={user.id}
-                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 cursor-pointer flex items-center space-x-4"
+                className="bg-white rounded-xl shadow-lg p-3 hover:shadow-xl transition-shadow duration-300 cursor-pointer flex items-center space-x-4"
                 onClick={() => setSelectedUser(user)}
                 role="button"
                 aria-label={t("viewUserDetails", { name: user.name })}
@@ -92,21 +102,15 @@ export default function MembersPage() {
                 <Image
                   src={user.profileImage || "/default_user.png"}
                   alt={user.name}
-                  width={50}
-                  height={50}
+                  width={60}
+                  height={60}
                   className="rounded-full object-cover border-2 border-gray-200"
                   onError={(e) => (e.currentTarget.src = "/default_user.png")}
                 />
                 <div>
                   <p className="text-lg font-bold text-gray-900">{user.name}</p>
-                  <p className="text-sm text-gray-600">{user.email}</p>
                   <p className="text-sm text-gray-500">
-                    {t("position")}:{" "}
-                    {user.position ? user.position : t("noPosition")}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {t("createdAt")}:{" "}
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    {user.position ? user.position.name : t("noPosition")}
                   </p>
                 </div>
               </div>
@@ -114,7 +118,6 @@ export default function MembersPage() {
           </div>
         )}
 
-        {/* User Detail Modal */}
         {selectedUser && (
           <UserDetailModal
             user={selectedUser}
@@ -123,7 +126,6 @@ export default function MembersPage() {
           />
         )}
 
-        {/* Error Modal */}
         {error && (
           <Modal isOpen={!!error}>
             <p className="text-red-600">{error}</p>

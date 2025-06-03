@@ -50,7 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       pathname !== "/signup" &&
       pathname !== "/church-registration"
     ) {
-      console.log("pathname:", pathname);
       fetchUser();
     }
   }, [router, pathname]);

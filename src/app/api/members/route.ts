@@ -27,7 +27,40 @@ export async function GET() {
         createdAt: true,
       },
     });
-    return NextResponse.json({ members });
+
+    // positionId를 기반으로 position 객체 생성
+    const newPendingUsers = await Promise.all(
+      members.map(async (user) => {
+        let position: { id: string; name: string } | null = null;
+        if (user.position) {
+          const positionData = await prisma.churchPosition.findUnique({
+            where: { id: user.position },
+            select: { id: true, name: true },
+          });
+          position = positionData ? positionData : null;
+        }
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          kakaoId: user.kakaoId,
+          lineId: user.lineId,
+          country: user.country,
+          city: user.city,
+          region: user.region,
+          address: user.address,
+          birthDate: user.birthDate,
+          gender: user.gender,
+          profileImage: user.profileImage,
+          churchId: user.churchId,
+          position, // position name
+          createdAt: user.createdAt,
+        };
+      })
+    );
+    return NextResponse.json({ members: newPendingUsers });
   } catch (error) {
     console.error("Error fetching members:", error);
     return NextResponse.json(

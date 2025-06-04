@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import GroupManagement from "@/components/GroupManagement";
 import PositionManagement from "@/components/PositionManagement";
 import DutyManagement from "@/components/DutyManagement";
+import TeamManagement from "@/components/TeamManagement";
 import { useRouter, useSearchParams } from "next/navigation";
 import Loading from "@/components/Loading";
 import { useAuth } from "@/context/AuthContext";
@@ -21,9 +22,12 @@ export default function MasterManagementPage() {
     | "positions"
     | "groups"
     | "duty"
+    | "team"
     | null;
-  const [activeTab, setActiveTab] = useState<"positions" | "groups" | "duty">(
-    initialTab && ["positions", "groups", "duty"].includes(initialTab)
+  const [activeTab, setActiveTab] = useState<
+    "positions" | "groups" | "duty" | "team"
+  >(
+    initialTab && ["positions", "groups", "duty", "team"].includes(initialTab)
       ? initialTab
       : "positions"
   );
@@ -39,7 +43,7 @@ export default function MasterManagementPage() {
   }, [user, isLoading, router]);
 
   // 탭 변경 핸들러
-  const handleTabChange = (tab: "positions" | "groups" | "duty") => {
+  const handleTabChange = (tab: "positions" | "groups" | "duty" | "team") => {
     setActiveTab(tab);
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", tab);
@@ -51,6 +55,7 @@ export default function MasterManagementPage() {
     { id: "positions", label: t("positionManagement") },
     { id: "groups", label: t("groupManagement") },
     { id: "duty", label: t("dutyManagement") },
+    { id: "team", label: t("teamManagement") },
   ] as const;
 
   if (isLoading) {
@@ -83,7 +88,9 @@ export default function MasterManagementPage() {
           <select
             value={activeTab}
             onChange={(e) =>
-              handleTabChange(e.target.value as "positions" | "groups" | "duty")
+              handleTabChange(
+                e.target.value as "positions" | "groups" | "duty" | "team"
+              )
             }
             className="w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
             aria-label={t("selectTab")}
@@ -126,6 +133,9 @@ export default function MasterManagementPage() {
           )}
           {activeTab === "duty" && (
             <DutyManagement userRole={user.role} churchId={user.churchId} />
+          )}
+          {activeTab === "team" && (
+            <TeamManagement userRole={user.role} churchId={user.churchId} />
           )}
         </div>
 

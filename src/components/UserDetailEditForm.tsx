@@ -183,7 +183,7 @@ export default function UserDetailEditForm({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "사용자 업데이트에 실패했습니다.");
+        throw new Error(errorData.message || t("updateFailed"));
       }
 
       const apiUser = await response.json();
@@ -374,7 +374,6 @@ export default function UserDetailEditForm({
                     aria-label={label}
                     disabled={isLoading}
                   >
-                    <option value="">{t("noPosition")}</option>
                     {positions.map((pos) => (
                       <option key={pos.id} value={pos.id}>
                         {pos.name}

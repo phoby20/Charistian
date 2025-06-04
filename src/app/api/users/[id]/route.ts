@@ -110,6 +110,15 @@ export async function PUT(
       },
     });
 
+    let position: { id: string; name: string } | null = null;
+    if (updatedUser.position) {
+      const positionData = await prisma.churchPosition.findUnique({
+        where: { id: updatedUser.position },
+        select: { id: true, name: true },
+      });
+      position = positionData ? positionData : null;
+    }
+
     const formattedUser = {
       ...updatedUser,
       birthDate: updatedUser.birthDate.toISOString(),
@@ -118,6 +127,7 @@ export async function PUT(
       subGroup: updatedUser.subGroups[0] || null,
       duties: updatedUser.duties,
       teams: updatedUser.teams,
+      position: position,
     };
 
     return NextResponse.json({ user: formattedUser });

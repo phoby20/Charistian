@@ -137,5 +137,10 @@
   "invaildToken": "無効なトークンです",
   "unauthorized": "権限がありません",
   "churchNotFound": "教会が見つかりません",
-  "positionNameExists": "既に存在する役職名です"
+  "positionNameExists": "既に存在する役職名です",
+  "signupComplete": {
+    "title": "会員登録完了",
+    "message": "会員登録が完了しました。承認までお待ちください",
+    "goHome": "ホームへ移動"
+  }
 }

@@ -245,7 +245,7 @@ function SignupPage() {
         return;
       }
 
-      router.push("/login");
+      router.push("/signup/complete");
     } catch (err) {
       console.error("Signup error:", err);
       setError(t("serverError"));

@@ -86,6 +86,7 @@ export async function POST(req: NextRequest) {
         gender: data.gender,
         address: data.address || null,
         country: data.country,
+        city: data.city,
         region: data.region,
         churchId: data.churchId,
         profileImage: data.profileImage || null,

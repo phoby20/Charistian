@@ -35,6 +35,31 @@ export async function GET() {
         address: true,
         birthDate: true,
         gender: true,
+        groups: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        subGroups: {
+          select: {
+            id: true,
+            name: true,
+            groupId: true,
+          },
+        },
+        duties: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        teams: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         profileImage: true,
         churchId: true,
         position: true, // positionId 필드 사용
@@ -45,13 +70,13 @@ export async function GET() {
     // positionId를 기반으로 position 객체 생성
     const newPendingUsers = await Promise.all(
       pendingUsers.map(async (user) => {
-        let position = null;
+        let position: { id: string; name: string } | null = null;
         if (user.position) {
           const positionData = await prisma.churchPosition.findUnique({
             where: { id: user.position },
-            select: { name: true },
+            select: { id: true, name: true },
           });
-          position = positionData ? positionData.name : "Unknown Position";
+          position = positionData ? positionData : null;
         }
 
         return {
@@ -67,6 +92,10 @@ export async function GET() {
           address: user.address,
           birthDate: user.birthDate,
           gender: user.gender,
+          group: user.groups[0] || null,
+          subGroup: user.subGroups[0] || null,
+          duties: user.duties || [],
+          teams: user.teams || [],
           profileImage: user.profileImage,
           churchId: user.churchId,
           position, // position name

@@ -8,7 +8,7 @@ import UserDetailModal from "@/components/UserDetailModal";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import Image from "next/image";
-import { User } from "@prisma/client";
+import { User } from "@/types/customUser";
 
 export default function PendingUsersPage() {
   const { t } = useTranslation("common");
@@ -43,32 +43,31 @@ export default function PendingUsersPage() {
     };
     fetchUserRole();
   }, [router]);
-
-  // Fetch pending users
-  useEffect(() => {
-    const fetchPendingUsers = async () => {
-      try {
-        const response = await fetch("/api/pending");
-        if (!response.ok) throw new Error("Failed to fetch data");
-        const { pendingUsers } = await response.json();
-        if (userRole === "SUPER_ADMIN" || userRole === "ADMIN") {
-          if (userChurchId) {
-            const filteredUsers = pendingUsers.filter(
-              (user: User) => user.churchId === userChurchId
-            );
-            setPendingUsers(filteredUsers);
-          } else {
-            setPendingUsers([]);
-          }
+  const fetchPendingUsers = async () => {
+    try {
+      const response = await fetch("/api/pending");
+      if (!response.ok) throw new Error("Failed to fetch data");
+      const { pendingUsers } = await response.json();
+      if (userRole === "SUPER_ADMIN" || userRole === "ADMIN") {
+        if (userChurchId) {
+          const filteredUsers = pendingUsers.filter(
+            (user: User) => user.churchId === userChurchId
+          );
+          setPendingUsers(filteredUsers);
         } else {
           setPendingUsers([]);
         }
-      } catch (err) {
-        console.error("Error fetching pending users:", err);
-        setError(t("serverError"));
+      } else {
+        setPendingUsers([]);
       }
-    };
+    } catch (err) {
+      console.error("Error fetching pending users:", err);
+      setError(t("serverError"));
+    }
+  };
 
+  // Fetch pending users
+  useEffect(() => {
     if (userRole !== null && userChurchId !== null) {
       fetchPendingUsers();
     }
@@ -116,6 +115,10 @@ export default function PendingUsersPage() {
     }
   };
 
+  const handleUpdate = () => {
+    fetchPendingUsers();
+  };
+
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-gray-50 to-gray-200">
       <div className="max-w-7xl mx-auto">
@@ -144,7 +147,7 @@ export default function PendingUsersPage() {
                   <p className="font-bold text-gray-700">{user.name}</p>
                   <p className="text-sm text-gray-500">
                     {t("position")}:{" "}
-                    {user.position ? user.position : t("noPosition")}
+                    {user.position ? user.position.name : t("noPosition")}
                   </p>
                   <p className="text-sm text-gray-500">
                     {t("createdAt")}:{" "}
@@ -161,6 +164,7 @@ export default function PendingUsersPage() {
           <UserDetailModal
             user={selectedUser}
             isOpen={!!selectedUser}
+            onUpdate={handleUpdate}
             onClose={() => setSelectedUser(null)}
             onApprove={() => handleApproveUser(selectedUser.id)}
             onReject={() => {

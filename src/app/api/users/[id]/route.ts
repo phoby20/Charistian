@@ -59,6 +59,8 @@ export async function PUT(
       teamIds,
     } = data;
 
+    console.log("groupId: ", groupId);
+
     if (!name || !email || !birthDate || !gender) {
       return NextResponse.json(
         { error: "필수 필드가 누락되었습니다." },

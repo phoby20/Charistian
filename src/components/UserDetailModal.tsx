@@ -24,7 +24,7 @@ export default function UserDetailModal({
 }: UserDetailModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [user, setUser] = useState<User>(initialUser);
-  const { positions, groups, subGroups, duties, isLoading, error } =
+  const { positions, groups, subGroups, duties, teams, isLoading, error } =
     useUserDetailData(
       user.churchId || "", // churchId가 null일 경우 빈 문자열
       user.group?.id || null
@@ -53,6 +53,7 @@ export default function UserDetailModal({
       groups={groups}
       subGroups={subGroups}
       duties={duties}
+      teams={teams}
       isLoading={isLoading}
       error={error}
     />

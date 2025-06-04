@@ -43,6 +43,7 @@ export default function UserDetailView({
     { key: "groupId", label: t("group") },
     { key: "subGroupId", label: t("subGroup") },
     { key: "dutyIds", label: t("duties") },
+    { key: "teamIds", label: t("teams") },
   ];
 
   if (isLoading) return <Loading />;
@@ -113,9 +114,12 @@ export default function UserDetailView({
                     ? user.subGroup?.name || t("noSubGroup")
                     : key === "dutyIds"
                     ? user.duties && user.duties.length > 0
-                      ? user.duties.map((duty) => duty.name).join(", ") ||
-                        t("noDuties")
+                      ? user.duties.map((duty) => duty.name).join(", ")
                       : t("noDuties")
+                    : key === "teamIds"
+                    ? user.teams && user.teams.length > 0
+                      ? user.teams.map((team) => team.name).join(", ")
+                      : t("noTeams")
                     : (user[key as keyof User] as string) || t("none")}
                 </p>
               </div>

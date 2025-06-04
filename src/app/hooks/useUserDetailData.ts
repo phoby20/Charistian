@@ -1,12 +1,13 @@
 // src/app/hooks/useUserDetailData.ts
 import { useState, useEffect } from "react";
-import { Position, Group, SubGroup, Duty } from "@/types/customUser";
+import { Position, Group, SubGroup, Duty, Team } from "@/types/customUser";
 
 interface UserDetailData {
   positions: Position[];
   groups: Group[];
   subGroups: SubGroup[];
   duties: Duty[];
+  teams: Team[];
   isLoading: boolean;
   error: string | null;
 }
@@ -19,6 +20,7 @@ export function useUserDetailData(
   const [groups, setGroups] = useState<Group[]>([]);
   const [subGroups, setSubGroups] = useState<SubGroup[]>([]);
   const [duties, setDuties] = useState<Duty[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,11 +34,13 @@ export function useUserDetailData(
 
       setIsLoading(true);
       try {
-        const [posResponse, groupResponse, dutyResponse] = await Promise.all([
-          fetch("/api/positions"),
-          fetch(`/api/groups/public?churchId=${churchId}`),
-          fetch(`/api/duties/public?churchId=${churchId}`),
-        ]);
+        const [posResponse, groupResponse, dutyResponse, teamResponse] =
+          await Promise.all([
+            fetch("/api/positions"),
+            fetch(`/api/groups/public?churchId=${churchId}`),
+            fetch(`/api/duties/public?churchId=${churchId}`),
+            fetch(`/api/teams?churchId=${churchId}`),
+          ]);
 
         if (!posResponse.ok)
           throw new Error("직책 정보를 가져오지 못했습니다.");
@@ -48,16 +52,20 @@ export function useUserDetailData(
             errorData.message || "직무 정보를 가져오지 못했습니다."
           );
         }
+        if (!teamResponse.ok) throw new Error("팀 정보를 가져오지 못했습니다.");
 
-        const [{ positions }, { groups }, { duties }] = await Promise.all([
-          posResponse.json(),
-          groupResponse.json(),
-          dutyResponse.json(),
-        ]);
+        const [{ positions }, { groups }, { duties }, { teams: fetchedTeams }] =
+          await Promise.all([
+            posResponse.json(),
+            groupResponse.json(),
+            dutyResponse.json(),
+            teamResponse.json(),
+          ]);
 
         setPositions(positions);
         setGroups(groups);
         setDuties(duties);
+        setTeams(fetchedTeams);
 
         if (groupId) {
           const subGroupResponse = await fetch(
@@ -82,5 +90,5 @@ export function useUserDetailData(
     fetchData();
   }, [churchId, groupId]);
 
-  return { positions, groups, subGroups, duties, isLoading, error };
+  return { positions, groups, subGroups, duties, teams, isLoading, error };
 }

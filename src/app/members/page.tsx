@@ -8,7 +8,7 @@ import UserDetailModal from "@/components/UserDetailModal";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import Image from "next/image";
-import { User as PrismaUser } from "@prisma/client";
+import { User as PrismaUser, Team } from "@prisma/client";
 
 interface Position {
   id: string;
@@ -38,7 +38,8 @@ interface User
   createdAt: string;
   group: Group | null;
   subGroup: SubGroup | null;
-  duties: Duty[] | null; // null 가능성 추가
+  duties: Duty[];
+  teams: Team[];
 }
 
 export default function MembersPage() {

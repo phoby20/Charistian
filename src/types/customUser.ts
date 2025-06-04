@@ -1,4 +1,4 @@
-// src/type/customUser.ts
+// src/types/customUser.ts
 import { User as PrismaUser } from "@prisma/client";
 
 export interface Position {
@@ -22,6 +22,11 @@ export interface Duty {
   name: string;
 }
 
+export interface Team {
+  id: string;
+  name: string;
+}
+
 export interface User
   extends Omit<PrismaUser, "position" | "birthDate" | "createdAt"> {
   position: Position | null;
@@ -29,13 +34,15 @@ export interface User
   createdAt: string;
   group: Group | null;
   subGroup: SubGroup | null;
-  duties: Duty[] | null;
+  duties: Duty[];
+  teams: Team[];
 }
 
 export interface FormData
-  extends Omit<User, "birthDate" | "group" | "subGroup" | "duties"> {
+  extends Omit<User, "birthDate" | "group" | "subGroup" | "duties" | "teams"> {
   birthDate: string;
   groupId: string | null;
   subGroupId: string | null;
   dutyIds: string[];
+  teamIds: string[];
 }

@@ -56,6 +56,7 @@ export async function PUT(
       groupId,
       subGroupId,
       dutyIds,
+      teamIds,
     } = data;
 
     if (!name || !email || !birthDate || !gender) {
@@ -95,11 +96,17 @@ export async function PUT(
               set: dutyIds.map((dutyId: string) => ({ id: dutyId })),
             }
           : { set: [] },
+        teams: teamIds
+          ? {
+              set: teamIds.map((teamId: string) => ({ id: teamId })),
+            }
+          : { set: [] },
       },
       include: {
         groups: { select: { id: true, name: true } },
         subGroups: { select: { id: true, name: true, groupId: true } },
         duties: { select: { id: true, name: true } },
+        teams: { select: { id: true, name: true } },
       },
     });
 
@@ -110,6 +117,7 @@ export async function PUT(
       group: updatedUser.groups[0] || null,
       subGroup: updatedUser.subGroups[0] || null,
       duties: updatedUser.duties,
+      teams: updatedUser.teams,
     };
 
     return NextResponse.json({ user: formattedUser });

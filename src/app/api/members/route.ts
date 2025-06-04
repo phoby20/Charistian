@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const members = await prisma.user.findMany({
       where: {
-        state: { not: "PENDING" }, // Exclude pending users
+        state: { not: "PENDING" },
       },
       select: {
         id: true,
@@ -43,11 +43,16 @@ export async function GET() {
             name: true,
           },
         },
+        teams: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         createdAt: true,
       },
     });
 
-    // positionId를 기반으로 position 객체 생성
     const newPendingUsers = await Promise.all(
       members.map(async (user) => {
         let position: { id: string; name: string } | null = null;
@@ -62,10 +67,11 @@ export async function GET() {
         return {
           ...user,
           profileImage: user.profileImage,
-          position, // position name
-          group: user.groups[0] || null, // 단일 그룹
-          subGroup: user.subGroups[0] || null, // 단일 서브그룹
-          duties: user.duties || [], // 빈 배열로 대체
+          position,
+          group: user.groups[0] || null,
+          subGroup: user.subGroups[0] || null,
+          duties: user.duties || [],
+          teams: user.teams || [],
         };
       })
     );

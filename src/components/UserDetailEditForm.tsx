@@ -12,6 +12,7 @@ import {
   Group,
   SubGroup,
   Duty,
+  Team,
 } from "@/types/customUser";
 
 interface UserDetailEditFormProps {
@@ -23,6 +24,7 @@ interface UserDetailEditFormProps {
   groups: Group[];
   subGroups: SubGroup[];
   duties: Duty[];
+  teams: Team[];
   isLoading: boolean;
   error: string | null;
 }
@@ -36,6 +38,7 @@ export default function UserDetailEditForm({
   groups,
   subGroups: initialSubGroups,
   duties,
+  teams,
   isLoading,
   error: parentError,
 }: UserDetailEditFormProps) {
@@ -46,14 +49,14 @@ export default function UserDetailEditForm({
     groupId: user.group?.id || null,
     subGroupId: user.subGroup?.id || null,
     dutyIds: user.duties ? user.duties.map((duty) => duty.id) : [],
+    teamIds: user.teams ? user.teams.map((team) => team.id) : [],
     gender: user.gender || "",
   });
   const [formError, setFormError] = useState<string | null>(null);
-  const [subGroups, setSubGroups] = useState<SubGroup[]>(initialSubGroups); // 동적 서브그룹 상태
+  const [subGroups, setSubGroups] = useState<SubGroup[]>(initialSubGroups);
   const [subGroupLoading, setSubGroupLoading] = useState<boolean>(false);
   const [subGroupError, setSubGroupError] = useState<string | null>(null);
 
-  // 초기 formData 설정
   useEffect(() => {
     setFormData({
       ...user,
@@ -61,17 +64,16 @@ export default function UserDetailEditForm({
       groupId: user.group?.id || null,
       subGroupId: user.subGroup?.id || null,
       dutyIds: user.duties ? user.duties.map((duty) => duty.id) : [],
+      teamIds: user.teams ? user.teams.map((team) => team.id) : [],
       gender: user.gender || "",
     });
     setSubGroups(initialSubGroups);
   }, [user, initialSubGroups]);
 
-  // churchId 유효성 검사
   if (!user.churchId) {
     return <p className="text-red-600">{t("noChurchId")}</p>;
   }
 
-  // 입력 변경 핸들러
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -81,10 +83,9 @@ export default function UserDetailEditForm({
     setFormData((prev) => ({ ...prev, [name]: value || null }));
   };
 
-  // 그룹 변경 시 서브그룹 로드
   const handleGroupChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const groupId = e.target.value || null;
-    setFormData((prev) => ({ ...prev, groupId, subGroupId: null })); // 서브그룹 초기화
+    setFormData((prev) => ({ ...prev, groupId, subGroupId: null }));
     setSubGroupError(null);
 
     if (groupId) {
@@ -109,7 +110,7 @@ export default function UserDetailEditForm({
         setSubGroupLoading(false);
       }
     } else {
-      setSubGroups([]); // 그룹 미선택 시 서브그룹 비우기
+      setSubGroups([]);
     }
   };
 
@@ -123,6 +124,13 @@ export default function UserDetailEditForm({
       (option) => option.value
     );
     setFormData((prev) => ({ ...prev, dutyIds: selectedOptions }));
+  };
+
+  const handleTeamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOptions = Array.from(e.target.selectedOptions).map(
+      (option) => option.value
+    );
+    setFormData((prev) => ({ ...prev, teamIds: selectedOptions }));
   };
 
   const handlePositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -169,6 +177,7 @@ export default function UserDetailEditForm({
           groupId: formData.groupId,
           subGroupId: formData.subGroupId,
           dutyIds: formData.dutyIds,
+          teamIds: formData.teamIds,
         }),
       });
 
@@ -181,32 +190,36 @@ export default function UserDetailEditForm({
 
       const updatedUser: User = {
         ...user,
-        name: apiUser.name || formData.name,
-        email: apiUser.email || formData.email,
-        phone: apiUser.phone || formData.phone,
-        kakaoId: apiUser.kakaoId || formData.kakaoId,
-        lineId: apiUser.lineId || formData.lineId,
-        country: apiUser.country || formData.country,
-        city: apiUser.city || formData.city,
-        region: apiUser.region || formData.region,
-        address: apiUser.address || formData.address,
-        birthDate: apiUser.birthDate || formData.birthDate,
-        gender: apiUser.gender || formData.gender,
+        name: apiUser.user.name || formData.name,
+        email: apiUser.user.email || formData.email,
+        phone: apiUser.user.phone || formData.phone,
+        kakaoId: apiUser.user.kakaoId || formData.kakaoId,
+        lineId: apiUser.user.lineId || formData.lineId,
+        country: apiUser.user.country || formData.country,
+        city: apiUser.user.city || formData.city,
+        region: apiUser.user.region || formData.region,
+        address: apiUser.user.address || formData.address,
+        birthDate: apiUser.user.birthDate || formData.birthDate,
+        gender: apiUser.user.gender || formData.gender,
         position:
-          apiUser.position ||
+          apiUser.user.position ||
           positions.find((p) => p.id === formData.position?.id) ||
           null,
         group:
-          apiUser.group ||
+          apiUser.user.group ||
           groups.find((g) => g.id === formData.groupId) ||
           null,
         subGroup:
-          apiUser.subGroup ||
+          apiUser.user.subGroup ||
           subGroups.find((sg) => sg.id === formData.subGroupId) ||
           null,
         duties:
-          apiUser.duties ||
+          apiUser.user.duties ||
           duties.filter((d) => formData.dutyIds.includes(d.id)) ||
+          [],
+        teams:
+          apiUser.user.teams ||
+          teams.filter((t) => formData.teamIds.includes(t.id)) ||
           [],
         churchId: user.churchId,
         createdAt: user.createdAt,
@@ -228,6 +241,7 @@ export default function UserDetailEditForm({
       groupId: user.group?.id || null,
       subGroupId: user.subGroup?.id || null,
       dutyIds: user.duties ? user.duties.map((duty) => duty.id) : [],
+      teamIds: user.teams ? user.teams.map((team) => team.id) : [],
       gender: user.gender || "",
     });
     setFormError(null);
@@ -255,6 +269,7 @@ export default function UserDetailEditForm({
     { key: "groupId", label: t("group"), type: "selectGroup" },
     { key: "subGroupId", label: t("subGroup"), type: "selectSubGroup" },
     { key: "dutyIds", label: t("duties"), type: "selectDuties" },
+    { key: "teamIds", label: t("teams"), type: "selectTeams" },
   ];
 
   if (isLoading) return <Loading />;
@@ -277,7 +292,7 @@ export default function UserDetailEditForm({
               className="w-6 h-6"
               fill="none"
               stroke="currentColor"
-              viewBox="0 0 24 24"
+              viewBox="0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
@@ -408,6 +423,21 @@ export default function UserDetailEditForm({
                     {duties.map((duty) => (
                       <option key={duty.id} value={duty.id}>
                         {duty.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : type === "selectTeams" ? (
+                  <select
+                    multiple
+                    value={formData.teamIds || []}
+                    onChange={handleTeamChange}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    aria-label={label}
+                    disabled={isLoading}
+                  >
+                    {teams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
                       </option>
                     ))}
                   </select>

@@ -41,11 +41,11 @@ export async function GET() {
     }
 
     // 직무 데이터 조회
-    const duties = await prisma.group.findMany({
+    const groups = await prisma.group.findMany({
       where: { churchId },
     });
 
-    return NextResponse.json({ duties });
+    return NextResponse.json({ groups });
   } catch (err) {
     console.error("Error in GET /api/groups:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

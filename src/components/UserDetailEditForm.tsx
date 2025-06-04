@@ -34,7 +34,7 @@ export default function UserDetailEditForm({
   onSave,
   positions,
   groups,
-  subGroups,
+  subGroups: initialSubGroups,
   duties,
   isLoading,
   error: parentError,
@@ -49,7 +49,11 @@ export default function UserDetailEditForm({
     gender: user.gender || "",
   });
   const [formError, setFormError] = useState<string | null>(null);
+  const [subGroups, setSubGroups] = useState<SubGroup[]>(initialSubGroups); // 동적 서브그룹 상태
+  const [subGroupLoading, setSubGroupLoading] = useState<boolean>(false);
+  const [subGroupError, setSubGroupError] = useState<string | null>(null);
 
+  // 초기 formData 설정
   useEffect(() => {
     setFormData({
       ...user,
@@ -59,8 +63,15 @@ export default function UserDetailEditForm({
       dutyIds: user.duties ? user.duties.map((duty) => duty.id) : [],
       gender: user.gender || "",
     });
-  }, [user]);
+    setSubGroups(initialSubGroups);
+  }, [user, initialSubGroups]);
 
+  // churchId 유효성 검사
+  if (!user.churchId) {
+    return <p className="text-red-600">{t("noChurchId")}</p>;
+  }
+
+  // 입력 변경 핸들러
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -70,9 +81,36 @@ export default function UserDetailEditForm({
     setFormData((prev) => ({ ...prev, [name]: value || null }));
   };
 
-  const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // 그룹 변경 시 서브그룹 로드
+  const handleGroupChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const groupId = e.target.value || null;
-    setFormData((prev) => ({ ...prev, groupId, subGroupId: null }));
+    setFormData((prev) => ({ ...prev, groupId, subGroupId: null })); // 서브그룹 초기화
+    setSubGroupError(null);
+
+    if (groupId) {
+      setSubGroupLoading(true);
+      try {
+        const response = await fetch(
+          `/api/subGroups?groupId=${groupId}&churchId=${user.churchId}`
+        );
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "서브그룹을 가져오지 못했습니다.");
+        }
+        const { subGroups: fetchedSubGroups } = await response.json();
+        setSubGroups(fetchedSubGroups || []);
+      } catch (err) {
+        console.error("서브그룹 가져오기 오류:", err);
+        setSubGroupError(
+          err instanceof Error ? err.message : t("subGroupFetchError")
+        );
+        setSubGroups([]);
+      } finally {
+        setSubGroupLoading(false);
+      }
+    } else {
+      setSubGroups([]); // 그룹 미선택 시 서브그룹 비우기
+    }
   };
 
   const handleSubGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -140,7 +178,6 @@ export default function UserDetailEditForm({
       }
 
       const apiUser = await response.json();
-      console.log("API 응답:", apiUser);
 
       const updatedUser: User = {
         ...user,
@@ -194,6 +231,8 @@ export default function UserDetailEditForm({
       gender: user.gender || "",
     });
     setFormError(null);
+    setSubGroupError(null);
+    setSubGroups(initialSubGroups);
     onClose();
   };
 
@@ -251,8 +290,10 @@ export default function UserDetailEditForm({
           </button>
         </div>
 
-        {(formError || parentError) && (
-          <p className="text-red-600 mb-4">{formError || parentError}</p>
+        {(formError || parentError || subGroupError) && (
+          <p className="text-red-600 mb-4">
+            {formError || parentError || subGroupError}
+          </p>
         )}
 
         <div className="space-y-6">
@@ -346,7 +387,7 @@ export default function UserDetailEditForm({
                     onChange={handleSubGroupChange}
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                     aria-label={label}
-                    disabled={!formData.groupId || isLoading}
+                    disabled={!formData.groupId || isLoading || subGroupLoading}
                   >
                     <option value="">{t("noSubGroup")}</option>
                     {subGroups.map((subGroup) => (
@@ -393,14 +434,14 @@ export default function UserDetailEditForm({
           <Button
             onClick={handleSave}
             className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors duration-200"
-            disabled={isLoading}
+            disabled={isLoading || subGroupLoading}
           >
             {t("save")}
           </Button>
           <Button
             onClick={handleCancel}
             className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200"
-            disabled={isLoading}
+            disabled={isLoading || subGroupLoading}
           >
             {t("cancel")}
           </Button>

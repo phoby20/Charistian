@@ -45,7 +45,6 @@ export default function UserDetailModal({
         onClose();
       }}
       onSave={(updatedUser: User) => {
-        console.log("업데이트된 사용자:", updatedUser);
         setUser(updatedUser);
         setIsEditing(false); // UserDetailView로 전환
         onUpdate?.(updatedUser);

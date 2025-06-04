@@ -14,6 +14,33 @@ import {
   Duty,
   Team,
 } from "@/types/customUser";
+import { countryOptions } from "@/data/country";
+import { citiesByCountry } from "@/data/cities";
+import { regionsByCity } from "@/data/regions";
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface Field {
+  key: string;
+  label: string;
+  type:
+    | "text"
+    | "textarea"
+    | "date"
+    | "select"
+    | "selectPosition"
+    | "selectGroup"
+    | "selectSubGroup"
+    | "selectDuties"
+    | "selectTeams"
+    | "selectCountry"
+    | "selectCity"
+    | "selectRegion";
+  options?: string[] | SelectOption[];
+}
 
 interface UserDetailEditFormProps {
   user: User;
@@ -51,6 +78,9 @@ export default function UserDetailEditForm({
     dutyIds: user.duties ? user.duties.map((duty) => duty.id) : [],
     teamIds: user.teams ? user.teams.map((team) => team.id) : [],
     gender: user.gender || "",
+    country: user.country || "", // user.country 초기값 설정
+    city: user.city || "", // user.city 초기값 설정
+    region: user.region || "", // user.region 초기값 설정
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [subGroups, setSubGroups] = useState<SubGroup[]>(initialSubGroups);
@@ -66,6 +96,9 @@ export default function UserDetailEditForm({
       dutyIds: user.duties ? user.duties.map((duty) => duty.id) : [],
       teamIds: user.teams ? user.teams.map((team) => team.id) : [],
       gender: user.gender || "",
+      country: user.country || "", // user.country 초기값 설정
+      city: user.city || "", // user.city 초기값 설정
+      region: user.region || "", // user.region 초기값 설정
     });
     setSubGroups(initialSubGroups);
   }, [user, initialSubGroups]);
@@ -80,7 +113,12 @@ export default function UserDetailEditForm({
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value || null }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value || null,
+      ...(name === "country" ? { city: null, region: null } : {}), // Reset city and region when country changes
+      ...(name === "city" ? { region: null } : {}), // Reset region when city changes
+    }));
   };
 
   const handleGroupChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -243,6 +281,9 @@ export default function UserDetailEditForm({
       dutyIds: user.duties ? user.duties.map((duty) => duty.id) : [],
       teamIds: user.teams ? user.teams.map((team) => team.id) : [],
       gender: user.gender || "",
+      country: user.country || "", // user.country 초기값 설정
+      city: user.city || "", // user.city 초기값 설정
+      region: user.region || "", // user.region 초기값 설정
     });
     setFormError(null);
     setSubGroupError(null);
@@ -250,13 +291,28 @@ export default function UserDetailEditForm({
     onClose();
   };
 
-  const fields = [
+  const fields: Field[] = [
     { key: "phone", label: t("phone"), type: "text" },
     { key: "kakaoId", label: t("kakaoId"), type: "text" },
     { key: "lineId", label: t("lineId"), type: "text" },
-    { key: "country", label: t("country"), type: "text" },
-    { key: "city", label: t("city"), type: "text" },
-    { key: "region", label: t("region"), type: "text" },
+    {
+      key: "country",
+      label: t("country"),
+      type: "selectCountry",
+      options: countryOptions,
+    },
+    {
+      key: "city",
+      label: t("city"),
+      type: "selectCity",
+      options: citiesByCountry[formData.country || ""] || [],
+    },
+    {
+      key: "region",
+      label: t("region"),
+      type: "selectRegion",
+      options: regionsByCity[formData.city || ""] || [],
+    },
     { key: "address", label: t("address"), type: "textarea" },
     { key: "birthDate", label: t("birthDate"), type: "date" },
     {
@@ -360,9 +416,55 @@ export default function UserDetailEditForm({
                     aria-label={label}
                     disabled={isLoading}
                   >
-                    {options!.map((opt) => (
+                    <option value="">{t("select", { field: label })}</option>
+                    {(options as string[])?.map((opt) => (
                       <option key={opt} value={opt}>
-                        {opt}
+                        {t(opt)}
+                      </option>
+                    ))}
+                  </select>
+                ) : type === "selectCountry" ? (
+                  <select
+                    name={key}
+                    value={(formData[key as keyof FormData] as string) || ""}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    aria-label={label}
+                    disabled={isLoading}
+                  >
+                    {(options as SelectOption[])?.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {t(opt.label)}
+                      </option>
+                    ))}
+                  </select>
+                ) : type === "selectCity" ? (
+                  <select
+                    name={key}
+                    value={(formData[key as keyof FormData] as string) || ""}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    aria-label={label}
+                    disabled={isLoading || !formData.country}
+                  >
+                    {(options as SelectOption[])?.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {t(opt.label)}
+                      </option>
+                    ))}
+                  </select>
+                ) : type === "selectRegion" ? (
+                  <select
+                    name={key}
+                    value={(formData[key as keyof FormData] as string) || ""}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    aria-label={label}
+                    disabled={isLoading || !formData.city}
+                  >
+                    {(options as SelectOption[])?.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {t(opt.label)}
                       </option>
                     ))}
                   </select>

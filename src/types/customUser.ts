@@ -1,5 +1,5 @@
 // src/types/customUser.ts
-import { User as PrismaUser } from "@prisma/client";
+import { User as PrismaUser, Role } from "@prisma/client";
 
 export interface Position {
   id: string;
@@ -31,6 +31,7 @@ export interface User
   extends Omit<PrismaUser, "position" | "birthDate" | "createdAt"> {
   position: Position | null;
   birthDate: string;
+  role: Role;
   createdAt: string;
   group: Group | null;
   subGroup: SubGroup | null;

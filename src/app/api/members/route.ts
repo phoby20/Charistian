@@ -23,6 +23,7 @@ export async function GET() {
         gender: true,
         profileImage: true,
         churchId: true,
+        role: true,
         position: true,
         groups: {
           select: {

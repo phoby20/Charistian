@@ -1,12 +1,12 @@
-// src/components/GroupManagement.tsx
 "use client";
 
 import { useTranslation } from "next-i18next";
 import { useState, useEffect, useRef } from "react";
 import Button from "./Button";
 import { useRouter } from "next/navigation";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, ChevronDown } from "lucide-react";
 import SubGroupManagement from "./SubGroupManagement";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Group {
   id: string;
@@ -111,7 +111,7 @@ export default function GroupManagement({
 
   // 그룹 추가
   const handleAddGroup = async () => {
-    if (!newGroupName) {
+    if (!newGroupName.trim()) {
       setError(t("groupNameRequired"));
       return;
     }
@@ -124,7 +124,7 @@ export default function GroupManagement({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ name: newGroupName, churchId }),
+        body: JSON.stringify({ name: newGroupName.trim(), churchId }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -149,7 +149,7 @@ export default function GroupManagement({
 
   // 그룹 수정
   const handleUpdateGroup = async () => {
-    if (!editingGroup || !editingGroup.name) {
+    if (!editingGroup || !editingGroup.name.trim()) {
       setError(t("groupNameRequired"));
       return;
     }
@@ -158,7 +158,7 @@ export default function GroupManagement({
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ name: editingGroup.name }),
+        body: JSON.stringify({ name: editingGroup.name.trim() }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -222,32 +222,52 @@ export default function GroupManagement({
   };
 
   if (isLoading) {
-    return <p className="text-gray-500 text-center">{t("loading")}</p>;
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-gray-500 text-center text-sm"
+      >
+        {t("loading")}
+      </motion.div>
+    );
   }
 
   if (!churchId) {
-    return <p className="text-red-600 text-center">{t("noChurchId")}</p>;
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-red-600 text-center text-sm"
+      >
+        {t("noChurchId")}
+      </motion.div>
+    );
   }
 
   return (
-    <section className="mb-6">
-      <h2 className="text-xl md:text-2xl font-semibold text-gray-700 mb-4">
+    <motion.section
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mb-12"
+    >
+      <h2 className="text-xl font-semibold text-gray-800 mb-4 tracking-tight">
         {t("groupManagement")}
       </h2>
-      <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
         {/* 그룹 추가 */}
-        <div className="mb-6 flex flex-col sm:flex-row items-center gap-2">
+        <div className="mb-6 flex flex-col sm:flex-row items-center gap-3">
           <input
             type="text"
             value={newGroupName}
             onChange={(e) => setNewGroupName(e.target.value)}
             placeholder={t("enterGroupName")}
-            className="w-full p-2 border rounded-md text-sm"
+            className="w-full sm:flex-1 p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all"
             aria-label={t("enterGroupName")}
           />
           <Button
             onClick={handleAddGroup}
-            className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:scale-105 transition-all duration-200"
           >
             {t("addGroup")}
           </Button>
@@ -255,117 +275,172 @@ export default function GroupManagement({
 
         {/* 그룹 리스트 */}
         {groups.length === 0 ? (
-          <p className="text-gray-500 italic text-center">{t("noGroups")}</p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-gray-500 italic text-center text-sm"
+          >
+            {t("noGroups")}
+          </motion.p>
         ) : (
-          <ul className="space-y-2">
-            {groups.map((group) => {
-              if (!group?.id || !group?.name) {
-                console.warn("Invalid group data:", group);
-                return null;
-              }
-              const isSelected = selectedGroupId === group.id;
-              return (
-                <li key={group.id} className="py-2 cursor-pointer">
-                  {/* 그룹 항목 */}
-                  <div className="flex items-center gap-2">
-                    {editingGroup?.id === group.id ? (
-                      <div className="flex-1 flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={editingGroup.name}
-                          onChange={(e) =>
-                            setEditingGroup({
-                              ...editingGroup,
-                              name: e.target.value,
-                            })
-                          }
-                          ref={inputRef}
-                          className="flex-1 p-2 border-green-500 rounded-md text-sm focus:ring-green-500 focus:border-green-500"
-                          aria-label={t("editGroupName")}
-                        />
-                        <Button
-                          onClick={handleUpdateGroup}
-                          className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-blue-700 text-xs"
-                        >
-                          {t("save")}
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setEditingGroup(null);
-                            setOpenMenuId(null);
-                          }}
-                          className="bg-gray-400 text-white px-3 py-1 rounded-md hover:bg-blue-600 text-xs"
-                        >
-                          {t("cancel")}
-                        </Button>
-                      </div>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => handleSelectGroup(group.id)}
-                          className={`flex-1 cursor-pointer text-left text-sm font-medium ${
-                            isSelected ? "text-blue-600" : "text-gray-700"
-                          } hover:text-blue-500`}
-                        >
-                          {group.name}
-                        </button>
-                        <div className="relative">
-                          <button
-                            onClick={() =>
-                              setOpenMenuId(
-                                openMenuId === group.id ? null : group.id
-                              )
+          <ul className="space-y-3">
+            <AnimatePresence>
+              {groups.map((group, index) => {
+                if (!group?.id || !group?.name) {
+                  console.warn("Invalid group data:", group);
+                  return null;
+                }
+                const isSelected = selectedGroupId === group.id;
+                return (
+                  <motion.li
+                    key={group.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-all duration-200"
+                  >
+                    {/* 그룹 항목 */}
+                    <div className="flex items-center gap-3">
+                      {editingGroup?.id === group.id ? (
+                        <div className="flex-1 flex flex-col sm:flex-row items-center gap-2">
+                          <input
+                            type="text"
+                            value={editingGroup.name}
+                            onChange={(e) =>
+                              setEditingGroup({
+                                ...editingGroup,
+                                name: e.target.value,
+                              })
                             }
-                            className="p-1 text-gray-600 hover:text-gray-800"
-                            aria-label={t("groupOptions")}
-                          >
-                            <MoreVertical className="h-5 w-5" />
-                          </button>
-                          {openMenuId === group.id && (
-                            <div
-                              ref={(el) => {
-                                if (el) menuRefs.current.set(group.id, el);
-                                else menuRefs.current.delete(group.id);
-                              }}
-                              className="absolute right-0 mt-2 w-32 bg-white border rounded-md shadow-lg z-10"
+                            ref={inputRef}
+                            className="flex-1 p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm"
+                            aria-label={t("editGroupName")}
+                          />
+                          <div className="flex gap-2 w-full sm:w-auto">
+                            <Button
+                              onClick={handleUpdateGroup}
+                              className="flex-1 sm:flex-none px-3 py-1 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 hover:scale-105 transition-all duration-200"
                             >
-                              <button
-                                onClick={() => {
-                                  setEditingGroup(group);
-                                  setOpenMenuId(null);
-                                }}
-                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              >
-                                {t("edit")}
-                              </button>
-                              <button
-                                onClick={() => handleDeleteGroup(group.id)}
-                                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                              >
-                                {t("delete")}
-                              </button>
-                            </div>
-                          )}
+                              {t("save")}
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setEditingGroup(null);
+                                setOpenMenuId(null);
+                              }}
+                              className="flex-1 sm:flex-none px-3 py-1 text-sm font-medium text-white bg-gray-600 rounded-full hover:bg-gray-700 hover:scale-105 transition-all duration-200"
+                            >
+                              {t("cancel")}
+                            </Button>
+                          </div>
                         </div>
-                      </>
-                    )}
-                  </div>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleSelectGroup(group.id)}
+                            className={`flex-1 flex items-center justify-between text-left text-sm font-medium text-gray-800 hover:text-blue-600 transition-colors duration-200 truncate`}
+                            aria-expanded={isSelected}
+                            aria-controls={`subgroup-${group.id}`}
+                          >
+                            <span className="truncate">{group.name}</span>
+                            <ChevronDown
+                              className={`w-4 h-4 transition-transform duration-200 ${
+                                isSelected ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
+                          <div className="relative">
+                            <button
+                              onClick={() =>
+                                setOpenMenuId(
+                                  openMenuId === group.id ? null : group.id
+                                )
+                              }
+                              className="p-1 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full transition-all duration-200"
+                              aria-label={t("groupOptions", {
+                                name: group.name,
+                              })}
+                              aria-expanded={openMenuId === group.id}
+                              aria-haspopup="true"
+                            >
+                              <MoreVertical className="w-5 h-5" />
+                            </button>
+                            <AnimatePresence>
+                              {openMenuId === group.id && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: -10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -10 }}
+                                  ref={(el) => {
+                                    if (el) menuRefs.current.set(group.id, el);
+                                    else menuRefs.current.delete(group.id);
+                                  }}
+                                  className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden"
+                                >
+                                  <button
+                                    onClick={() => {
+                                      setEditingGroup(group);
+                                      setOpenMenuId(null);
+                                    }}
+                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                                  >
+                                    {t("edit")}
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteGroup(group.id)}
+                                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
+                                  >
+                                    {t("delete")}
+                                  </button>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </>
+                      )}
+                    </div>
 
-                  {/* 서브그룹 관리 */}
-                  {isSelected && churchId && (
-                    <SubGroupManagement
-                      groupId={group.id}
-                      churchId={churchId}
-                      onError={setError}
-                    />
-                  )}
-                </li>
-              );
-            })}
+                    {/* 서브그룹 관리 */}
+                    <AnimatePresence>
+                      {isSelected && churchId && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          id={`subgroup-${group.id}`}
+                          className="mt-3 pl-4 border-l-2 border-gray-200"
+                        >
+                          <SubGroupManagement
+                            groupId={group.id}
+                            churchId={churchId}
+                            onError={setError}
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.li>
+                );
+              })}
+            </AnimatePresence>
           </ul>
         )}
-        {error && <p className="text-red-600 mt-4 text-sm">{error}</p>}
+
+        {/* 에러 메시지 */}
+        <AnimatePresence>
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="text-red-600 mt-4 text-sm bg-red-50 p-2 rounded-lg"
+            >
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
-    </section>
+    </motion.section>
   );
 }

@@ -1,4 +1,3 @@
-// src/components/TeamManagement.tsx
 "use client";
 
 import { useTranslation } from "next-i18next";
@@ -6,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import Button from "./Button";
 import { useRouter } from "next/navigation";
 import { MoreVertical } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Team {
   id: string;
@@ -99,7 +99,7 @@ export default function TeamManagement({
 
   // 팀 추가
   const handleAddTeam = async () => {
-    if (!newTeamName) {
+    if (!newTeamName.trim()) {
       setError(t("teamNameRequired"));
       return;
     }
@@ -112,7 +112,7 @@ export default function TeamManagement({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ name: newTeamName, churchId }),
+        body: JSON.stringify({ name: newTeamName.trim(), churchId }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -137,7 +137,7 @@ export default function TeamManagement({
 
   // 팀 수정
   const handleUpdateTeam = async () => {
-    if (!editingTeam || !editingTeam.name) {
+    if (!editingTeam || !editingTeam.name.trim()) {
       setError(t("teamNameRequired"));
       return;
     }
@@ -146,7 +146,7 @@ export default function TeamManagement({
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ name: editingTeam.name }),
+        body: JSON.stringify({ name: editingTeam.name.trim() }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -207,32 +207,52 @@ export default function TeamManagement({
   };
 
   if (isLoading) {
-    return <p className="text-gray-500 text-center">{t("loading")}</p>;
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-gray-500 text-center text-sm"
+      >
+        {t("loading")}
+      </motion.div>
+    );
   }
 
   if (!churchId) {
-    return <p className="text-red-600 text-center">{t("noChurchId")}</p>;
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-red-600 text-center text-sm"
+      >
+        {t("noChurchId")}
+      </motion.div>
+    );
   }
 
   return (
-    <section className="mb-6">
-      <h2 className="text-xl md:text-2xl font-semibold text-gray-700 mb-4">
+    <motion.section
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mb-12"
+    >
+      <h2 className="text-xl font-semibold text-gray-800 mb-4 tracking-tight">
         {t("teamManagement")}
       </h2>
-      <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200">
         {/* 팀 추가 */}
-        <div className="mb-6 flex flex-col sm:flex-row items-center gap-2">
+        <div className="mb-6 flex flex-col sm:flex-row items-center gap-3">
           <input
             type="text"
             value={newTeamName}
             onChange={(e) => setNewTeamName(e.target.value)}
             placeholder={t("enterTeamName")}
-            className="w-full p-2 border rounded-md text-sm"
+            className="w-full sm:flex-1 p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all"
             aria-label={t("enterTeamName")}
           />
           <Button
             onClick={handleAddTeam}
-            className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:scale-105 transition-all duration-200"
           >
             {t("addTeam")}
           </Button>
@@ -240,19 +260,32 @@ export default function TeamManagement({
 
         {/* 팀 리스트 */}
         {teams.length === 0 ? (
-          <p className="text-gray-500 italic text-center">{t("noTeams")}</p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-gray-500 italic text-center text-sm"
+          >
+            {t("noTeams")}
+          </motion.p>
         ) : (
-          <ul className="space-y-2">
-            {teams.map((team) => {
-              if (!team?.id || !team?.name) {
-                console.warn("Invalid team data:", team);
-                return null;
-              }
-              return (
-                <li key={team.id} className="py-2 cursor-pointer">
-                  <div className="flex items-center gap-2">
+          <ul className="space-y-3">
+            <AnimatePresence>
+              {teams.map((team, index) => {
+                if (!team?.id || !team?.name) {
+                  console.warn("Invalid team data:", team);
+                  return null;
+                }
+                return (
+                  <motion.li
+                    key={team.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="flex items-center gap-3 bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-all duration-200"
+                  >
                     {editingTeam?.id === team.id ? (
-                      <div className="flex-1 flex items-center gap-2">
+                      <div className="flex-1 flex flex-col sm:flex-row items-center gap-2">
                         <input
                           type="text"
                           value={editingTeam.name}
@@ -263,28 +296,30 @@ export default function TeamManagement({
                             })
                           }
                           ref={inputRef}
-                          className="flex-1 p-2 border-green-500 rounded-md text-sm focus:ring-green-500 focus:border-green-500"
+                          className="flex-1 p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm"
                           aria-label={t("editTeamName")}
                         />
-                        <Button
-                          onClick={handleUpdateTeam}
-                          className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-blue-700 text-xs"
-                        >
-                          {t("save")}
-                        </Button>
-                        <button
-                          onClick={() => {
-                            setEditingTeam(null);
-                            setOpenMenuId(null);
-                          }}
-                          className="bg-gray-400 text-white px-3 py-1 rounded-md hover:bg-blue-600 text-xs"
-                        >
-                          {t("cancel")}
-                        </button>
+                        <div className="flex gap-2 w-full sm:w-auto">
+                          <Button
+                            onClick={handleUpdateTeam}
+                            className="flex-1 sm:flex-none px-3 py-1 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 hover:scale-105 transition-all duration-200"
+                          >
+                            {t("save")}
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setEditingTeam(null);
+                              setOpenMenuId(null);
+                            }}
+                            className="flex-1 sm:flex-none px-3 py-1 text-sm font-medium text-white bg-gray-600 rounded-full hover:bg-gray-700 hover:scale-105 transition-all duration-200"
+                          >
+                            {t("cancel")}
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <>
-                        <span className="flex-1 text-sm font-medium text-gray-700">
+                        <span className="flex-1 text-sm text-gray-800 truncate">
                           {team.name}
                         </span>
                         <div className="relative">
@@ -294,47 +329,70 @@ export default function TeamManagement({
                                 openMenuId === team.id ? null : team.id
                               )
                             }
-                            className="p-1 text-gray-600 hover:text-gray-800"
-                            aria-label={t("teamOptions")}
+                            className="p-1 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full transition-all duration-200"
+                            aria-label={t("teamOptions", { name: team.name })}
+                            aria-expanded={openMenuId === team.id}
+                            aria-haspopup="true"
                           >
-                            <MoreVertical className="h-5 w-5" />
+                            <MoreVertical className="w-5 h-5" />
                           </button>
-                          {openMenuId === team.id && (
-                            <div
-                              ref={(el) => {
-                                if (el) menuRefs.current.set(team.id, el);
-                                else menuRefs.current.delete(team.id);
-                              }}
-                              className="absolute right-0 mt-2 w-32 bg-white border rounded-md shadow-lg z-10"
-                            >
-                              <button
-                                onClick={() => {
-                                  setEditingTeam(team);
-                                  setOpenMenuId(null);
+                          <AnimatePresence>
+                            {openMenuId === team.id && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                ref={(el) => {
+                                  if (el) {
+                                    menuRefs.current.set(team.id, el);
+                                  } else {
+                                    menuRefs.current.delete(team.id);
+                                  }
                                 }}
-                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden"
                               >
-                                {t("edit")}
-                              </button>
-                              <button
-                                onClick={() => handleDeleteTeam(team.id)}
-                                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                              >
-                                {t("delete")}
-                              </button>
-                            </div>
-                          )}
+                                <button
+                                  onClick={() => {
+                                    setEditingTeam(team);
+                                    setOpenMenuId(null);
+                                  }}
+                                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                                >
+                                  {t("edit")}
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteTeam(team.id)}
+                                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
+                                >
+                                  {t("delete")}
+                                </button>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                       </>
                     )}
-                  </div>
-                </li>
-              );
-            })}
+                  </motion.li>
+                );
+              })}
+            </AnimatePresence>
           </ul>
         )}
-        {error && <p className="text-red-600 mt-4 text-sm">{error}</p>}
+
+        {/* 에러 메시지 */}
+        <AnimatePresence>
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="text-red-600 mt-4 text-sm bg-red-50 p-2 rounded-lg"
+            >
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
-    </section>
+    </motion.section>
   );
 }

@@ -1,46 +1,13 @@
-// src/app/members/page.tsx
 "use client";
 
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import UserDetailModal from "@/components/UserDetailModal";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
-import Image from "next/image";
-import { User as PrismaUser, Team } from "@prisma/client";
-
-interface Position {
-  id: string;
-  name: string;
-}
-
-interface Group {
-  id: string;
-  name: string;
-}
-
-interface SubGroup {
-  id: string;
-  name: string;
-  groupId: string;
-}
-
-interface Duty {
-  id: string;
-  name: string;
-}
-
-interface User
-  extends Omit<PrismaUser, "position" | "birthDate" | "createdAt"> {
-  position: Position | null;
-  birthDate: string;
-  createdAt: string;
-  group: Group | null;
-  subGroup: SubGroup | null;
-  duties: Duty[];
-  teams: Team[];
-}
+import MemberCard from "@/components/MemberCard"; // 새 컴포넌트 임포트
+import { User } from "@/types/customUser";
 
 export default function MembersPage() {
   const { t } = useTranslation("common");
@@ -116,28 +83,7 @@ export default function MembersPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {members.map((user) => (
-              <div
-                key={user.id}
-                className="bg-white rounded-xl shadow-lg p-3 hover:shadow-xl transition-shadow duration-300 cursor-pointer flex items-center space-x-4"
-                onClick={() => setSelectedUser(user)}
-                role="button"
-                aria-label={t("viewUserDetails", { name: user.name })}
-              >
-                <Image
-                  src={user.profileImage || "/default_user.png"}
-                  alt={user.name}
-                  width={60}
-                  height={60}
-                  className="rounded-full object-cover border-2 border-gray-200"
-                  onError={(e) => (e.currentTarget.src = "/default_user.png")}
-                />
-                <div>
-                  <p className="text-lg font-bold text-gray-900">{user.name}</p>
-                  <p className="text-sm text-gray-500">
-                    {user.position ? user.position.name : t("noPosition")}
-                  </p>
-                </div>
-              </div>
+              <MemberCard key={user.id} user={user} onClick={setSelectedUser} />
             ))}
           </div>
         )}

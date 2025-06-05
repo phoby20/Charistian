@@ -1,4 +1,5 @@
-// src/components/UserDetailEditForm.tsx
+"use client";
+
 import { useTranslation } from "next-i18next";
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
@@ -17,6 +18,7 @@ import {
 import { countryOptions } from "@/data/country";
 import { citiesByCountry } from "@/data/cities";
 import { regionsByCity } from "@/data/regions";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SelectOption {
   value: string;
@@ -40,6 +42,8 @@ interface Field {
     | "selectCity"
     | "selectRegion";
   options?: string[] | SelectOption[];
+  icon?: string;
+  required?: boolean;
 }
 
 interface UserDetailEditFormProps {
@@ -78,9 +82,9 @@ export default function UserDetailEditForm({
     dutyIds: user.duties ? user.duties.map((duty) => duty.id) : [],
     teamIds: user.teams ? user.teams.map((team) => team.id) : [],
     gender: user.gender || "",
-    country: user.country || "", // user.country 초기값 설정
-    city: user.city || "", // user.city 초기값 설정
-    region: user.region || "", // user.region 초기값 설정
+    country: user.country || "",
+    city: user.city || "",
+    region: user.region || "",
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [subGroups, setSubGroups] = useState<SubGroup[]>(initialSubGroups);
@@ -96,15 +100,23 @@ export default function UserDetailEditForm({
       dutyIds: user.duties ? user.duties.map((duty) => duty.id) : [],
       teamIds: user.teams ? user.teams.map((team) => team.id) : [],
       gender: user.gender || "",
-      country: user.country || "", // user.country 초기값 설정
-      city: user.city || "", // user.city 초기값 설정
-      region: user.region || "", // user.region 초기값 설정
+      country: user.country || "",
+      city: user.city || "",
+      region: user.region || "",
     });
     setSubGroups(initialSubGroups);
   }, [user, initialSubGroups]);
 
   if (!user.churchId) {
-    return <p className="text-red-600">{t("noChurchId")}</p>;
+    return (
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-red-600 text-center p-4 text-sm"
+      >
+        {t("noChurchId")}
+      </motion.p>
+    );
   }
 
   const handleInputChange = (
@@ -116,8 +128,8 @@ export default function UserDetailEditForm({
     setFormData((prev) => ({
       ...prev,
       [name]: value || null,
-      ...(name === "country" ? { city: null, region: null } : {}), // Reset city and region when country changes
-      ...(name === "city" ? { region: null } : {}), // Reset region when city changes
+      ...(name === "country" ? { city: null, region: null } : {}),
+      ...(name === "city" ? { region: null } : {}),
     }));
   };
 
@@ -281,9 +293,9 @@ export default function UserDetailEditForm({
       dutyIds: user.duties ? user.duties.map((duty) => duty.id) : [],
       teamIds: user.teams ? user.teams.map((team) => team.id) : [],
       gender: user.gender || "",
-      country: user.country || "", // user.country 초기값 설정
-      city: user.city || "", // user.city 초기값 설정
-      region: user.region || "", // user.region 초기값 설정
+      country: user.country || "",
+      city: user.city || "",
+      region: user.region || "",
     });
     setFormError(null);
     setSubGroupError(null);
@@ -292,60 +304,101 @@ export default function UserDetailEditForm({
   };
 
   const fields: Field[] = [
-    { key: "phone", label: t("phone"), type: "text" },
-    { key: "kakaoId", label: t("kakaoId"), type: "text" },
-    { key: "lineId", label: t("lineId"), type: "text" },
+    { key: "phone", label: t("phone"), type: "text", icon: "phone" },
+    { key: "kakaoId", label: t("kakaoId"), type: "text", icon: "chat" },
+    { key: "lineId", label: t("lineId"), type: "text", icon: "chat" },
     {
       key: "country",
       label: t("country"),
       type: "selectCountry",
       options: countryOptions,
+      icon: "globe",
     },
     {
       key: "city",
       label: t("city"),
       type: "selectCity",
       options: citiesByCountry[formData.country || ""] || [],
+      icon: "map-pin",
     },
     {
       key: "region",
       label: t("region"),
       type: "selectRegion",
       options: regionsByCity[formData.city || ""] || [],
+      icon: "map-pin",
     },
-    { key: "address", label: t("address"), type: "textarea" },
-    { key: "birthDate", label: t("birthDate"), type: "date" },
+    { key: "address", label: t("address"), type: "textarea", icon: "home" },
+    {
+      key: "birthDate",
+      label: t("birthDate"),
+      type: "date",
+      icon: "calendar",
+      required: true,
+    },
     {
       key: "gender",
       label: t("gender"),
       type: "select",
       options: ["Male", "Female"],
+      icon: "user",
+      required: true,
     },
-    { key: "position", label: t("position"), type: "selectPosition" },
-    { key: "groupId", label: t("group"), type: "selectGroup" },
-    { key: "subGroupId", label: t("subGroup"), type: "selectSubGroup" },
-    { key: "dutyIds", label: t("duties"), type: "selectDuties" },
-    { key: "teamIds", label: t("teams"), type: "selectTeams" },
+    {
+      key: "position",
+      label: t("position"),
+      type: "selectPosition",
+      icon: "briefcase",
+    },
+    { key: "groupId", label: t("group"), type: "selectGroup", icon: "users" },
+    {
+      key: "subGroupId",
+      label: t("subGroup"),
+      type: "selectSubGroup",
+      icon: "users",
+    },
+    {
+      key: "dutyIds",
+      label: t("duties"),
+      type: "selectDuties",
+      icon: "check-square",
+    },
+    { key: "teamIds", label: t("teams"), type: "selectTeams", icon: "team" },
   ];
 
   if (isLoading) return <Loading />;
-  if (parentError) return <p className="text-red-600">{parentError}</p>;
+  if (parentError)
+    return (
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-red-600 text-center p-4 text-sm"
+      >
+        {parentError}
+      </motion.p>
+    );
 
   return (
     <Modal isOpen={isOpen}>
-      <div className="bg-white rounded-2xl w-full p-6 mx-4 sm:mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20 }}
+        className="relative bg-white rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto"
+      >
+        {/* 헤더 */}
+        <div className="flex items-center justify-between mb-4 sticky top-0 bg-white z-10 pt-2">
+          <h2 className="text-xl font-semibold text-gray-900 sm:text-2xl tracking-tight">
             {t("userDetails")}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all"
             aria-label={t("close")}
             disabled={isLoading}
           >
             <svg
-              className="w-6 h-6"
+              className="w-5 h-5 sm:w-6 sm:h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -361,222 +414,299 @@ export default function UserDetailEditForm({
           </button>
         </div>
 
+        {/* 에러 메시지 */}
         {(formError || parentError || subGroupError) && (
-          <p className="text-red-600 mb-4">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-red-600 text-center mb-4 text-sm bg-red-50 p-2 rounded-lg"
+          >
             {formError || parentError || subGroupError}
-          </p>
+          </motion.p>
         )}
 
-        <div className="space-y-6">
-          <div className="flex items-center space-x-4">
-            <Image
-              src={user.profileImage || "/default_user.png"}
-              alt={user.name}
-              width={80}
-              height={80}
-              className="rounded-full object-cover border-2 border-gray-200"
-              onError={(e) => (e.currentTarget.src = "/default_user.png")}
-            />
+        {/* 프로필 섹션 */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 mb-4 shadow-sm"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="relative group">
+              <Image
+                src={user.profileImage || "/default_user.png"}
+                alt={user.name}
+                width={56}
+                height={56}
+                className="rounded-full object-cover border-2 border-gray-200 group-hover:scale-105 transition-transform duration-200"
+                onError={(e) => (e.currentTarget.src = "/default_user.png")}
+              />
+              <div className="absolute inset-0 rounded-full ring-2 ring-offset-2 ring-transparent group-hover:ring-blue-300 transition-all" />
+            </div>
             <div className="flex-1">
-              <label className="text-sm font-medium text-gray-700">
-                {t("name")}
+              <label className="text-sm font-medium text-gray-600 flex items-center">
+                {t("name")} <span className="text-red-500 ml-1">*</span>
               </label>
               <input
                 type="text"
                 name="name"
                 value={formData.name || ""}
                 onChange={handleInputChange}
-                className="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all"
                 required
                 aria-label={t("name")}
                 disabled={isLoading}
               />
             </div>
           </div>
+        </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {fields.map(({ key, label, type, options }) => (
-              <div key={key}>
-                <p className="text-sm font-medium text-gray-700">{label}</p>
-                {type === "textarea" ? (
-                  <textarea
-                    name={key}
-                    value={(formData[key as keyof FormData] as string) || ""}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    aria-label={label}
-                    disabled={isLoading}
-                  />
-                ) : type === "select" ? (
-                  <select
-                    name={key}
-                    value={(formData[key as keyof FormData] as string) || ""}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    aria-label={label}
-                    disabled={isLoading}
-                  >
-                    {(options as string[])?.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {t(opt)}
-                      </option>
-                    ))}
-                  </select>
-                ) : type === "selectCountry" ? (
-                  <select
-                    name={key}
-                    value={(formData[key as keyof FormData] as string) || ""}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    aria-label={label}
-                    disabled={isLoading}
-                  >
-                    {(options as SelectOption[])?.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {t(opt.label)}
-                      </option>
-                    ))}
-                  </select>
-                ) : type === "selectCity" ? (
-                  <select
-                    name={key}
-                    value={(formData[key as keyof FormData] as string) || ""}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    aria-label={label}
-                    disabled={isLoading || !formData.country}
-                  >
-                    {(options as SelectOption[])?.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {t(opt.label)}
-                      </option>
-                    ))}
-                  </select>
-                ) : type === "selectRegion" ? (
-                  <select
-                    name={key}
-                    value={(formData[key as keyof FormData] as string) || ""}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    aria-label={label}
-                    disabled={isLoading || !formData.city}
-                  >
-                    {(options as SelectOption[])?.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {t(opt.label)}
-                      </option>
-                    ))}
-                  </select>
-                ) : type === "selectPosition" ? (
-                  <select
-                    value={formData.position?.id || ""}
-                    onChange={handlePositionChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    aria-label={label}
-                    disabled={isLoading}
-                  >
-                    {positions.map((pos) => (
-                      <option key={pos.id} value={pos.id}>
-                        {pos.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : type === "selectGroup" ? (
-                  <select
-                    value={formData.groupId || ""}
-                    onChange={handleGroupChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    aria-label={label}
-                    disabled={isLoading}
-                  >
-                    <option value="">{t("noGroup")}</option>
-                    {groups.map((group) => (
-                      <option key={group.id} value={group.id}>
-                        {group.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : type === "selectSubGroup" ? (
-                  <select
-                    value={formData.subGroupId || ""}
-                    onChange={handleSubGroupChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    aria-label={label}
-                    disabled={!formData.groupId || isLoading || subGroupLoading}
-                  >
-                    <option value="">{t("noSubGroup")}</option>
-                    {subGroups.map((subGroup) => (
-                      <option key={subGroup.id} value={subGroup.id}>
-                        {subGroup.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : type === "selectDuties" ? (
-                  <select
-                    multiple
-                    value={formData.dutyIds || []}
-                    onChange={handleDutyChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    aria-label={label}
-                    disabled={isLoading}
-                  >
-                    {duties.map((duty) => (
-                      <option key={duty.id} value={duty.id}>
-                        {duty.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : type === "selectTeams" ? (
-                  <select
-                    multiple
-                    value={formData.teamIds || []}
-                    onChange={handleTeamChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    aria-label={label}
-                    disabled={isLoading}
-                  >
-                    {teams.map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {team.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type={type}
-                    name={key}
-                    value={(formData[key as keyof FormData] as string) || ""}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    aria-label={label}
-                    required={["name", "email", "birthDate", "gender"].includes(
-                      key as string
-                    )}
-                    disabled={isLoading}
-                  />
-                )}
-              </div>
-            ))}
+        {/* 입력 필드 */}
+        <div className="space-y-3">
+          <AnimatePresence>
+            {fields.map(
+              ({ key, label, type, options, icon, required }, index) => (
+                <motion.div
+                  key={key}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 * index }}
+                  className="bg-white rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-200"
+                >
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-500 mt-1">
+                      {icon === "phone" && "📞"}
+                      {icon === "chat" && "💬"}
+                      {icon === "globe" && "🌍"}
+                      {icon === "map-pin" && "📍"}
+                      {icon === "home" && "🏠"}
+                      {icon === "calendar" && "📅"}
+                      {icon === "user" && "👤"}
+                      {icon === "briefcase" && "💼"}
+                      {icon === "users" && "👥"}
+                      {icon === "check-square" && "✅"}
+                      {icon === "team" && "🤝"}
+                    </span>
+                    <div className="flex-1 relative">
+                      <label className="text-sm font-medium text-gray-600 flex items-center">
+                        {label}{" "}
+                        {required && (
+                          <span className="text-red-500 ml-1">*</span>
+                        )}
+                      </label>
+                      {type === "textarea" ? (
+                        <textarea
+                          name={key}
+                          value={
+                            (formData[key as keyof FormData] as string) || ""
+                          }
+                          onChange={handleInputChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all min-h-[80px]"
+                          aria-label={label}
+                          disabled={isLoading}
+                        />
+                      ) : type === "select" ? (
+                        <select
+                          name={key}
+                          value={
+                            (formData[key as keyof FormData] as string) || ""
+                          }
+                          onChange={handleInputChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
+                          aria-label={label}
+                          disabled={isLoading}
+                        >
+                          <option value="">{t("selectPlaceholder")}</option>
+                          {(options as string[])?.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {t(opt)}
+                            </option>
+                          ))}
+                        </select>
+                      ) : type === "selectCountry" ? (
+                        <select
+                          name={key}
+                          value={
+                            (formData[key as keyof FormData] as string) || ""
+                          }
+                          onChange={handleInputChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
+                          aria-label={label}
+                          disabled={isLoading}
+                        >
+                          <option value="">{t("selectPlaceholder")}</option>
+                          {(options as SelectOption[])?.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {t(opt.label)}
+                            </option>
+                          ))}
+                        </select>
+                      ) : type === "selectCity" ? (
+                        <select
+                          name={key}
+                          value={
+                            (formData[key as keyof FormData] as string) || ""
+                          }
+                          onChange={handleInputChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
+                          aria-label={label}
+                          disabled={isLoading || !formData.country}
+                        >
+                          <option value="">{t("selectPlaceholder")}</option>
+                          {(options as SelectOption[])?.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {t(opt.label)}
+                            </option>
+                          ))}
+                        </select>
+                      ) : type === "selectRegion" ? (
+                        <select
+                          name={key}
+                          value={
+                            (formData[key as keyof FormData] as string) || ""
+                          }
+                          onChange={handleInputChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
+                          aria-label={label}
+                          disabled={isLoading || !formData.city}
+                        >
+                          <option value="">{t("selectPlaceholder")}</option>
+                          {(options as SelectOption[])?.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {t(opt.label)}
+                            </option>
+                          ))}
+                        </select>
+                      ) : type === "selectPosition" ? (
+                        <select
+                          value={formData.position?.id || ""}
+                          onChange={handlePositionChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
+                          aria-label={label}
+                          disabled={isLoading}
+                        >
+                          <option value="">{t("noPosition")}</option>
+                          {positions.map((pos) => (
+                            <option key={pos.id} value={pos.id}>
+                              {pos.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : type === "selectGroup" ? (
+                        <select
+                          value={formData.groupId || ""}
+                          onChange={handleGroupChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
+                          aria-label={label}
+                          disabled={isLoading}
+                        >
+                          <option value="">{t("noGroup")}</option>
+                          {groups.map((group) => (
+                            <option key={group.id} value={group.id}>
+                              {group.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : type === "selectSubGroup" ? (
+                        <select
+                          value={formData.subGroupId || ""}
+                          onChange={handleSubGroupChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
+                          aria-label={label}
+                          disabled={
+                            !formData.groupId || isLoading || subGroupLoading
+                          }
+                        >
+                          <option value="">{t("noSubGroup")}</option>
+                          {subGroups.map((subGroup) => (
+                            <option key={subGroup.id} value={subGroup.id}>
+                              {subGroup.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : type === "selectDuties" ? (
+                        <select
+                          multiple
+                          value={formData.dutyIds || []}
+                          onChange={handleDutyChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all h-[100px]"
+                          aria-label={label}
+                          disabled={isLoading}
+                        >
+                          {duties.map((duty) => (
+                            <option key={duty.id} value={duty.id}>
+                              {duty.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : type === "selectTeams" ? (
+                        <select
+                          multiple
+                          value={formData.teamIds || []}
+                          onChange={handleTeamChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all h-[100px]"
+                          aria-label={label}
+                          disabled={isLoading}
+                        >
+                          {teams.map((team) => (
+                            <option key={team.id} value={team.id}>
+                              {team.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type={type}
+                          name={key}
+                          value={
+                            (formData[key as keyof FormData] as string) || ""
+                          }
+                          onChange={handleInputChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all"
+                          aria-label={label}
+                          required={required}
+                          disabled={isLoading}
+                        />
+                      )}
+                      {subGroupLoading && key === "subGroupId" && (
+                        <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">
+                          Loading...
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* 버튼 바 */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="sticky bottom-0 bg-white pt-4 mt-6 border-t border-gray-200"
+        >
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button
+              onClick={handleSave}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:scale-105 transition-all duration-200"
+              disabled={isLoading || subGroupLoading}
+            >
+              {t("save")}
+            </Button>
+            <Button
+              onClick={handleCancel}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-full hover:bg-gray-300 hover:scale-105 transition-all duration-200"
+              disabled={isLoading || subGroupLoading}
+            >
+              {t("cancel")}
+            </Button>
           </div>
-        </div>
-
-        <div className="flex justify-end mt-8 space-x-3">
-          <Button
-            onClick={handleSave}
-            className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors duration-200"
-            disabled={isLoading || subGroupLoading}
-          >
-            {t("save")}
-          </Button>
-          <Button
-            onClick={handleCancel}
-            className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200"
-            disabled={isLoading || subGroupLoading}
-          >
-            {t("cancel")}
-          </Button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </Modal>
   );
 }

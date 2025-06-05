@@ -3,7 +3,8 @@
 import { useTranslation } from "react-i18next";
 import Image from "next/image";
 import { User } from "@/types/customUser";
-import { Role } from "@prisma/client";
+import { getBorderColor } from "./roleBadge";
+import { motion } from "framer-motion";
 
 interface MemberCardProps {
   user: User;
@@ -13,90 +14,77 @@ interface MemberCardProps {
 export default function MemberCard({ user, onClick }: MemberCardProps) {
   const { t } = useTranslation("common");
 
-  // Role에 따른 border 색상 매핑
-  const getBorderColor = (role: string) => {
-    switch (role) {
-      case Role.VISITOR:
-        return (
-          <p className="text-sm text-gray-100 px-3 rounded-full border bg-gray-500 border-gray-300">
-            {role}
-          </p>
-        );
-      case Role.GENERAL:
-        return <></>;
-      case Role.ADMIN:
-        return (
-          <p className="text-sm text-gray-100 px-3 rounded-full border bg-blue-500 border-blue-500">
-            {role}
-          </p>
-        );
-      case Role.SUB_ADMIN:
-        return (
-          <p className="text-sm text-gray-100 px-3 rounded-full border bg-indigo-500 border-indigo-500">
-            {role}
-          </p>
-        );
-      case Role.SUPER_ADMIN:
-        return (
-          <p className="text-sm text-gray-100 px-3 rounded-full border bg-purple-500 border-purple-500">
-            {role}
-          </p>
-        );
-      case Role.MASTER:
-        return (
-          <p className="text-sm text-gray-100 px-3 rounded-full border bg-red-500 border-red-500">
-            {role}
-          </p>
-        );
-      default:
-        <></>;
-    }
-  };
-
   return (
-    <div
-      className="bg-white rounded-xl shadow-lg p-2 hover:shadow-xl hover:border transition-shadow duration-300 cursor-pointer flex items-center space-x-4"
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white rounded-xl shadow-md p-3 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer flex items-center space-x-3 border border-gray-200 hover:border-blue-300"
       onClick={() => onClick(user)}
       role="button"
+      tabIndex={0}
       aria-label={t("viewUserDetails", { name: user.name })}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick(user);
+        }
+      }}
     >
-      <Image
-        src={user.profileImage || "/default_user.png"}
-        alt={user.name}
-        width={60}
-        height={50}
-        className="w-16 h-16 rounded-full object-cover border-2 border-gray-300"
-        onError={(e) => (e.currentTarget.src = "/default_user.png")}
-      />
-      <div className="flex flex-col gap-1">
+      {/* 프로필 이미지 */}
+      <div className="relative group flex-shrink-0">
+        <Image
+          src={user.profileImage || "/default_user.png"}
+          alt={user.name}
+          width={48}
+          height={48}
+          className="w-14 h-14 rounded-full object-cover border-2 border-gray-200 group-hover:scale-105 transition-transform duration-200"
+          onError={(e) => (e.currentTarget.src = "/default_user.png")}
+        />
+        <div className="absolute inset-0 rounded-full ring-2 ring-offset-1 ring-transparent group-hover:ring-blue-300 transition-all" />
+      </div>
+
+      {/* 정보 섹션 */}
+      <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+        {/* 이름 및 직책 */}
         <div className="flex items-center gap-2">
           {getBorderColor(user.role)}
-          <p className="font-bold text-gray-900">{user.name}</p>
-          <p className="text-sm text-gray-500">
+          <p className="font-semibold text-gray-900 text-sm truncate">
+            {user.name}
+          </p>
+          <p className="text-xs text-gray-500 truncate">
             {user.position ? user.position.name : t("noPosition")}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {user.duties.map((duty) => (
-            <p
-              className="text-xs text-gray-600 border border-green-500 bg-green-100 rounded-full px-2"
-              key={duty.id}
-            >
-              {duty.name}
-            </p>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {user.teams.map((team) => (
-            <p
-              className="text-xs text-gray-600 border border-orange-500 bg-orange-100 rounded-full px-2"
-              key={team.id}
-            >
-              {team.name}
-            </p>
-          ))}
-        </div>
+
+        {/* 직무 태그 */}
+        {user.duties && user.duties.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 overflow-x-auto scrollbar-hide">
+            {user.duties.map((duty) => (
+              <span
+                key={duty.id}
+                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-300 hover:bg-green-200 transition-colors duration-200"
+              >
+                {duty.name}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* 팀 태그 */}
+        {user.teams && user.teams.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 overflow-x-auto scrollbar-hide">
+            {user.teams.map((team) => (
+              <span
+                key={team.id}
+                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-200 transition-colors duration-200"
+              >
+                {team.name}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -143,7 +143,7 @@ export default function Header() {
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
                 className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
               >
-                {i18n.language === "ko" ? "한국어" : "English"}
+                {i18n.language === "ko" ? "한국어" : "日本語"}
                 <ChevronDown className="w-4 h-4 ml-1" />
               </button>
               {isLangMenuOpen && (
@@ -155,10 +155,10 @@ export default function Header() {
                     한국어
                   </button>
                   <button
-                    onClick={() => changeLanguage("en")}
+                    onClick={() => changeLanguage("ja")}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    English
+                    日本語
                   </button>
                 </div>
               )}

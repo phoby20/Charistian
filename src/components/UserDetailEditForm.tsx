@@ -416,7 +416,6 @@ export default function UserDetailEditForm({
                     aria-label={label}
                     disabled={isLoading}
                   >
-                    <option value="">{t("select", { field: label })}</option>
                     {(options as string[])?.map((opt) => (
                       <option key={opt} value={opt}>
                         {t(opt)}

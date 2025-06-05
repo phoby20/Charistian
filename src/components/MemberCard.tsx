@@ -26,8 +26,8 @@ export default function MemberCard({ user, onClick }: MemberCardProps) {
         onError={(e) => (e.currentTarget.src = "/default_user.png")}
       />
       <div className="flex flex-col gap-1">
-        <div className="flex items-center  gap-3">
-          <p className="text-lg font-bold text-gray-900">{user.name}</p>
+        <div className="flex items-center  gap-2">
+          <p className="font-bold text-gray-900">{user.name}</p>
           <p className="text-sm text-gray-500">
             {user.position ? user.position.name : t("noPosition")}
           </p>
@@ -40,6 +40,18 @@ export default function MemberCard({ user, onClick }: MemberCardProps) {
                 key={duty.id}
               >
                 {duty.name}
+              </p>
+            );
+          })}
+        </div>
+        <div className="flex gap-2">
+          {user.teams.map((team) => {
+            return (
+              <p
+                className="text-xs text-gray-600 border border-orange-500 bg-orange-100 rounded-full px-2"
+                key={team.id}
+              >
+                {team.name}
               </p>
             );
           })}

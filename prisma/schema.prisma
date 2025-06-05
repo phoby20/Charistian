@@ -171,7 +171,6 @@ model Attendance {
   userId        String
   user          User      @relation("UserAttendance", fields: [userId], references: [id])
   date          DateTime
-  status        String
   checkedById   String
   checkedBy     User      @relation("CheckedBy", fields: [checkedById], references: [id])
   createdAt     DateTime  @default(now())

@@ -12,6 +12,8 @@ import {
   ChevronDown,
   Settings,
   UsersRound,
+  UserCheck,
+  Globe,
 } from "lucide-react";
 import Button from "./Button";
 import { useAuth } from "@/context/AuthContext";
@@ -109,13 +111,22 @@ export default function Header() {
               </Link>
             )}
             {user && (
-              <Link
-                href="/members"
-                className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                <UsersRound className="w-5 h-5 mr-1" />
-                {t("members")}
-              </Link>
+              <>
+                <Link
+                  href="/attendance"
+                  className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  <UserCheck className="w-5 h-5 mr-1" />
+                  {t("attendance")}
+                </Link>
+                <Link
+                  href="/members"
+                  className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  <UsersRound className="w-5 h-5 mr-1" />
+                  {t("members")}
+                </Link>
+              </>
             )}
             {/* 설정 메뉴 */}
             {user && user.role === "SUPER_ADMIN" && (
@@ -217,6 +228,24 @@ export default function Header() {
       {isMenuOpen && (
         <div className="md:hidden bg-white shadow-md" ref={mobileMenuRef}>
           <nav className="flex flex-col px-4 py-2 space-y-1">
+            {user && (
+              <>
+                <Link
+                  href="/attendance"
+                  className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  <UserCheck className="w-5 h-5 mr-1" />
+                  {t("attendance")}
+                </Link>
+                <Link
+                  href="/members"
+                  className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  <UsersRound className="w-5 h-5 mr-1" />
+                  {t("members")}
+                </Link>
+              </>
+            )}
             {!user && (
               <Link
                 href="/church-registration"
@@ -230,7 +259,7 @@ export default function Header() {
               <div className="px-3 py-2">
                 <button
                   onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
-                  className="flex items-center text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium w-full"
+                  className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
                 >
                   <Settings className="w-5 h-5 mr-2" />
                   {t("settings")}
@@ -252,9 +281,12 @@ export default function Header() {
             <div className="px-3 py-2">
               <button
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
-                className="flex items-center text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium w-full"
+                className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
               >
-                <span className="text-sm font-medium">{t("language")}</span>
+                <span className="flex items-center text-sm font-medium">
+                  <Globe className="w-5 h-5 mr-2" />
+                  {t("language")}
+                </span>
                 <ChevronDown className="w-4 h-4 ml-2" />
               </button>
               {isLangMenuOpen && (
@@ -284,7 +316,7 @@ export default function Header() {
               <div className="px-3 py-2">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium w-full"
+                  className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
                 >
                   <UserIcon className="w-5 h-5 mr-2" />
                   {user.name} ({t(user.role.toLowerCase())})

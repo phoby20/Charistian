@@ -9,9 +9,16 @@ import { motion } from "framer-motion";
 interface MemberCardProps {
   user: User;
   onClick: (user: User) => void;
+  attendanceStatus?: {
+    [key: string]: boolean;
+  };
 }
 
-export default function MemberCard({ user, onClick }: MemberCardProps) {
+export default function MemberCard({
+  user,
+  onClick,
+  attendanceStatus,
+}: MemberCardProps) {
   const { t } = useTranslation("common");
 
   return (
@@ -19,7 +26,7 @@ export default function MemberCard({ user, onClick }: MemberCardProps) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-white rounded-xl shadow-md p-3 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer flex items-center space-x-3 border border-gray-200 hover:border-blue-300"
+      className="min-h-26 bg-white rounded-xl shadow-md p-3 pl-5 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 cursor-pointer flex items-center space-x-8 border border-gray-200 hover:border-blue-300"
       onClick={() => onClick(user)}
       role="button"
       tabIndex={0}
@@ -33,23 +40,35 @@ export default function MemberCard({ user, onClick }: MemberCardProps) {
     >
       {/* 프로필 이미지 */}
       <div className="relative group flex-shrink-0">
-        <Image
-          src={user.profileImage || "/default_user.png"}
-          alt={user.name}
-          width={48}
-          height={48}
-          className="w-14 h-14 rounded-full object-cover border-2 border-gray-200 group-hover:scale-105 transition-transform duration-200"
-          onError={(e) => (e.currentTarget.src = "/default_user.png")}
-        />
-        <div className="absolute inset-0 rounded-full ring-2 ring-offset-1 ring-transparent group-hover:ring-blue-300 transition-all" />
+        <div className="relative flex flex-col items-center">
+          <Image
+            src={user.profileImage || "/default_user.png"}
+            alt={user.name}
+            width={48}
+            height={48}
+            className="w-14 h-14 rounded-full object-cover border-2 border-gray-200 group-hover:scale-105 transition-transform duration-200"
+            onError={(e) => (e.currentTarget.src = "/default_user.png")}
+          />
+          {attendanceStatus && (
+            <span
+              className={`absolute bottom-[-17] text-xs font-medium px-2 py-1 rounded-full ${
+                attendanceStatus[user.id]
+                  ? "bg-green-500 text-white"
+                  : "bg-gray-200 text-gray-600"
+              }`}
+            >
+              {attendanceStatus[user.id] ? t("attended") : t("notAttended")}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* 정보 섹션 */}
       <div className="flex flex-col gap-1.5 flex-1 min-w-0">
         {/* 이름 및 직책 */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col">
           {getBorderColor(user.role)}
-          <p className="font-semibold text-gray-900 text-sm truncate">
+          <p className="font-semibold text-gray-900 text-sx truncate">
             {user.name}
           </p>
           <p className="text-xs text-gray-500 truncate">
@@ -63,7 +82,7 @@ export default function MemberCard({ user, onClick }: MemberCardProps) {
             {user.duties.map((duty) => (
               <span
                 key={duty.id}
-                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-300 hover:bg-green-200 transition-colors duration-200"
+                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-green-800 border border-green-300 hover:bg-green-200 transition-colors duration-200"
               >
                 {duty.name}
               </span>
@@ -77,7 +96,7 @@ export default function MemberCard({ user, onClick }: MemberCardProps) {
             {user.teams.map((team) => (
               <span
                 key={team.id}
-                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-200 transition-colors duration-200"
+                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-orange-800 border border-orange-300 hover:bg-orange-200 transition-colors duration-200"
               >
                 {team.name}
               </span>

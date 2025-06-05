@@ -1,4 +1,3 @@
-// src/app/church/register/page.tsx
 "use client";
 
 import { useTranslation } from "next-i18next";
@@ -12,6 +11,8 @@ import { regionsByCity } from "@/data/regions";
 import { citiesByCountry } from "@/data/cities";
 import { countryOptions } from "@/data/country";
 import Loading from "@/components/Loading";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 
 export default function ChurchRegistrationPage() {
   const { t } = useTranslation("common");
@@ -114,7 +115,6 @@ export default function ChurchRegistrationPage() {
         let width = img.width;
         let height = img.height;
 
-        // 가로 크기를 600px로 조정, 비율 유지
         if (width > maxWidth) {
           height = (maxWidth / width) * height;
           width = maxWidth;
@@ -137,7 +137,7 @@ export default function ChurchRegistrationPage() {
             }
           },
           file.type,
-          0.8 // JPEG 품질 80%
+          0.8
         );
       };
       img.onerror = (err) => reject(err);
@@ -152,11 +152,11 @@ export default function ChurchRegistrationPage() {
       try {
         const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
         if (!allowedTypes.includes(files[0].type)) {
-          setError(`지원되지 않는 파일 형식입니다: ${files[0].type}`);
+          setError(t("unsupportedFileType"));
           return;
         }
         if (files[0].size > 5 * 1024 * 1024) {
-          setError("파일 크기가 5MB를 초과했습니다.");
+          setError(t("fileTooLarge"));
           return;
         }
 
@@ -164,7 +164,7 @@ export default function ChurchRegistrationPage() {
         setFormData((prev) => ({ ...prev, [name]: resizedFile }));
       } catch (error) {
         console.error("이미지 리사이즈 오류:", error);
-        setError("이미지 처리 중 오류가 발생했습니다.");
+        setError(t("imageProcessingError"));
       }
     } else {
       setFormData((prev) => ({ ...prev, [name]: undefined }));
@@ -207,8 +207,8 @@ export default function ChurchRegistrationPage() {
     if (!formData.plan) missingFields.push(t("plan"));
 
     if (missingFields.length > 0) {
-      console.log("누락된 필드:", missingFields);
       setError(`${t("pleaseFillAllFields")}: ${missingFields.join(", ")}`);
+      setIsLoading(false);
       return;
     }
 
@@ -246,26 +246,36 @@ export default function ChurchRegistrationPage() {
       const result = await response.json();
       if (!response.ok) {
         setError(result.error || t("registrationFailed"));
+        setIsLoading(false);
         return;
       }
 
       router.push("/church-registration/success");
-      setIsLoading(false);
     } catch (err) {
       console.error("등록 오류:", err);
       setError(t("serverError"));
+      setIsLoading(false);
     }
   };
 
   // 첫 번째 스텝: 교회 정보 입력
   const renderStep1 = () => (
-    <form onSubmit={handleNextStep}>
+    <motion.form
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+      onSubmit={handleNextStep}
+      className="space-y-4"
+    >
       <Input
         label={t("churchName")}
         name="churchName"
         value={formData.churchName}
         onChange={handleInputChange}
         required
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+        placeholder={t("churchName")}
       />
       <Select
         label={t("country")}
@@ -274,6 +284,7 @@ export default function ChurchRegistrationPage() {
         required
         value={selectedCountry}
         onChange={(e) => setSelectedCountry(e.target.value)}
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
       />
       <Select
         label={t("city")}
@@ -282,6 +293,7 @@ export default function ChurchRegistrationPage() {
         required
         value={selectedCity}
         onChange={(e) => setSelectedCity(e.target.value)}
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
       />
       <Select
         label={t("region")}
@@ -294,6 +306,7 @@ export default function ChurchRegistrationPage() {
           setFormData((prev) => ({ ...prev, region: value }));
         }}
         required
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
       />
       <Input
         label={t("address")}
@@ -301,6 +314,8 @@ export default function ChurchRegistrationPage() {
         value={formData.address}
         onChange={handleInputChange}
         required
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+        placeholder={t("address")}
       />
       <Input
         label={t("churchPhone")}
@@ -308,40 +323,57 @@ export default function ChurchRegistrationPage() {
         value={formData.churchPhone}
         onChange={handleInputChange}
         required
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+        placeholder={t("churchPhone")}
       />
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">
-          {t("buildingImage")} ({t("optional")})
+      <div>
+        <label className="block text-sm font-medium text-gray-800 mb-2">
+          {t("buildingImage")}
+          <span className="text-gray-500"> ({t("optional")})</span>
         </label>
         <input
           type="file"
           name="buildingImage"
           accept="image/*"
-          className="mt-1"
+          className="w-full p-3 border rounded-lg border-gray-300 shadow-sm bg-white text-gray-800 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-500 hover:file:bg-blue-100 transition-all duration-200"
           onChange={handleFileChange}
+          aria-label={t("buildingImage")}
         />
         {formData.buildingImage && (
-          <div className="mt-2 text-sm text-gray-600">
-            {t("selectedFile")}: {formData.buildingImage.name}
+          <div className="mt-2 text-sm text-gray-600 flex items-center">
+            <span className="truncate">{formData.buildingImage.name}</span>
             <button
               type="button"
-              className="ml-2 text-red-600 hover:underline"
+              className="ml-2 text-red-600 hover:text-red-800 transition-colors"
               onClick={() => handleFileReset("buildingImage")}
+              aria-label={t("removeBuildingImage")}
             >
-              {t("remove")}
+              <X size={16} />
             </button>
           </div>
         )}
       </div>
-      <div className="flex justify-end space-x-4">
-        <Button type="submit">{t("next")}</Button>
+      <div className="flex justify-end">
+        <Button
+          type="submit"
+          className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md"
+        >
+          {t("next")}
+        </Button>
       </div>
-    </form>
+    </motion.form>
   );
 
   // 두 번째 스텝: 신청자 정보 입력
   const renderStep2 = () => (
-    <form onSubmit={handleSubmit}>
+    <motion.form
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ duration: 0.3 }}
+      onSubmit={handleSubmit}
+      className="space-y-4"
+    >
       <Input
         label={t("superAdminEmail")}
         name="superAdminEmail"
@@ -349,6 +381,8 @@ export default function ChurchRegistrationPage() {
         value={formData.superAdminEmail}
         onChange={handleInputChange}
         required
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+        placeholder={t("superAdminEmail")}
       />
       <Input
         label={t("password")}
@@ -357,6 +391,8 @@ export default function ChurchRegistrationPage() {
         value={formData.password}
         onChange={handleInputChange}
         required
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+        placeholder={t("password")}
       />
       <Input
         label={t("contactName")}
@@ -364,6 +400,8 @@ export default function ChurchRegistrationPage() {
         value={formData.contactName}
         onChange={handleInputChange}
         required
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+        placeholder={t("contactName")}
       />
       <Input
         label={t("contactPhone")}
@@ -371,6 +409,8 @@ export default function ChurchRegistrationPage() {
         value={formData.contactPhone}
         onChange={handleInputChange}
         required
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+        placeholder={t("contactPhone")}
       />
       <Select
         label={t("contactGender")}
@@ -382,6 +422,7 @@ export default function ChurchRegistrationPage() {
         value={formData.contactGender}
         onChange={handleInputChange}
         required
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
       />
       <Input
         label={t("contactBirthDate")}
@@ -390,6 +431,7 @@ export default function ChurchRegistrationPage() {
         value={formData.contactBirthDate}
         onChange={handleInputChange}
         required
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
       />
       <Select
         label={t("plan")}
@@ -402,62 +444,133 @@ export default function ChurchRegistrationPage() {
         value={formData.plan}
         onChange={handleInputChange}
         required
+        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
       />
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">
-          {t("contactImage")} ({t("optional")})
+      <div>
+        <label className="block text-sm font-medium text-gray-800 mb-2">
+          {t("contactImage")}
+          <span className="text-gray-500"> ({t("optional")})</span>
         </label>
         <input
           type="file"
           name="contactImage"
           accept="image/*"
-          className="mt-1"
+          className="w-full p-3 border rounded-lg border-gray-300 shadow-sm bg-white text-gray-800 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-500 hover:file:bg-blue-100 transition-all duration-200"
           onChange={handleFileChange}
+          aria-label={t("contactImage")}
         />
         {formData.contactImage && (
-          <div className="mt-2 text-sm text-gray-600">
-            {t("selectedFile")}: {formData.contactImage.name}
+          <div className="mt-2 text-sm text-gray-600 flex items-center">
+            <span className="truncate">{formData.contactImage.name}</span>
             <button
               type="button"
-              className="ml-2 text-red-600 hover:underline"
+              className="ml-2 text-red-600 hover:text-red-800 transition-colors"
               onClick={() => handleFileReset("contactImage")}
+              aria-label={t("removeContactImage")}
             >
-              {t("remove")}
+              <X size={16} />
             </button>
           </div>
         )}
       </div>
-      <div className="flex justify-between space-x-4">
-        <Button type="button" onClick={() => setStep(1)}>
+      <div className="flex justify-between">
+        <Button
+          type="button"
+          onClick={() => setStep(1)}
+          className="px-6 py-2 bg-gray-600 text-white rounded-full font-medium text-sm hover:bg-gray-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md"
+        >
           {t("back")}
         </Button>
-        <Button type="submit">{t("churchRegistration")}</Button>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 disabled:bg-gray-400 disabled:hover:scale-100 disabled:hover:bg-gray-400 transition-all duration-200 shadow-sm hover:shadow-md"
+        >
+          {isLoading ? (
+            <span className="flex items-center">
+              <svg
+                className="animate-spin h-4 w-4 mr-2 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-50"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-100"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                />
+              </svg>
+              {t("submitting")}
+            </span>
+          ) : (
+            t("churchRegistration")
+          )}
+        </Button>
       </div>
-    </form>
+    </motion.form>
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen flex items-center justify-center bg-gray-50 p-4 sm:p-6"
+    >
       {isLoading && <Loading />}
-      <div className="bg-white p-8 rounded-md shadow-md w-full max-w-lg">
-        <h1 className="text-2xl font-bold mb-6">{t("churchRegistration")}</h1>
-        <div className="mb-4">
-          <p className="text-sm text-gray-600">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-lg bg-white rounded-3xl shadow-lg p-8 sm:p-10"
+      >
+        <h1 className="text-2xl font-semibold text-gray-800 mb-6 text-center tracking-tight">
+          {t("churchRegistration")}
+        </h1>
+        <div className="mb-6">
+          <p className="text-sm text-gray-600 text-center">
             {t("step")} {step} {t("of")} 2
           </p>
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div
-              className="bg-blue-600 h-2.5 rounded-full"
-              style={{ width: step === 1 ? "50%" : "100%" }}
-            ></div>
+          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+            <motion.div
+              className="bg-blue-600 h-2 rounded-full"
+              initial={{ width: step === 1 ? "50%" : "100%" }}
+              animate={{ width: step === 1 ? "50%" : "100%" }}
+              transition={{ duration: 0.3 }}
+            />
           </div>
         </div>
-        {step === 1 ? renderStep1() : renderStep2()}
-        <Modal isOpen={!!error}>
-          <p>{error}</p>
-          <Button onClick={() => setError(null)}>{t("confirm")}</Button>
-        </Modal>
-      </div>
-    </div>
+        <AnimatePresence mode="wait">
+          {step === 1 ? renderStep1() : renderStep2()}
+        </AnimatePresence>
+        <AnimatePresence>
+          {error && (
+            <Modal isOpen={!!error}>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-white rounded-lg p-6 max-w-sm mx-auto"
+              >
+                <p className="text-gray-800 text-sm mb-4">{error}</p>
+                <Button
+                  onClick={() => setError(null)}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 transition-all duration-200"
+                >
+                  {t("confirm")}
+                </Button>
+              </motion.div>
+            </Modal>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </motion.div>
   );
 }

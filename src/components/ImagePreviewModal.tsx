@@ -5,19 +5,17 @@ import Image from "next/image";
 
 interface ImagePreviewModalProps {
   isOpen: boolean;
-  onClose: () => void;
   imageUrl: string | null;
   alt: string;
 }
 
 export default function ImagePreviewModal({
   isOpen,
-  onClose,
   imageUrl,
   alt,
 }: ImagePreviewModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen}>
       {imageUrl && (
         <div className="flex justify-center">
           <Image

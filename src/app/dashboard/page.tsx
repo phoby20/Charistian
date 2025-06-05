@@ -202,7 +202,6 @@ export default function DashboardPage() {
         {/* 이미지 확대 모달 */}
         <ImagePreviewModal
           isOpen={isImageModalOpen}
-          onClose={() => setImageModalOpen(false)}
           imageUrl={selectedImage}
           alt="Building image"
         />

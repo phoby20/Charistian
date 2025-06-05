@@ -181,6 +181,7 @@ enum Role {
   VISITOR
   GENERAL
   ADMIN
+  SUB_ADMIN
   SUPER_ADMIN
   MASTER
 }

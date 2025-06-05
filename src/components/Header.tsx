@@ -11,6 +11,7 @@ import {
   LogOut,
   ChevronDown,
   Settings,
+  UsersRound,
 } from "lucide-react";
 import Button from "./Button";
 import { useAuth } from "@/context/AuthContext";
@@ -92,7 +93,7 @@ export default function Header() {
           <div className="flex-shrink-0 flex items-center">
             <Link href={logoHref} className="flex items-center">
               <span className="text-2xl font-bold text-blue-600">
-                {t("siteTitle", { defaultValue: "Church Management" })}
+                {t("siteTitle", { defaultValue: "ChurchM" })}
               </span>
             </Link>
           </div>
@@ -107,12 +108,15 @@ export default function Header() {
                 {t("churchRegistration")}
               </Link>
             )}
-            <Link
-              href="/members"
-              className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-            >
-              {t("members")}
-            </Link>
+            {user && (
+              <Link
+                href="/members"
+                className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                <UsersRound className="w-5 h-5 mr-1" />
+                {t("members")}
+              </Link>
+            )}
             {/* 설정 메뉴 */}
             {user && user.role === "SUPER_ADMIN" && (
               <div className="relative" ref={settingsMenuRef}>

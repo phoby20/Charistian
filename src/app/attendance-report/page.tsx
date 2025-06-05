@@ -68,7 +68,6 @@ export default function AttendanceReport() {
       const query = new URLSearchParams();
       if (startDate) query.set("startDate", startDate);
       if (endDate) query.set("endDate", endDate);
-      console.log("Fetching attendance with query:", query.toString()); // 디버깅 로그
       const response = await fetch(
         `/api/attendance/search?${query.toString()}`,
         {
@@ -79,7 +78,6 @@ export default function AttendanceReport() {
       if (!response.ok) throw new Error("Failed to fetch attendance");
       const { attendances }: { attendances: AttendanceRecord[] } =
         await response.json();
-      console.log("Received attendances:", attendances); // 디버깅 로그
       // 출석 상태 초기화
       const status: { [key: string]: boolean } = {};
       const byDate: { [key: string]: { [key: string]: boolean } } = {};

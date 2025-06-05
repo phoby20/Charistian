@@ -12,6 +12,7 @@ import { regionsByCity } from "@/data/regions";
 import { countryOptions } from "@/data/country";
 import { X } from "lucide-react";
 import Loading from "@/components/Loading";
+import { motion, AnimatePresence } from "framer-motion";
 
 function SignupPage() {
   const { t } = useTranslation("common");
@@ -28,7 +29,7 @@ function SignupPage() {
     { value: string; label: string }[]
   >([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Added for loading state
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     birthDate: "",
@@ -119,13 +120,18 @@ function SignupPage() {
           );
           if (response.ok) {
             const data = await response.json();
-            setChurches(
-              data.map((church: { id: string; name: string }) => ({
+            const churchOptions = data.map(
+              (church: { id: string; name: string }) => ({
                 value: church.id,
                 label: church.name,
-              }))
+              })
             );
-            setSelectedChurch(data[0]?.id || "");
+            setChurches(churchOptions);
+            setSelectedChurch(churchOptions[0]?.value || "");
+            setFormData((prev) => ({
+              ...prev,
+              churchId: churchOptions[0]?.value || "",
+            }));
           } else {
             setChurches([]);
             setPositions([]);
@@ -156,13 +162,17 @@ function SignupPage() {
           );
           if (response.ok) {
             const data = await response.json();
-            setPositions(
-              data.map((position: { id: string; name: string }) => ({
+            const positionOptions = data.map(
+              (position: { id: string; name: string }) => ({
                 value: position.id,
                 label: position.name,
-              }))
+              })
             );
-            setFormData((prev) => ({ ...prev, position: "" }));
+            setPositions(positionOptions);
+            setFormData((prev) => ({
+              ...prev,
+              position: positionOptions[0]?.value || "",
+            }));
           } else {
             setPositions([]);
             setError(t("noPositionsFound"));
@@ -179,7 +189,7 @@ function SignupPage() {
     };
 
     fetchPositions();
-  }, [formData.churchId, isInitialLoad, selectedChurch]);
+  }, [selectedChurch, isInitialLoad]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -206,27 +216,34 @@ function SignupPage() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const formDataToSubmit = new FormData(e.currentTarget);
+    const formDataToSubmit = new FormData();
 
-    if (!formDataToSubmit.get("city")) {
+    // Append form data
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === "profileImage" && value) {
+        formDataToSubmit.append(key, value);
+      } else if (value) {
+        formDataToSubmit.append(key, value.toString());
+      }
+    });
+
+    // Validation
+    if (!formData.city) {
       setError(t("pleaseFillCityFields"));
       setIsSubmitting(false);
       return;
     }
-
-    if (!formDataToSubmit.get("region")) {
+    if (!formData.region) {
       setError(t("pleaseFillRegionFields"));
       setIsSubmitting(false);
       return;
     }
-
-    if (!formDataToSubmit.get("churchId")) {
+    if (!formData.churchId) {
       setError(t("pleaseFillChurchFields"));
       setIsSubmitting(false);
       return;
     }
-
-    if (!formDataToSubmit.get("position")) {
+    if (!formData.position) {
       setError(t("pleaseFillPositionFields"));
       setIsSubmitting(false);
       return;
@@ -256,210 +273,231 @@ function SignupPage() {
   const clearError = () => setError(null);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4 sm:p-6">
-      {isSubmitting || (isInitialLoad && <Loading />)}
-      <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-8 sm:p-12">
-        <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-8 text-center">
-          {t("signup")}
-        </h1>
-        {error && (
-          <div className="mb-6 flex items-center justify-between bg-red-50 text-red-600 p-4 rounded-lg text-sm animate-slide-in">
-            <span>{error}</span>
-            <button
-              onClick={clearError}
-              className="hover:text-red-800 transition-colors"
-              aria-label="Dismiss error"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        )}
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen flex items-center justify-center bg-gray-50 p-4 sm:p-6"
+    >
+      {isSubmitting || isInitialLoad ? (
+        <Loading />
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-8 sm:p-12"
         >
-          <Input
-            label={t("name")}
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
-            placeholder={t("name")}
-          />
-          <Input
-            label={t("birthDate")}
-            type="date"
-            name="birthDate"
-            value={formData.birthDate}
-            onChange={handleInputChange}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
-          />
-          <Input
-            label={t("email")}
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
-            placeholder={t("email")}
-          />
-          <Input
-            label={t("password")}
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
-            placeholder={t("password")}
-          />
-          <Input
-            label={t("phone")}
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
-            placeholder={t("phone")}
-          />
-          <Input
-            label={t("kakaoId")}
-            name="kakaoId"
-            value={formData.kakaoId}
-            onChange={handleInputChange}
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
-            placeholder={t("kakaoId")}
-          />
-          <Input
-            label={t("lineId")}
-            name="lineId"
-            value={formData.lineId}
-            onChange={handleInputChange}
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
-            placeholder={t("lineId")}
-          />
-          <Select
-            label={t("gender")}
-            name="gender"
-            options={[
-              { value: "M", label: t("male") },
-              { value: "F", label: t("female") },
-            ]}
-            value={formData.gender}
-            onChange={handleInputChange}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
-          />
-          <Input
-            label={t("address")}
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 transition-all duration-200"
-            placeholder={t("address")}
-          />
-          <Select
-            label={t("country")}
-            name="country"
-            options={countryOptions}
-            value={selectedCountry}
-            onChange={(e) => setSelectedCountry(e.target.value)}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
-          />
-          <Select
-            label={t("city")}
-            name="city"
-            options={citiesByCountry[selectedCountry] || []}
-            value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
-          />
-          <Select
-            label={t("region")}
-            name="region"
-            options={regionsByCity[selectedCity] || []}
-            value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value)}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
-          />
-          <Select
-            label={t("church")}
-            name="churchId"
-            options={churches}
-            value={selectedChurch}
-            onChange={(e) => {
-              setSelectedChurch(e.target.value);
-            }}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
-          />
-          <Select
-            label={t("position")}
-            name="position"
-            options={positions}
-            value={formData.position}
-            onChange={handleInputChange}
-            required
-            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 transition-all duration-200"
-            disabled={!selectedChurch || positions.length === 0}
-          />
-          <div className="col-span-1 md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("profileImage")}{" "}
-              <span className="text-gray-400">({t("optional")})</span>
-            </label>
-            <input
-              type="file"
-              name="profileImage"
-              accept="image/*"
-              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-all duration-200"
-              onChange={handleFileChange}
+          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-8 text-center tracking-tight">
+            {t("signup")}
+          </h1>
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mb-6 flex items-center justify-between bg-red-50 text-red-600 p-4 rounded-lg text-sm"
+              >
+                <span>{error}</span>
+                <button
+                  onClick={clearError}
+                  className="hover:text-red-800 transition-colors"
+                  aria-label={t("dismissError")}
+                >
+                  <X size={16} />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+            <Input
+              label={t("name")}
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+              placeholder={t("name")}
             />
-          </div>
-          <div className="col-span-1 md:col-span-2 flex justify-center mt-6">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="relative bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center">
-                  <svg
-                    className="animate-spin h-5 w-5 mr-2 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8H4z"
-                    ></path>
-                  </svg>
-                  {t("submitting")}
-                </span>
-              ) : (
-                t("signup")
-              )}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+            <Input
+              label={t("birthDate")}
+              type="date"
+              name="birthDate"
+              value={formData.birthDate}
+              onChange={handleInputChange}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
+            />
+            <Input
+              label={t("email")}
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+              placeholder={t("email")}
+            />
+            <Input
+              label={t("password")}
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+              placeholder={t("password")}
+            />
+            <Input
+              label={t("phone")}
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+              placeholder={t("phone")}
+            />
+            <Input
+              label={t("kakaoId")}
+              name="kakaoId"
+              value={formData.kakaoId}
+              onChange={handleInputChange}
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+              placeholder={t("kakaoId")}
+            />
+            <Input
+              label={t("lineId")}
+              name="lineId"
+              value={formData.lineId}
+              onChange={handleInputChange}
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+              placeholder={t("lineId")}
+            />
+            <Select
+              label={t("gender")}
+              name="gender"
+              options={[
+                { value: "M", label: t("male") },
+                { value: "F", label: t("female") },
+              ]}
+              value={formData.gender}
+              onChange={handleInputChange}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
+            />
+            <Input
+              label={t("address")}
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+              placeholder={t("address")}
+            />
+            <Select
+              label={t("country")}
+              name="country"
+              options={countryOptions}
+              value={selectedCountry}
+              onChange={(e) => setSelectedCountry(e.target.value)}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
+            />
+            <Select
+              label={t("city")}
+              name="city"
+              options={citiesByCountry[selectedCountry] || []}
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
+            />
+            <Select
+              label={t("region")}
+              name="region"
+              options={regionsByCity[selectedCity] || []}
+              value={selectedRegion}
+              onChange={(e) => setSelectedRegion(e.target.value)}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
+            />
+            <Select
+              label={t("church")}
+              name="churchId"
+              options={churches}
+              value={selectedChurch}
+              onChange={(e) => {
+                setSelectedChurch(e.target.value);
+              }}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
+            />
+            <Select
+              label={t("position")}
+              name="position"
+              options={positions}
+              value={formData.position}
+              onChange={handleInputChange}
+              required
+              disabled={!selectedChurch || positions.length === 0}
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+            />
+            <div className="col-span-full">
+              <label className="block text-sm font-medium text-gray-800 mb-2">
+                {t("profileImage")}
+                <span className="text-gray-500"> ({t("optional")})</span>
+              </label>
+              <input
+                type="file"
+                name="profileImage"
+                accept="image/*"
+                className="w-full p-3 border rounded-lg border-gray-300 shadow-sm bg-white text-gray-800 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-500 hover:file:bg-blue-100 transition-all duration-200"
+                onChange={handleFileChange}
+                aria-label={t("profileImage")}
+              />
+            </div>
+            <div className="col-span-full flex justify-center mt-6">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 disabled:bg-gray-400 disabled:hover:bg-scale-100 disabled:hover:bg-gray-400 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center">
+                    <svg
+                      className="animate-spin h-4 w-4 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-50"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-100"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      />
+                    </svg>
+                    {t("submitting")}
+                  </span>
+                ) : (
+                  t("signup")
+                )}
+              </Button>
+            </div>
+          </form>
+        </motion.div>
+      )}
+      ;
+    </motion.div>
   );
 }
 

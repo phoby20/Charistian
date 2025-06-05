@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
+import { formatInTimeZone } from "date-fns-tz";
 
 const prisma = new PrismaClient();
 
@@ -90,19 +91,23 @@ export async function POST(request: Request) {
       );
     }
 
-    // 서버의 현재 날짜 사용 (JST 기준)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
+    // JST 기준 현재 날짜 설정
+    const jstTimeZone = "Asia/Tokyo";
+    const todayJst = new Date(
+      formatInTimeZone(new Date(), jstTimeZone, "yyyy-MM-dd'T00:00:00.000Z")
+    );
+    const tomorrowJst = new Date(todayJst);
+    tomorrowJst.setDate(todayJst.getDate() + 1);
+
+    console.log("todayJst:", todayJst.toISOString()); // 디버깅: JST 기준 날짜 확인
 
     // 이미 출석 기록이 있는지 확인
     const existingAttendance = await prisma.attendance.findFirst({
       where: {
         userId,
         date: {
-          gte: today,
-          lt: tomorrow,
+          gte: todayJst,
+          lt: tomorrowJst,
         },
       },
     });
@@ -117,9 +122,9 @@ export async function POST(request: Request) {
     const attendance = await prisma.attendance.create({
       data: {
         userId,
-        date: today,
+        date: todayJst, // JST 기준 자정
         checkedById,
-        createdAt: new Date(), // 명시적으로 createdAt 추가 (스키마의 기본값이 없으면 필요)
+        createdAt: new Date(), // 현재 시간 (UTC 또는 서버 시간대)
       },
       select: {
         id: true,
@@ -128,6 +133,8 @@ export async function POST(request: Request) {
         checkedById: true,
       },
     });
+
+    console.log("Saved attendance date:", attendance.date.toISOString()); // 저장된 날짜 확인
 
     return NextResponse.json({ attendance }, { status: 201 });
   } catch (error) {

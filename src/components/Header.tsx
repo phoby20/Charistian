@@ -24,12 +24,14 @@ export default function Header() {
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
+  const [isMembersMenuOpen, setIsMembersMenuOpen] = useState(false); // New state for members dropdown
   const { user, logout } = useAuth();
   const router = useRouter();
 
   const langMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
+  const membersMenuRef = useRef<HTMLDivElement>(null); // New ref for members dropdown
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   // 외부 클릭으로 드롭다운 및 모바일 메뉴 닫기
@@ -47,6 +49,9 @@ export default function Header() {
       if (settingsMenuRef.current && settingsMenuRef.current.contains(target)) {
         isOutside = false;
       }
+      if (membersMenuRef.current && membersMenuRef.current.contains(target)) {
+        isOutside = false;
+      }
       if (mobileMenuRef.current && mobileMenuRef.current.contains(target)) {
         isOutside = false;
       }
@@ -55,6 +60,7 @@ export default function Header() {
         setIsLangMenuOpen(false);
         setIsUserMenuOpen(false);
         setIsSettingsMenuOpen(false);
+        setIsMembersMenuOpen(false); // Close members dropdown
         setIsMenuOpen(false);
       }
     }
@@ -82,6 +88,13 @@ export default function Header() {
     setIsSettingsMenuOpen(false);
     setIsMenuOpen(false);
     router.push("/master-management");
+  };
+
+  // 멤버 메뉴 닫기 및 내비게이션
+  const closeMembersMenu = (path: string) => {
+    setIsMembersMenuOpen(false);
+    setIsMenuOpen(false);
+    router.push(path);
   };
 
   // 로고 클릭 시 이동 경로 결정
@@ -112,20 +125,42 @@ export default function Header() {
             )}
             {user && (
               <>
-                <Link
-                  href="/attendance"
-                  className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  <UserCheck className="w-5 h-5 mr-1" />
-                  {t("attendance")}
-                </Link>
-                <Link
-                  href="/members"
-                  className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  <UsersRound className="w-5 h-5 mr-1" />
-                  {t("members")}
-                </Link>
+                {/* Members Dropdown */}
+                <div className="relative" ref={membersMenuRef}>
+                  <button
+                    onClick={() => setIsMembersMenuOpen(!isMembersMenuOpen)}
+                    className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    <UsersRound className="w-5 h-5 mr-1" />
+                    {t("members")}
+                    <ChevronDown className="w-4 h-4 ml-1" />
+                  </button>
+                  {isMembersMenuOpen && (
+                    <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
+                      <Link
+                        href="/members"
+                        onClick={() => closeMembersMenu("/members")}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {t("memberList")}
+                      </Link>
+                      <Link
+                        href="/attendance"
+                        onClick={() => closeMembersMenu("/attendance")}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {t("checkAttendance")}
+                      </Link>
+                      <Link
+                        href="/attendance-report"
+                        onClick={() => closeMembersMenu("/attendance-report")}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {t("attendanceReport")}
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </>
             )}
             {/* 설정 메뉴 */}
@@ -237,13 +272,42 @@ export default function Header() {
                   <UserCheck className="w-5 h-5 mr-1" />
                   {t("attendance")}
                 </Link>
-                <Link
-                  href="/members"
-                  className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  <UsersRound className="w-5 h-5 mr-1" />
-                  {t("members")}
-                </Link>
+                {/* Mobile Members Dropdown */}
+                <div className="px-3 py-2">
+                  <button
+                    onClick={() => setIsMembersMenuOpen(!isMembersMenuOpen)}
+                    className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
+                  >
+                    <UsersRound className="w-5 h-5 mr-2" />
+                    {t("members")}
+                    <ChevronDown className="w-4 h-4 ml-2" />
+                  </button>
+                  {isMembersMenuOpen && (
+                    <div className="mt-2 pl-4">
+                      <Link
+                        href="/members"
+                        onClick={() => closeMembersMenu("/members")}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {t("memberList")}
+                      </Link>
+                      <Link
+                        href="/attendance"
+                        onClick={() => closeMembersMenu("/attendance")}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {t("checkAttendance")}
+                      </Link>
+                      <Link
+                        href="/attendance-report"
+                        onClick={() => closeMembersMenu("/attendance-report")}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {t("attendanceReport")}
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </>
             )}
             {!user && (
@@ -302,12 +366,12 @@ export default function Header() {
                   </button>
                   <button
                     onClick={() => {
-                      changeLanguage("en");
+                      changeLanguage("ja");
                       toggleMenu();
                     }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    English
+                    日本語
                   </button>
                 </div>
               )}

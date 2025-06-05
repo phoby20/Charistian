@@ -74,7 +74,6 @@ export default function PendingUsersPage() {
   }, [userRole, userChurchId]);
 
   const handleApproveUser = async (userId: string) => {
-    console.log("Approving user:", userId);
     try {
       const response = await fetch("/api/users/approve", {
         method: "POST",

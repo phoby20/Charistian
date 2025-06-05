@@ -30,7 +30,6 @@ export default function PendingChurchPage() {
         const response = await fetch("/api/pending", {
           credentials: "include",
         });
-        console.log("response: ", response);
         if (!response.ok) throw new Error("Failed to fetch pending churches");
         const { pendingChurches } = await response.json();
         setPendingChurches(pendingChurches);

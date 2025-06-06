@@ -35,6 +35,14 @@ export default function Header() {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
+  // 모든 드롭다운 메뉴 닫기
+  const closeAllDropdowns = () => {
+    setIsLangMenuOpen(false);
+    setIsUserMenuOpen(false);
+    setIsSettingsMenuOpen(false);
+    setIsMembersMenuOpen(false);
+  };
+
   // 외부 클릭으로 드롭다운 및 모바일 메뉴 닫기
   useEffect(() => {
     function handleClickOutside(event: MouseEvent | TouchEvent) {
@@ -64,10 +72,7 @@ export default function Header() {
       }
 
       if (isOutside) {
-        setIsLangMenuOpen(false);
-        setIsUserMenuOpen(false);
-        setIsSettingsMenuOpen(false);
-        setIsMembersMenuOpen(false);
+        closeAllDropdowns();
         setIsMenuOpen(false);
       }
     }
@@ -83,7 +88,7 @@ export default function Header() {
   // 언어 전환
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
-    setIsLangMenuOpen(false);
+    closeAllDropdowns();
     setIsMenuOpen(false);
   };
 
@@ -101,14 +106,14 @@ export default function Header() {
 
   // 설정 메뉴 닫기 및 내비게이션
   const closeSettingsMenu = () => {
-    setIsSettingsMenuOpen(false);
+    closeAllDropdowns();
     setIsMenuOpen(false);
     router.push("/master-management");
   };
 
   // 멤버 메뉴 닫기 및 내비게이션
   const closeMembersMenu = (path: string) => {
-    setIsMembersMenuOpen(false);
+    closeAllDropdowns();
     setIsMenuOpen(false);
     router.push(path);
   };
@@ -144,7 +149,10 @@ export default function Header() {
                 {/* Members Dropdown */}
                 <div className="relative" ref={membersMenuRef}>
                   <button
-                    onClick={() => setIsMembersMenuOpen(!isMembersMenuOpen)}
+                    onClick={() => {
+                      closeAllDropdowns();
+                      setIsMembersMenuOpen(!isMembersMenuOpen);
+                    }}
                     className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
                   >
                     <UsersRound className="w-5 h-5 mr-1" />
@@ -183,7 +191,10 @@ export default function Header() {
             {user && user.role === "SUPER_ADMIN" && (
               <div className="relative" ref={settingsMenuRef}>
                 <button
-                  onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
+                  onClick={() => {
+                    closeAllDropdowns();
+                    setIsSettingsMenuOpen(!isSettingsMenuOpen);
+                  }}
                   className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   <Settings className="w-5 h-5 mr-1" />
@@ -206,7 +217,10 @@ export default function Header() {
             {/* 언어 선택 */}
             <div className="relative" ref={langMenuRef}>
               <button
-                onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                onClick={() => {
+                  closeAllDropdowns();
+                  setIsLangMenuOpen(!isLangMenuOpen);
+                }}
                 className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
               >
                 {i18n.language === "ko" ? "한국어" : "日本語"}
@@ -233,7 +247,10 @@ export default function Header() {
             {user ? (
               <div className="relative" ref={userMenuRef}>
                 <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  onClick={() => {
+                    closeAllDropdowns();
+                    setIsUserMenuOpen(!isUserMenuOpen);
+                  }}
                   className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   <UserIcon className="w-5 h-5 mr-1" />
@@ -294,7 +311,10 @@ export default function Header() {
                 {/* Mobile Members Dropdown */}
                 <div className="px-3 py-2">
                   <button
-                    onClick={() => setIsMembersMenuOpen(!isMembersMenuOpen)}
+                    onClick={() => {
+                      closeAllDropdowns();
+                      setIsMembersMenuOpen(!isMembersMenuOpen);
+                    }}
                     className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
                   >
                     <UsersRound className="w-5 h-5 mr-2" />
@@ -341,7 +361,10 @@ export default function Header() {
             {user && user.role === "SUPER_ADMIN" && (
               <div className="px-3 py-2">
                 <button
-                  onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
+                  onClick={() => {
+                    closeAllDropdowns();
+                    setIsSettingsMenuOpen(!isSettingsMenuOpen);
+                  }}
                   className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
                 >
                   <Settings className="w-5 h-5 mr-2" />
@@ -363,7 +386,10 @@ export default function Header() {
             )}
             <div className="px-3 py-2">
               <button
-                onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                onClick={() => {
+                  closeAllDropdowns();
+                  setIsLangMenuOpen(!isLangMenuOpen);
+                }}
                 className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
               >
                 <span className="flex items-center text-sm font-medium">
@@ -398,7 +424,10 @@ export default function Header() {
             {user ? (
               <div className="px-3 py-2">
                 <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  onClick={() => {
+                    closeAllDropdowns();
+                    setIsUserMenuOpen(!isUserMenuOpen);
+                  }}
                   className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
                 >
                   <UserIcon className="w-5 h-5 mr-2" />

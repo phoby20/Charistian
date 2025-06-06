@@ -24,20 +24,27 @@ export default function Header() {
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
-  const [isMembersMenuOpen, setIsMembersMenuOpen] = useState(false); // New state for members dropdown
+  const [isMembersMenuOpen, setIsMembersMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const router = useRouter();
 
   const langMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
-  const membersMenuRef = useRef<HTMLDivElement>(null); // New ref for members dropdown
+  const membersMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
   // 외부 클릭으로 드롭다운 및 모바일 메뉴 닫기
   useEffect(() => {
     function handleClickOutside(event: MouseEvent | TouchEvent) {
       const target = event.target as Node;
+
+      // 토글 버튼 클릭은 무시
+      if (toggleButtonRef.current && toggleButtonRef.current.contains(target)) {
+        return;
+      }
+
       let isOutside = true;
 
       if (langMenuRef.current && langMenuRef.current.contains(target)) {
@@ -60,7 +67,7 @@ export default function Header() {
         setIsLangMenuOpen(false);
         setIsUserMenuOpen(false);
         setIsSettingsMenuOpen(false);
-        setIsMembersMenuOpen(false); // Close members dropdown
+        setIsMembersMenuOpen(false);
         setIsMenuOpen(false);
       }
     }
@@ -80,8 +87,17 @@ export default function Header() {
     setIsMenuOpen(false);
   };
 
-  // 메뉴 토글
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  // 모바일 메뉴 열기
+  const openMobileMenu = (event: React.MouseEvent | React.TouchEvent) => {
+    event.stopPropagation();
+    setIsMenuOpen(true);
+  };
+
+  // 모바일 메뉴 닫기
+  const closeMobileMenu = (event: React.MouseEvent | React.TouchEvent) => {
+    event.stopPropagation();
+    setIsMenuOpen(false);
+  };
 
   // 설정 메뉴 닫기 및 내비게이션
   const closeSettingsMenu = () => {
@@ -246,8 +262,10 @@ export default function Header() {
           {/* 모바일 메뉴 버튼 */}
           <div className="md:hidden flex items-center">
             <button
-              onClick={toggleMenu}
+              ref={toggleButtonRef}
+              onClick={isMenuOpen ? closeMobileMenu : openMobileMenu}
               className="text-gray-600 hover:text-blue-600 focus:outline-none"
+              aria-label={isMenuOpen ? t("closeMenu") : t("openMenu")}
             >
               {isMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -267,6 +285,7 @@ export default function Header() {
               <>
                 <Link
                   href="/attendance"
+                  onClick={() => setIsMenuOpen(false)}
                   className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   <UserCheck className="w-5 h-5 mr-1" />
@@ -313,7 +332,7 @@ export default function Header() {
             {!user && (
               <Link
                 href="/church-registration"
-                onClick={toggleMenu}
+                onClick={() => setIsMenuOpen(false)}
                 className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
               >
                 {t("churchRegistration")}
@@ -358,7 +377,7 @@ export default function Header() {
                   <button
                     onClick={() => {
                       changeLanguage("ko");
-                      toggleMenu();
+                      setIsMenuOpen(false);
                     }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
@@ -367,7 +386,7 @@ export default function Header() {
                   <button
                     onClick={() => {
                       changeLanguage("ja");
-                      toggleMenu();
+                      setIsMenuOpen(false);
                     }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
@@ -391,7 +410,7 @@ export default function Header() {
                     <button
                       onClick={() => {
                         logout();
-                        toggleMenu();
+                        setIsMenuOpen(false);
                       }}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                     >
@@ -404,7 +423,7 @@ export default function Header() {
             ) : (
               <Link
                 href="/login"
-                onClick={toggleMenu}
+                onClick={() => setIsMenuOpen(false)}
                 className="block text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
               >
                 {t("login")}

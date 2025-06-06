@@ -5,24 +5,26 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
-import { User } from "@/types/customUser";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatInTimeZone } from "date-fns-tz";
+import { useAuth } from "@/context/AuthContext";
+import { User } from "@/types/customUser";
+import Loading from "@/components/Loading";
 
 // Attendance 데이터의 타입 정의
 interface AttendanceRecord {
   userId: string;
-  date: string; // e.g., "2025-06-05"
+  date: string; // e.g., "2025-06-06"
 }
 
 export default function AttendanceReport() {
   const { t } = useTranslation("common");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, isLoading, error: authError } = useAuth();
   const [members, setMembers] = useState<User[]>([]);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [userChurchId, setUserChurchId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [selectedSubGroup, setSelectedSubGroup] = useState<string | null>(null);
   const [isGroupMenuOpen, setIsGroupMenuOpen] = useState(false);
@@ -32,18 +34,21 @@ export default function AttendanceReport() {
   }>({});
   const [page, setPage] = useState(1);
   const [pageSize] = useState(30); // 페이지당 회원 수
-  // 오늘 날짜 동적으로 설정
-  const today = new Date().toISOString().split("T")[0];
+
+  // JST 기준 오늘 날짜 설정
+  const jstTimeZone = "Asia/Tokyo";
+  const today = formatInTimeZone(new Date(), jstTimeZone, "yyyy-MM-dd");
   const [startDate, setStartDate] = useState<string>(today);
   const [endDate, setEndDate] = useState<string>(today);
 
+  // 회원 목록 가져오기
   const fetchMembers = async () => {
     try {
-      if (userRole !== "SUPER_ADMIN" && userRole !== "ADMIN") {
+      if (!user || (user.role !== "SUPER_ADMIN" && user.role !== "ADMIN")) {
         router.push("/login");
         return;
       }
-      if (!userChurchId) {
+      if (!user.churchId) {
         setMembers([]);
         return;
       }
@@ -53,12 +58,12 @@ export default function AttendanceReport() {
       if (!response.ok) throw new Error("Failed to fetch members");
       const { members }: { members: User[] } = await response.json();
       const filteredMembers = members.filter(
-        (user: User) => user.churchId === userChurchId
+        (userData: User) => userData.churchId === user.churchId
       );
       setMembers(filteredMembers);
     } catch (err) {
       console.error("Error fetching members:", err);
-      setError(t("serverError"));
+      setFetchError(t("serverError"));
     }
   };
 
@@ -95,38 +100,17 @@ export default function AttendanceReport() {
       setAttendanceByDate(byDate);
     } catch (err) {
       console.error("Error fetching attendance:", err);
-      setError(t("serverError"));
+      setFetchError(t("serverError"));
     }
   };
 
+  // 데이터 가져오기
   useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const response = await fetch("/api/auth/me", {
-          credentials: "include",
-        });
-        if (response.ok) {
-          const data: { user: { role: string; churchId: string | null } } =
-            await response.json();
-          setUserRole(data.user.role);
-          setUserChurchId(data.user.churchId);
-        } else {
-          router.push("/login");
-        }
-      } catch (err) {
-        console.error("Error fetching user role:", err);
-        setError(t("serverError"));
-      }
-    };
-    fetchUserRole();
-  }, [router, t]);
-
-  useEffect(() => {
-    if (userRole !== null && userChurchId !== null) {
+    if (user && !isLoading) {
       fetchMembers();
       fetchAttendance();
     }
-  }, [userRole, userChurchId, startDate, endDate]);
+  }, [user, isLoading, startDate, endDate]);
 
   // 그룹 및 서브그룹 목록 생성
   const groups = Array.from(
@@ -199,7 +183,7 @@ export default function AttendanceReport() {
     const end = new Date(endDate);
     const dates = [];
     for (let date = start; date <= end; date.setDate(date.getDate() + 1)) {
-      dates.push(date.toISOString().split("T")[0]);
+      dates.push(formatInTimeZone(date, jstTimeZone, "yyyy-MM-dd"));
     }
     return dates;
   };
@@ -231,6 +215,10 @@ export default function AttendanceReport() {
     }
   };
 
+  // 로딩 및 인증 처리
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -239,7 +227,7 @@ export default function AttendanceReport() {
     >
       <header className="sticky top-0 z-20 bg-white shadow-sm px-4 py-3 md:px-6">
         <div className="max-w-7xl mx-auto space-y-3">
-          {/* Title and Group/Subgroup */}
+          {/* Title, Group/Subgroup, Logout */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
             <h1 className="text-2xl font-semibold text-gray-900 md:text-3xl tracking-tight">
               {t("attendanceReport")}
@@ -383,7 +371,7 @@ export default function AttendanceReport() {
                   id="attendance-report"
                   className="text-lg font-semibold text-gray-800 mb-4"
                 >
-                  {t("attendanceReport")} - {selectedGroup || t("allGroups")}{" "}
+                  {selectedGroup || t("allGroups")}{" "}
                   {selectedSubGroup ? `/ ${selectedSubGroup}` : ""}{" "}
                   {startDate && endDate
                     ? `(${startDate} ~ ${endDate})`
@@ -461,17 +449,19 @@ export default function AttendanceReport() {
           )}
 
           {/* 에러 모달 */}
-          {error && (
-            <Modal isOpen={!!error}>
+          {(authError || fetchError) && (
+            <Modal isOpen={!!(authError || fetchError)}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white rounded-xl p-4 sm:p-6"
               >
-                <p className="text-red-600 text-center text-sm mb-4">{error}</p>
+                <p className="text-red-600 text-center text-sm mb-4">
+                  {authError || fetchError}
+                </p>
                 <div className="flex justify-center">
                   <Button
-                    onClick={() => setError(null)}
+                    onClick={() => setFetchError(null)}
                     className="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-full hover:bg-gray-700 hover:scale-105 transition-all duration-200"
                   >
                     {t("close")}

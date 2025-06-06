@@ -1,5 +1,3 @@
-// src/app/attendance/page.tsx
-
 "use client";
 
 import { useTranslation } from "react-i18next";
@@ -8,9 +6,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import MemberCard from "@/components/MemberCard";
-import { User } from "@/types/customUser";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+import { User } from "@/types/customUser";
+import Loading from "@/components/Loading";
 
 // Attendance 데이터의 타입 정의
 interface AttendanceRecord {
@@ -21,10 +21,9 @@ export default function Attendance() {
   const { t } = useTranslation("common");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, isLoading, error: authError } = useAuth();
   const [members, setMembers] = useState<User[]>([]);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [userChurchId, setUserChurchId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [selectedSubGroup, setSelectedSubGroup] = useState<string | null>(null);
   const [isGroupMenuOpen, setIsGroupMenuOpen] = useState(false);
@@ -34,14 +33,17 @@ export default function Attendance() {
   }>({});
   const [page, setPage] = useState(1);
   const [pageSize] = useState(30); // 페이지당 회원 수
+  const [isCallApi, setIsCallApi] = useState(false);
 
+  // 회원 목록 가져오기
   const fetchMembers = async () => {
+    setIsCallApi(true);
     try {
-      if (userRole !== "SUPER_ADMIN" && userRole !== "ADMIN") {
+      if (!user || (user.role !== "SUPER_ADMIN" && user.role !== "ADMIN")) {
         router.push("/login");
         return;
       }
-      if (!userChurchId) {
+      if (!user.churchId) {
         setMembers([]);
         return;
       }
@@ -51,13 +53,14 @@ export default function Attendance() {
       if (!response.ok) throw new Error("Failed to fetch members");
       const { members }: { members: User[] } = await response.json();
       const filteredMembers = members.filter(
-        (user: User) => user.churchId === userChurchId
+        (userData: User) => userData.churchId === user.churchId
       );
       setMembers(filteredMembers);
     } catch (err) {
       console.error("Error fetching members:", err);
-      setError(t("serverError"));
+      setFetchError(t("serverError"));
     }
+    setIsCallApi(false);
   };
 
   // 출석 정보 가져오기 (서버 날짜 사용)
@@ -76,12 +79,13 @@ export default function Attendance() {
       setAttendanceStatus(status);
     } catch (err) {
       console.error("Error fetching attendance:", err);
-      setError(t("serverError"));
+      setFetchError(t("serverError"));
     }
   };
 
   // 출석 체크/취소 처리
   const checkUser = async (userId: string) => {
+    setIsCallApi(true);
     try {
       const isAttended = !attendanceStatus[userId];
       const response = await fetch("/api/attendance", {
@@ -99,38 +103,18 @@ export default function Attendance() {
       }));
     } catch (err) {
       console.error("Error updating attendance:", err);
-      setError(t("serverError"));
+      setFetchError(t("serverError"));
     }
+    setIsCallApi(false);
   };
 
+  // 데이터 가져오기
   useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const response = await fetch("/api/auth/me", {
-          credentials: "include",
-        });
-        if (response.ok) {
-          const data: { user: { role: string; churchId: string | null } } =
-            await response.json();
-          setUserRole(data.user.role);
-          setUserChurchId(data.user.churchId);
-        } else {
-          router.push("/login");
-        }
-      } catch (err) {
-        console.error("Error fetching user role:", err);
-        setError(t("serverError"));
-      }
-    };
-    fetchUserRole();
-  }, [router, t]);
-
-  useEffect(() => {
-    if (userRole !== null && userChurchId !== null) {
+    if (user && !isLoading) {
       fetchMembers();
       fetchAttendance();
     }
-  }, [userRole, userChurchId]);
+  }, [user, isLoading]);
 
   // 그룹 및 서브그룹 목록 생성
   const groups = Array.from(
@@ -167,7 +151,7 @@ export default function Attendance() {
     } else if (subGroups.length > 0) {
       setSelectedSubGroup(subGroups[0]);
     }
-  }, [searchParams, groups, subGroups, router]);
+  }, [searchParams, groups, subGroups]);
 
   // 필터링된 회원 목록
   const filteredMembers = members.filter((user) => {
@@ -212,6 +196,10 @@ export default function Attendance() {
     }
   };
 
+  // 로딩 및 인증 처리
+  if (isLoading || isCallApi) {
+    return <Loading />;
+  }
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -403,17 +391,19 @@ export default function Attendance() {
           )}
 
           {/* 에러 모달 */}
-          {error && (
-            <Modal isOpen={!!error}>
+          {(authError || fetchError) && (
+            <Modal isOpen={!!(authError || fetchError)}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white rounded-xl p-4 sm:p-6"
               >
-                <p className="text-red-600 text-center text-sm mb-4">{error}</p>
+                <p className="text-red-600 text-center text-sm mb-4">
+                  {authError || fetchError}
+                </p>
                 <div className="flex justify-center">
                   <Button
-                    onClick={() => setError(null)}
+                    onClick={() => setFetchError(null)}
                     className="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-full hover:bg-gray-700 hover:scale-105 transition-all duration-200"
                   >
                     {t("close")}

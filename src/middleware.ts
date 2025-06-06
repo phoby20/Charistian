@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/jwt";
-import { User } from "./types/user";
+import { TokenPayload, verifyToken } from "@/lib/jwt";
 
 declare module "next/server" {
   interface NextRequest {
-    user?: User;
+    user?: TokenPayload;
   }
 }
 

@@ -1,21 +1,22 @@
+// src/app/[locale]/signup/page.tsx
 "use client";
 
-import { useTranslation } from "next-i18next";
+import { useTranslations, useLocale } from "next-intl";
 import Input from "@/components/Input";
 import Select from "@/components/Select";
 import Button from "@/components/Button";
 import { FormEvent, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { appWithTranslation } from "next-i18next";
 import { citiesByCountry } from "@/data/cities";
 import { regionsByCity } from "@/data/regions";
 import { countryOptions } from "@/data/country";
 import { X } from "lucide-react";
 import Loading from "@/components/Loading";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "@/utils/useRouter";
 
-function SignupPage() {
-  const { t } = useTranslation("common");
+export default function SignupPage() {
+  const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string>("");
@@ -127,10 +128,11 @@ function SignupPage() {
               })
             );
             setChurches(churchOptions);
-            setSelectedChurch(churchOptions[0]?.value || "");
+            const defaultChurch = churchOptions[0]?.value || "";
+            setSelectedChurch(defaultChurch);
             setFormData((prev) => ({
               ...prev,
-              churchId: churchOptions[0]?.value || "",
+              churchId: defaultChurch,
             }));
           } else {
             setChurches([]);
@@ -150,7 +152,7 @@ function SignupPage() {
     };
 
     fetchChurches();
-  }, [selectedRegion, isInitialLoad, selectedCountry, selectedCity]);
+  }, [selectedRegion, isInitialLoad, selectedCountry, selectedCity, t]);
 
   // Church change: Fetch Positions
   useEffect(() => {
@@ -189,7 +191,7 @@ function SignupPage() {
     };
 
     fetchPositions();
-  }, [selectedChurch, isInitialLoad]);
+  }, [selectedChurch, isInitialLoad, t]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -262,7 +264,7 @@ function SignupPage() {
         return;
       }
 
-      router.push("/signup/complete");
+      router.push(`/${locale}/signup/complete`);
     } catch (err) {
       console.error("Signup error:", err);
       setError(t("serverError"));
@@ -430,6 +432,7 @@ function SignupPage() {
               value={selectedChurch}
               onChange={(e) => {
                 setSelectedChurch(e.target.value);
+                setFormData((prev) => ({ ...prev, churchId: e.target.value }));
               }}
               required
               className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
@@ -496,9 +499,6 @@ function SignupPage() {
           </form>
         </motion.div>
       )}
-      ;
     </motion.div>
   );
 }
-
-export default appWithTranslation(SignupPage);

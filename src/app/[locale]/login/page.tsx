@@ -11,7 +11,6 @@ export default function LoginPage() {
   const t = useTranslations(); // 네임스페이스 제거
   const [error, setError] = useState<string | null>(null);
   const locale = useLocale();
-  // const router = useRouter();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,6 +42,8 @@ export default function LoginPage() {
     }
   };
 
+  const signUpUrl = `/${locale}/signup`;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-md shadow-md w-full max-w-md">
@@ -61,7 +62,7 @@ export default function LoginPage() {
         <div className="mt-4 text-sm text-center">
           <p>
             {t("noAccount")}{" "}
-            <Link href="/signup" className="text-blue-600 hover:underline">
+            <Link href={signUpUrl} className="text-blue-600 hover:underline">
               {t("signup")}
             </Link>
           </p>

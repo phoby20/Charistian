@@ -1,12 +1,13 @@
-// src/app/signup/complete/page.tsx
+// src/app/[locale]/signup/complete/page.tsx
 "use client";
 
-import { useTranslation } from "next-i18next";
+import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import Button from "@/components/Button";
 
 export default function SignupCompletePage() {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
+  const locale = useLocale();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -15,7 +16,7 @@ export default function SignupCompletePage() {
           {t("signupComplete.title")}
         </h1>
         <p className="text-gray-600 mb-6">{t("signupComplete.message")}</p>
-        <Link href="/">
+        <Link href={`/${locale}`}>
           <Button variant="primary" className="w-full">
             {t("signupComplete.goHome")}
           </Button>

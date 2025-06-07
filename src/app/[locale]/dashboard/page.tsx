@@ -1,15 +1,23 @@
+// src/app/[locale]/dashboard/page.tsx
 "use client";
 
-import { useTranslation } from "next-i18next";
+import { useTranslations, useLocale } from "next-intl";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import { useState, useEffect } from "react";
 import { ChurchApplication, User } from "@prisma/client";
-import { useRouter } from "next/navigation";
+import { createNavigation } from "next-intl/navigation";
+
 import { useAuth } from "@/context/AuthContext";
 
+const { useRouter } = createNavigation({
+  locales: ["ko", "ja"],
+  defaultLocale: "ko",
+});
+
 export default function DashboardPage() {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
   const { user, isLoading, error: authError } = useAuth();
   const [pendingChurches, setPendingChurches] = useState<ChurchApplication[]>(
@@ -55,7 +63,7 @@ export default function DashboardPage() {
     if (user && !isLoading) {
       fetchPendingData();
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, t]);
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-gray-50 to-gray-200">
@@ -70,22 +78,22 @@ export default function DashboardPage() {
         {pendingUsers.length > 0 && (
           <div
             className="mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-md cursor-pointer hover:bg-yellow-200 transition-colors"
-            onClick={() => router.push("/pending-users")}
+            onClick={() => router.push(`/${locale}/pending-users`)}
             role="button"
             aria-label={t("pendingUsersWarning")}
           >
-            {t("pendingUsersWarning")} {pendingUsers.length}
+            {t("pendingUsersWarning", { count: pendingUsers.length })}
           </div>
         )}
 
         {pendingChurches.length > 0 && (
           <div
             className="mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-md cursor-pointer hover:bg-yellow-200 transition-colors"
-            onClick={() => router.push("/pending-churchs")}
+            onClick={() => router.push(`/${locale}/pending-churches`)}
             role="button"
             aria-label={t("pendingChurchesWarning")}
           >
-            {t("pendingChurchesWarning")} {pendingChurches.length}
+            {t("pendingChurchesWarning", { count: pendingChurches.length })}
           </div>
         )}
 

@@ -1,16 +1,17 @@
-// src/app/login/page.tsx
+// src/app/[locale]/login/page.tsx
 "use client";
 
-import { useTranslation } from "next-i18next";
+import { useLocale, useTranslations } from "next-intl";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import { FormEvent, useState } from "react";
-import { appWithTranslation } from "next-i18next";
-import Link from "next/link"; // Next.js Link 컴포넌트 추가
+import Link from "next/link";
 
-function LoginPage() {
-  const { t } = useTranslation("common");
+export default function LoginPage() {
+  const t = useTranslations(); // 네임스페이스 제거
   const [error, setError] = useState<string | null>(null);
+  const locale = useLocale();
+  // const router = useRouter();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,7 +32,7 @@ function LoginPage() {
       }
 
       if (typeof window !== "undefined") {
-        window.location.href = "/dashboard";
+        window.location.href = `/${locale}/dashboard`;
       }
     } catch (err) {
       setError(
@@ -69,5 +70,3 @@ function LoginPage() {
     </div>
   );
 }
-
-export default appWithTranslation(LoginPage);

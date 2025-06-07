@@ -2,9 +2,10 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl"; // next-intl 번역 및 로케일
 import { User } from "@prisma/client";
-import { useTranslation } from "next-i18next";
+import { useRouter } from "@/utils/useRouter";
 
 interface AuthContextType {
   user: User | null;
@@ -20,8 +21,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const pathname = usePathname(); // 현재 경로 가져오기
-  const { t } = useTranslation("common");
+  const pathname = usePathname();
+  const t = useTranslations(); // 네임스페이스 없이 사용
+  const locale = useLocale(); // 현재 로케일 가져오기
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -40,19 +42,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (err) {
         console.error("Error fetching user:", err);
         setError(t("serverError"));
-        router.push("/login");
+        router.push(`/${locale}/login`); // 로케일 포함 로그인 페이지로
       } finally {
         setIsLoading(false);
       }
     };
     if (
-      pathname !== "/login" &&
-      pathname !== "/signup" &&
-      pathname !== "/church-registration"
+      pathname !== `/${locale}/login` &&
+      pathname !== `/${locale}/signup` &&
+      pathname !== `/${locale}/church-registration`
     ) {
       fetchUser();
     }
-  }, [router, pathname]);
+  }, [router, pathname, locale]);
 
   const logout = async () => {
     try {
@@ -61,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         credentials: "include",
       });
       setUser(null);
-      router.push("/login");
+      router.push("/", { locale: locale });
     } catch (error) {
       console.error("Error logging out:", error);
       setError(t("serverError"));

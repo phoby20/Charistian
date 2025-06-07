@@ -1,21 +1,21 @@
 "use client";
 
-import { useTranslation } from "next-i18next";
+import { useTranslations } from "next-intl";
 import Input from "@/components/Input";
 import Select from "@/components/Select";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import { FormEvent, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { regionsByCity } from "@/data/regions";
 import { citiesByCountry } from "@/data/cities";
 import { countryOptions } from "@/data/country";
 import Loading from "@/components/Loading";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import { useRouter } from "@/utils/useRouter";
 
 export default function ChurchRegistrationPage() {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

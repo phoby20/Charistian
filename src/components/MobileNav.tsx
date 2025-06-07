@@ -84,21 +84,21 @@ export default function MobileNav({
                   {isMembersMenuOpen && (
                     <div className="mt-2 pl-4">
                       <Link
-                        href="/members"
+                        href={`${locale}/members`}
                         onClick={() => closeMembersMenu("/members")}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         {t("memberList")}
                       </Link>
                       <Link
-                        href="/attendance"
+                        href={`${locale}/attendance`}
                         onClick={() => closeMembersMenu("/attendance")}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         {t("checkAttendance")}
                       </Link>
                       <Link
-                        href="/attendance-report"
+                        href={`${locale}/attendance-report`}
                         onClick={() => closeMembersMenu("/attendance-report")}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
@@ -111,7 +111,7 @@ export default function MobileNav({
             )}
             {!user && (
               <Link
-                href="/church-registration"
+                href={`${locale}/church-registration`}
                 onClick={() => setIsMenuOpen(false)}
                 className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
               >
@@ -134,7 +134,7 @@ export default function MobileNav({
                 {isSettingsMenuOpen && (
                   <div className="mt-2 pl-4">
                     <Link
-                      href="/master-management"
+                      href={`${locale}/master-management`}
                       onClick={closeSettingsMenu}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >

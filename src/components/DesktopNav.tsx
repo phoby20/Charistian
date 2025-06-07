@@ -67,7 +67,7 @@ export default function DesktopNav({
     <nav className="hidden md:flex space-x-4 items-center">
       {!user && (
         <Link
-          href="/church-registration"
+          href={`${locale}/church-registration`}
           className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
         >
           {t("churchRegistration")}
@@ -91,21 +91,21 @@ export default function DesktopNav({
             {isMembersMenuOpen && (
               <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
                 <Link
-                  href="/members"
+                  href={`${locale}/members`}
                   onClick={() => closeMembersMenu("/members")}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   {t("memberList")}
                 </Link>
                 <Link
-                  href="/attendance"
+                  href={`${locale}/attendance`}
                   onClick={() => closeMembersMenu("/attendance")}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   {t("checkAttendance")}
                 </Link>
                 <Link
-                  href="/attendance-report"
+                  href={`${locale}/attendance-report`}
                   onClick={() => closeMembersMenu("/attendance-report")}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
@@ -133,7 +133,7 @@ export default function DesktopNav({
           {isSettingsMenuOpen && (
             <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
               <Link
-                href="/master-management"
+                href={`${locale}/master-management`}
                 onClick={closeSettingsMenu}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >

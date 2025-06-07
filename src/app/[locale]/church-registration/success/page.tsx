@@ -1,12 +1,12 @@
 // src/app/church-registration/success/page.tsx
 "use client";
 
-import { useTranslation } from "next-i18next";
 import Button from "@/components/Button";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/utils/useRouter";
+import { useTranslations } from "next-intl";
 
 export default function SuccessPage() {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
 
   return (

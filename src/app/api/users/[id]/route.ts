@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import { Role } from "@prisma/client";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secure-secret-key";
 
@@ -34,8 +35,32 @@ export async function PUT(
       );
     }
 
-    if (!["SUPER_ADMIN", "ADMIN"].includes(decoded.role)) {
-      return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
+    // Role 변경 권한 정의
+    const allowedRoles: { [key: string]: string[] } = {
+      MASTER: [
+        "MASTER",
+        "SUPER_ADMIN",
+        "SUB_ADMIN",
+        "ADMIN",
+        "GENERAL",
+        "VISITOR",
+      ],
+      SUPER_ADMIN: ["SUB_ADMIN", "ADMIN", "GENERAL", "VISITOR"],
+      SUB_ADMIN: ["ADMIN", "GENERAL", "VISITOR"],
+      ADMIN: ["GENERAL", "VISITOR"],
+      GENERAL: [],
+      VISITOR: [],
+    };
+
+    // 현재 사용자의 Role이 허용된 Role 변경 권한이 있는지 확인
+    if (
+      !allowedRoles[decoded.role] ||
+      allowedRoles[decoded.role].length === 0
+    ) {
+      return NextResponse.json(
+        { error: "Role 변경 권한이 없습니다." },
+        { status: 403 }
+      );
     }
 
     const { id } = await params;
@@ -57,13 +82,38 @@ export async function PUT(
       subGroupId,
       dutyIds,
       teamIds,
+      role,
     } = data;
 
-    console.log("groupId: ", groupId);
-
-    if (!name || !email || !birthDate || !gender) {
+    // 필수 필드 검증 (role 추가)
+    if (!name || !email || !birthDate || !gender || !role) {
       return NextResponse.json(
         { error: "필수 필드가 누락되었습니다." },
+        { status: 400 }
+      );
+    }
+
+    // 요청된 Role이 현재 사용자의 권한 내에 있는지 검증
+    if (role && !allowedRoles[decoded.role].includes(role)) {
+      return NextResponse.json(
+        { error: `허용되지 않은 Role: ${role}` },
+        { status: 403 }
+      );
+    }
+
+    // 유효한 Role 값인지 검증
+    const validRoles = [
+      "MASTER",
+      "SUPER_ADMIN",
+      "SUB_ADMIN",
+      "ADMIN",
+      "GENERAL",
+      "VISITOR",
+    ] as const;
+
+    if (role && !validRoles.includes(role)) {
+      return NextResponse.json(
+        { error: "유효하지 않은 Role 값입니다." },
         { status: 400 }
       );
     }
@@ -83,6 +133,7 @@ export async function PUT(
         birthDate: new Date(birthDate),
         gender,
         position: positionId,
+        role: role as Role, // Role 업데이트 (Prisma Enum 처리)
         groups: groupId
           ? {
               set: [{ id: groupId }],
@@ -130,6 +181,7 @@ export async function PUT(
       duties: updatedUser.duties,
       teams: updatedUser.teams,
       position: position,
+      role: updatedUser.role, // role 필드 포함
     };
 
     return NextResponse.json({ user: formattedUser });

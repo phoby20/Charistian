@@ -1,4 +1,3 @@
-// src/components/UserDetailEditForm.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -20,6 +19,7 @@ import { citiesByCountry } from "@/data/cities";
 import { regionsByCity } from "@/data/regions";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
+import { useAuth } from "@/context/AuthContext"; // AuthContext에서 현재 사용자 Role 가져오기
 
 interface SelectOption {
   value: string;
@@ -41,7 +41,8 @@ interface Field {
     | "selectTeams"
     | "selectCountry"
     | "selectCity"
-    | "selectRegion";
+    | "selectRegion"
+    | "selectRole"; // Role 선택 필드 추가
   options?: string[] | SelectOption[];
   icon?: string;
   required?: boolean;
@@ -75,6 +76,7 @@ export default function UserDetailEditForm({
   error: parentError,
 }: UserDetailEditFormProps) {
   const t = useTranslations();
+  const { user: currentUser } = useAuth(); // 현재 로그인한 사용자 정보 가져오기
   const [formData, setFormData] = useState<FormData>({
     ...user,
     birthDate: user.birthDate ? user.birthDate.split("T")[0] : "",
@@ -86,11 +88,45 @@ export default function UserDetailEditForm({
     country: user.country || "",
     city: user.city || "",
     region: user.region || "",
+    role: user.role, // Role 초기값 추가
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [subGroups, setSubGroups] = useState<SubGroup[]>(initialSubGroups);
   const [subGroupLoading, setSubGroupLoading] = useState<boolean>(false);
   const [subGroupError, setSubGroupError] = useState<string | null>(null);
+
+  // Role 옵션 정의
+  const roleOptions: SelectOption[] = [
+    { value: "MASTER", label: "master" },
+    { value: "SUPER_ADMIN", label: "superAdmin" },
+    { value: "SUB_ADMIN", label: "subAdmin" },
+    { value: "ADMIN", label: "admin" },
+    { value: "GENERAL", label: "general" },
+    { value: "VISITOR", label: "visitor" },
+  ];
+
+  // 현재 사용자의 Role에 따라 허용된 Role 옵션 필터링
+  const getAllowedRoles = (): SelectOption[] => {
+    if (!currentUser?.role) return [];
+    switch (currentUser.role) {
+      case "MASTER":
+        return roleOptions; // 모든 Role 허용
+      case "SUPER_ADMIN":
+        return roleOptions.filter((option) =>
+          ["SUB_ADMIN", "ADMIN", "GENERAL", "VISITOR"].includes(option.value)
+        );
+      case "SUB_ADMIN":
+        return roleOptions.filter((option) =>
+          ["ADMIN", "GENERAL", "VISITOR"].includes(option.value)
+        );
+      case "ADMIN":
+        return roleOptions.filter((option) =>
+          ["GENERAL", "VISITOR"].includes(option.value)
+        );
+      default:
+        return []; // VISITOR, GENERAL 등은 Role 변경 불가
+    }
+  };
 
   useEffect(() => {
     setFormData({
@@ -104,6 +140,7 @@ export default function UserDetailEditForm({
       country: user.country || "",
       city: user.city || "",
       region: user.region || "",
+      role: user.role,
     });
     setSubGroups(initialSubGroups);
   }, [user, initialSubGroups]);
@@ -191,6 +228,11 @@ export default function UserDetailEditForm({
     setFormData((prev) => ({ ...prev, position: selectedPosition }));
   };
 
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const role = e.target.value as User["role"];
+    setFormData((prev) => ({ ...prev, role }));
+  };
+
   const validateForm = () => {
     if (!formData.name) return t("required", { field: t("name") });
     if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
@@ -198,6 +240,7 @@ export default function UserDetailEditForm({
     if (!formData.birthDate) return t("required", { field: t("birthDate") });
     if (!formData.gender) return t("required", { field: t("gender") });
     if (formData.subGroupId && !formData.groupId) return t("selectGroupFirst");
+    if (!formData.role) return t("required", { field: t("role") }); // Role 필수 검증 추가
     return null;
   };
 
@@ -229,6 +272,7 @@ export default function UserDetailEditForm({
           subGroupId: formData.subGroupId,
           dutyIds: formData.dutyIds,
           teamIds: formData.teamIds,
+          role: formData.role, // Role 추가
         }),
       });
 
@@ -272,6 +316,7 @@ export default function UserDetailEditForm({
           apiUser.user.teams ||
           teams.filter((t) => formData.teamIds.includes(t.id)) ||
           [],
+        role: apiUser.user.role || formData.role, // Role 업데이트 반영
         churchId: user.churchId,
         createdAt: user.createdAt,
         id: user.id,
@@ -297,6 +342,7 @@ export default function UserDetailEditForm({
       country: user.country || "",
       city: user.city || "",
       region: user.region || "",
+      role: user.role,
     });
     setFormError(null);
     setSubGroupError(null);
@@ -368,6 +414,14 @@ export default function UserDetailEditForm({
       icon: "check-square",
     },
     { key: "teamIds", label: t("teams"), type: "selectTeams", icon: "team" },
+    {
+      key: "role",
+      label: t("role"),
+      type: "selectRole",
+      options: getAllowedRoles(), // 동적으로 허용된 Role 옵션 사용
+      icon: "shield",
+      required: true,
+    },
   ];
 
   if (isLoading) return <Loading />;
@@ -491,6 +545,7 @@ export default function UserDetailEditForm({
                       {icon === "users" && "👥"}
                       {icon === "check-square" && "✅"}
                       {icon === "team" && "🤝"}
+                      {icon === "shield" && "🛡️"}
                     </span>
                     <div className="flex-1 relative">
                       <label className="text-sm font-medium text-gray-600 flex items-center">
@@ -540,7 +595,7 @@ export default function UserDetailEditForm({
                         >
                           {(options as SelectOption[])?.map((opt) => (
                             <option key={opt.value} value={opt.value}>
-                              {opt.label} {/* t(opt.label) → opt.label */}
+                              {opt.label}
                             </option>
                           ))}
                         </select>
@@ -557,7 +612,7 @@ export default function UserDetailEditForm({
                         >
                           {(options as SelectOption[])?.map((opt) => (
                             <option key={opt.value} value={opt.value}>
-                              {opt.label} {/* t(opt.label) → opt.label */}
+                              {opt.label}
                             </option>
                           ))}
                         </select>
@@ -574,7 +629,7 @@ export default function UserDetailEditForm({
                         >
                           {(options as SelectOption[])?.map((opt) => (
                             <option key={opt.value} value={opt.value}>
-                              {opt.label} {/* t(opt.label) → opt.label */}
+                              {opt.label}
                             </option>
                           ))}
                         </select>
@@ -652,6 +707,20 @@ export default function UserDetailEditForm({
                           {teams.map((team) => (
                             <option key={team.id} value={team.id}>
                               {team.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : type === "selectRole" ? (
+                        <select
+                          value={formData.role || ""}
+                          onChange={handleRoleChange}
+                          className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
+                          aria-label={label}
+                          disabled={isLoading || !currentUser?.role} // 현재 사용자가 없으면 비활성화
+                        >
+                          {getAllowedRoles().map((role) => (
+                            <option key={role.value} value={role.value}>
+                              {role.label}
                             </option>
                           ))}
                         </select>

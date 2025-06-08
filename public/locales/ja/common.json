@@ -189,6 +189,5 @@
   "addSubGroup": "小グループ登録",
   "addDuty": "職務登録",
   "addTeam": "チーム登録",
-  "male": "男性",
-  "female": "女性"
+  "role": "権限"
 }

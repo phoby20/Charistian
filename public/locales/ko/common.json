@@ -196,6 +196,5 @@
   "addSubGroup": "소그룹등록",
   "addDuty": "직책등록",
   "addTeam": "팀등록",
-  "male": "남자",
-  "female": "여자"
+  "role": "권한"
 }

@@ -1,12 +1,12 @@
 "use client";
 
-import { useTranslation } from "next-i18next";
 import { useState, useEffect, useRef } from "react";
 import Button from "./Button";
-import { useRouter } from "next/navigation";
 import { MoreVertical, ChevronDown } from "lucide-react";
 import SubGroupManagement from "./SubGroupManagement";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/utils/useRouter";
 
 interface Group {
   id: string;
@@ -29,7 +29,7 @@ export default function GroupManagement({
   const [error, setError] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -267,7 +267,7 @@ export default function GroupManagement({
           />
           <Button
             onClick={handleAddGroup}
-            className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:scale-105 transition-all duration-200"
+            className="w-full sm:w-auto px-4 py-2 font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:scale-105 transition-all duration-200"
           >
             {t("addGroup")}
           </Button>
@@ -358,9 +358,7 @@ export default function GroupManagement({
                                 )
                               }
                               className="p-1 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full transition-all duration-200"
-                              aria-label={t("groupOptions", {
-                                name: group.name,
-                              })}
+                              aria-label={group.name}
                               aria-expanded={openMenuId === group.id}
                               aria-haspopup="true"
                             >

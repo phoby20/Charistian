@@ -1,11 +1,11 @@
 // src/components/SubGroupManagement.tsx
 "use client";
 
-import { useTranslation } from "next-i18next";
 import { useState, useEffect, useRef } from "react";
 import Button from "./Button";
 import { MoreVertical } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/utils/useRouter";
 
 interface SubGroup {
   id: string;
@@ -30,7 +30,7 @@ export default function SubGroupManagement({
   const [editingSubGroup, setEditingSubGroup] = useState<SubGroup | null>(null);
   const [subGroupLoading, setSubGroupLoading] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -212,7 +212,7 @@ export default function SubGroupManagement({
         />
         <Button
           onClick={handleAddSubGroup}
-          className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          className="w-full min-w-28 sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
           disabled={subGroupLoading}
         >
           {t("addSubGroup")}
@@ -271,7 +271,6 @@ export default function SubGroupManagement({
                         )
                       }
                       className="p-1 text-gray-600 hover:text-gray-800"
-                      aria-label={t("subGroupOptions")}
                     >
                       <MoreVertical className="h-4 w-4" />
                     </button>

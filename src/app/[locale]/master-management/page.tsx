@@ -1,8 +1,7 @@
 "use client";
 
-import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import GroupManagement from "@/components/GroupManagement";
 import PositionManagement from "@/components/PositionManagement";
 import DutyManagement from "@/components/DutyManagement";
@@ -11,9 +10,11 @@ import Loading from "@/components/Loading";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/utils/useRouter";
 
 export default function MasterManagementPage() {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading, error } = useAuth();

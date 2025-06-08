@@ -1,11 +1,11 @@
 "use client";
 
-import { useTranslation } from "next-i18next";
 import { useState, useEffect, useRef } from "react";
 import Button from "./Button";
-import { useRouter } from "next/navigation";
 import { MoreVertical } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/utils/useRouter";
 
 interface Position {
   id: string;
@@ -27,8 +27,9 @@ export default function PositionManagement({
   const [editingNewName, setEditingNewName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
+
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
@@ -254,7 +255,7 @@ export default function PositionManagement({
             animate={{ opacity: 1 }}
             className="text-gray-500 italic text-center text-sm"
           >
-            {t("noPositions")}
+            {t("noPosition")}
           </motion.p>
         ) : (
           <ul className="space-y-3">
@@ -307,9 +308,7 @@ export default function PositionManagement({
                             )
                           }
                           className="p-1 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full transition-all duration-200"
-                          aria-label={t("positionActions", {
-                            name: position.name,
-                          })}
+                          aria-label={position.name}
                           aria-expanded={openMenuId === position.id}
                           aria-haspopup="true"
                         >

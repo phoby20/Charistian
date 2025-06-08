@@ -168,6 +168,9 @@
   "noDuties": "職務無し",
   "noPosition": "職分無し",
   "noMembers": "登録済みの聖徒がありません",
+  "attended": "出席済み",
+  "notAttended": "未出席",
+  "attendance": "出席チェック",
   "male": "男性",
   "female": "女性"
 }

@@ -175,6 +175,9 @@
   "noDuties": "직책없음",
   "noPosition": "직분없음",
   "noMembers": "등록된 성도가 없습니다",
+  "attended": "출석",
+  "notAttended": "미출석",
+  "attendance": "출석체크",
   "male": "남자",
   "female": "여자"
 }

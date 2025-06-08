@@ -1,8 +1,7 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import MemberCard from "@/components/MemberCard";
@@ -11,6 +10,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { User } from "@/types/customUser";
 import Loading from "@/components/Loading";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/utils/useRouter";
 
 // Attendance 데이터의 타입 정의
 interface AttendanceRecord {
@@ -18,7 +19,7 @@ interface AttendanceRecord {
 }
 
 export default function Attendance() {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading, error: authError } = useAuth();
@@ -220,9 +221,7 @@ export default function Attendance() {
                 aria-expanded={isGroupMenuOpen}
                 aria-haspopup="true"
               >
-                <span className="truncate max-w-[120px]">
-                  {selectedGroup || t("selectGroup")}
-                </span>
+                <span className="truncate max-w-[120px]">{selectedGroup}</span>
                 <ChevronDown
                   className="w-4 h-4 transition-transform duration-200"
                   style={{
@@ -265,7 +264,7 @@ export default function Attendance() {
                   aria-haspopup="true"
                 >
                   <span className="truncate max-w-[120px]">
-                    {selectedSubGroup || t("selectSubGroup")}
+                    {selectedSubGroup}
                   </span>
                   <ChevronDown
                     className="w-4 h-4 transition-transform duration-200"
@@ -337,7 +336,7 @@ export default function Attendance() {
                       id="attendance"
                       className="text-lg font-semibold text-gray-800 mb-4"
                     >
-                      {t("attendance")} - {selectedGroup || t("allGroups")}{" "}
+                      {selectedGroup}{" "}
                       {selectedSubGroup ? `/ ${selectedSubGroup}` : ""}
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

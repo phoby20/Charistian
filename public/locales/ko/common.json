@@ -178,6 +178,8 @@
   "attended": "출석",
   "notAttended": "미출석",
   "attendance": "출석체크",
+  "startDate": "시작일",
+  "endDate": "출석체크",
   "male": "남자",
   "female": "여자"
 }

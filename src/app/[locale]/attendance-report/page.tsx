@@ -1,8 +1,7 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import { ChevronDown } from "lucide-react";
@@ -11,6 +10,8 @@ import { formatInTimeZone } from "date-fns-tz";
 import { useAuth } from "@/context/AuthContext";
 import { User } from "@/types/customUser";
 import Loading from "@/components/Loading";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/utils/useRouter";
 
 // Attendance 데이터의 타입 정의
 interface AttendanceRecord {
@@ -19,7 +20,7 @@ interface AttendanceRecord {
 }
 
 export default function AttendanceReport() {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading, error: authError } = useAuth();
@@ -242,7 +243,7 @@ export default function AttendanceReport() {
                   aria-haspopup="true"
                 >
                   <span className="truncate max-w-[120px]">
-                    {selectedGroup || t("selectGroup")}
+                    {selectedGroup}
                   </span>
                   <ChevronDown
                     className="w-4 h-4 transition-transform duration-200"
@@ -285,7 +286,7 @@ export default function AttendanceReport() {
                     aria-haspopup="true"
                   >
                     <span className="truncate max-w-[120px]">
-                      {selectedSubGroup || t("selectSubGroup")}
+                      {selectedSubGroup}
                     </span>
                     <ChevronDown
                       className="w-4 h-4 transition-transform duration-200"
@@ -371,7 +372,7 @@ export default function AttendanceReport() {
                   id="attendance-report"
                   className="text-lg font-semibold text-gray-800 mb-4"
                 >
-                  {selectedGroup || t("allGroups")}{" "}
+                  {selectedGroup}{" "}
                   {selectedSubGroup ? `/ ${selectedSubGroup}` : ""}{" "}
                   {startDate && endDate
                     ? `(${startDate} ~ ${endDate})`

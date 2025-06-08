@@ -166,5 +166,7 @@
   "noTeams": "所属しているチーム無し",
   "duties": "職務",
   "noDuties": "職務無し",
-  "noPosition": "職分無し"
+  "noPosition": "職分無し",
+  "male": "男性",
+  "female": "女性"
 }

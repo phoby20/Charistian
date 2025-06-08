@@ -1,3 +1,4 @@
+// src/components/UserDetailEditForm.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -146,7 +147,7 @@ export default function UserDetailEditForm({
         );
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || "서브그룹을 가져오지 못했습니다.");
+          throw new Error(errorData.error || t("subGroupFetchError"));
         }
         const { subGroups: fetchedSubGroups } = await response.json();
         setSubGroups(fetchedSubGroups || []);
@@ -340,7 +341,10 @@ export default function UserDetailEditForm({
       key: "gender",
       label: t("gender"),
       type: "select",
-      options: ["Male", "Female"],
+      options: [
+        { value: "Male", label: "male" },
+        { value: "Female", label: "female" },
+      ],
       icon: "user",
       required: true,
     },
@@ -517,9 +521,9 @@ export default function UserDetailEditForm({
                           aria-label={label}
                           disabled={isLoading}
                         >
-                          {(options as string[])?.map((opt) => (
-                            <option key={opt} value={opt}>
-                              {t(opt)}
+                          {(options as SelectOption[])?.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {t(opt.label)}
                             </option>
                           ))}
                         </select>
@@ -536,7 +540,7 @@ export default function UserDetailEditForm({
                         >
                           {(options as SelectOption[])?.map((opt) => (
                             <option key={opt.value} value={opt.value}>
-                              {t(opt.label)}
+                              {opt.label} {/* t(opt.label) → opt.label */}
                             </option>
                           ))}
                         </select>
@@ -553,7 +557,7 @@ export default function UserDetailEditForm({
                         >
                           {(options as SelectOption[])?.map((opt) => (
                             <option key={opt.value} value={opt.value}>
-                              {t(opt.label)}
+                              {opt.label} {/* t(opt.label) → opt.label */}
                             </option>
                           ))}
                         </select>
@@ -570,7 +574,7 @@ export default function UserDetailEditForm({
                         >
                           {(options as SelectOption[])?.map((opt) => (
                             <option key={opt.value} value={opt.value}>
-                              {t(opt.label)}
+                              {opt.label} {/* t(opt.label) → opt.label */}
                             </option>
                           ))}
                         </select>

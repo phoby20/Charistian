@@ -175,29 +175,31 @@ export default function PendingUsersPage() {
 
         {/* Rejection Modal */}
         <Modal isOpen={isRejectionModalOpen}>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            {t("userRejectionReason")}
-          </h2>
-          <textarea
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            value={rejectionReason}
-            onChange={(e) => setRejectionReason(e.target.value)}
-            placeholder={t("enterUserRejectionReason")}
-          />
-          <div className="flex justify-end mt-4 space-x-3">
-            <Button
-              onClick={handleRejectUser}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
-              disabled={!rejectionReason.trim()}
-            >
-              {t("confirm")}
-            </Button>
-            <Button
-              onClick={() => setRejectionModalOpen(false)}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md"
-            >
-              {t("close")}
-            </Button>
+          <div className="p-4">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              {t("userRejectionReason")}
+            </h2>
+            <textarea
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder={t("enterUserRejectionReason")}
+            />
+            <div className="flex justify-end mt-4 space-x-3">
+              <Button
+                onClick={handleRejectUser}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
+                disabled={!rejectionReason.trim()}
+              >
+                {t("confirm")}
+              </Button>
+              <Button
+                onClick={() => setRejectionModalOpen(false)}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md"
+              >
+                {t("close")}
+              </Button>
+            </div>
           </div>
         </Modal>
 

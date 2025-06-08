@@ -111,8 +111,8 @@
   "noPendingChurches": "대기 중인 교회가 없습니다.",
   "noPendingUsers": "대기 중인 사용자가 없습니다.",
   "enterRejectionReason": "교회 거부 사유를 입력하세요",
-  "userRejectionReason": "사용자 거부 사유",
-  "enterUserRejectionReason": "사용자 거부 사유를 입력하세요",
+  "userRejectionReason": "승인 거부 이유",
+  "enterUserRejectionReason": "승인 거부 사유를 입력하세요",
   "close": "닫기",
   "authError": "인증 오류가 발생했습니다.",
   "churchId": "교회 ID",
@@ -173,5 +173,7 @@
   "noTeams": "소속된 팀없음",
   "duties": "직책",
   "noDuties": "직책없음",
-  "noPosition": "직분없음"
+  "noPosition": "직분없음",
+  "male": "남자",
+  "female": "여자"
 }

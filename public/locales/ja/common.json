@@ -182,9 +182,11 @@
   "enterPositionName": "登録する職分を入力してください",
   "enterGroupName": "登録する所属を入力してください",
   "enterSubGroupName": "登録する小グループを入力してください",
+  "enterDutyName": "登録する職務を入力してください",
   "addPosition": "職分登録",
   "addGroup": "所属登録",
   "addSubGroup": "小グループ登録",
+  "addDuty": "職務登録",
   "male": "男性",
   "female": "女性"
 }

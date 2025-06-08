@@ -189,9 +189,11 @@
   "enterPositionName": "등록할 직분을 입력해 주세요",
   "enterGroupName": "등록할 소속을 입력해 주세요",
   "enterSubGroupName": "등록할 소그룹을 입력해 주세요",
+  "enterDutyName": "등록할 직책을 입력해 주세요",
   "addPosition": "직분등록",
   "addGroup": "소속등록",
   "addSubGroup": "소그룹등록",
+  "addDuty": "직책등록",
   "male": "남자",
   "female": "여자"
 }

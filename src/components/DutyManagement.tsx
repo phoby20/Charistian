@@ -1,11 +1,11 @@
 "use client";
 
-import { useTranslation } from "next-i18next";
 import { useState, useEffect, useRef } from "react";
 import Button from "./Button";
-import { useRouter } from "next/navigation";
 import { MoreVertical } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/utils/useRouter";
 
 interface Duty {
   id: string;
@@ -26,7 +26,7 @@ export default function DutyManagement({
   const [editingDuty, setEditingDuty] = useState<Duty | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -281,7 +281,7 @@ export default function DutyManagement({
                             )
                           }
                           className="p-1 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full transition-all duration-200"
-                          aria-label={t("dutyActions", { name: duty.name })}
+                          aria-label={duty.name}
                           aria-expanded={openMenuId === duty.id}
                           aria-haspopup="true"
                         >

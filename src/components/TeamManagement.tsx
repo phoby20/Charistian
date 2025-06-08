@@ -1,11 +1,11 @@
 "use client";
 
-import { useTranslation } from "next-i18next";
 import { useState, useEffect, useRef } from "react";
 import Button from "./Button";
-import { useRouter } from "next/navigation";
 import { MoreVertical } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/utils/useRouter";
 
 interface Team {
   id: string;
@@ -27,7 +27,7 @@ export default function TeamManagement({
   const [error, setError] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -330,7 +330,7 @@ export default function TeamManagement({
                               )
                             }
                             className="p-1 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-full transition-all duration-200"
-                            aria-label={t("teamOptions", { name: team.name })}
+                            aria-label={team.name}
                             aria-expanded={openMenuId === team.id}
                             aria-haspopup="true"
                           >

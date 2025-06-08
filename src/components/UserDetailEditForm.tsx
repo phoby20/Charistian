@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "next-i18next";
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
 import Button from "./Button";
@@ -19,6 +18,7 @@ import { countryOptions } from "@/data/country";
 import { citiesByCountry } from "@/data/cities";
 import { regionsByCity } from "@/data/regions";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 interface SelectOption {
   value: string;
@@ -73,7 +73,7 @@ export default function UserDetailEditForm({
   isLoading,
   error: parentError,
 }: UserDetailEditFormProps) {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const [formData, setFormData] = useState<FormData>({
     ...user,
     birthDate: user.birthDate ? user.birthDate.split("T")[0] : "",
@@ -517,7 +517,6 @@ export default function UserDetailEditForm({
                           aria-label={label}
                           disabled={isLoading}
                         >
-                          <option value="">{t("selectPlaceholder")}</option>
                           {(options as string[])?.map((opt) => (
                             <option key={opt} value={opt}>
                               {t(opt)}
@@ -535,7 +534,6 @@ export default function UserDetailEditForm({
                           aria-label={label}
                           disabled={isLoading}
                         >
-                          <option value="">{t("selectPlaceholder")}</option>
                           {(options as SelectOption[])?.map((opt) => (
                             <option key={opt.value} value={opt.value}>
                               {t(opt.label)}
@@ -553,7 +551,6 @@ export default function UserDetailEditForm({
                           aria-label={label}
                           disabled={isLoading || !formData.country}
                         >
-                          <option value="">{t("selectPlaceholder")}</option>
                           {(options as SelectOption[])?.map((opt) => (
                             <option key={opt.value} value={opt.value}>
                               {t(opt.label)}
@@ -571,7 +568,6 @@ export default function UserDetailEditForm({
                           aria-label={label}
                           disabled={isLoading || !formData.city}
                         >
-                          <option value="">{t("selectPlaceholder")}</option>
                           {(options as SelectOption[])?.map((opt) => (
                             <option key={opt.value} value={opt.value}>
                               {t(opt.label)}

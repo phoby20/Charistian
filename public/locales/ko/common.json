@@ -29,6 +29,7 @@
   "registrationFailed": "교회 등록에 실패했습니다",
   "churchExists": "이미 등록된 교회입니다",
   "siteTitle": "교회 관리 시스템",
+  "none": "미등록",
   "home": "홈",
   "login": "로그인",
   "logout": "로그아웃",
@@ -159,5 +160,18 @@
   "members": "성도관리",
   "memberList": "성도리스트",
   "checkAttendance": "출석체크",
-  "attendanceReport": "출석현황"
+  "attendanceReport": "출석현황",
+  "pendingUsersWarning": "승인대기중인 성도님이 있습니다",
+  "pendingChurchesWarning": "승인대기중인 교회가 있습니다",
+  "createdAt": "등록일",
+  "userDetails": "성도카드",
+  "group": "소속",
+  "noGroup": "무소속",
+  "subGroup": "소그룹",
+  "noSubGroup": "소속된 소그룹없음",
+  "teams": "팀",
+  "noTeams": "소속된 팀없음",
+  "duties": "직책",
+  "noDuties": "직책없음",
+  "noPosition": "직분없음"
 }

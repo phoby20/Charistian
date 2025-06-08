@@ -109,7 +109,7 @@ export default function Header() {
   };
 
   // 로고 클릭 시 이동 경로 결정
-  const logoHref = user ? "/dashboard" : "/";
+  const logoHref = user ? `/${locale}/dashboard` : "/";
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">

@@ -28,6 +28,7 @@
   "registrationFailed": "教会登録に失敗しました",
   "churchExists": "すでに登録されている教会です",
   "siteTitle": "教会管理システム",
+  "none": "未登録",
   "home": "ホーム",
   "login": "ログイン",
   "logout": "ログアウト",
@@ -152,5 +153,18 @@
   "members": "聖徒管理",
   "memberList": "聖徒一覧",
   "checkAttendance": "出席チェック",
-  "attendanceReport": "出席現状"
+  "attendanceReport": "出席現状",
+  "pendingUsersWarning": "承認待ちの聖徒がいます",
+  "pendingChurchesWarning": "承認待ちの教会があります",
+  "createdAt": "登録日",
+  "userDetails": "聖徒カード",
+  "group": "所属",
+  "noGroup": "無所属",
+  "subGroup": "小グループ",
+  "noSubGroup": "所属している小グループ無し",
+  "teams": "チーム",
+  "noTeams": "所属しているチーム無し",
+  "duties": "職務",
+  "noDuties": "職務無し",
+  "noPosition": "職分無し"
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "next-i18next";
 import Image from "next/image";
 import Modal from "./Modal";
 import Button from "./Button";
@@ -8,6 +7,7 @@ import Loading from "./Loading";
 import { User } from "@/types/customUser";
 import { getBorderColor } from "./roleBadge";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 interface UserDetailViewProps {
   user: User;
@@ -30,7 +30,7 @@ export default function UserDetailView({
   isLoading,
   error,
 }: UserDetailViewProps) {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
 
   const fields = [
     { key: "phone", label: t("phone"), icon: "phone" },

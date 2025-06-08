@@ -1,17 +1,17 @@
 // src/app/pending-users/page.tsx
 "use client";
 
-import { useTranslation } from "next-i18next";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import UserDetailModal from "@/components/UserDetailModal";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import Image from "next/image";
 import { User } from "@/types/customUser";
+import { useRouter } from "@/utils/useRouter";
 
 export default function PendingUsersPage() {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [userRole, setUserRole] = useState<string | null>(null);

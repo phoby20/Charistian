@@ -1,23 +1,17 @@
 // src/app/[locale]/dashboard/page.tsx
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import { useState, useEffect } from "react";
 import { ChurchApplication, User } from "@prisma/client";
-import { createNavigation } from "next-intl/navigation";
 
 import { useAuth } from "@/context/AuthContext";
-
-const { useRouter } = createNavigation({
-  locales: ["ko", "ja"],
-  defaultLocale: "ko",
-});
+import { useRouter } from "@/utils/useRouter";
 
 export default function DashboardPage() {
   const t = useTranslations();
-  const locale = useLocale();
   const router = useRouter();
   const { user, isLoading, error: authError } = useAuth();
   const [pendingChurches, setPendingChurches] = useState<ChurchApplication[]>(
@@ -78,7 +72,7 @@ export default function DashboardPage() {
         {pendingUsers.length > 0 && (
           <div
             className="mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-md cursor-pointer hover:bg-yellow-200 transition-colors"
-            onClick={() => router.push(`/${locale}/pending-users`)}
+            onClick={() => router.push(`/pending-users`)}
             role="button"
             aria-label={t("pendingUsersWarning")}
           >
@@ -89,7 +83,7 @@ export default function DashboardPage() {
         {pendingChurches.length > 0 && (
           <div
             className="mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-md cursor-pointer hover:bg-yellow-200 transition-colors"
-            onClick={() => router.push(`/${locale}/pending-churches`)}
+            onClick={() => router.push(`/pending-churches`)}
             role="button"
             aria-label={t("pendingChurchesWarning")}
           >

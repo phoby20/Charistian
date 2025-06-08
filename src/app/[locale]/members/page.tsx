@@ -1,8 +1,7 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import UserDetailModal from "@/components/UserDetailModal";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
@@ -10,9 +9,11 @@ import MemberCard from "@/components/MemberCard";
 import { User } from "@/types/customUser";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/utils/useRouter";
 
 export default function MembersPage() {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [members, setMembers] = useState<User[]>([]);
@@ -150,9 +151,7 @@ export default function MembersPage() {
               aria-expanded={isGroupMenuOpen}
               aria-haspopup="true"
             >
-              <span className="truncate max-w-[120px]">
-                {selectedGroup || t("selectGroup")}
-              </span>
+              <span className="truncate max-w-[120px]">{selectedGroup}</span>
               <ChevronDown
                 className="w-4 h-4 transition-transform duration-200"
                 style={{

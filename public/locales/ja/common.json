@@ -167,6 +167,7 @@
   "duties": "職務",
   "noDuties": "職務無し",
   "noPosition": "職分無し",
+  "noMembers": "登録済みの聖徒がありません",
   "male": "男性",
   "female": "女性"
 }

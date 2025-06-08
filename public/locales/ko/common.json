@@ -174,6 +174,7 @@
   "duties": "직책",
   "noDuties": "직책없음",
   "noPosition": "직분없음",
+  "noMembers": "등록된 성도가 없습니다",
   "male": "남자",
   "female": "여자"
 }

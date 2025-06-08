@@ -1,8 +1,8 @@
 // src/components/ChurchApplicationCard.tsx
-import { useTranslation } from "next-i18next";
 import Button from "@/components/Button";
 import Image from "next/image";
 import { ChurchApplication } from "@prisma/client";
+import { useTranslations } from "next-intl";
 
 interface ChurchApplicationCardProps {
   church: ChurchApplication;
@@ -17,7 +17,7 @@ export default function ChurchApplicationCard({
   onReject,
   onImageClick,
 }: ChurchApplicationCardProps) {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">

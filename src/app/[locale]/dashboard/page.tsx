@@ -80,7 +80,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {pendingChurches.length > 0 && (
+        {user && user.role === "MASTER" && pendingChurches.length > 0 && (
           <div
             className="mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-md cursor-pointer hover:bg-yellow-200 transition-colors"
             onClick={() => router.push(`/pending-churches`)}

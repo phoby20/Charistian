@@ -1,6 +1,6 @@
-import { useTranslation } from "next-i18next";
 import { ChurchApplication } from "@prisma/client";
 import ChurchApplicationCard from "./ChurchApplicationCard";
+import { useTranslations } from "next-intl";
 
 interface PendingChurchesProps {
   pendingChurches: ChurchApplication[];
@@ -17,7 +17,7 @@ export default function PendingChurches({
   onRejectChurch,
   onImageClick,
 }: PendingChurchesProps) {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
 
   if (userRole !== "MASTER") {
     return null;
@@ -25,9 +25,6 @@ export default function PendingChurches({
 
   return (
     <section className="mb-12">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-        {t("pendingChurches")}
-      </h2>
       {pendingChurches.length === 0 ? (
         <p className="text-gray-500 italic">{t("noPendingChurches")}</p>
       ) : (

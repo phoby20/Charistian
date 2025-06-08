@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "next-i18next";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import { useState, useEffect } from "react";
@@ -8,9 +7,10 @@ import { ChurchApplication } from "@prisma/client";
 import ImagePreviewModal from "@/components/ImagePreviewModal";
 import PendingChurches from "@/components/PendingChurches";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
 
 export default function PendingChurchPage() {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
   const { user, isLoading, error: authError } = useAuth();
   const [pendingChurches, setPendingChurches] = useState<ChurchApplication[]>(
     []

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Button from "./Button";
 import { User } from "@prisma/client";
+import { getPathname } from "@/utils/useRouter";
 
 interface DesktopNavProps {
   user: User | null;
@@ -91,21 +92,21 @@ export default function DesktopNav({
             {isMembersMenuOpen && (
               <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
                 <Link
-                  href={`${locale}/members`}
+                  href={getPathname({ locale, href: "/members" })} // `getPathname`으로 올바른 경로 생성
                   onClick={() => closeMembersMenu("/members")}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   {t("memberList")}
                 </Link>
                 <Link
-                  href={`${locale}/attendance`}
+                  href={getPathname({ locale, href: "/attendance" })}
                   onClick={() => closeMembersMenu("/attendance")}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   {t("checkAttendance")}
                 </Link>
                 <Link
-                  href={`${locale}/attendance-report`}
+                  href={getPathname({ locale, href: "/attendance-report" })}
                   onClick={() => closeMembersMenu("/attendance-report")}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
@@ -131,9 +132,9 @@ export default function DesktopNav({
             <ChevronDown className="w-4 h-4 ml-1" />
           </button>
           {isSettingsMenuOpen && (
-            <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
+            <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1 w-25">
               <Link
-                href={`${locale}/master-management`}
+                href={getPathname({ locale, href: "/master-management" })}
                 onClick={closeSettingsMenu}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
@@ -199,7 +200,7 @@ export default function DesktopNav({
           )}
         </div>
       ) : (
-        <Link href={`/${locale}/login`}>
+        <Link href={getPathname({ locale, href: "/login" })}>
           <Button variant="outline">{t("login")}</Button>
         </Link>
       )}

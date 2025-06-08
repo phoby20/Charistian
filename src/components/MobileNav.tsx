@@ -12,6 +12,7 @@ import {
   Globe,
 } from "lucide-react";
 import { User } from "@prisma/client";
+import { getPathname } from "@/utils/useRouter";
 
 interface MobileNavProps {
   user: User | null;
@@ -84,21 +85,24 @@ export default function MobileNav({
                   {isMembersMenuOpen && (
                     <div className="mt-2 pl-4">
                       <Link
-                        href={`${locale}/members`}
+                        href={getPathname({ locale, href: "/members" })}
                         onClick={() => closeMembersMenu("/members")}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         {t("memberList")}
                       </Link>
                       <Link
-                        href={`${locale}/attendance`}
+                        href={getPathname({ locale, href: "/attendance" })}
                         onClick={() => closeMembersMenu("/attendance")}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         {t("checkAttendance")}
                       </Link>
                       <Link
-                        href={`${locale}/attendance-report`}
+                        href={getPathname({
+                          locale,
+                          href: "/attendance-report",
+                        })}
                         onClick={() => closeMembersMenu("/attendance-report")}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
@@ -134,7 +138,7 @@ export default function MobileNav({
                 {isSettingsMenuOpen && (
                   <div className="mt-2 pl-4">
                     <Link
-                      href={`${locale}/master-management`}
+                      href={getPathname({ locale, href: "/master-management" })}
                       onClick={closeSettingsMenu}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
@@ -205,7 +209,7 @@ export default function MobileNav({
               </div>
             ) : (
               <Link
-                href={`${locale}/login`}
+                href={getPathname({ locale, href: "/login" })}
                 onClick={() => setIsMenuOpen(false)}
                 className="block text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
               >

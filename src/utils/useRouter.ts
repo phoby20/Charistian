@@ -1,6 +1,6 @@
 import { createNavigation } from "next-intl/navigation";
 
-export const { useRouter } = createNavigation({
+export const { useRouter, getPathname } = createNavigation({
   locales: ["ko", "ja"],
   defaultLocale: "ko",
 });

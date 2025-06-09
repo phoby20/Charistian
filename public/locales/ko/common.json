@@ -37,6 +37,7 @@
   "visitor": "방문자",
   "general": "일반",
   "admin": "관리자",
+  "subAdmin": "중간 관리자",
   "super_admin": "최고 관리자",
   "master": "마스터",
   "registrationComplete": "등록 신청 완료",
@@ -196,5 +197,7 @@
   "addSubGroup": "소그룹등록",
   "addDuty": "직책등록",
   "addTeam": "팀등록",
-  "role": "권한"
+  "role": "권한",
+  "EmailAlreadyExists": "이미 존재하는 이메일입니다",
+  "invalidImageFormat": "이미지 파일만 업로드 가능합니다"
 }

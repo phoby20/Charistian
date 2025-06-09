@@ -4,11 +4,13 @@ import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { Role } from "@prisma/client";
+import { uploadFile } from "@/lib/vercelBlob";
+import { Position } from "@/types/customUser";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secure-secret-key";
 
 export async function PUT(
-  request: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -64,26 +66,39 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const data = await request.json();
-    const {
-      name,
-      email,
-      phone,
-      kakaoId,
-      lineId,
-      country,
-      city,
-      region,
-      address,
-      birthDate,
-      gender,
-      positionId,
-      groupId,
-      subGroupId,
-      dutyIds,
-      teamIds,
-      role,
-    } = data;
+    const formData = await req.formData();
+    // FormData에서 데이터 추출
+    const email = formData.get("email") as string;
+    const name = formData.get("name") as string;
+    const birthDate = formData.get("birthDate") as string;
+    const phone = formData.get("phone") as string | null;
+    const kakaoId = formData.get("kakaoId") as string | null;
+    const lineId = formData.get("lineId") as string | null;
+    const gender = formData.get("gender") as string;
+    const address = formData.get("address") as string | null;
+    const country = formData.get("country") as string | null;
+    const city = formData.get("city") as string | null;
+    const region = formData.get("region") as string | null;
+    const positionId = formData.get("positionId") as string | null;
+    const groupId = formData.get("groupId") as string | null;
+    const subGroupId = formData.get("subGroupId") as string | null;
+    const role = formData.get("role") as Role;
+    const profileImage = formData.get("profileImage") as File | null;
+
+    // dutyIds와 teamIds 파싱
+    const dutyIdsRaw = formData.get("dutyIds") as string;
+    const teamIdsRaw = formData.get("teamIds") as string;
+    let dutyIds: string[] = [];
+    let teamIds: string[] = [];
+    try {
+      if (dutyIdsRaw) dutyIds = JSON.parse(dutyIdsRaw);
+      if (teamIdsRaw) teamIds = JSON.parse(teamIdsRaw);
+    } catch (err) {
+      return NextResponse.json(
+        { error: "dutyIds 또는 teamIds 파싱 오류입니다.", err },
+        { status: 400 }
+      );
+    }
 
     // 필수 필드 검증 (role 추가)
     if (!name || !email || !birthDate || !gender || !role) {
@@ -118,6 +133,17 @@ export async function PUT(
       );
     }
 
+    let profileImagePath: string = "";
+    if (profileImage && profileImage.size > 0) {
+      profileImagePath = await uploadFile(
+        profileImage,
+        `profile_${email}_${Date.now()}.jpg`
+      );
+    }
+
+    console.log("profileImagePath:", profileImagePath);
+    console.log("id:", id);
+
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
@@ -133,7 +159,8 @@ export async function PUT(
         birthDate: new Date(birthDate),
         gender,
         position: positionId,
-        role: role as Role, // Role 업데이트 (Prisma Enum 처리)
+        profileImage: profileImagePath || null,
+        role: role, // Role 업데이트 (Prisma Enum 처리)
         groups: groupId
           ? {
               set: [{ id: groupId }],
@@ -163,7 +190,7 @@ export async function PUT(
       },
     });
 
-    let position: { id: string; name: string } | null = null;
+    let position: Position | null = null;
     if (updatedUser.position) {
       const positionData = await prisma.churchPosition.findUnique({
         where: { id: updatedUser.position },
@@ -182,6 +209,7 @@ export async function PUT(
       teams: updatedUser.teams,
       position: position,
       role: updatedUser.role, // role 필드 포함
+      profileImage: updatedUser.profileImage || undefined, // 프로필 사진 업데이트
     };
 
     return NextResponse.json({ user: formattedUser });

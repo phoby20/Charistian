@@ -36,6 +36,7 @@
   "visitor": "訪問者",
   "general": "一般",
   "admin": "管理者",
+  "subAdmin": "中間管理者",
   "super_admin": "スーパーマネージャー",
   "master": "マスター",
   "registrationComplete": "登録申請完了",
@@ -189,5 +190,7 @@
   "addSubGroup": "小グループ登録",
   "addDuty": "職務登録",
   "addTeam": "チーム登録",
-  "role": "権限"
+  "role": "権限",
+  "EmailAlreadyExists": "すでに存在するEmailです",
+  "invalidImageFormat": "画像ファイルのみアップロード可能です。"
 }

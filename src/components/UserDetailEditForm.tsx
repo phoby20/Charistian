@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Modal from "./Modal";
 import Button from "./Button";
 import Image from "next/image";
 import Loading from "./Loading";
 import {
   User,
-  FormData,
+  UserFormData,
   Position,
   Group,
   SubGroup,
@@ -19,7 +19,7 @@ import { citiesByCountry } from "@/data/cities";
 import { regionsByCity } from "@/data/regions";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { useAuth } from "@/context/AuthContext"; // AuthContext에서 현재 사용자 Role 가져오기
+import { useAuth } from "@/context/AuthContext";
 
 interface SelectOption {
   value: string;
@@ -42,7 +42,8 @@ interface Field {
     | "selectCountry"
     | "selectCity"
     | "selectRegion"
-    | "selectRole"; // Role 선택 필드 추가
+    | "selectRole"
+    | "file";
   options?: string[] | SelectOption[];
   icon?: string;
   required?: boolean;
@@ -76,8 +77,8 @@ export default function UserDetailEditForm({
   error: parentError,
 }: UserDetailEditFormProps) {
   const t = useTranslations();
-  const { user: currentUser } = useAuth(); // 현재 로그인한 사용자 정보 가져오기
-  const [formData, setFormData] = useState<FormData>({
+  const { user: currentUser } = useAuth();
+  const [formData, setFormData] = useState<UserFormData>({
     ...user,
     birthDate: user.birthDate ? user.birthDate.split("T")[0] : "",
     groupId: user.group?.id || null,
@@ -88,14 +89,20 @@ export default function UserDetailEditForm({
     country: user.country || "",
     city: user.city || "",
     region: user.region || "",
-    role: user.role, // Role 초기값 추가
+    role: user.role,
+    profileImage: user.profileImage || null,
+    positionId: user.position?.id || null,
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [subGroups, setSubGroups] = useState<SubGroup[]>(initialSubGroups);
   const [subGroupLoading, setSubGroupLoading] = useState<boolean>(false);
   const [subGroupError, setSubGroupError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // 업로드할 파일
+  const [previewImage, setPreviewImage] = useState<string | null>(
+    user.profileImage || null
+  ); // 이미지 미리보기
+  const fileInputRef = useRef<HTMLInputElement>(null); // 파일 입력 참조
 
-  // Role 옵션 정의
   const roleOptions: SelectOption[] = [
     { value: "MASTER", label: "master" },
     { value: "SUPER_ADMIN", label: "superAdmin" },
@@ -105,12 +112,11 @@ export default function UserDetailEditForm({
     { value: "VISITOR", label: "visitor" },
   ];
 
-  // 현재 사용자의 Role에 따라 허용된 Role 옵션 필터링
   const getAllowedRoles = (): SelectOption[] => {
     if (!currentUser?.role) return [];
     switch (currentUser.role) {
       case "MASTER":
-        return roleOptions; // 모든 Role 허용
+        return roleOptions;
       case "SUPER_ADMIN":
         return roleOptions.filter((option) =>
           ["SUB_ADMIN", "ADMIN", "GENERAL", "VISITOR"].includes(option.value)
@@ -124,7 +130,7 @@ export default function UserDetailEditForm({
           ["GENERAL", "VISITOR"].includes(option.value)
         );
       default:
-        return []; // VISITOR, GENERAL 등은 Role 변경 불가
+        return [];
     }
   };
 
@@ -141,8 +147,12 @@ export default function UserDetailEditForm({
       city: user.city || "",
       region: user.region || "",
       role: user.role,
+      profileImage: user.profileImage || null,
+      positionId: user.position?.id || null,
     });
     setSubGroups(initialSubGroups);
+    setPreviewImage(user.profileImage || null);
+    setSelectedFile(null);
   }, [user, initialSubGroups]);
 
   if (!user.churchId) {
@@ -169,6 +179,26 @@ export default function UserDetailEditForm({
       ...(name === "country" ? { city: null, region: null } : {}),
       ...(name === "city" ? { region: null } : {}),
     }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setFormError(t("invalidImageFormat"));
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setFormError(t("fileTooLarge"));
+        return;
+      }
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleGroupChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -222,10 +252,8 @@ export default function UserDetailEditForm({
   };
 
   const handlePositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const positionId = e.target.value;
-    const selectedPosition =
-      positions.find((pos) => pos.id === positionId) || null;
-    setFormData((prev) => ({ ...prev, position: selectedPosition }));
+    const positionId = e.target.value || null;
+    setFormData((prev) => ({ ...prev, positionId }));
   };
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -240,7 +268,7 @@ export default function UserDetailEditForm({
     if (!formData.birthDate) return t("required", { field: t("birthDate") });
     if (!formData.gender) return t("required", { field: t("gender") });
     if (formData.subGroupId && !formData.groupId) return t("selectGroupFirst");
-    if (!formData.role) return t("required", { field: t("role") }); // Role 필수 검증 추가
+    if (!formData.role) return t("required", { field: t("role") });
     return null;
   };
 
@@ -251,29 +279,32 @@ export default function UserDetailEditForm({
       return;
     }
 
+    const formDataToSubmit = new FormData();
+    formDataToSubmit.append("name", formData.name || "");
+    formDataToSubmit.append("email", formData.email || "");
+    if (formData.phone) formDataToSubmit.append("phone", formData.phone);
+    if (formData.kakaoId) formDataToSubmit.append("kakaoId", formData.kakaoId);
+    if (formData.lineId) formDataToSubmit.append("lineId", formData.lineId);
+    if (formData.country) formDataToSubmit.append("country", formData.country);
+    if (formData.city) formDataToSubmit.append("city", formData.city);
+    if (formData.region) formDataToSubmit.append("region", formData.region);
+    if (formData.address) formDataToSubmit.append("address", formData.address);
+    formDataToSubmit.append("birthDate", formData.birthDate);
+    formDataToSubmit.append("gender", formData.gender || "");
+    if (formData.positionId)
+      formDataToSubmit.append("positionId", formData.positionId);
+    if (formData.groupId) formDataToSubmit.append("groupId", formData.groupId);
+    if (formData.subGroupId)
+      formDataToSubmit.append("subGroupId", formData.subGroupId);
+    formDataToSubmit.append("dutyIds", JSON.stringify(formData.dutyIds));
+    formDataToSubmit.append("teamIds", JSON.stringify(formData.teamIds));
+    formDataToSubmit.append("role", formData.role || "");
+    if (selectedFile) formDataToSubmit.append("profileImage", selectedFile);
+
     try {
       const response = await fetch(`/api/users/${user.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          kakaoId: formData.kakaoId,
-          lineId: formData.lineId,
-          country: formData.country,
-          city: formData.city,
-          region: formData.region,
-          address: formData.address,
-          birthDate: formData.birthDate,
-          gender: formData.gender,
-          positionId: formData.position?.id || null,
-          groupId: formData.groupId,
-          subGroupId: formData.subGroupId,
-          dutyIds: formData.dutyIds,
-          teamIds: formData.teamIds,
-          role: formData.role, // Role 추가
-        }),
+        body: formDataToSubmit,
       });
 
       if (!response.ok) {
@@ -296,9 +327,10 @@ export default function UserDetailEditForm({
         address: apiUser.user.address || formData.address,
         birthDate: apiUser.user.birthDate || formData.birthDate,
         gender: apiUser.user.gender || formData.gender,
+        profileImage: apiUser.user.profileImage || formData.profileImage,
         position:
           apiUser.user.position ||
-          positions.find((p) => p.id === formData.position?.id) ||
+          positions.find((p) => p.id === formData.positionId) ||
           null,
         group:
           apiUser.user.group ||
@@ -316,13 +348,15 @@ export default function UserDetailEditForm({
           apiUser.user.teams ||
           teams.filter((t) => formData.teamIds.includes(t.id)) ||
           [],
-        role: apiUser.user.role || formData.role, // Role 업데이트 반영
+        role: apiUser.user.role || formData.role,
         churchId: user.churchId,
         createdAt: user.createdAt,
         id: user.id,
       };
 
       setFormError(null);
+      setSelectedFile(null);
+      setPreviewImage(updatedUser.profileImage || null);
       onSave(updatedUser);
     } catch (err) {
       console.error("사용자 업데이트 오류:", err);
@@ -343,11 +377,21 @@ export default function UserDetailEditForm({
       city: user.city || "",
       region: user.region || "",
       role: user.role,
+      profileImage: user.profileImage || null,
+      positionId: user.position?.id || null,
     });
     setFormError(null);
     setSubGroupError(null);
     setSubGroups(initialSubGroups);
+    setSelectedFile(null);
+    setPreviewImage(user.profileImage || null);
     onClose();
+  };
+
+  const handleImageClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // 파일 입력 클릭 트리거
+    }
   };
 
   const fields: Field[] = [
@@ -395,7 +439,7 @@ export default function UserDetailEditForm({
       required: true,
     },
     {
-      key: "position",
+      key: "positionId",
       label: t("position"),
       type: "selectPosition",
       icon: "briefcase",
@@ -418,7 +462,7 @@ export default function UserDetailEditForm({
       key: "role",
       label: t("role"),
       type: "selectRole",
-      options: getAllowedRoles(), // 동적으로 허용된 Role 옵션 사용
+      options: getAllowedRoles(),
       icon: "shield",
       required: true,
     },
@@ -491,16 +535,31 @@ export default function UserDetailEditForm({
           className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 mb-4 shadow-sm"
         >
           <div className="flex items-center space-x-3">
-            <div className="relative group">
+            <div className="relative group" onClick={handleImageClick}>
               <Image
-                src={user.profileImage || "/default_user.png"}
+                src={previewImage || "/default_user.png"}
                 alt={user.name}
                 width={56}
                 height={56}
                 className="rounded-full object-cover border-2 border-gray-200 group-hover:scale-105 transition-transform duration-200"
                 onError={(e) => (e.currentTarget.src = "/default_user.png")}
               />
-              <div className="absolute inset-0 rounded-full ring-2 ring-offset-2 ring-transparent group-hover:ring-blue-300 transition-all" />
+              {/* + 아이콘 */}
+              <span
+                className="z-50 absolute bottom-0 right-0 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold group-hover:bg-blue-600 transition-all duration-200"
+                aria-hidden="true"
+              >
+                +
+              </span>
+              {/* 숨겨진 파일 입력 */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                disabled={isLoading}
+              />
             </div>
             <div className="flex-1">
               <label className="text-sm font-medium text-gray-600 flex items-center">
@@ -558,7 +617,8 @@ export default function UserDetailEditForm({
                         <textarea
                           name={key}
                           value={
-                            (formData[key as keyof FormData] as string) || ""
+                            (formData[key as keyof UserFormData] as string) ||
+                            ""
                           }
                           onChange={handleInputChange}
                           className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all min-h-[80px]"
@@ -569,7 +629,8 @@ export default function UserDetailEditForm({
                         <select
                           name={key}
                           value={
-                            (formData[key as keyof FormData] as string) || ""
+                            (formData[key as keyof UserFormData] as string) ||
+                            ""
                           }
                           onChange={handleInputChange}
                           className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
@@ -586,7 +647,8 @@ export default function UserDetailEditForm({
                         <select
                           name={key}
                           value={
-                            (formData[key as keyof FormData] as string) || ""
+                            (formData[key as keyof UserFormData] as string) ||
+                            ""
                           }
                           onChange={handleInputChange}
                           className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
@@ -603,7 +665,8 @@ export default function UserDetailEditForm({
                         <select
                           name={key}
                           value={
-                            (formData[key as keyof FormData] as string) || ""
+                            (formData[key as keyof UserFormData] as string) ||
+                            ""
                           }
                           onChange={handleInputChange}
                           className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
@@ -620,7 +683,8 @@ export default function UserDetailEditForm({
                         <select
                           name={key}
                           value={
-                            (formData[key as keyof FormData] as string) || ""
+                            (formData[key as keyof UserFormData] as string) ||
+                            ""
                           }
                           onChange={handleInputChange}
                           className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
@@ -635,7 +699,7 @@ export default function UserDetailEditForm({
                         </select>
                       ) : type === "selectPosition" ? (
                         <select
-                          value={formData.position?.id || ""}
+                          value={formData.positionId || ""}
                           onChange={handlePositionChange}
                           className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
                           aria-label={label}
@@ -716,11 +780,11 @@ export default function UserDetailEditForm({
                           onChange={handleRoleChange}
                           className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all appearance-none"
                           aria-label={label}
-                          disabled={isLoading || !currentUser?.role} // 현재 사용자가 없으면 비활성화
+                          disabled={isLoading || !currentUser?.role}
                         >
                           {getAllowedRoles().map((role) => (
                             <option key={role.value} value={role.value}>
-                              {role.label}
+                              {t(role.label)}
                             </option>
                           ))}
                         </select>
@@ -729,7 +793,8 @@ export default function UserDetailEditForm({
                           type={type}
                           name={key}
                           value={
-                            (formData[key as keyof FormData] as string) || ""
+                            (formData[key as keyof UserFormData] as string) ||
+                            ""
                           }
                           onChange={handleInputChange}
                           className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm hover:shadow-md transition-all"

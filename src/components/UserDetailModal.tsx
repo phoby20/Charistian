@@ -1,4 +1,6 @@
 // src/components/UserDetailModal.tsx
+"use client";
+
 import { useState } from "react";
 import { User } from "@/types/customUser";
 import UserDetailView from "./UserDetailView";

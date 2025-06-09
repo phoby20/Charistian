@@ -1,4 +1,3 @@
-// src/types/customUser.ts
 import { User as PrismaUser, Role } from "@prisma/client";
 
 export interface Position {
@@ -37,13 +36,17 @@ export interface User
   subGroup: SubGroup | null;
   duties: Duty[];
   teams: Team[];
+  profileImage: string | null; // 프로필 사진 필드
+  positionId: string | null; // positionId 추가
 }
 
-export interface FormData
+export interface UserFormData
   extends Omit<User, "birthDate" | "group" | "subGroup" | "duties" | "teams"> {
   birthDate: string;
   groupId: string | null;
   subGroupId: string | null;
   dutyIds: string[];
   teamIds: string[];
+  role: Role;
+  profileImage: string | null;
 }

@@ -78,8 +78,20 @@ export default function Header() {
 
   // 언어 전환
   const changeLanguage = (lng: string) => {
-    const cleanedPathname = pathname.replace(/^\/[^/]+/, "");
-    router.push(cleanedPathname, { locale: lng });
+    console.log("Changing language to:", lng);
+    console.log("Current pathname:", pathname);
+    let cleanedPathname = pathname.replace(/^\/[^/]+/, "");
+    if (cleanedPathname === "" || pathname.match(/^\/(ko|ja)$/)) {
+      cleanedPathname = "/";
+    }
+    console.log("Cleaned pathname:", cleanedPathname);
+    try {
+      router.push(cleanedPathname, { locale: lng });
+    } catch (error) {
+      console.error("Router push failed:", error);
+      // Fallback: 강제 URL 이동
+      window.location.href = `/${lng}${cleanedPathname}`;
+    }
     closeAllDropdowns();
     setIsMenuOpen(false);
   };
@@ -119,7 +131,7 @@ export default function Header() {
           <div className="flex-shrink-0 flex items-center">
             <Link href={logoHref} className="flex items-center">
               <span className="text-2xl font-bold text-blue-600">
-                {t("siteTitle", { defaultValue: "ChurchM" })}
+                {t("siteTitle", { defaultValue: "Charis" })}
               </span>
             </Link>
           </div>

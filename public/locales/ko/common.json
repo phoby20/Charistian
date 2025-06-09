@@ -10,7 +10,7 @@
   "name": "이름",
   "address": "주소",
   "email": "이메일",
-  "churchRegistration": "교회 등록",
+  "churchRegistration": "교회등록",
   "churchName": "교회 이름",
   "churchAddress": "교회 주소",
   "country": "국가",
@@ -28,7 +28,7 @@
   "enterprise": "엔터프라이즈",
   "registrationFailed": "교회 등록에 실패했습니다",
   "churchExists": "이미 등록된 교회입니다",
-  "siteTitle": "교회 관리 시스템",
+  "siteTitle": "Charis",
   "none": "미등록",
   "home": "홈",
   "login": "로그인",
@@ -214,5 +214,100 @@
   "viewProfile": "프로필 보기",
   "manageMembers": "멤버 관리",
   "manageAttendance": "출석 관리",
-  "superAdmin": "수퍼 관리자"
+  "superAdmin": "수퍼 관리자",
+  "Landing": {
+    "brandName": "Charis(카리스)",
+    "login": "로그인",
+    "signup": "회원가입",
+    "hero": {
+      "title": "교회 관리를 간편하게",
+      "description": "출석, 성도 관리 등을 위한 올인원 플랫폼으로 공동체를 강화하세요.",
+      "cta": "성도등록"
+    },
+    "features": {
+      "title": "주요 기능",
+      "attendance": {
+        "title": "출석 관리",
+        "description": "실시간 인사이트로 출석을 쉽게 기록하고 분석하세요."
+      },
+      "members": {
+        "title": "멤버 관리",
+        "description": "멤버 프로필, 역할, 그룹을 효율적으로 관리하세요."
+      },
+      "dashboard": {
+        "title": "스마트 대시보드",
+        "description": "교회 활동과 통계를 한눈에 확인하세요."
+      },
+      "qrAttendance": {
+        "title": "QR코드 출석체크",
+        "description": "개인화된 QR코드로 출석을 간편하게 체크하세요.",
+        "badge": "준비중"
+      },
+      "permissions": {
+        "title": "권한 설정",
+        "description": "관리자, 리더, 회원별로 접근 권한을 맞춤 설정하세요."
+      },
+      "churchManagement": {
+        "title": "교회 및 회원 등록",
+        "description": "교회 등록, 회원 승인, 성도 관리를 간편하게 처리하세요."
+      }
+    },
+    "usage": {
+      "title": "서비스 이용 방법",
+      "step": "{number}단계",
+      "steps": {
+        "register": {
+          "title": "신규교회등록",
+          "description": "회원가입 후 교회 등록 절차를 완료하세요."
+        },
+        "setup": {
+          "title": "플랫폼 설정",
+          "description": "역할, 권한, 회원 프로필을 설정하세요."
+        },
+        "manage": {
+          "title": "커뮤니티 관리",
+          "description": "출석 관리, 이벤트 운영, 회원 소통을 시작하세요."
+        }
+      }
+    },
+    "promotion": {
+      "title": "모든 기능을 무료 이용",
+      "description": "기간 한정으로 Charis의 모든 서비스를 무료 이용 가능!",
+      "cta": "신규교회등록",
+      "limitedOffer": "기간 한정 혜택"
+    },
+    "cta": {
+      "title": "교회를 변화할 준비 되셨나요?",
+      "description": "수천 개의 교회가 사용하는 플랫폼에 합류하세요!",
+      "button": "신규교회등록"
+    },
+    "footer": {
+      "description": "사랑과 정성으로 만든 현대적인 교회 통합 관리 플랫폼.",
+      "links": "링크",
+      "about": "회사 소개",
+      "contact": "문의",
+      "privacy": "개인정보처리방침",
+      "rights": "모든 권리 보유."
+    }
+  },
+  "about": {
+    "title": "회사 정보",
+    "companyInfo": "회사 정보",
+    "companyName": "판매업체 명칭: Integrity",
+    "location": "위치: 〒174-0072東京都板橋区南常盤台1-11-6 レフア南常盤台101호",
+    "email": "이메일: hearttercompany@gmail.com",
+    "phone": "전화번호: 요청 시 즉시 공개",
+    "manager": "운영 책임자: 박관성",
+    "pricing": {
+      "title": "판매 가격",
+      "free": "FREE 회원: 무료",
+      "smart": "SMART 회원: 월 20,000원 (구독)",
+      "enterprise": "ENTERPRISE 회원: 월 80,000원 (구독)"
+    },
+    "additionalFees": "추가 수수료: 없음",
+    "paymentMethod": "결제 방법: 신용카드",
+    "paymentPeriod": "결제 기간: FREE 회원은 무료입니다. 신용카드 결제 시 즉시 처리되며, 다음 달부터 자동 이체 됩니다.",
+    "refundPolicy": "교환 및 환불 정책: 결제 후 기본적으로 환불은 불가합니다. 구독 취소 시 즉시 구독이 중지되며, 다음 달 결제가 마지막 결제가 됩니다.",
+    "serviceAvailability": "서비스 이용 가능 시점: 결제 후 즉시 서비스 이용 가능"
+  }
 }

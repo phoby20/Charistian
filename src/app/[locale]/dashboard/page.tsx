@@ -9,6 +9,29 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/utils/useRouter";
 import { motion } from "framer-motion";
 import { format, subDays } from "date-fns";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  TooltipItem,
+} from "chart.js";
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface AttendanceRecord {
   userId: string;
@@ -53,7 +76,11 @@ export default function DashboardPage() {
         });
         if (!pendingResponse.ok)
           throw new Error("Failed to fetch pending data");
-        const { pendingChurches, pendingUsers } = await pendingResponse.json();
+        const {
+          pendingChurches,
+          pendingUsers,
+        }: { pendingChurches: ChurchApplication[]; pendingUsers: User[] } =
+          await pendingResponse.json();
         setPendingChurches(pendingChurches);
 
         if (["MASTER", "SUPER_ADMIN", "ADMIN"].includes(user.role)) {
@@ -117,7 +144,7 @@ export default function DashboardPage() {
             credentials: "include",
           });
           if (!membersResponse.ok) throw new Error("Failed to fetch members");
-          const { members } = await membersResponse.json();
+          const { members }: { members: User[] } = await membersResponse.json();
 
           const filteredMembers = user.churchId
             ? members.filter((m: User) => m.churchId === user.churchId)
@@ -150,6 +177,68 @@ export default function DashboardPage() {
     fetchData();
   }, [user, isLoading, t, memberStats.totalMembers]);
 
+  // Chart.js data for last 7 days attendance
+  const chartData = {
+    labels: attendanceStats.last7Days.map((day) => day.date),
+    datasets: [
+      {
+        label: t("last7Days"),
+        data: attendanceStats.last7Days.map((day) => day.count),
+        borderColor: "rgba(59, 130, 246, 1)", // Tailwind's blue-600
+        backgroundColor: "rgba(59, 130, 246, 0.2)",
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top" as const,
+        labels: {
+          font: {
+            size: 14,
+            family: "'Inter', sans-serif",
+          },
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: TooltipItem<"line">) =>
+            `${t("attendance")}: ${context.parsed.y} ${t("people")}`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: t("date"),
+          font: {
+            size: 14,
+            family: "'Inter', sans-serif",
+          },
+        },
+      },
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: t("attendanceCount"),
+          font: {
+            size: 14,
+            family: "'Inter', sans-serif",
+          },
+        },
+      },
+    },
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -169,6 +258,16 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-extrabold text-gray-900">
             {t("dashboard")}
           </h1>
+          <div className="space-y-2">
+            {["MASTER", "SUPER_ADMIN", "ADMIN"].includes(user?.role || "") && (
+              <Button
+                onClick={() => router.push("/signup")}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+              >
+                {t("addMember")}
+              </Button>
+            )}
+          </div>
         </motion.div>
 
         {/* Pending Alerts */}
@@ -198,7 +297,7 @@ export default function DashboardPage() {
         )}
 
         {/* Dashboard Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
           {/* Attendance Stats */}
           {["SUPER_ADMIN", "ADMIN"].includes(user?.role || "") && (
             <motion.div
@@ -224,14 +323,9 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-gray-600">{t("last7Days")}</p>
-                  <ul className="text-sm">
-                    {attendanceStats.last7Days.map(({ date, count }) => (
-                      <li key={date} className="flex justify-between">
-                        <span>{date}</span>
-                        <span className="font-semibold">{count}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="h-64" aria-label={t("last7Days")}>
+                    <Line data={chartData} options={chartOptions} />
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -244,20 +338,25 @@ export default function DashboardPage() {
               animate={{ opacity: 1, scale: 1 }}
               className="bg-white p-6 rounded-lg shadow-md"
             >
-              <h2 className="text-xl font-semibold mb-4">{t("memberStats")}</h2>
+              <h2 className="text-xl font-bold mb-4">{t("memberStats")}</h2>
               <div className="space-y-4">
                 <div>
-                  <p className="text-gray-600">{t("totalMembers")}</p>
+                  <p className="text-gray-600 font-bold">{t("totalMembers")}</p>
                   <p className="text-2xl font-bold text-blue-600">
                     {memberStats.totalMembers}
                   </p>
                 </div>
-                <div>
-                  <p className="text-gray-600">{t("roleDistribution")}</p>
+                <div className="mb-10">
+                  <h3 className="text-gray-600 font-bold mb-1">
+                    {t("roleDistribution")}
+                  </h3>
                   <ul className="text-sm">
                     {Object.entries(memberStats.roleDistribution).map(
                       ([role, count]) => (
-                        <li key={role} className="flex justify-between">
+                        <li
+                          key={role}
+                          className="flex justify-between  text-gray-500 mb-1"
+                        >
                           <span>{t(role.toLowerCase())}</span>
                           <span className="font-semibold">{count}</span>
                         </li>
@@ -265,11 +364,16 @@ export default function DashboardPage() {
                     )}
                   </ul>
                 </div>
-                <div>
-                  <p className="text-gray-600">{t("recentMembers")}</p>
+                <div className="mb-10">
+                  <p className="text-gray-600 font-bold mb-1">
+                    {t("recentMembers")}
+                  </p>
                   <ul className="text-sm">
                     {memberStats.recentMembers.map((m) => (
-                      <li key={m.id} className="flex justify-between">
+                      <li
+                        key={m.id}
+                        className="flex justify-between text-gray-500 mb-1"
+                      >
                         <span>{m.name}</span>
                         <span>
                           {format(new Date(m.createdAt), "yyyy-MM-dd")}
@@ -281,27 +385,6 @@ export default function DashboardPage() {
               </div>
             </motion.div>
           )}
-
-          {/* Quick Actions */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white p-6 rounded-lg shadow-md"
-          >
-            <h2 className="text-xl font-semibold mb-4">{t("quickActions")}</h2>
-            <div className="space-y-2">
-              {["MASTER", "SUPER_ADMIN", "ADMIN"].includes(
-                user?.role || ""
-              ) && (
-                <Button
-                  onClick={() => router.push("/signup")}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md"
-                >
-                  {t("addMember")}
-                </Button>
-              )}
-            </div>
-          </motion.div>
         </div>
 
         {/* Error Modal */}

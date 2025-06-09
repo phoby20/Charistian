@@ -27,7 +27,7 @@
   "enterprise": "エンタープライズ",
   "registrationFailed": "教会登録に失敗しました",
   "churchExists": "すでに登録されている教会です",
-  "siteTitle": "Charis",
+  "siteTitle": "Charistian",
   "none": "未登録",
   "home": "ホーム",
   "login": "ログイン",
@@ -197,75 +197,87 @@
   "todayAttendance": "今日の出席者",
   "weeklyAttendanceRate": "週次出席率",
   "last7Days": "過去7日間",
-  "memberStats": "メンバー統計",
-  "totalMembers": "総メンバー数",
+  "memberStats": "聖徒統計",
+  "totalMembers": "総聖徒数",
   "roleDistribution": "役割分布",
-  "recentMembers": "最近のメンバー",
+  "recentMembers": "最近の聖徒",
   "quickActions": "クイックアクション",
   "addAttendance": "出席を追加",
-  "addMember": "メンバーを追加",
+  "addMember": "聖徒を追加",
   "viewProfile": "プロフィールを見る",
-  "manageMembers": "メンバー管理",
+  "manageMembers": "聖徒管理",
   "manageAttendance": "出席管理",
   "superAdmin": "スーパー管理者",
   "Landing": {
-    "brandName": "Charis(カリス)",
+    "brandName": "Charistian(カリスチャン)",
     "login": "ログイン",
     "signup": "新規登録",
     "hero": {
-      "title": "教会管理を簡単に",
-      "description": "出席管理や聖徒管理のためのオールインワンプラットフォームでコミュニティを強化。",
-      "cta": "始める"
+      "title": "教会運営と管理を簡単に",
+      "description": "出席管理や聖徒管理のためのオールインワンプラットフォームでコミュニティを強化",
+      "cta": "聖徒登録"
     },
     "features": {
       "title": "主な機能",
       "attendance": {
         "title": "出席管理",
-        "description": "リアルタイムのインサイトで出席を簡単に記録・分析。"
+        "description": "リアルタイムのインサイトで出席を簡単に記録・分析"
       },
       "members": {
-        "title": "メンバー管理",
-        "description": "メンバーのプロフィール、役割、グループを効率的に管理。"
+        "title": "聖徒管理",
+        "description": "聖徒のプロフィール、役割、所属を効率的に管理"
       },
       "dashboard": {
         "title": "スマートダッシュボード",
-        "description": "教会の活動と統計を一目で確認。"
+        "description": "教会の活動と統計を一目で確認"
       },
       "qrAttendance": {
         "title": "QRコード出席確認",
-        "description": "パーソナライズされたQRコードで簡単に出席確認（準備中）。",
+        "description": "パーソナライズされたQRコードで簡単に出席確認（準備中）",
         "badge": "準備中"
       },
       "permissions": {
         "title": "権限設定",
-        "description": "管理者、リーダー、メンバーのアクセス権限をカスタマイズ。"
+        "description": "管理者、リーダー、聖徒のアクセス権限をカスタマイズ"
       },
       "churchManagement": {
-        "title": "教会およびメンバー登録",
-        "description": "教会の登録、メンバー承認、信徒管理を簡単に。"
+        "title": "所属・チーム管理",
+        "description": "所属・教区・チームごとに聖徒を管理"
       }
     },
     "usage": {
       "title": "サービスの利用方法",
       "step": "ステップ {number}",
-      "steps": {
-        "register": {
-          "title": "教会の登録",
-          "description": "新規登録後、教会の登録手続きを完了。"
+      "steps": [
+        {
+          "title": "教会の新規登録",
+          "description": "サービスを利用する教会を登録します。"
         },
-        "setup": {
-          "title": "プラットフォームの設定",
-          "description": "役割、権限、メンバープロフィールを設定。"
+        {
+          "title": "教会新規登録の承認",
+          "description": "カリスチャン運営チームが重複登録や適格性を確認後、承認します。"
         },
-        "manage": {
-          "title": "コミュニティ管理",
-          "description": "出席管理、イベント運営、メンバーとの交流を開始。"
+        {
+          "title": "所属/部署/チーム/役割の設定",
+          "description": "教会登録時に登録したメールでログイン後、所属、部署、チーム、役割を教会の事情に合わせて再設定します。"
+        },
+        {
+          "title": "聖徒の会員登録",
+          "description": "在職中の聖徒にカリスチャン会員登録を案内します。"
+        },
+        {
+          "title": "新規聖徒の承認",
+          "description": "聖徒が会員登録をしたら、聖徒情報を確認して承認します。"
+        },
+        {
+          "title": "権限設定",
+          "description": "承認した聖徒の中から一部に管理者権限を付与し、出席チェックを案内します。"
         }
-      }
+      ]
     },
     "promotion": {
       "title": "小規模教会向け無料利用",
-      "description": "在籍メンバー50人以下の教会は期間限定で無料利用可能！",
+      "description": "在籍聖徒50人以下の教会は期間限定で無料利用可能！",
       "cta": "新規教会登録",
       "limitedOffer": "期間限定オファー"
     },
@@ -302,5 +314,8 @@
     "paymentPeriod": "決済期間: FREE会員は無料です。クレジットカード決済の場合、ただちに処理され、翌月から自動引き落としとなります。",
     "refundPolicy": "交換および返品（返金ポリシー）: 決済後は基本的に返金は受け付けておりません。なお、サブスクリプションのキャンセルを行いますと、直ちにサブスクリプションが停止され、翌月の支払い分が最後の支払いとなります。",
     "serviceAvailability": "引渡時期: 決済後、直ちにサービスのご利用が可能です。"
-  }
+  },
+  "people": "人",
+  "date": "日付",
+  "attendanceCount": "出席人数"
 }

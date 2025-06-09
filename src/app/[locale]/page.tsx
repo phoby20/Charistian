@@ -3,13 +3,11 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/utils/useRouter";
 import { motion } from "framer-motion";
-// import Link from "next/link";
 import Button from "@/components/Button";
 
 export default function LandingPage() {
   const t = useTranslations("Landing");
   const router = useRouter();
-  // const locale = useLocale();
 
   const features = [
     {
@@ -47,23 +45,35 @@ export default function LandingPage() {
 
   const usageSteps = [
     {
-      step: t("usage.steps.register.title"),
-      description: t("usage.steps.register.description"),
+      title: t("usage.steps.0.title"),
+      description: t("usage.steps.0.description"),
     },
     {
-      step: t("usage.steps.setup.title"),
-      description: t("usage.steps.setup.description"),
+      title: t("usage.steps.1.title"),
+      description: t("usage.steps.1.description"),
     },
     {
-      step: t("usage.steps.manage.title"),
-      description: t("usage.steps.manage.description"),
+      title: t("usage.steps.2.title"),
+      description: t("usage.steps.2.description"),
+    },
+    {
+      title: t("usage.steps.3.title"),
+      description: t("usage.steps.3.description"),
+    },
+    {
+      title: t("usage.steps.4.title"),
+      description: t("usage.steps.4.description"),
+    },
+    {
+      title: t("usage.steps.5.title"),
+      description: t("usage.steps.5.description"),
     },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <section className="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="py-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h2
             className="text-4xl md:text-5xl font-extrabold mb-6"
             initial={{ opacity: 0, y: 20 }}
@@ -96,15 +106,15 @@ export default function LandingPage() {
             <Button
               onClick={() => router.push("/church-registration")}
               className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
-              aria-label={t("usage.steps.register.title")}
+              aria-label={t("usage.steps.0.title")}
             >
-              {t("usage.steps.register.title")}
+              {t("usage.steps.0.title")}
             </Button>
           </motion.div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-wave bg-cover opacity-20"></div>
       </section>
-      <section className="py-16 bg-white">
+      <section className="py-30 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.h3
             className="text-3xl font-bold text-gray-900 text-center mb-12"
@@ -139,9 +149,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-      {/* 서비스 이용 방법 섹션 */}
       <section
-        className="py-16 bg-gray-100"
+        className="py-50 bg-gray-100"
         role="region"
         aria-labelledby="usage-title"
       >
@@ -155,10 +164,10 @@ export default function LandingPage() {
           >
             {t("usage.title")}
           </motion.h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {usageSteps.map((step, index) => (
               <motion.div
-                key={step.step}
+                key={step.title}
                 className="p-6 bg-white rounded-lg shadow-md text-center"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -169,16 +178,33 @@ export default function LandingPage() {
                   {t("usage.step", { number: index + 1 })}
                 </span>
                 <h4 className="text-xl font-semibold text-gray-900 mb-2">
-                  {step.step}
+                  {step.title}
                 </h4>
                 <p className="text-gray-600">{step.description}</p>
+                {index === 0 && (
+                  <Button
+                    onClick={() => router.push("/church-registration")}
+                    className="bg-white text-indigo-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
+                    aria-label={t("cta.button")}
+                  >
+                    {t("cta.button")}
+                  </Button>
+                )}
+                {index === 4 && (
+                  <Button
+                    onClick={() => router.push("/signup")}
+                    className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
+                    aria-label={t("hero.cta")}
+                  >
+                    {t("hero.cta")}
+                  </Button>
+                )}
               </motion.div>
             ))}
           </div>
         </div>
       </section>
-      {/* 프로모션 섹션: 50명 이하 무료 이용 */}
-      <section className="py-16 bg-gradient-to-r from-green-500 to-teal-600 text-white">
+      <section className="py-50 bg-gradient-to-r from-green-500 to-teal-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             className="inline-flex items-center bg-yellow-400 text-gray-900 text-sm font-semibold px-3 py-1 rounded-full mb-4"
@@ -221,9 +247,15 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
-      <section className="py-16 bg-black from-indigo-600 to-purple-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section
+        className="py-50 bg-cover bg-center text-white relative"
+        role="region"
+        aria-labelledby="cta-title"
+      >
+        <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h3
+            id="cta-title"
             className="text-3xl font-bold mb-6"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -256,56 +288,6 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
-      <footer className="bg-gray-900 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h4 className="text-lg font-semibold mb-4">{t("brandName")}</h4>
-              <p className="text-gray-400">{t("footer.description")}</p>
-            </div>
-            {/* <div>
-              <h4 className="text-lg font-semibold mb-4">
-                {t("footer.links")}
-              </h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href={`${locale}/about`}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    {t("footer.about")}
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact"
-                    className="text-gray-400 hover:text-white"
-                  >
-                    {t("footer.contact")}
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/privacy"
-                    className="text-gray-400 hover:text-white"
-                  >
-                    {t("footer.privacy")}
-                  </Link>
-                </li>
-              </ul>
-            </div> */}
-            <div>
-              <h4 className="text-lg font-semibold mb-4">
-                {t("footer.contact")}
-              </h4>
-              <p className="text-gray-400">Email: phoby20@hotmail.com</p>
-            </div>
-          </div>
-          <div className="mt-8 text-center text-gray-500">
-            © {new Date().getFullYear()} {t("brandName")}. {t("footer.rights")}
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

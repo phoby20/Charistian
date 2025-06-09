@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import { AuthProvider } from "@/context/AuthContext";
 import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -71,6 +72,7 @@ export default async function RootLayout({ children, params }: LayoutProps) {
           <AuthProvider>
             <Header />
             <main className="flex-grow">{children}</main>
+            <Footer />
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

@@ -28,7 +28,7 @@
   "enterprise": "엔터프라이즈",
   "registrationFailed": "교회 등록에 실패했습니다",
   "churchExists": "이미 등록된 교회입니다",
-  "siteTitle": "Charis",
+  "siteTitle": "Charistian",
   "none": "미등록",
   "home": "홈",
   "login": "로그인",
@@ -216,59 +216,71 @@
   "manageAttendance": "출석 관리",
   "superAdmin": "수퍼 관리자",
   "Landing": {
-    "brandName": "Charis(카리스)",
+    "brandName": "Charistian(카리스챤)",
     "login": "로그인",
     "signup": "회원가입",
     "hero": {
-      "title": "교회 관리를 간편하게",
-      "description": "출석, 성도 관리 등을 위한 올인원 플랫폼으로 공동체를 강화하세요.",
+      "title": "교회 운영과 관리를 간편하게",
+      "description": "출석, 성도 관리 등을 위한 올인원 플랫폼으로 공동체를 강화하세요",
       "cta": "성도등록"
     },
     "features": {
       "title": "주요 기능",
       "attendance": {
         "title": "출석 관리",
-        "description": "실시간 인사이트로 출석을 쉽게 기록하고 분석하세요."
+        "description": "실시간 인사이트로 출석을 쉽게 기록하고 분석하세요"
       },
       "members": {
-        "title": "멤버 관리",
-        "description": "멤버 프로필, 역할, 그룹을 효율적으로 관리하세요."
+        "title": "성도 관리",
+        "description": "성도 프로필, 역할, 소속을 효율적으로 관리하세요"
       },
       "dashboard": {
         "title": "스마트 대시보드",
-        "description": "교회 활동과 통계를 한눈에 확인하세요."
+        "description": "교회 활동과 통계를 한눈에 확인하세요"
       },
       "qrAttendance": {
         "title": "QR코드 출석체크",
-        "description": "개인화된 QR코드로 출석을 간편하게 체크하세요.",
+        "description": "개인화된 QR코드로 출석을 간편하게 체크하세요",
         "badge": "준비중"
       },
       "permissions": {
         "title": "권한 설정",
-        "description": "관리자, 리더, 회원별로 접근 권한을 맞춤 설정하세요."
+        "description": "관리자, 리더, 성도별로 접근 권한을 맞춤 설정하세요"
       },
       "churchManagement": {
-        "title": "교회 및 회원 등록",
-        "description": "교회 등록, 회원 승인, 성도 관리를 간편하게 처리하세요."
+        "title": "소속/팀 관리",
+        "description": "소속/교구/부서/팀 별로 성도를 관리하세요"
       }
     },
     "usage": {
       "title": "서비스 이용 방법",
       "step": "{number}단계",
-      "steps": {
-        "register": {
-          "title": "신규교회등록",
-          "description": "회원가입 후 교회 등록 절차를 완료하세요."
+      "steps": [
+        {
+          "title": "교회신규등록",
+          "description": "서비스를 이용할 교회를 등록합니다."
         },
-        "setup": {
-          "title": "플랫폼 설정",
-          "description": "역할, 권한, 회원 프로필을 설정하세요."
+        {
+          "title": "교회 신규 등록 승인",
+          "description": "카리스챤 운영팀에서 중복 등록 및 적합성을 확인 후 승인합니다."
         },
-        "manage": {
-          "title": "커뮤니티 관리",
-          "description": "출석 관리, 이벤트 운영, 회원 소통을 시작하세요."
+        {
+          "title": "소속/부서/팀/직분 설정",
+          "description": "교회 등록 시 입력한 이메일로 로그인 후 소속, 부서, 팀, 직분을 교회의 사정에 맞게 재설정합니다."
+        },
+        {
+          "title": "성도들의 회원가입",
+          "description": "재직 중인 성도들에게 카리스챤 회원가입을 안내합니다."
+        },
+        {
+          "title": "신규 성도의 승인",
+          "description": "성도들이 회원가입을 하면 성도 정보를 확인 후 승인합니다."
+        },
+        {
+          "title": "권한 설정",
+          "description": "승인한 성도 중 몇몇 성도에게 관리자 권한을 부여하여 출석 체크를 안내합니다."
         }
-      }
+      ]
     },
     "promotion": {
       "title": "모든 기능을 무료 이용",
@@ -282,7 +294,7 @@
       "button": "신규교회등록"
     },
     "footer": {
-      "description": "사랑과 정성으로 만든 현대적인 교회 통합 관리 플랫폼.",
+      "description": "교회 통합 관리 운영 플랫폼",
       "links": "링크",
       "about": "회사 소개",
       "contact": "문의",
@@ -309,5 +321,8 @@
     "paymentPeriod": "결제 기간: FREE 회원은 무료입니다. 신용카드 결제 시 즉시 처리되며, 다음 달부터 자동 이체 됩니다.",
     "refundPolicy": "교환 및 환불 정책: 결제 후 기본적으로 환불은 불가합니다. 구독 취소 시 즉시 구독이 중지되며, 다음 달 결제가 마지막 결제가 됩니다.",
     "serviceAvailability": "서비스 이용 가능 시점: 결제 후 즉시 서비스 이용 가능"
-  }
+  },
+  "people": "명",
+  "date": "날짜",
+  "attendanceCount": "출석 인원"
 }

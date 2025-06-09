@@ -131,7 +131,7 @@ export default function Header() {
           <div className="flex-shrink-0 flex items-center">
             <Link href={logoHref} className="flex items-center">
               <span className="text-2xl font-bold text-blue-600">
-                {t("siteTitle", { defaultValue: "Charis" })}
+                {t("siteTitle", { defaultValue: "Charistian" })}
               </span>
             </Link>
           </div>

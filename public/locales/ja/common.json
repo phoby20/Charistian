@@ -192,5 +192,20 @@
   "addTeam": "チーム登録",
   "role": "権限",
   "EmailAlreadyExists": "すでに存在するEmailです",
-  "invalidImageFormat": "画像ファイルのみアップロード可能です。"
+  "invalidImageFormat": "画像ファイルのみアップロード可能です。",
+  "attendanceStats": "出席統計",
+  "todayAttendance": "今日の出席者",
+  "weeklyAttendanceRate": "週次出席率",
+  "last7Days": "過去7日間",
+  "memberStats": "メンバー統計",
+  "totalMembers": "総メンバー数",
+  "roleDistribution": "役割分布",
+  "recentMembers": "最近のメンバー",
+  "quickActions": "クイックアクション",
+  "addAttendance": "出席を追加",
+  "addMember": "メンバーを追加",
+  "viewProfile": "プロフィールを見る",
+  "manageMembers": "メンバー管理",
+  "manageAttendance": "出席管理",
+  "superAdmin": "スーパー管理者"
 }

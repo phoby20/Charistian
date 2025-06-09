@@ -4,7 +4,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import DesktopNav from "./DesktopNav";
 import MobileNav from "./MobileNav";
 import { useAuth } from "@/context/AuthContext";
@@ -14,13 +13,11 @@ import { useRouter } from "@/utils/useRouter";
 export default function Header() {
   const t = useTranslations();
   const locale = useLocale();
-  const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
 
   // 드롭다운 상태 관리
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
   const [isMembersMenuOpen, setIsMembersMenuOpen] = useState(false);
@@ -35,7 +32,6 @@ export default function Header() {
 
   // 모든 드롭다운 메뉴 닫기
   const closeAllDropdowns = () => {
-    setIsLangMenuOpen(false);
     setIsUserMenuOpen(false);
     setIsSettingsMenuOpen(false);
     setIsMembersMenuOpen(false);
@@ -75,26 +71,6 @@ export default function Header() {
       document.removeEventListener("touchstart", handleClickOutside);
     };
   }, []);
-
-  // 언어 전환
-  const changeLanguage = (lng: string) => {
-    console.log("Changing language to:", lng);
-    console.log("Current pathname:", pathname);
-    let cleanedPathname = pathname.replace(/^\/[^/]+/, "");
-    if (cleanedPathname === "" || pathname.match(/^\/(ko|ja)$/)) {
-      cleanedPathname = "/";
-    }
-    console.log("Cleaned pathname:", cleanedPathname);
-    try {
-      router.push(cleanedPathname, { locale: lng });
-    } catch (error) {
-      console.error("Router push failed:", error);
-      // Fallback: 강제 URL 이동
-      window.location.href = `/${lng}${cleanedPathname}`;
-    }
-    closeAllDropdowns();
-    setIsMenuOpen(false);
-  };
 
   // 설정 메뉴 닫기 및 내비게이션
   const closeSettingsMenu = () => {
@@ -142,18 +118,14 @@ export default function Header() {
             t={t}
             locale={locale}
             logout={logout}
-            changeLanguage={changeLanguage}
             closeSettingsMenu={closeSettingsMenu}
             closeMembersMenu={closeMembersMenu}
-            isLangMenuOpen={isLangMenuOpen}
-            setIsLangMenuOpen={setIsLangMenuOpen}
             isUserMenuOpen={isUserMenuOpen}
             setIsUserMenuOpen={setIsUserMenuOpen}
             isSettingsMenuOpen={isSettingsMenuOpen}
             setIsSettingsMenuOpen={setIsSettingsMenuOpen}
             isMembersMenuOpen={isMembersMenuOpen}
             setIsMembersMenuOpen={setIsMembersMenuOpen}
-            langMenuRef={langMenuRef}
             userMenuRef={userMenuRef}
             settingsMenuRef={settingsMenuRef}
             membersMenuRef={membersMenuRef}
@@ -182,13 +154,10 @@ export default function Header() {
         t={t}
         locale={locale}
         logout={logout}
-        changeLanguage={changeLanguage}
         closeSettingsMenu={closeSettingsMenu}
         closeMembersMenu={closeMembersMenu}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
-        isLangMenuOpen={isLangMenuOpen}
-        setIsLangMenuOpen={setIsLangMenuOpen}
         isUserMenuOpen={isUserMenuOpen}
         setIsUserMenuOpen={setIsUserMenuOpen}
         isSettingsMenuOpen={isSettingsMenuOpen}

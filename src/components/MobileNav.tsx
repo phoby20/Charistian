@@ -9,7 +9,6 @@ import {
   ChevronDown,
   Settings,
   UsersRound,
-  Globe,
 } from "lucide-react";
 import { User } from "@prisma/client";
 import { getPathname } from "@/utils/useRouter";
@@ -19,13 +18,10 @@ interface MobileNavProps {
   t: ReturnType<typeof useTranslations>;
   locale: string;
   logout: () => Promise<void>;
-  changeLanguage: (lng: string) => void;
   closeSettingsMenu: () => void;
   closeMembersMenu: (path: string) => void;
   isMenuOpen: boolean;
   setIsMenuOpen: (open: boolean) => void;
-  isLangMenuOpen: boolean;
-  setIsLangMenuOpen: (open: boolean) => void;
   isUserMenuOpen: boolean;
   setIsUserMenuOpen: (open: boolean) => void;
   isSettingsMenuOpen: boolean;
@@ -40,13 +36,10 @@ export default function MobileNav({
   t,
   locale,
   logout,
-  changeLanguage,
   closeSettingsMenu,
   closeMembersMenu,
   isMenuOpen,
   setIsMenuOpen,
-  isLangMenuOpen,
-  setIsLangMenuOpen,
   isUserMenuOpen,
   setIsUserMenuOpen,
   isSettingsMenuOpen,
@@ -56,7 +49,6 @@ export default function MobileNav({
   mobileMenuRef,
 }: MobileNavProps) {
   const closeAllDropdowns = () => {
-    setIsLangMenuOpen(false);
     setIsUserMenuOpen(false);
     setIsSettingsMenuOpen(false);
     setIsMembersMenuOpen(false);
@@ -148,37 +140,7 @@ export default function MobileNav({
                 )}
               </div>
             )}
-            <div className="px-3 py-2">
-              <button
-                onClick={() => {
-                  closeAllDropdowns();
-                  setIsLangMenuOpen(!isLangMenuOpen);
-                }}
-                className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
-              >
-                <span className="flex items-center text-sm font-medium">
-                  <Globe className="w-5 h-5 mr-2" />
-                  {t("language")}
-                </span>
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </button>
-              {isLangMenuOpen && (
-                <div className="mt-2 pl-4">
-                  <button
-                    onClick={() => changeLanguage("ko")}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    한국어
-                  </button>
-                  <button
-                    onClick={() => changeLanguage("ja")}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    日本語
-                  </button>
-                </div>
-              )}
-            </div>
+
             {user ? (
               <div className="px-3 py-2">
                 <button

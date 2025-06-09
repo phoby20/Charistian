@@ -19,18 +19,14 @@ interface DesktopNavProps {
   t: ReturnType<typeof useTranslations>;
   locale: string;
   logout: () => Promise<void>;
-  changeLanguage: (lng: string) => void;
   closeSettingsMenu: () => void;
   closeMembersMenu: (path: string) => void;
-  isLangMenuOpen: boolean;
-  setIsLangMenuOpen: (open: boolean) => void;
   isUserMenuOpen: boolean;
   setIsUserMenuOpen: (open: boolean) => void;
   isSettingsMenuOpen: boolean;
   setIsSettingsMenuOpen: (open: boolean) => void;
   isMembersMenuOpen: boolean;
   setIsMembersMenuOpen: (open: boolean) => void;
-  langMenuRef: React.RefObject<HTMLDivElement | null>;
   userMenuRef: React.RefObject<HTMLDivElement | null>;
   settingsMenuRef: React.RefObject<HTMLDivElement | null>;
   membersMenuRef: React.RefObject<HTMLDivElement | null>;
@@ -41,24 +37,19 @@ export default function DesktopNav({
   t,
   locale,
   logout,
-  changeLanguage,
   closeSettingsMenu,
   closeMembersMenu,
-  isLangMenuOpen,
-  setIsLangMenuOpen,
   isUserMenuOpen,
   setIsUserMenuOpen,
   isSettingsMenuOpen,
   setIsSettingsMenuOpen,
   isMembersMenuOpen,
   setIsMembersMenuOpen,
-  langMenuRef,
   userMenuRef,
   settingsMenuRef,
   membersMenuRef,
 }: DesktopNavProps) {
   const closeAllDropdowns = () => {
-    setIsLangMenuOpen(false);
     setIsUserMenuOpen(false);
     setIsSettingsMenuOpen(false);
     setIsMembersMenuOpen(false);
@@ -144,35 +135,6 @@ export default function DesktopNav({
           )}
         </div>
       )}
-      {/* 언어 선택 */}
-      <div className="relative" ref={langMenuRef}>
-        <button
-          onClick={() => {
-            closeAllDropdowns();
-            setIsLangMenuOpen(!isLangMenuOpen);
-          }}
-          className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-        >
-          {locale === "ko" ? "한국어" : "日本語"}
-          <ChevronDown className="w-4 h-4 ml-1" />
-        </button>
-        {isLangMenuOpen && (
-          <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
-            <button
-              onClick={() => changeLanguage("ko")}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              한국어
-            </button>
-            <button
-              onClick={() => changeLanguage("ja")}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              日本語
-            </button>
-          </div>
-        )}
-      </div>
       {/* 사용자 메뉴 */}
       {user ? (
         <div className="relative" ref={userMenuRef}>

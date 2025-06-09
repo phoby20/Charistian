@@ -1,4 +1,3 @@
-// src/app/api/users/[id]/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
@@ -54,7 +53,6 @@ export async function PUT(
       VISITOR: [],
     };
 
-    // 현재 사용자의 Role이 허용된 Role 변경 권한이 있는지 확인
     if (
       !allowedRoles[decoded.role] ||
       allowedRoles[decoded.role].length === 0
@@ -84,6 +82,7 @@ export async function PUT(
     const subGroupId = formData.get("subGroupId") as string | null;
     const role = formData.get("role") as Role;
     const profileImage = formData.get("profileImage") as File | null;
+    const profileImageUrl = formData.get("profileImageUrl") as string | null;
 
     // dutyIds와 teamIds 파싱
     const dutyIdsRaw = formData.get("dutyIds") as string;
@@ -133,7 +132,8 @@ export async function PUT(
       );
     }
 
-    let profileImagePath: string = "";
+    let profileImagePath: string | null = profileImageUrl; // 기존 URL을 기본값으로 설정
+
     if (profileImage && profileImage.size > 0) {
       profileImagePath = await uploadFile(
         profileImage,
@@ -159,8 +159,8 @@ export async function PUT(
         birthDate: new Date(birthDate),
         gender,
         position: positionId,
-        profileImage: profileImagePath || null,
-        role: role, // Role 업데이트 (Prisma Enum 처리)
+        profileImage: profileImagePath, // null 가능
+        role: role,
         groups: groupId
           ? {
               set: [{ id: groupId }],
@@ -208,8 +208,8 @@ export async function PUT(
       duties: updatedUser.duties,
       teams: updatedUser.teams,
       position: position,
-      role: updatedUser.role, // role 필드 포함
-      profileImage: updatedUser.profileImage || undefined, // 프로필 사진 업데이트
+      role: updatedUser.role,
+      profileImage: updatedUser.profileImage || undefined,
     };
 
     return NextResponse.json({ user: formattedUser });

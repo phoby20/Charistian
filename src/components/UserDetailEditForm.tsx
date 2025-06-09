@@ -97,11 +97,11 @@ export default function UserDetailEditForm({
   const [subGroups, setSubGroups] = useState<SubGroup[]>(initialSubGroups);
   const [subGroupLoading, setSubGroupLoading] = useState<boolean>(false);
   const [subGroupError, setSubGroupError] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // 업로드할 파일
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(
     user.profileImage || null
-  ); // 이미지 미리보기
-  const fileInputRef = useRef<HTMLInputElement>(null); // 파일 입력 참조
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const roleOptions: SelectOption[] = [
     { value: "MASTER", label: "master" },
@@ -135,6 +135,27 @@ export default function UserDetailEditForm({
   };
 
   useEffect(() => {
+    let initialCity = user.city || "";
+    let initialRegion = user.region || "";
+
+    // country가 있고, user.city가 없거나 유효하지 않은 경우 첫 번째 city 선택
+    if (
+      user.country &&
+      (!user.city ||
+        !citiesByCountry[user.country]?.find((c) => c.value === user.city))
+    ) {
+      initialCity = citiesByCountry[user.country]?.[0]?.value || "";
+    }
+
+    // city가 있고, user.region이 없거나 유효하지 않은 경우 첫 번째 region 선택
+    if (
+      initialCity &&
+      (!user.region ||
+        !regionsByCity[initialCity]?.find((r) => r.value === user.region))
+    ) {
+      initialRegion = regionsByCity[initialCity]?.[0]?.value || "";
+    }
+
     setFormData({
       ...user,
       birthDate: user.birthDate ? user.birthDate.split("T")[0] : "",
@@ -144,8 +165,8 @@ export default function UserDetailEditForm({
       teamIds: user.teams ? user.teams.map((team) => team.id) : [],
       gender: user.gender || "",
       country: user.country || "",
-      city: user.city || "",
-      region: user.region || "",
+      city: initialCity,
+      region: initialRegion,
       role: user.role,
       profileImage: user.profileImage || null,
       positionId: user.position?.id || null,
@@ -173,12 +194,24 @@ export default function UserDetailEditForm({
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value || null,
-      ...(name === "country" ? { city: null, region: null } : {}),
-      ...(name === "city" ? { region: null } : {}),
-    }));
+    setFormData((prev) => {
+      const newData: Partial<UserFormData> = { [name]: value || null };
+
+      if (name === "country") {
+        const cities = citiesByCountry[value] || [];
+        const firstCity = cities[0]?.value || null;
+        const regions = firstCity ? regionsByCity[firstCity] || [] : [];
+        const firstRegion = regions[0]?.value || null;
+        newData.city = firstCity;
+        newData.region = firstRegion;
+      } else if (name === "city") {
+        const regions = regionsByCity[value] || [];
+        const firstRegion = regions[0]?.value || null;
+        newData.region = firstRegion;
+      }
+
+      return { ...prev, ...newData };
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,6 +231,12 @@ export default function UserDetailEditForm({
         setPreviewImage(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -299,7 +338,11 @@ export default function UserDetailEditForm({
     formDataToSubmit.append("dutyIds", JSON.stringify(formData.dutyIds));
     formDataToSubmit.append("teamIds", JSON.stringify(formData.teamIds));
     formDataToSubmit.append("role", formData.role || "");
-    if (selectedFile) formDataToSubmit.append("profileImage", selectedFile);
+    if (selectedFile) {
+      formDataToSubmit.append("profileImage", selectedFile);
+    } else if (formData.profileImage) {
+      formDataToSubmit.append("profileImageUrl", formData.profileImage);
+    }
 
     try {
       const response = await fetch(`/api/users/${user.id}`, {
@@ -386,12 +429,6 @@ export default function UserDetailEditForm({
     setSelectedFile(null);
     setPreviewImage(user.profileImage || null);
     onClose();
-  };
-
-  const handleImageClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click(); // 파일 입력 클릭 트리거
-    }
   };
 
   const fields: Field[] = [
@@ -544,14 +581,12 @@ export default function UserDetailEditForm({
                 className="rounded-full object-cover border-2 border-gray-200 group-hover:scale-105 transition-transform duration-200"
                 onError={(e) => (e.currentTarget.src = "/default_user.png")}
               />
-              {/* + 아이콘 */}
               <span
                 className="z-50 absolute bottom-0 right-0 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold group-hover:bg-blue-600 transition-all duration-200"
                 aria-hidden="true"
               >
                 +
               </span>
-              {/* 숨겨진 파일 입력 */}
               <input
                 type="file"
                 ref={fileInputRef}

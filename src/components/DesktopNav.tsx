@@ -65,7 +65,7 @@ export default function DesktopNav({
           {t("churchRegistration")}
         </Link>
       )}
-      {user && (
+      {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user?.role || "") && (
         <>
           {/* Members Dropdown */}
           <div className="relative" ref={membersMenuRef}>

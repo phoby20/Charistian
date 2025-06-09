@@ -60,7 +60,9 @@ export default function MobileNav({
       {isMenuOpen && (
         <div className="md:hidden bg-white shadow-md" ref={mobileMenuRef}>
           <nav className="flex flex-col px-4 py-2 space-y-1">
-            {user && (
+            {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(
+              user?.role || ""
+            ) && (
               <>
                 <div className="px-3 py-2">
                   <button

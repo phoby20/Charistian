@@ -6,13 +6,16 @@ import Input from "@/components/Input";
 import Button from "@/components/Button";
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import Loading from "@/components/Loading";
 
 export default function LoginPage() {
   const t = useTranslations(); // 네임스페이스 제거
   const [error, setError] = useState<string | null>(null);
   const locale = useLocale();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    setIsLoading(true);
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
@@ -40,9 +43,14 @@ export default function LoginPage() {
         })
       );
     }
+    setIsLoading(false);
   };
 
   const signUpUrl = `/${locale}/signup`;
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

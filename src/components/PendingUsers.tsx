@@ -1,6 +1,6 @@
-import { useTranslation } from "next-i18next";
 import Button from "./Button";
 import { User } from "@prisma/client";
+import { useTranslations } from "next-intl";
 
 interface PendingUsersProps {
   pendingUsers: User[];
@@ -15,7 +15,7 @@ export default function PendingUsers({
   onApproveUser,
   onRejectUser,
 }: PendingUsersProps) {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
 
   if (userRole !== "SUPER_ADMIN" && userRole !== "ADMIN") {
     return null;

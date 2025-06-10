@@ -1,7 +1,14 @@
 // src/context/AuthContext.tsx
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { usePathname } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl"; // next-intl 번역 및 로케일
 import { User } from "@prisma/client";
@@ -12,6 +19,7 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   logout: () => Promise<void>;
+  setError: Dispatch<SetStateAction<string | null>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -71,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, error, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, error, logout, setError }}>
       {children}
     </AuthContext.Provider>
   );

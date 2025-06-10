@@ -84,7 +84,7 @@ async function main() {
       // User 존재 여부 확인
       const existingUser = await tx.user.findUnique({
         where: { email: "master@example.com" },
-        select: { id: true, churchId: true }, // churchId 포함
+        select: { id: true, churchId: true },
       });
 
       if (existingUser) {
@@ -95,15 +95,16 @@ async function main() {
           });
 
           if (existingChurch) {
-            throw new Error(
-              `Church with ID "${existingUser.churchId}" already exists for user with email "master@example.com". Seeding aborted.`
+            console.log(
+              `Church with ID "${existingUser.churchId}" already exists for user with email "master@example.com". Skipping seeding.`
             );
+            return; // 시드 작업 중단 대신 건너뛰기
           }
         }
-        // churchId가 없더라도 User가 존재하면 시드 중단
-        throw new Error(
-          `User with email "master@example.com" already exists. Seeding aborted.`
+        console.log(
+          `User with email "master@example.com" already exists. Skipping seeding.`
         );
+        return; // 시드 작업 중단 대신 건너뛰기
       }
 
       // Church 생성

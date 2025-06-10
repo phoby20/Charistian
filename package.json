@@ -5,9 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "prisma generate --schema prisma/schema.prod.prisma && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prisma:generate:local": "prisma generate --schema prisma/schema.local.prisma",
+    "prisma:generate:prod": "prisma generate --schema prisma/schema.prod.prisma"
   },
   "prisma": {
     "seed": "node --loader ts-node/esm prisma/seed.ts"

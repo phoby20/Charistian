@@ -1,6 +1,7 @@
+// src/app/[locale]/members/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import UserDetailModal from "@/components/UserDetailModal";
 import Modal from "@/components/Modal";
@@ -11,8 +12,9 @@ import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/utils/useRouter";
+import Loading from "@/components/Loading";
 
-export default function MembersPage() {
+function MembersContent() {
   const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -24,7 +26,7 @@ export default function MembersPage() {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [isGroupMenuOpen, setIsGroupMenuOpen] = useState(false);
 
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       if (userRole !== "SUPER_ADMIN" && userRole !== "ADMIN") {
         router.push("/login");
@@ -45,7 +47,7 @@ export default function MembersPage() {
       console.error("Error fetching members:", err);
       setError(t("serverError"));
     }
-  };
+  }, [userRole, router, userChurchId, t]);
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -66,13 +68,13 @@ export default function MembersPage() {
       }
     };
     fetchUserRole();
-  }, [router]);
+  }, [router, t]);
 
   useEffect(() => {
     if (userRole !== null && userChurchId !== null) {
       fetchMembers();
     }
-  }, [userRole, userChurchId, router]);
+  }, [userRole, userChurchId, router, fetchMembers]);
 
   // 그룹 목록 생성
   const groups = Array.from(
@@ -121,15 +123,20 @@ export default function MembersPage() {
     return a.localeCompare(b);
   });
 
-  const handleUpdate = () => {
+  const handleUpdate = useCallback(() => {
     fetchMembers();
-  };
+  }, [fetchMembers]);
 
-  const handleGroupSelect = (group: string) => {
-    setSelectedGroup(group);
-    setIsGroupMenuOpen(false);
-    router.push(`/members?group=${encodeURIComponent(group)}`);
-  };
+  const handleGroupSelect = useCallback(
+    (group: string) => {
+      setSelectedGroup(group);
+      setIsGroupMenuOpen(false);
+      router.push(`/members?group=${encodeURIComponent(group)}`, {
+        scroll: false,
+      });
+    },
+    [router]
+  );
 
   return (
     <motion.div
@@ -297,5 +304,13 @@ export default function MembersPage() {
         </div>
       </main>
     </motion.div>
+  );
+}
+
+export default function MembersPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <MembersContent />
+    </Suspense>
   );
 }

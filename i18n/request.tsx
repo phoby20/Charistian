@@ -9,9 +9,9 @@ type Locale = (typeof locales)[number];
 export default getRequestConfig(async ({ locale }: { locale?: string }) => {
   // 로케일 유효성 검사
   if (!locale || !locales.includes(locale as Locale)) {
-    console.warn(
-      `Invalid locale: ${locale || "undefined"}, falling back to 'ko'`
-    );
+    // console.warn(
+    //   `Invalid locale: ${locale || "undefined"}, falling back to 'ko'`
+    // );
     locale = "ko"; // 기본 로케일로 대체
   }
 

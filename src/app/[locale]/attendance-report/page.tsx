@@ -1,6 +1,7 @@
+// src/app/[locale]/attendance-report/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
@@ -19,7 +20,7 @@ interface AttendanceRecord {
   date: string; // e.g., "2025-06-06"
 }
 
-export default function AttendanceReport() {
+function AttendanceReportContent() {
   const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,7 +44,7 @@ export default function AttendanceReport() {
   const [endDate, setEndDate] = useState<string>(today);
 
   // 회원 목록 가져오기
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       if (!user || (user.role !== "SUPER_ADMIN" && user.role !== "ADMIN")) {
         router.push("/login");
@@ -56,7 +57,7 @@ export default function AttendanceReport() {
       const response = await fetch("/api/members", {
         credentials: "include",
       });
-      if (!response.ok) throw new Error("Failed to fetch members");
+      if (!response.ok) throw new Error(t("failedToFetchMembers"));
       const { members }: { members: User[] } = await response.json();
       const filteredMembers = members.filter(
         (userData: User) => userData.churchId === user.churchId
@@ -66,10 +67,10 @@ export default function AttendanceReport() {
       console.error("Error fetching members:", err);
       setFetchError(t("serverError"));
     }
-  };
+  }, [user, router, t]);
 
   // 출석 정보 가져오기
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async () => {
     try {
       const query = new URLSearchParams();
       if (startDate) query.set("startDate", startDate);
@@ -78,24 +79,20 @@ export default function AttendanceReport() {
         `/api/attendance/search?${query.toString()}`,
         {
           credentials: "include",
-          cache: "no-store", // 캐싱 방지
+          cache: "no-store",
         }
       );
-      if (!response.ok) throw new Error("Failed to fetch attendance");
+      if (!response.ok) throw new Error(t("failedToFetchAttendance"));
       const { attendances }: { attendances: AttendanceRecord[] } =
         await response.json();
-      // 출석 상태 초기화
-      const status: { [key: string]: boolean } = {};
       const byDate: { [key: string]: { [key: string]: boolean } } = {};
       attendances.forEach((att: AttendanceRecord) => {
-        // 날짜 범위 내 출석 여부 확인
         if (
           (!startDate || att.date >= startDate) &&
           (!endDate || att.date <= endDate)
         ) {
-          status[att.userId] = true; // 카드 뷰용
           if (!byDate[att.date]) byDate[att.date] = {};
-          byDate[att.date][att.userId] = true; // 테이블 뷰용
+          byDate[att.date][att.userId] = true;
         }
       });
       setAttendanceByDate(byDate);
@@ -103,7 +100,7 @@ export default function AttendanceReport() {
       console.error("Error fetching attendance:", err);
       setFetchError(t("serverError"));
     }
-  };
+  }, [startDate, endDate, t]);
 
   // 데이터 가져오기
   useEffect(() => {
@@ -111,7 +108,7 @@ export default function AttendanceReport() {
       fetchMembers();
       fetchAttendance();
     }
-  }, [user, isLoading, startDate, endDate]);
+  }, [user, isLoading, startDate, endDate, fetchMembers, fetchAttendance]);
 
   // 그룹 및 서브그룹 목록 생성
   const groups = Array.from(
@@ -178,7 +175,7 @@ export default function AttendanceReport() {
   );
 
   // 날짜 범위의 날짜 목록 생성
-  const getDateRange = () => {
+  const getDateRange = useCallback(() => {
     if (!startDate || !endDate) return [];
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -187,34 +184,43 @@ export default function AttendanceReport() {
       dates.push(formatInTimeZone(date, jstTimeZone, "yyyy-MM-dd"));
     }
     return dates;
-  };
+  }, [startDate, endDate]);
 
   const dateRange = getDateRange();
 
-  const handleGroupSelect = (group: string) => {
-    setSelectedGroup(group);
-    setSelectedSubGroup(null);
-    setIsGroupMenuOpen(false);
-    setPage(1);
-    router.push(`/attendance-report?group=${encodeURIComponent(group)}`);
-  };
+  const handleGroupSelect = useCallback(
+    (group: string) => {
+      setSelectedGroup(group);
+      setSelectedSubGroup(null);
+      setIsGroupMenuOpen(false);
+      setPage(1);
+      router.push(`/attendance-report?group=${encodeURIComponent(group)}`);
+    },
+    [router]
+  );
 
-  const handleSubGroupSelect = (subGroup: string) => {
-    setSelectedSubGroup(subGroup);
-    setIsSubGroupMenuOpen(false);
-    setPage(1);
-    router.push(
-      `/attendance-report?group=${encodeURIComponent(
-        selectedGroup || ""
-      )}&subGroup=${encodeURIComponent(subGroup)}`
-    );
-  };
+  const handleSubGroupSelect = useCallback(
+    (subGroup: string) => {
+      setSelectedSubGroup(subGroup);
+      setIsSubGroupMenuOpen(false);
+      setPage(1);
+      router.push(
+        `/attendance-report?group=${encodeURIComponent(
+          selectedGroup || ""
+        )}&subGroup=${encodeURIComponent(subGroup)}`
+      );
+    },
+    [router, selectedGroup]
+  );
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
-    }
-  };
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      if (newPage >= 1 && newPage <= totalPages) {
+        setPage(newPage);
+      }
+    },
+    [totalPages]
+  );
 
   // 로딩 및 인증 처리
   if (isLoading) {
@@ -474,5 +480,13 @@ export default function AttendanceReport() {
         </div>
       </main>
     </motion.div>
+  );
+}
+
+export default function AttendanceReportPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <AttendanceReportContent />
+    </Suspense>
   );
 }

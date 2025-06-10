@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-import * as bcrypt from "bcrypt";
+import { PrismaClient, Prisma } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -80,7 +80,7 @@ async function main() {
     const hashedPassword = await bcrypt.hash("master@christm", 10);
 
     // 트랜잭션으로 데이터 생성
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Church를 먼저 생성
       const church = await tx.church.create({
         data: {

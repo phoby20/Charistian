@@ -52,7 +52,7 @@ export default function DashboardPage() {
       setFetchError,
       t
     );
-  }, [user, isLoading, memberStats.totalMembers]);
+  }, [user, isLoading]);
 
   if (isLoading) {
     return <Loading />;

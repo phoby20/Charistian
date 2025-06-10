@@ -42,7 +42,7 @@ export default function PendingChurchPage() {
     if (user && !isLoading && user.role === "MASTER") {
       fetchPendingChurches();
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, t]);
 
   const handleApproveChurch = async (applicationId: string) => {
     try {

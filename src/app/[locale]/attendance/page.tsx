@@ -1,6 +1,7 @@
+// src/app/[locale]/attendance/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
@@ -18,7 +19,7 @@ interface AttendanceRecord {
   userId: string;
 }
 
-export default function Attendance() {
+function AttendanceContent() {
   const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,7 +38,7 @@ export default function Attendance() {
   const [isCallApi, setIsCallApi] = useState(false);
 
   // 회원 목록 가져오기
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     setIsCallApi(true);
     try {
       if (!user || (user.role !== "SUPER_ADMIN" && user.role !== "ADMIN")) {
@@ -51,7 +52,7 @@ export default function Attendance() {
       const response = await fetch("/api/members", {
         credentials: "include",
       });
-      if (!response.ok) throw new Error("Failed to fetch members");
+      if (!response.ok) throw new Error(t("failedToFetchMembers"));
       const { members }: { members: User[] } = await response.json();
       const filteredMembers = members.filter(
         (userData: User) => userData.churchId === user.churchId
@@ -60,17 +61,17 @@ export default function Attendance() {
     } catch (err) {
       console.error("Error fetching members:", err);
       setFetchError(t("serverError"));
+    } finally {
+      setIsCallApi(false);
     }
-    setIsCallApi(false);
-  };
+  }, [user, router, t]);
 
-  // 출석 정보 가져오기 (서버 날짜 사용)
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async () => {
     try {
       const response = await fetch("/api/attendance", {
         credentials: "include",
       });
-      if (!response.ok) throw new Error("Failed to fetch attendance");
+      if (!response.ok) throw new Error(t("failedToFetchAttendance"));
       const { attendances }: { attendances: AttendanceRecord[] } =
         await response.json();
       const status: { [key: string]: boolean } = {};
@@ -82,32 +83,36 @@ export default function Attendance() {
       console.error("Error fetching attendance:", err);
       setFetchError(t("serverError"));
     }
-  };
+  }, [t]);
 
   // 출석 체크/취소 처리
-  const checkUser = async (userId: string) => {
-    setIsCallApi(true);
-    try {
-      const isAttended = !attendanceStatus[userId];
-      const response = await fetch("/api/attendance", {
-        method: isAttended ? "POST" : "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ userId }),
-      });
-      if (!response.ok) throw new Error("Failed to update attendance");
-      setAttendanceStatus((prev) => ({
-        ...prev,
-        [userId]: isAttended,
-      }));
-    } catch (err) {
-      console.error("Error updating attendance:", err);
-      setFetchError(t("serverError"));
-    }
-    setIsCallApi(false);
-  };
+  const checkUser = useCallback(
+    async (userId: string) => {
+      setIsCallApi(true);
+      try {
+        const isAttended = !attendanceStatus[userId];
+        const response = await fetch("/api/attendance", {
+          method: isAttended ? "POST" : "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ userId }),
+        });
+        if (!response.ok) throw new Error(t("failedToUpdateAttendance"));
+        setAttendanceStatus((prev) => ({
+          ...prev,
+          [userId]: isAttended,
+        }));
+      } catch (err) {
+        console.error("Error updating attendance:", err);
+        setFetchError(t("serverError"));
+      } finally {
+        setIsCallApi(false);
+      }
+    },
+    [attendanceStatus, t]
+  );
 
   // 데이터 가져오기
   useEffect(() => {
@@ -115,7 +120,7 @@ export default function Attendance() {
       fetchMembers();
       fetchAttendance();
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, fetchMembers, fetchAttendance]);
 
   // 그룹 및 서브그룹 목록 생성
   const groups = Array.from(
@@ -414,5 +419,13 @@ export default function Attendance() {
         </div>
       </main>
     </motion.div>
+  );
+}
+
+export default function AttendancePage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <AttendanceContent />
+    </Suspense>
   );
 }

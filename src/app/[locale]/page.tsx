@@ -72,10 +72,10 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-      <section className="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white pt-24 pb-16">
-        <div className="py-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative bg-[url('/top_bg.png')] bg-cover bg-center text-white pt-24 pb-16">
+        <div className="py-30 max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.h2
-            className="text-4xl md:text-5xl font-extrabold mb-6"
+            className="text-3xl md:text-4xl font-extrabold mb-3 text-gray-600"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -83,7 +83,7 @@ export default function LandingPage() {
             {t("hero.title")}
           </motion.h2>
           <motion.p
-            className="text-lg md:text-xl mb-8 max-w-2xl mx-auto"
+            className="text-lg md:text-xl mb-8 max-w-xl text-gray-600"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -91,21 +91,21 @@ export default function LandingPage() {
             {t("hero.description")}
           </motion.p>
           <motion.div
-            className="flex gap-4 justify-center"
+            className="flex gap-4 "
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
             <Button
               onClick={() => router.push("/signup")}
-              className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
+              className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full border"
               aria-label={t("hero.cta")}
             >
               {t("hero.cta")}
             </Button>
             <Button
               onClick={() => router.push("/church-registration")}
-              className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
+              className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full border"
               aria-label={t("usage.steps.0.title")}
             >
               {t("usage.steps.0.title")}

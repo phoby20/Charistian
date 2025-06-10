@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 interface SubGroupInput {
   name: string;
-  church: { connect: { id: string } }; // church 필드 추가
+  church: { connect: { id: string } };
 }
 
 async function main() {
@@ -77,11 +77,36 @@ async function main() {
   const districtSubGroups = ["1교구(1教区)", "2교구(2教区)", "3교구(3教区)"];
 
   try {
-    const hashedPassword = await bcrypt.hash("master@christm", 10);
+    const hashedPassword = await bcrypt.hash("master@charistian", 10);
 
     // 트랜잭션으로 데이터 생성
     await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      // Church를 먼저 생성
+      // User 존재 여부 확인
+      const existingUser = await tx.user.findUnique({
+        where: { email: "master@example.com" },
+        select: { id: true, churchId: true }, // churchId 포함
+      });
+
+      if (existingUser) {
+        // User가 존재하면 churchId로 Church 확인
+        if (existingUser.churchId) {
+          const existingChurch = await tx.church.findUnique({
+            where: { id: existingUser.churchId },
+          });
+
+          if (existingChurch) {
+            throw new Error(
+              `Church with ID "${existingUser.churchId}" already exists for user with email "master@example.com". Seeding aborted.`
+            );
+          }
+        }
+        // churchId가 없더라도 User가 존재하면 시드 중단
+        throw new Error(
+          `User with email "master@example.com" already exists. Seeding aborted.`
+        );
+      }
+
+      // Church 생성
       const church = await tx.church.create({
         data: {
           name: "Master Church",
@@ -95,11 +120,9 @@ async function main() {
         },
       });
 
-      // User 생성 (churchId 제거, church connect만 사용)
-      const user = await tx.user.upsert({
-        where: { email: "master@example.com" },
-        update: {},
-        create: {
+      // User 생성
+      const user = await tx.user.create({
+        data: {
           email: "master@example.com",
           password: hashedPassword,
           name: "Master Admin",

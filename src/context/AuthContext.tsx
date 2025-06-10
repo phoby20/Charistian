@@ -55,11 +55,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }
     };
-    if (
-      pathname !== `/${locale}/login` &&
-      pathname !== `/${locale}/signup` &&
-      pathname !== `/${locale}/church-registration`
-    ) {
+
+    const EXCLUDED_PATHS = ["", "/login", "/signup", "/church-registration"];
+
+    if (!locale || !pathname) {
+      fetchUser(); // 방어 로직: locale 또는 pathname 없으면 기본 호출
+    } else if (!EXCLUDED_PATHS.includes(pathname.replace(`/${locale}`, ""))) {
       fetchUser();
     }
   }, [router, pathname, locale]);

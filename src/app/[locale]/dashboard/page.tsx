@@ -17,7 +17,12 @@ import ErrorModal from "@/components/ErrorModal";
 export default function DashboardPage() {
   const t = useTranslations();
   const router = useRouter();
-  const { user, isLoading, error: authError } = useAuth();
+  const {
+    user,
+    isLoading,
+    error: authError,
+    setError: setAuthError,
+  } = useAuth();
   const [pendingChurches, setPendingChurches] = useState<ChurchApplication[]>(
     []
   );
@@ -93,7 +98,11 @@ export default function DashboardPage() {
         <ErrorModal
           authError={authError}
           fetchError={fetchError}
-          onClose={() => setFetchError(null)}
+          onClose={() => {
+            setAuthError(null);
+            setFetchError(null);
+            router.push("/");
+          }}
         />
       </div>
     </div>

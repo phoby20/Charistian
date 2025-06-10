@@ -1,10 +1,10 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import Image from "next/image";
 import { User } from "@/types/customUser";
 import { getBorderColor } from "./roleBadge";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 interface MemberCardProps {
   user: User;
@@ -19,7 +19,7 @@ export default function MemberCard({
   onClick,
   attendanceStatus,
 }: MemberCardProps) {
-  const { t } = useTranslation("common");
+  const t = useTranslations();
 
   return (
     <motion.div
@@ -30,7 +30,7 @@ export default function MemberCard({
       onClick={() => onClick(user)}
       role="button"
       tabIndex={0}
-      aria-label={t("viewUserDetails", { name: user.name })}
+      aria-label={user.name}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();

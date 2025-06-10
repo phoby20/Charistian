@@ -56,7 +56,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    const EXCLUDED_PATHS = ["", "/login", "/signup", "/church-registration"];
+    const EXCLUDED_PATHS = [
+      "",
+      "/login",
+      "/signup",
+      "/church-registration",
+      "/church-registration/success",
+    ];
 
     if (!locale || !pathname) {
       fetchUser(); // 방어 로직: locale 또는 pathname 없으면 기본 호출

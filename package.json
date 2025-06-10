@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate --schema prisma/schema.prod.prisma && next build",
+    "build": "npx prisma generate --schema prisma/schema.prod.prisma && npx prisma migrate deploy --schema prisma/schema.prod.prisma && next build && npx prisma db seed",
     "start": "next start",
     "lint": "next lint",
     "prisma:generate:local": "prisma generate --schema prisma/schema.local.prisma",

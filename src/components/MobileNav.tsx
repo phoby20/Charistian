@@ -109,7 +109,7 @@ export default function MobileNav({
             )}
             {!user && (
               <Link
-                href={`${locale}/church-registration`}
+                href={getPathname({ locale, href: "/church-registration" })}
                 onClick={() => setIsMenuOpen(false)}
                 className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
               >

@@ -323,5 +323,12 @@
     "city": "在籍中の教会の都市",
     "region": "在籍中の教会の地域",
     "church": "在籍中の教会名"
-  }
+  },
+  "myQRCode": "マイQR",
+  "generatingQR": "QRコード生成中...",
+  "scanQR": "QRスキャン",
+  "cameraError": "カメラにアクセスできません",
+  "InvalidQRCode": "無効なQRコード形式です",
+  "videoError": "ビデオストリームの再生に失敗しました",
+  "noQRCodeDetected": "QRコードが検出されませんでした"
 }

@@ -34,7 +34,16 @@ export async function GET() {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
     const userRole = decoded.role as string;
 
-    if (!["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
+    if (
+      ![
+        "CHECKER",
+        "SUPER_ADMIN",
+        "ADMIN",
+        "SUB_ADMIN",
+        "SUPER_ADMIN",
+        "ADMIN",
+      ].includes(userRole)
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -77,7 +86,16 @@ export async function POST(request: Request) {
     const checkedById = decoded.userId as string;
     const userRole = decoded.role as string;
 
-    if (!["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
+    if (
+      ![
+        "CHECKER",
+        "SUPER_ADMIN",
+        "ADMIN",
+        "SUB_ADMIN",
+        "SUPER_ADMIN",
+        "ADMIN",
+      ].includes(userRole)
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -155,7 +173,7 @@ export async function DELETE(request: Request) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
     const userRole = decoded.role as string;
 
-    if (!["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
+    if (!["CHECKER", "SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(userRole)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

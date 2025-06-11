@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
@@ -7,6 +7,28 @@ import { uploadFile } from "@/lib/vercelBlob";
 import { Position } from "@/types/customUser";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secure-secret-key";
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const user = await prisma.user.findUnique({
+      where: { id: id },
+      select: { id: true, name: true, churchId: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
 
 export async function PUT(
   req: Request,

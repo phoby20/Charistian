@@ -61,7 +61,6 @@
   "of": "중",
   "fileTooLarge": "파일 크기가 5MB를 초과했습니다.",
   "unsupportedFileType": "지원되지 않는 파일 형식입니다.",
-  "signup": "회원가입",
   "birthDate": "생년월일",
   "kakaoId": "카카오 ID",
   "lineId": "라인 ID",
@@ -324,5 +323,11 @@
   },
   "people": "명",
   "date": "날짜",
-  "attendanceCount": "출석 인원"
+  "attendanceCount": "출석 인원",
+  "signup": {
+    "signupTitle": "회원가입",
+    "city": "재적중인 교회의 도시",
+    "region": "재적중인 교회의 지역",
+    "church": "재적중인 교회명"
+  }
 }

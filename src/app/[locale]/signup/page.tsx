@@ -289,7 +289,7 @@ export default function SignupPage() {
           className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-8 sm:p-12"
         >
           <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-8 text-center tracking-tight">
-            {t("signup")}
+            {t("signup.signupTitle")}
           </h1>
           <AnimatePresence>
             {error && (
@@ -407,7 +407,7 @@ export default function SignupPage() {
               className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
             />
             <Select
-              label={t("city")}
+              label={t("signup.city")}
               name="city"
               options={citiesByCountry[selectedCountry] || []}
               value={selectedCity}
@@ -416,7 +416,7 @@ export default function SignupPage() {
               className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
             />
             <Select
-              label={t("region")}
+              label={t("signup.region")}
               name="region"
               options={regionsByCity[selectedCity] || []}
               value={selectedRegion}
@@ -425,7 +425,7 @@ export default function SignupPage() {
               className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
             />
             <Select
-              label={t("church")}
+              label={t("signup.church")}
               name="churchId"
               options={churches}
               value={selectedChurch}
@@ -491,7 +491,7 @@ export default function SignupPage() {
                     {t("submitting")}
                   </span>
                 ) : (
-                  t("signup")
+                  t("signup.signupTitle")
                 )}
               </Button>
             </div>

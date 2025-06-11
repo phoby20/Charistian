@@ -49,7 +49,7 @@ export async function PUT(
     try {
       decoded = jwt.verify(token, JWT_SECRET) as {
         userId: string;
-        role: string;
+        role: Role; // Role enum 사용
       };
     } catch (err) {
       return NextResponse.json(
@@ -59,20 +59,28 @@ export async function PUT(
     }
 
     // Role 변경 권한 정의
-    const allowedRoles: { [key: string]: string[] } = {
-      MASTER: [
-        "MASTER",
-        "SUPER_ADMIN",
-        "SUB_ADMIN",
-        "ADMIN",
-        "GENERAL",
-        "VISITOR",
+    const allowedRoles: { [key in Role]: Role[] } = {
+      [Role.MASTER]: [
+        Role.MASTER,
+        Role.SUPER_ADMIN,
+        Role.SUB_ADMIN,
+        Role.ADMIN,
+        Role.GENERAL,
+        Role.VISITOR,
+        Role.CHECKER,
       ],
-      SUPER_ADMIN: ["SUB_ADMIN", "ADMIN", "GENERAL", "VISITOR"],
-      SUB_ADMIN: ["ADMIN", "GENERAL", "VISITOR"],
-      ADMIN: ["GENERAL", "VISITOR"],
-      GENERAL: [],
-      VISITOR: [],
+      [Role.SUPER_ADMIN]: [
+        Role.SUB_ADMIN,
+        Role.ADMIN,
+        Role.GENERAL,
+        Role.VISITOR,
+        Role.CHECKER,
+      ],
+      [Role.ADMIN]: [Role.SUB_ADMIN, Role.GENERAL, Role.VISITOR, Role.CHECKER],
+      [Role.SUB_ADMIN]: [Role.GENERAL, Role.VISITOR, Role.CHECKER],
+      [Role.GENERAL]: [],
+      [Role.VISITOR]: [],
+      [Role.CHECKER]: [],
     };
 
     if (
@@ -121,7 +129,7 @@ export async function PUT(
       );
     }
 
-    // 필수 필드 검증 (role 추가)
+    // 필수 필드 검증
     if (!name || !email || !birthDate || !gender || !role) {
       return NextResponse.json(
         { error: "필수 필드가 누락되었습니다." },
@@ -129,28 +137,11 @@ export async function PUT(
       );
     }
 
-    // 요청된 Role이 현재 사용자의 권한 내에 있는지 검증
+    // Role이 제공된 경우, 요청된 Role이 현재 사용자의 권한 내에 있는지 검증
     if (role && !allowedRoles[decoded.role].includes(role)) {
       return NextResponse.json(
         { error: `허용되지 않은 Role: ${role}` },
         { status: 403 }
-      );
-    }
-
-    // 유효한 Role 값인지 검증
-    const validRoles = [
-      "MASTER",
-      "SUPER_ADMIN",
-      "SUB_ADMIN",
-      "ADMIN",
-      "GENERAL",
-      "VISITOR",
-    ] as const;
-
-    if (role && !validRoles.includes(role)) {
-      return NextResponse.json(
-        { error: "유효하지 않은 Role 값입니다." },
-        { status: 400 }
       );
     }
 
@@ -181,7 +172,7 @@ export async function PUT(
         birthDate: new Date(birthDate),
         gender,
         position: positionId,
-        profileImage: profileImagePath, // null 가능
+        profileImage: profileImagePath,
         role: role,
         groups: groupId
           ? {

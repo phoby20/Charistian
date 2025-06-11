@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Button from "@/components/Button";
 import { useState, useEffect } from "react";
 import { ChurchApplication, User } from "@prisma/client";
 import { useAuth } from "@/context/AuthContext";
@@ -69,16 +68,6 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-extrabold text-gray-900">
             {t("dashboard")}
           </h1>
-          <div className="space-y-2">
-            {["MASTER", "SUPER_ADMIN", "ADMIN"].includes(user?.role || "") && (
-              <Button
-                onClick={() => router.push("/signup")}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
-              >
-                {t("addMember")}
-              </Button>
-            )}
-          </div>
         </motion.div>
 
         {/* Pending Alerts */}

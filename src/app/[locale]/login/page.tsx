@@ -72,7 +72,7 @@ export default function LoginPage() {
           <p>
             {t("noAccount")}{" "}
             <Link href={signUpUrl} className="text-blue-600 hover:underline">
-              {t("signup.signupTitle")}
+              {t("signupTitle")}
             </Link>
           </p>
         </div>

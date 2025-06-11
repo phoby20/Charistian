@@ -346,7 +346,6 @@ export default function ChurchRegistrationPage() {
               type="button"
               className="ml-2 text-red-600 hover:text-red-800 transition-colors"
               onClick={() => handleFileReset("buildingImage")}
-              aria-label={t("removeBuildingImage")}
             >
               <X size={16} />
             </button>
@@ -466,7 +465,6 @@ export default function ChurchRegistrationPage() {
               type="button"
               className="ml-2 text-red-600 hover:text-red-800 transition-colors"
               onClick={() => handleFileReset("contactImage")}
-              aria-label={t("removeContactImage")}
             >
               <X size={16} />
             </button>

@@ -15,18 +15,19 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    setIsLoading(true);
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
     try {
+      setIsLoading(true);
       const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+      setIsLoading(false);
 
       if (!response.ok) {
         setError(t("invalidCredentials"));
@@ -34,6 +35,7 @@ export default function LoginPage() {
       }
 
       if (typeof window !== "undefined") {
+        setIsLoading(false);
         window.location.href = `/${locale}/dashboard`;
       }
     } catch (err) {
@@ -43,7 +45,6 @@ export default function LoginPage() {
         })
       );
     }
-    setIsLoading(false);
   };
 
   const signUpUrl = `/${locale}/signup`;
@@ -71,7 +72,7 @@ export default function LoginPage() {
           <p>
             {t("noAccount")}{" "}
             <Link href={signUpUrl} className="text-blue-600 hover:underline">
-              {t("signup")}
+              {t("signup.signupTitle")}
             </Link>
           </p>
         </div>

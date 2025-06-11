@@ -60,7 +60,6 @@
   "of": "の",
   "fileTooLarge": "ファイルサイズが5MBを超えています。",
   "fileTypeNotSupported": "サポートされていないファイルタイプです。",
-  "signup": "会員登録",
   "fileUploadError": "ファイルアップロード中にエラーが発生しました。",
   "registrationSuccess": "登録申請が成功しました！",
   "registrationPending": "登録申請は保留中です。承認をお待ちください。",
@@ -277,7 +276,7 @@
     },
     "promotion": {
       "title": "小規模教会向け無料利用",
-      "description": "在籍聖徒50人以下の教会は期間限定で無料利用可能！",
+      "description": "期間限定でCharistianの全てのサービスを無料利用可能！",
       "cta": "新規教会登録",
       "limitedOffer": "期間限定オファー"
     },
@@ -317,5 +316,11 @@
   },
   "people": "人",
   "date": "日付",
-  "attendanceCount": "出席人数"
+  "attendanceCount": "出席人数",
+  "signup": {
+    "signupTitle": "会員登録",
+    "city": "在籍中の教会の都市",
+    "region": "在籍中の教会の地域",
+    "church": "在籍中の教会名"
+  }
 }

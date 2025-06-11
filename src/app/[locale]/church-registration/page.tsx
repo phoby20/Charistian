@@ -437,8 +437,8 @@ export default function ChurchRegistrationPage() {
         name="plan"
         options={[
           { value: "FREE", label: t("free") },
-          { value: "SMART", label: t("smart") },
-          { value: "ENTERPRISE", label: t("enterprise") },
+          // { value: "SMART", label: t("smart") },
+          // { value: "ENTERPRISE", label: t("enterprise") },
         ]}
         value={formData.plan}
         onChange={handleInputChange}

@@ -2,11 +2,13 @@ import { FC, ButtonHTMLAttributes } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "outline";
+  isDisabled?: boolean;
 }
 
 const Button: FC<ButtonProps> = ({
   children,
   variant = "primary",
+  isDisabled = false,
   ...props
 }) => {
   const baseStyles =
@@ -19,7 +21,15 @@ const Button: FC<ButtonProps> = ({
   };
 
   return (
-    <button className={`${baseStyles} ${variantStyles[variant]}`} {...props}>
+    <button
+      className={`${baseStyles} ${variantStyles[variant]} ${
+        isDisabled
+          ? "cursor-not-allowed bg-gray-200 text-black hover:bg-gray-200"
+          : ""
+      }`}
+      {...props}
+      disabled={isDisabled}
+    >
       {children}
     </button>
   );

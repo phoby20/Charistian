@@ -6,13 +6,13 @@ import Input from "@/components/Input";
 import Button from "@/components/Button";
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import Loading from "@/components/Loading";
+// import Loading from "@/components/Loading";
 
 export default function LoginPage() {
   const t = useTranslations(); // 네임스페이스 제거
   const [error, setError] = useState<string | null>(null);
   const locale = useLocale();
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,13 +21,13 @@ export default function LoginPage() {
     const password = formData.get("password") as string;
 
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
       const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      setIsLoading(false);
+      // setIsLoading(false);
 
       if (!response.ok) {
         setError(t("invalidCredentials"));
@@ -35,7 +35,7 @@ export default function LoginPage() {
       }
 
       if (typeof window !== "undefined") {
-        setIsLoading(false);
+        // setIsLoading(false);
         window.location.href = `/${locale}/dashboard`;
       }
     } catch (err) {
@@ -49,9 +49,9 @@ export default function LoginPage() {
 
   const signUpUrl = `/${locale}/signup`;
 
-  if (isLoading) {
-    return <Loading />;
-  }
+  // if (isLoading) {
+  //   return <Loading />;
+  // }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

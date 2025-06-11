@@ -240,8 +240,7 @@
       },
       "qrAttendance": {
         "title": "QR코드 출석체크",
-        "description": "개인화된 QR코드로 출석을 간편하게 체크하세요",
-        "badge": "준비중"
+        "description": "스마트폰의 QR코드로 출석을 간편하게 체크하세요"
       },
       "permissions": {
         "title": "권한 설정",

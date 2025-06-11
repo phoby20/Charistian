@@ -233,8 +233,7 @@
       },
       "qrAttendance": {
         "title": "QRコード出席確認",
-        "description": "パーソナライズされたQRコードで簡単に出席確認（準備中）",
-        "badge": "準備中"
+        "description": "スマートフォンのQRコードで簡単に出席確認"
       },
       "permissions": {
         "title": "権限設定",

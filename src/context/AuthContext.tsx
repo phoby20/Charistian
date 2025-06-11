@@ -62,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       "/signup",
       "/church-registration",
       "/church-registration/success",
+      "/signup/complete",
     ];
 
     if (!locale || !pathname) {

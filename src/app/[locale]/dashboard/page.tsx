@@ -1,3 +1,4 @@
+// src/app/[locale]/dashboard/page.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -12,6 +13,8 @@ import { AttendanceStatsData, fetchData, MemberStatsData } from ".";
 import Loading from "@/components/Loading";
 import PendingAlerts from "@/components/PendingAlerts";
 import ErrorModal from "@/components/ErrorModal";
+import MyQRCode from "@/components/MyQRCode";
+import QRScanner from "@/components/QRScanner";
 
 export default function DashboardPage() {
   const t = useTranslations();
@@ -37,8 +40,8 @@ export default function DashboardPage() {
     recentMembers: [],
   });
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [scanMessage, setScanMessage] = useState<string>(""); // 메시지 상태
 
-  // Fetch pending and stats data
   useEffect(() => {
     fetchData(
       user,
@@ -53,7 +56,7 @@ export default function DashboardPage() {
     );
   }, [user, isLoading]);
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return <Loading />;
   }
 
@@ -63,27 +66,29 @@ export default function DashboardPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex justify-between items-center mb-8"
+          className="flex justify-between items-center mb-8 space-x-4"
         >
           <h1 className="text-3xl font-extrabold text-gray-900">
             {t("dashboard")}
           </h1>
+          <div className="flex space-x-2">
+            <MyQRCode user={user} scanMessage={scanMessage} />{" "}
+            {/* scanMessage 전달 */}
+            <QRScanner user={user} onMessage={setScanMessage} />
+          </div>
         </motion.div>
 
-        {/* Pending Alerts */}
         <PendingAlerts
           user={user}
           pendingUsers={pendingUsers}
           pendingChurches={pendingChurches}
         />
 
-        {/* Dashboard Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
           <AttendanceStats user={user} attendanceStats={attendanceStats} />
           <MemberStats user={user} memberStats={memberStats} />
         </div>
 
-        {/* Error Modal */}
         <ErrorModal
           authError={authError}
           fetchError={fetchError}

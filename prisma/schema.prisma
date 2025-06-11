@@ -182,6 +182,7 @@ enum Role {
   ADMIN
   SUB_ADMIN
   SUPER_ADMIN
+  CHECKER
   MASTER
 }
 

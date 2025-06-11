@@ -26,10 +26,9 @@ export default function LandingPage() {
       description: t("features.dashboard.description"),
     },
     {
-      icon: "📱",
+      icon: "🔲",
       title: t("features.qrAttendance.title"),
       description: t("features.qrAttendance.description"),
-      badge: t("features.qrAttendance.badge"),
     },
     {
       icon: "🔐",
@@ -134,11 +133,6 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, delay: index * 0.2 }}
                 viewport={{ once: true }}
               >
-                {feature.badge && (
-                  <span className="absolute top-2 right-2 bg-yellow-400 text-gray-900 text-xs font-semibold px-2 py-1 rounded-full">
-                    {feature.badge}
-                  </span>
-                )}
                 <span className="text-4xl mb-4 block">{feature.icon}</span>
                 <h4 className="text-xl font-semibold text-gray-900 mb-2">
                   {feature.title}

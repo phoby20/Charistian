@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { Resend } from "resend";
 
 // 기본 직분, 직책, 그룹, 팀, 서브그룹 데이터
 const defaultPositions = [
@@ -75,6 +76,57 @@ interface SubGroupInput {
   name: string;
 }
 
+// 6자리 랜덤 숫자 비밀번호 생성 함수
+function generateRandomPassword(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// 5자리 랜덤 숫자 생성 함수
+function generateRandomFiveDigits(): string {
+  return Math.floor(10000 + Math.random() * 90000).toString();
+}
+
+// 이메일 전송 함수
+async function sendApprovalEmail(
+  superAdminEmail: string,
+  checkerEmail: string,
+  checkerPassword: string,
+  churchName: string
+) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
+  await resend.emails.send({
+    from: "charistian 운영팀 <noreply@charistian.com>",
+    to: superAdminEmail,
+    subject: `${churchName} 교회 등록 완료 안내`,
+    html: `
+      <h1>${churchName} 교회 등록 완료</h1>
+      <p>안녕하세요, ${churchName} 교회의 등록이 성공적으로 완료되었습니다.</p>
+      <h2>CHECKER 유저 정보</h2>
+      <p>QR 코드 스캔을 위한 CHECKER 유저 계정이 아래와 같이 생성되었습니다:</p>
+      <ul>
+        <li><strong>이메일</strong>: ${checkerEmail}</li>
+        <li><strong>비밀번호</strong>: ${checkerPassword}</li>
+      </ul>
+      <h2>서비스 이용 안내</h2>
+      <h3>교회가 할 일</h3>
+      <ol>
+        <li>로그인 후 <strong>설정 > 마스터 설정</strong>에서 "직분설정", "소속설정", "직책설정", "팀 설정"을 진행하세요.</li>
+        <li>교회 성도들에게 <a href="https://www.charistian.com/">https://www.charistian.com/</a> 가입을 안내하세요. 성도는 재적 중인 교회의 나라, 도시, 지역을 선택하면 등록된 교회 목록에서 ${churchName}을 선택할 수 있습니다.</li>
+        <li>성도가 회원 등록을 신청하면 <strong>${superAdminEmail}</strong>으로 로그인하여 등록 신청을 승인/거부하세요.</li>
+        <li>승인된 성도의 소속, 직책, 팀을 설정하세요.</li>
+        <li>예배일 또는 이벤트 날에 스마트폰/태블릿으로 CHECKER 유저(${checkerEmail})로 로그인한 뒤 <strong>QR스캔</strong> 버튼을 클릭하여 입장하는 성도의 QR 코드를 스캔하세요.</li>
+        <li>QR 코드가 없는 성도는 화면 상단 메뉴에서 <strong>성도관리 > 출석체크</strong>로 이동하여 소속된 회원을 찾아 클릭하면 출석체크가 완료됩니다.</li>
+      </ol>
+      <h3>성도가 할 일</h3>
+      <ol>
+        <li>로그인 후 <strong>QR코드</strong> 버튼을 클릭하세요.</li>
+        <li>교회에서 준비한 QR 스캐너에 QR 코드를 스캔하세요.</li>
+      </ol>
+    `,
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { applicationId } = await req.json();
@@ -106,17 +158,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 트랜잭션으로 Church, User, ChurchPosition, Duty, Group, SubGroup, Team 생성 및 Application 업데이트
-    const [church, user, updatedApplication] = await prisma.$transaction(
-      async (tx) => {
-        // 1. 교회 생성
+    // CHECKER 유저 이메일 생성
+    const superAdminEmail = application.superAdminEmail.toLowerCase();
+    const emailPrefix = superAdminEmail.split("@")[0];
+    const emailDomain = superAdminEmail.split("@")[1];
+    const randomDigits = generateRandomFiveDigits();
+    const checkerEmail = `${emailPrefix}_${randomDigits}_checker@${emailDomain}`;
+    const checkerPassword = generateRandomPassword();
+
+    // 트랜잭션으로 Church, User(SUPER_ADMIN), User(CHECKER), ChurchPosition, Duty, Group, SubGroup, Team 생성 및 Application 업데이트
+    const [church, superAdminUser, checkerUser, updatedApplication] =
+      await prisma.$transaction(async (tx) => {
+        // 1. SUPER_ADMIN 이메일 중복 체크
+        const existingSuperAdmin = await tx.user.findUnique({
+          where: { email: superAdminEmail },
+        });
+        if (existingSuperAdmin) {
+          throw new Error("SUPER_ADMIN 이메일이 이미 등록되어 있습니다");
+        }
+
+        // 2. CHECKER 이메일 중복 체크
+        const existingChecker = await tx.user.findUnique({
+          where: { email: checkerEmail },
+        });
+        if (existingChecker) {
+          throw new Error("CHECKER 이메일이 이미 등록되어 있습니다");
+        }
+
+        // 3. 교회 생성
         const church = await tx.church.create({
           data: {
             name: application.churchName,
             address: application.address,
-            country: application.country,
             city: application.city,
             region: application.region,
+            country: application.country,
             phone: application.churchPhone,
             buildingImage: application.buildingImage,
             plan: application.plan,
@@ -124,10 +200,10 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // 2. 사용자 생성
-        const user = await tx.user.create({
+        // 4. SUPER_ADMIN 유저 생성
+        const superAdminUser = await tx.user.create({
           data: {
-            email: application.superAdminEmail.toLowerCase(),
+            email: superAdminEmail,
             password: application.password,
             name: application.contactName,
             birthDate: application.contactBirthDate,
@@ -144,7 +220,25 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // 3. 기본 직분(ChurchPosition) 생성
+        // 5. CHECKER 유저 생성
+        const checkerUser = await tx.user.create({
+          data: {
+            email: checkerEmail,
+            password: checkerPassword,
+            name: "Checker User",
+            birthDate: new Date("1970-01-01"),
+            gender: "Unknown",
+            country: application.country,
+            region: "Unknown",
+            role: "CHECKER",
+            state: "APPROVED",
+            church: {
+              connect: { id: church.id },
+            },
+          },
+        });
+
+        // 6. 기본 직분(ChurchPosition) 생성
         const positionData = defaultPositions.map((name) => ({
           name,
           churchId: church.id,
@@ -153,7 +247,7 @@ export async function POST(req: NextRequest) {
           data: positionData,
         });
 
-        // 4. 기본 직책(Duty) 생성
+        // 7. 기본 직책(Duty) 생성
         const dutyData = defaultDuties.map((name) => ({
           name,
           churchId: church.id,
@@ -162,7 +256,7 @@ export async function POST(req: NextRequest) {
           data: dutyData,
         });
 
-        // 5. 기본 그룹(Group) 및 서브그룹(SubGroup) 생성
+        // 8. 기본 그룹(Group) 및 서브그룹(SubGroup) 생성
         const classGroupNames = [
           "유아부(幼兒部)",
           "유치부(幼稚部)",
@@ -178,7 +272,6 @@ export async function POST(req: NextRequest) {
           "장년부(長年部)",
         ];
 
-        // Group을 개별적으로 생성하여 id를 얻음
         for (const name of defaultGroups) {
           const group = await tx.group.create({
             data: {
@@ -187,12 +280,13 @@ export async function POST(req: NextRequest) {
             },
           });
 
-          // SubGroup 생성
           const subGroups: SubGroupInput[] = classGroupNames.includes(name)
             ? classSubGroups.map((subGroupName) => ({ name: subGroupName }))
             : districtGroupNames.includes(name)
-            ? districtSubGroups.map((subGroupName) => ({ name: subGroupName }))
-            : [];
+              ? districtSubGroups.map((subGroupName) => ({
+                  name: subGroupName,
+                }))
+              : [];
 
           if (subGroups.length > 0) {
             await tx.subGroup.createMany({
@@ -205,7 +299,7 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // 6. 기본 팀(Team) 생성
+        // 9. 기본 팀(Team) 생성
         const teamData = defaultTeams.map((name) => ({
           name,
           churchId: church.id,
@@ -214,22 +308,29 @@ export async function POST(req: NextRequest) {
           data: teamData,
         });
 
-        // 7. ChurchApplication 상태 업데이트
+        // 10. ChurchApplication 상태 업데이트
         const updatedApplication = await tx.churchApplication.update({
           where: { id: applicationId },
           data: { state: "APPROVED" },
         });
 
-        return [church, user, updatedApplication];
-      }
+        return [church, superAdminUser, checkerUser, updatedApplication];
+      });
+
+    // 이메일 전송
+    await sendApprovalEmail(
+      superAdminEmail,
+      checkerEmail,
+      checkerPassword,
+      church.name
     );
 
-    // TODO: 이메일 전송 및 Stripe 결제 URL 생성 구현
     return NextResponse.json(
       {
         message: "교회 신청이 승인되었습니다",
         church,
-        user,
+        superAdminUser,
+        checkerUser,
         updatedApplication,
       },
       { status: 200 }
@@ -237,7 +338,15 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     console.error("교회 신청 승인 중 오류:", error);
 
-    // Prisma 오류 처리
+    if (error instanceof Error) {
+      if (error.message.includes("SUPER_ADMIN 이메일")) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+      if (error.message.includes("CHECKER 이메일")) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+    }
+
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2025") {
         return NextResponse.json(

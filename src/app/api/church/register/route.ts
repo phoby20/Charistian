@@ -4,6 +4,7 @@ import { uploadFile } from "@/lib/vercelBlob";
 import * as bcrypt from "bcrypt";
 import { regionsByCityKorea } from "@/data/regions/regionsKorea";
 import { regionsByCityJapan } from "@/data/regions/regionsJapan";
+import { Resend } from "resend";
 
 const validPlans = ["FREE", "SMART", "ENTERPRISE"] as const;
 type Plan = (typeof validPlans)[number];
@@ -205,6 +206,19 @@ export async function POST(req: NextRequest) {
         buildingImage: data.buildingImage,
         state: "PENDING",
       },
+    });
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    await resend.emails.send({
+      from: "charistian 운영팀 <noreply@charistian.com>",
+      to: "phoby20@hotmail.com",
+      subject: `교회 등록 신청 알림`,
+      html: `
+      <h2>${data.churchName} 교회 등록 신청</h2>
+      <p>${data.churchName} 교회의 등록 신청이 있습니다.</p>
+      <p>지금 <a href="https://www.charistian.com/">https://www.charistian.com/</a>에 마스터 권한으로 접속해서 확인하시기 바랍니다.</p>
+    `,
     });
 
     return NextResponse.json(

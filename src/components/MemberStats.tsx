@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { User } from "@prisma/client";
+import { toCamelCase } from "@/utils/toCamelCase";
 
 interface MemberStatsData {
   totalMembers: number;
@@ -19,7 +20,10 @@ interface MemberStatsProps {
 export default function MemberStats({ user, memberStats }: MemberStatsProps) {
   const t = useTranslations();
 
-  if (!user || !["MASTER", "SUPER_ADMIN", "ADMIN"].includes(user.role)) {
+  if (
+    !user ||
+    !["MASTER", "SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role)
+  ) {
     return null;
   }
 
@@ -48,7 +52,7 @@ export default function MemberStats({ user, memberStats }: MemberStatsProps) {
                   key={role}
                   className="flex justify-between text-gray-500 mb-1"
                 >
-                  <span>{t(role.toLowerCase())}</span>
+                  <span>{t(toCamelCase(role))}</span>
                   <span className="font-semibold">{count}</span>
                 </li>
               )

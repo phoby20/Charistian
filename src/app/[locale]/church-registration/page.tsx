@@ -484,33 +484,7 @@ export default function ChurchRegistrationPage() {
           disabled={isLoading}
           className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 disabled:bg-gray-400 disabled:hover:scale-100 disabled:hover:bg-gray-400 transition-all duration-200 shadow-sm hover:shadow-md"
         >
-          {isLoading ? (
-            <span className="flex items-center">
-              <svg
-                className="animate-spin h-4 w-4 mr-2 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-50"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-100"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                />
-              </svg>
-              {t("submitting")}
-            </span>
-          ) : (
-            t("churchRegistration")
-          )}
+          {isLoading ? <Loading /> : t("churchRegistration")}
         </Button>
       </div>
     </motion.form>

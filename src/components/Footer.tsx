@@ -108,7 +108,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 text-center text-gray-500">
-          © {new Date().getFullYear()} {t("brandName")}. {t("footer.rights")}
+          © {new Date().getFullYear()} Integrity,. All Rights Reserved.
         </div>
       </div>
     </footer>

@@ -21,7 +21,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const {
     user,
-    isLoading,
+    isLoading: isAuthLoading,
     error: authError,
     setError: setAuthError,
   } = useAuth();
@@ -41,20 +41,22 @@ export default function DashboardPage() {
   });
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [scanMessage, setScanMessage] = useState<string>(""); // 메시지 상태
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchData(
       user,
-      isLoading,
+      isAuthLoading,
       memberStats,
       setPendingChurches,
       setPendingUsers,
       setAttendanceStats,
       setMemberStats,
       setFetchError,
+      setIsLoading,
       t
     );
-  }, [user, isLoading]);
+  }, [user, isAuthLoading]);
 
   if (isLoading || !user) {
     return <Loading />;

@@ -25,7 +25,7 @@ const Button: FC<ButtonProps> = ({
       className={`${baseStyles} ${variantStyles[variant]} ${
         isDisabled
           ? "cursor-not-allowed bg-gray-200 text-black hover:bg-gray-200"
-          : ""
+          : "cursor-pointer"
       }`}
       {...props}
       disabled={isDisabled}

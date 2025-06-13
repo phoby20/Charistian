@@ -211,8 +211,8 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "charistian 운영팀 <noreply@charistian.com>",
-      to: "phoby20@hotmail.com",
+      from: `charistian 운영팀 <${process.env.RESEND_FROM}>`,
+      to: `${process.env.ADMIN_EMAIL}`,
       subject: `교회 등록 신청 알림`,
       html: `
       <h2>${data.churchName} 교회 등록 신청</h2>

@@ -28,15 +28,18 @@ export const fetchData = async (
   setAttendanceStats: Dispatch<SetStateAction<AttendanceStatsData>>,
   setMemberStats: Dispatch<SetStateAction<MemberStatsData>>,
   setFetchError: Dispatch<SetStateAction<string | null>>,
+  setIsLoading: Dispatch<SetStateAction<boolean>>,
   t: (key: string, values?: Record<string, string | number | Date>) => string // 번역 함수 타입 명시
 ) => {
   if (!user || isLoading) return;
 
   try {
+    setIsLoading(true);
     // Fetch pending data
     const pendingResponse = await fetch("/api/pending", {
       credentials: "include",
     });
+
     if (!pendingResponse.ok) throw new Error("Failed to fetch pending data");
     const {
       pendingChurches,
@@ -68,6 +71,7 @@ export const fetchData = async (
         `/api/attendance/search?startDate=${startDate}&endDate=${endDate}`,
         { credentials: "include" }
       );
+
       if (!attendanceResponse.ok) throw new Error("Failed to fetch attendance");
       const { attendances }: { attendances: AttendanceRecord[] } =
         await attendanceResponse.json();
@@ -103,6 +107,7 @@ export const fetchData = async (
       const membersResponse = await fetch("/api/members", {
         credentials: "include",
       });
+      setIsLoading(false);
       if (!membersResponse.ok) throw new Error("Failed to fetch members");
       const { members }: { members: User[] } = await membersResponse.json();
 

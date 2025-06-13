@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useRouter } from "@/utils/useRouter";
+import Link from "next/link";
 
 export default function Footer() {
   const t = useTranslations("Landing");
@@ -104,12 +105,21 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4">
               {t("footer.contact")}
             </h4>
-            <p className="text-gray-400">Email: phoby20@hotmail.com</p>
+            <Link
+              href={`/${locale}/contact`}
+              className="text-gray-400 hover:text-white font-medium"
+            >
+              {t("footer.contactLink") || "문의하기"}
+            </Link>
           </div>
         </div>
         <div className="mt-8 text-center text-gray-500">
-          © {new Date().getFullYear()} {t("brandName")}. {t("footer.rights")}
+          © {new Date().getFullYear()} Integrity,. All Rights Reserved.
         </div>
+        <p className="mt-1 text-center text-gray-500">
+          Room 101, Lehua Minami-Tokiwadai, 1-11-6 Minami-Tokiwadai,
+          Itabashi-ku, Tokyo 174-0072, Japan
+        </p>
       </div>
     </footer>
   );

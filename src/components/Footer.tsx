@@ -116,6 +116,10 @@ export default function Footer() {
         <div className="mt-8 text-center text-gray-500">
           © {new Date().getFullYear()} Integrity,. All Rights Reserved.
         </div>
+        <p className="mt-1 text-center text-gray-500">
+          Room 101, Lehua Minami-Tokiwadai, 1-11-6 Minami-Tokiwadai,
+          Itabashi-ku, Tokyo 174-0072, Japan
+        </p>
       </div>
     </footer>
   );

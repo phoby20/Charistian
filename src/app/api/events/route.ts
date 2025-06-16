@@ -138,8 +138,8 @@ export async function POST(req: NextRequest) {
       startDate: new Date(startDate),
       endDate: new Date(endDate),
       churchId,
-      groupId: user.groups[0].id, // 클라이언트에서 제공된 값 사용
-      subGroupId: user.subGroups[0].id, // 클라이언트에서 제공된 값 사용
+      groupId: user.groups[0]?.id ?? null, // 클라이언트에서 제공된 값 사용
+      subGroupId: user.subGroups[0]?.id ?? null, // 클라이언트에서 제공된 값 사용
       teamId,
       roles,
       status: status || "SCHEDULED",

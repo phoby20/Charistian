@@ -3,12 +3,14 @@ import { FC, ButtonHTMLAttributes } from "react";
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "outline";
   isDisabled?: boolean;
+  onClick?: () => void;
 }
 
 const Button: FC<ButtonProps> = ({
   children,
   variant = "primary",
   isDisabled = false,
+  onClick,
   ...props
 }) => {
   const baseStyles =
@@ -28,6 +30,7 @@ const Button: FC<ButtonProps> = ({
           : "cursor-pointer"
       }`}
       {...props}
+      onClick={onClick}
       disabled={isDisabled}
     >
       {children}

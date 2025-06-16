@@ -21,12 +21,14 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
   const [isMembersMenuOpen, setIsMembersMenuOpen] = useState(false);
+  const [isEventsMenuOpen, setIsEventsMenuOpen] = useState(false);
 
   // 참조 관리
   const langMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
   const membersMenuRef = useRef<HTMLDivElement>(null);
+  const eventsMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -35,6 +37,7 @@ export default function Header() {
     setIsUserMenuOpen(false);
     setIsSettingsMenuOpen(false);
     setIsMembersMenuOpen(false);
+    setIsEventsMenuOpen(false);
   };
 
   // 외부 클릭으로 드롭다운 및 모바일 메뉴 닫기
@@ -53,6 +56,8 @@ export default function Header() {
       if (settingsMenuRef.current && settingsMenuRef.current.contains(target))
         isOutside = false;
       if (membersMenuRef.current && membersMenuRef.current.contains(target))
+        isOutside = false;
+      if (eventsMenuRef.current && eventsMenuRef.current.contains(target))
         isOutside = false;
       // MobileNav 메뉴 확인
       if (mobileMenuRef.current && mobileMenuRef.current.contains(target))
@@ -126,6 +131,7 @@ export default function Header() {
             setIsSettingsMenuOpen={setIsSettingsMenuOpen}
             isMembersMenuOpen={isMembersMenuOpen}
             setIsMembersMenuOpen={setIsMembersMenuOpen}
+            setIsEventsMenuOpen={setIsEventsMenuOpen}
             userMenuRef={userMenuRef}
             settingsMenuRef={settingsMenuRef}
             membersMenuRef={membersMenuRef}
@@ -164,7 +170,10 @@ export default function Header() {
         setIsSettingsMenuOpen={setIsSettingsMenuOpen}
         isMembersMenuOpen={isMembersMenuOpen}
         setIsMembersMenuOpen={setIsMembersMenuOpen}
+        isEventsMenuOpen={isEventsMenuOpen}
+        setIsEventsMenuOpen={setIsEventsMenuOpen}
         mobileMenuRef={mobileMenuRef}
+        eventsMenuRef={eventsMenuRef}
       />
     </header>
   );

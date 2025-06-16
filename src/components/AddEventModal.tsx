@@ -1,0 +1,214 @@
+import { Dispatch, SetStateAction } from "react";
+import { useTranslations } from "next-intl";
+import { X } from "lucide-react";
+import { Role } from "@prisma/client";
+import { NewEvent } from "@/types/calendar";
+import Button from "./Button";
+import DatePicker from "react-datepicker"; // react-datepicker 임포트
+import "react-datepicker/dist/react-datepicker.css"; // 스타일 임포트
+import { toZonedTime } from "date-fns-tz"; // KST 변환
+import { toCamelCase } from "@/utils/toCamelCase";
+
+type AddEventModalProps = {
+  newEvent: NewEvent;
+  setIsAddModalOpen: Dispatch<SetStateAction<boolean>>;
+  setSelectedDate: Dispatch<SetStateAction<Date | null>>;
+  handleAddEvent: () => Promise<void>;
+  setNewEvent: Dispatch<SetStateAction<NewEvent>>;
+};
+
+export function AddEventModal({
+  newEvent,
+  setIsAddModalOpen,
+  setSelectedDate,
+  handleAddEvent,
+  setNewEvent,
+}: AddEventModalProps) {
+  const t = useTranslations();
+  const kstTimeZone = "Asia/Seoul";
+
+  // DatePicker에서 선택된 날짜를 KST로 변환
+  const handleDateChange = (date: Date | null, field: keyof NewEvent) => {
+    if (date) {
+      const kstDate = toZonedTime(date, kstTimeZone);
+      setNewEvent((prev) => ({ ...prev, [field]: kstDate }));
+    } else {
+      setNewEvent((prev) => ({ ...prev, [field]: null }));
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300">
+      <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl transform transition-all duration-300 ease-out scale-100 hover:scale-[1.02]">
+        <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+          <h2 className="text-2xl font-semibold text-gray-800">
+            {t("Calendar.addEvent")}
+          </h2>
+          <button
+            type="button"
+            onClick={() => {
+              setIsAddModalOpen(false);
+              setNewEvent({});
+              setSelectedDate(null);
+            }}
+            className="text-gray-400 hover:text-gray-600 transition-colors duration-200 rounded-full p-1 hover:bg-gray-100"
+          >
+            <X size={24} />
+          </button>
+        </div>
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            await handleAddEvent();
+          }}
+          className="mt-6 space-y-6"
+        >
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("Calendar.title")}
+            </label>
+            <input
+              type="text"
+              value={newEvent.title || ""}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, title: e.target.value })
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("Calendar.description")}
+            </label>
+            <textarea
+              value={newEvent.description || ""}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, description: e.target.value })
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 h-24 resize-none"
+              placeholder={t("Calendar.enterDescription")}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("Calendar.startDate")}
+            </label>
+            <DatePicker
+              selected={newEvent.startDate}
+              onChange={(date: Date | null) =>
+                handleDateChange(date, "startDate")
+              }
+              showTimeSelect
+              timeFormat="HH:mm"
+              dateFormat="yyyy-MM-dd HH:mm"
+              timeIntervals={15} // 15분 단위
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("Calendar.endDate")}
+            </label>
+            <DatePicker
+              selected={newEvent.endDate}
+              onChange={(date: Date | null) =>
+                handleDateChange(date, "endDate")
+              }
+              showTimeSelect
+              timeFormat="HH:mm"
+              dateFormat="yyyy-MM-dd HH:mm"
+              timeIntervals={15} // 15분 단위
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("Calendar.label")}
+            </label>
+            <select
+              value={newEvent.label || ""}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, label: e.target.value || null })
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            >
+              <option value="">{t("Calendar.selectLabel")}</option>
+              <option value="High">{t("Calendar.high")}</option>
+              <option value="Medium">{t("Calendar.medium")}</option>
+              <option value="Low">{t("Calendar.low")}</option>
+            </select>
+          </div>
+          <div>
+            <p className="block text-sm font-medium text-gray-700 mb-1">
+              {t("Calendar.roles")}
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {Object.values(Role)
+                .filter(
+                  (role) => !["MASTER", "CHECKER", "VISITOR"].includes(role)
+                )
+                .map((role) => (
+                  <label
+                    key={role}
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-all duration-200"
+                  >
+                    <span
+                      className={`relative flex items-center justify-center w-5 h-5 border-2 ${
+                        (newEvent.roles || []).includes(role)
+                          ? "border-blue-500 bg-blue-500"
+                          : "border-gray-300"
+                      } rounded-sm transition-all duration-200`}
+                    >
+                      {(newEvent.roles || []).includes(role) && (
+                        <span className="text-white text-xs font-bold">✓</span>
+                      )}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={(newEvent.roles || []).includes(role)}
+                      onChange={(e) => {
+                        const roles = (newEvent.roles as Role[]) || [];
+                        if (e.target.checked) {
+                          setNewEvent({
+                            ...newEvent,
+                            roles: [...roles, role],
+                          });
+                        } else {
+                          setNewEvent({
+                            ...newEvent,
+                            roles: roles.filter((r) => r !== role),
+                          });
+                        }
+                      }}
+                      className="absolute opacity-0 w-5 h-5 cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {t(toCamelCase(role))}
+                    </span>
+                  </label>
+                ))}
+            </div>
+          </div>
+          <div className="flex justify-end space-x-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddModalOpen(false);
+                setNewEvent({});
+                setSelectedDate(null);
+              }}
+            >
+              {t("Calendar.cancel")}
+            </Button>
+            <Button variant="primary" type="submit">
+              {t("Calendar.save")}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

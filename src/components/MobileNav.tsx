@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Settings,
   UsersRound,
+  Calendar,
 } from "lucide-react";
 import { User } from "@prisma/client";
 import { getPathname } from "@/utils/useRouter";
@@ -29,7 +30,10 @@ interface MobileNavProps {
   setIsSettingsMenuOpen: (open: boolean) => void;
   isMembersMenuOpen: boolean;
   setIsMembersMenuOpen: (open: boolean) => void;
+  isEventsMenuOpen: boolean;
+  setIsEventsMenuOpen: (open: boolean) => void;
   mobileMenuRef: React.RefObject<HTMLDivElement | null>;
+  eventsMenuRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function MobileNav({
@@ -45,9 +49,12 @@ export default function MobileNav({
   setIsUserMenuOpen,
   isSettingsMenuOpen,
   setIsSettingsMenuOpen,
+  isEventsMenuOpen,
+  setIsEventsMenuOpen,
   isMembersMenuOpen,
   setIsMembersMenuOpen,
   mobileMenuRef,
+  eventsMenuRef,
 }: MobileNavProps) {
   const closeAllDropdowns = () => {
     setIsUserMenuOpen(false);
@@ -108,6 +115,37 @@ export default function MobileNav({
                 </div>
               </>
             )}
+
+            {/* 달력 메뉴 */}
+            {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "GENERAL"].includes(
+              user?.role || ""
+            ) && (
+              <div className="px-3 py-2" ref={eventsMenuRef}>
+                <button
+                  onClick={() => {
+                    closeAllDropdowns();
+                    setIsEventsMenuOpen(!isEventsMenuOpen);
+                  }}
+                  className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
+                >
+                  <Calendar className="w-5 h-5 mr-1" />
+                  {t("calendar")}
+                  <ChevronDown className="w-4 h-4 ml-1" />
+                </button>
+                {isEventsMenuOpen && (
+                  <div className="mt-2 pl-4">
+                    <Link
+                      href={getPathname({ locale, href: "/calendar" })} // `getPathname`으로 올바른 경로 생성
+                      onClick={() => closeMembersMenu("/calendar")}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      {t("calendar")}
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
             {!user && (
               <Link
                 href={getPathname({ locale, href: "/church-registration" })}

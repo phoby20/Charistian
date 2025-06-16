@@ -111,9 +111,6 @@ export default function EventCalendar({
   const handleDesktopDoubleClick = (day: Date) => {
     const expectedPath = `/${locale}/calendar`;
     if (pathname !== expectedPath) {
-      console.log(
-        `handleDesktopDoubleClick skipped: Current path (${pathname}) does not match ${expectedPath}`
-      );
       return;
     }
 

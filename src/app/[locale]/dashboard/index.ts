@@ -32,9 +32,8 @@ export const fetchData = async (
   t: (key: string, values?: Record<string, string | number | Date>) => string // 번역 함수 타입 명시
 ) => {
   if (!user || isLoading) return;
-
+  setIsLoading(true);
   try {
-    setIsLoading(true);
     // Fetch pending data
     const pendingResponse = await fetch("/api/pending", {
       credentials: "include",
@@ -107,7 +106,7 @@ export const fetchData = async (
       const membersResponse = await fetch("/api/members", {
         credentials: "include",
       });
-      setIsLoading(false);
+
       if (!membersResponse.ok) throw new Error("Failed to fetch members");
       const { members }: { members: User[] } = await membersResponse.json();
 
@@ -135,5 +134,7 @@ export const fetchData = async (
   } catch (err) {
     console.error("Error fetching data:", err);
     setFetchError(t("serverError"));
+  } finally {
+    setIsLoading(false);
   }
 };

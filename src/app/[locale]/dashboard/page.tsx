@@ -59,7 +59,7 @@ export default function DashboardPage() {
     );
   }, [user, isAuthLoading]);
 
-  if (!isLoading || !user) {
+  if (isLoading || !user) {
     return <Loading />;
   }
 

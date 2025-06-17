@@ -191,7 +191,7 @@ export default function MobileCalendar({
             .map((event) => (
               <div
                 key={event.id}
-                className="p-2 mb-2 border rounded bg-gray-50 cursor-pointer hover:bg-gray-100"
+                className="p-2 mb-2 border text-xs rounded bg-gray-50 cursor-pointer hover:bg-gray-100"
                 style={{
                   backgroundColor:
                     defaultLabelColors[event.label || "Low"] || "#FFFFFF",
@@ -201,7 +201,9 @@ export default function MobileCalendar({
                   setIsDetailModalOpen(true);
                 }}
               >
-                <span>{event.title}</span>
+                <span>
+                  ({format(new Date(event.startDate), "HH:mm")}) {event.title}
+                </span>
                 {/* <button
                   onClick={(e) => {
                     e.stopPropagation();

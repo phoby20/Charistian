@@ -1,4 +1,5 @@
 import { CustomCalendarEvent } from "@/types/calendar";
+import { format } from "date-fns";
 import { RefCallback } from "react";
 
 interface MultiDayEvent extends CustomCalendarEvent {
@@ -17,7 +18,7 @@ interface EventItemProps {
   eventRef?: RefCallback<HTMLDivElement>;
 }
 
-const EVENT_HEIGHT = 24; // 이벤트 높이
+const EVENT_HEIGHT = 20; // 이벤트 높이
 const EVENT_MARGIN = 2; // 좌우 여백
 const EVENT_MARGIN_TOP = 30; // 0번째 싱글 이벤트의 margin-top
 const EVENT_MARGIN_BOTTOM = 4; // 모든 싱글 이벤트의 margin-bottom
@@ -83,12 +84,12 @@ export const EventItem = ({
     <div
       ref={eventRef}
       id={event.id}
-      className={`text-white p-1 rounded cursor-pointer flex justify-between items-center ${backgroundClass} ${isMultiDay ? "rounded-l rounded-r" : ""}`}
+      className={`text-white p-1 text-xs rounded cursor-pointer flex justify-between items-center ${backgroundClass} ${isMultiDay ? "rounded-l rounded-r" : ""}`}
       style={{ ...baseStyles, ...multiDayStyles, ...singleDayStyles }}
     >
       <span>
+        {isMultiDay ? null : format(new Date(event.startDate), "HH:mm")}{" "}
         {event.title}
-        {event.eventIndex}
       </span>
     </div>
   );

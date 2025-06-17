@@ -15,6 +15,7 @@ import PendingAlerts from "@/components/PendingAlerts";
 import ErrorModal from "@/components/ErrorModal";
 import MyQRCode from "@/components/MyQRCode";
 import QRScanner from "@/components/QRScanner";
+import EventCalendar from "@/components/EventCalendar";
 
 export default function DashboardPage() {
   const t = useTranslations();
@@ -86,9 +87,14 @@ export default function DashboardPage() {
           pendingChurches={pendingChurches}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <AttendanceStats user={user} attendanceStats={attendanceStats} />
           <MemberStats user={user} memberStats={memberStats} />
+          <EventCalendar
+            user={user}
+            setFetchError={setFetchError}
+            setIsLoading={setIsLoading}
+          />
         </div>
 
         <ErrorModal

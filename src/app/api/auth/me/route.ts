@@ -1,3 +1,5 @@
+// src/app/api/auth/me/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifyToken } from "@/lib/jwt";
@@ -22,6 +24,8 @@ export async function GET(req: NextRequest) {
         birthDate: true,
         phone: true,
         kakaoId: true,
+        groups: { select: { id: true } }, // 관계 포함
+        subGroups: { select: { id: true } }, // 관계 포함
       },
     });
 

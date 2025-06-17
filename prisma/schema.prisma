@@ -36,6 +36,9 @@ model User {
   rejectionReason String?
   attendances   Attendance[] @relation("UserAttendance")
   checkedAttendances Attendance[] @relation("CheckedBy")
+  createdEvents Event[]    @relation("EventCreator")
+  attendees     EventAttendance[] // 이벤트 참여자
+  userEventLabels UserEventLabel[] @relation("UserEventLabel") // 추가: 사용자별 라벨 관계
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
@@ -58,6 +61,7 @@ model Church {
   duties            Duty[]     // 직책
   positions         ChurchPosition[]   // 직분 목록 (예: ["목사", "집사"])
   creations         Creation[]
+  events            Event[]    @relation("ChurchEvents")
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
@@ -76,6 +80,7 @@ model Group {
   church        Church    @relation(fields: [churchId], references: [id])
   users         User[]    @relation("UserGroups")
   subGroups     SubGroup[]
+  events        Event[]   @relation("GroupEvents")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -88,6 +93,7 @@ model SubGroup {
   churchId      String
   church        Church    @relation("ChurchSubGroups", fields: [churchId], references: [id])
   users         User[]    @relation("UserSubGroups")
+  events        Event[]   @relation("SubGroupEvents")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -98,13 +104,14 @@ model Team {
   churchId      String
   church        Church    @relation(fields: [churchId], references: [id])
   users         User[]    @relation("UserTeams")
+  events        Event[]   @relation("TeamEvents")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
 
 model Duty {
   id            String    @id @default(uuid())
-  name          String    // 직책 이름
+  name          String
   churchId      String
   church        Church    @relation(fields: [churchId], references: [id])
   users         User[]    @relation("UserDuties")
@@ -149,8 +156,8 @@ model ChurchApplication {
   superAdminEmail   String
   password          String
   country           String
-  city              String       // 새 필드 추가
-  region            String       // 새 필드 추가
+  city              String
+  region            String
   address           String
   contactName       String
   contactPhone      String
@@ -174,6 +181,60 @@ model Attendance {
   checkedById   String
   checkedBy     User      @relation("CheckedBy", fields: [checkedById], references: [id])
   createdAt     DateTime  @default(now())
+}
+
+model EventAttendance {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model UserEventLabel {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], name: "UserEventLabel")
+  label     String
+  priority  Int      @default(1) // 중요도 (1~5 등급, 기본값 1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, label]) // 사용자별 라벨 중복 방지
+}
+
+model Event {
+  id            String    @id @default(uuid())
+  title         String
+  description   String?
+  startDate     DateTime
+  endDate       DateTime
+  status        EventStatus @default(SCHEDULED)
+  recurrence    String? // 예: "WEEKLY", "MONTHLY" 등 반복 일정 시 사용
+  notifyBefore  Int? // 알림 기능: 알림 전송 시간(분 단위, 예: 30)
+  attendees     EventAttendance[]
+  churchId      String
+  church        Church    @relation("ChurchEvents", fields: [churchId], references: [id])
+  groupId       String?
+  group         Group?    @relation("GroupEvents", fields: [groupId], references: [id])
+  subGroupId    String?
+  subGroup      SubGroup? @relation("SubGroupEvents", fields: [subGroupId], references: [id])
+  teamId        String?
+  team          Team?     @relation("TeamEvents", fields: [teamId], references: [id])
+  roles         Role[]
+  creatorId     String
+  creator       User      @relation("EventCreator", fields: [creatorId], references: [id])
+  label         String?   // 새로 추가: 라벨 (예: "High", "Medium", "Low")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum EventStatus {
+  SCHEDULED
+  ONGOING
+  COMPLETED
+  CANCELLED
 }
 
 enum Role {

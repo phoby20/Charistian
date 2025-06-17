@@ -89,13 +89,10 @@ export default function MobileCalendar({
   useEffect(() => {
     const expectedPath = `/${locale}/calendar`;
     if (pathname !== expectedPath) {
-      console.log(
-        `handleDesktopDoubleClick skipped: Current path (${pathname}) does not match ${expectedPath}`
-      );
       setIsDashboard(true);
       return;
     }
-  });
+  }, []);
 
   return (
     <div className="flex-1 overflow-auto">

@@ -118,7 +118,6 @@ export default function EventCalendar({
 
     if (!isMobile) {
       const kstDay = toZonedTime(day, "Asia/Seoul");
-      console.log("kstDay: ", kstDay);
       setSelectedDate(kstDay);
       setNewEvent({
         ...newEvent,

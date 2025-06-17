@@ -18,7 +18,7 @@ interface EventItemProps {
 }
 
 const EVENT_HEIGHT = 26; // 이벤트 높이
-const EVENT_MARGIN = 4; // 좌우 여백
+const EVENT_MARGIN = 2; // 좌우 여백
 const EVENT_MARGIN_TOP = 30; // 0번째 싱글 이벤트의 margin-top
 const EVENT_MARGIN_BOTTOM = 4; // 모든 싱글 이벤트의 margin-bottom
 

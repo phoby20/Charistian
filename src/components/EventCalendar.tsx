@@ -74,6 +74,7 @@ export default function EventCalendar({
   }, [user]);
 
   const handleAddEvent = async () => {
+    setIsLoading(true);
     if (
       selectedDate &&
       newEvent.title &&
@@ -105,6 +106,7 @@ export default function EventCalendar({
         setSelectedDate(null);
       }
     }
+    setIsLoading(false);
   };
 
   // 데스크톱에서 더블클릭 시 날짜 설정, /:locale/calendar 경로에서만 실행

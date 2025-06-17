@@ -17,7 +17,7 @@ interface EventItemProps {
   eventRef?: RefCallback<HTMLDivElement>;
 }
 
-const EVENT_HEIGHT = 26; // 이벤트 높이
+const EVENT_HEIGHT = 24; // 이벤트 높이
 const EVENT_MARGIN = 2; // 좌우 여백
 const EVENT_MARGIN_TOP = 30; // 0번째 싱글 이벤트의 margin-top
 const EVENT_MARGIN_BOTTOM = 4; // 모든 싱글 이벤트의 margin-bottom
@@ -86,7 +86,10 @@ export const EventItem = ({
       className={`text-white p-1 rounded cursor-pointer flex justify-between items-center ${backgroundClass} ${isMultiDay ? "rounded-l rounded-r" : ""}`}
       style={{ ...baseStyles, ...multiDayStyles, ...singleDayStyles }}
     >
-      <span>{event.title}</span>
+      <span>
+        {event.title}
+        {event.eventIndex}
+      </span>
     </div>
   );
 };

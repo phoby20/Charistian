@@ -143,17 +143,79 @@ export const DayCell = ({
     (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
   );
 
+  // 모든 멀티 이벤트의 시작일과 eventIndex 매핑 (주 전체 기준)
+  const multiEventStartIndices: { startDate: Date; eventIndex: number }[] = [];
+  const weekEvents = events
+    .filter((event) => {
+      const eventStart = new Date(event.startDate);
+      const eventEnd = new Date(event.endDate);
+      return (
+        !isSameDay(eventStart, eventEnd) &&
+        (isWithinInterval(eventStart, { start: weekStart, end: weekEnd }) ||
+          isWithinInterval(eventEnd, { start: weekStart, end: weekEnd }) ||
+          (eventStart <= weekStart && eventEnd >= weekEnd))
+      );
+    })
+    .sort(
+      (a, b) =>
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    );
+  weekEvents.forEach((event, idx) => {
+    multiEventStartIndices.push({
+      startDate: new Date(event.startDate),
+      eventIndex: idx,
+    });
+  });
+
+  // 현재 날짜에 영향을 주는 멀티 이벤트의 최대 시작일 eventIndex 계산
+  let maxStartIndex = -1;
+  multiEventStartIndices.forEach(({ startDate, eventIndex }) => {
+    const event = weekEvents.find((e) =>
+      isSameDay(new Date(e.startDate), startDate)
+    );
+    if (event) {
+      const eventStart = new Date(event.startDate);
+      const eventEnd = new Date(event.endDate);
+      if (
+        isWithinInterval(day, { start: eventStart, end: eventEnd }) ||
+        isSameDay(day, eventStart) ||
+        isSameDay(day, eventEnd)
+      ) {
+        maxStartIndex = Math.max(maxStartIndex, eventIndex);
+      }
+    }
+  });
+
   // 멀티 이벤트와 싱글 이벤트를 결합하여 날짜별 eventIndex 할당
   const allEvents: (MultiDayEvent | SingleDayEvent)[] = [
     ...sortedMultiDayEvents.map((event, idx) => ({
       ...event,
-      eventIndex: idx,
+      eventIndex:
+        multiEventStartIndices.find((entry) =>
+          isSameDay(entry.startDate, new Date(event.startDate))
+        )?.eventIndex ?? idx,
     })),
     ...singleDayEventsRaw.map((event, idx) => ({
       ...event,
-      eventIndex: multiDayEventsRaw.length + idx,
+      eventIndex: maxStartIndex >= 0 ? maxStartIndex + 1 + idx : idx,
     })),
   ];
+
+  // 디버깅 로그
+  console.log({
+    day: format(day, "yyyy-MM-dd"),
+    maxStartIndex,
+    multiEventStartIndices: multiEventStartIndices.map((e) => ({
+      startDate: format(e.startDate, "yyyy-MM-dd"),
+      eventIndex: e.eventIndex,
+    })),
+    allEvents: allEvents.map((e) => ({
+      id: e.id,
+      title: e.title,
+      eventIndex: e.eventIndex,
+      isMultiDay: "spanCells" in e,
+    })),
+  });
 
   // 이벤트 요소를 위한 ref 배열
   const eventRefs = useRef<(HTMLDivElement | null)[]>(

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { format, addDays } from "date-fns";
+import { format, addDays, set, addHours } from "date-fns";
 import { Role, User } from "@prisma/client";
 import Button from "./Button";
 import { EventDetailModal } from "./EventDetailModal";
@@ -117,12 +117,21 @@ export default function EventCalendar({
     }
 
     if (!isMobile) {
-      const kstDay = toZonedTime(day, "Asia/Seoul");
-      setSelectedDate(kstDay);
+      const nowKst = toZonedTime(new Date(), "Asia/Seoul"); // KST 현재 시간
+      const kstDay = toZonedTime(day, "Asia/Seoul"); // 입력 day를 KST로 변환
+      // 년도, 월, 일 유지, 시간은 현재 시간으로 설정
+      const startDate = set(kstDay, {
+        hours: nowKst.getHours(),
+        minutes: nowKst.getMinutes(),
+        seconds: nowKst.getSeconds(),
+      });
+      const endDate = addHours(startDate, 1); // startDate + 1시간
+
+      setSelectedDate(startDate);
       setNewEvent({
         ...newEvent,
-        startDate: kstDay,
-        endDate: kstDay,
+        startDate,
+        endDate,
       });
       setIsAddModalOpen(true);
     }
@@ -132,7 +141,6 @@ export default function EventCalendar({
   const handleMobileAddClick = () => {
     if (isMobile) {
       const accessDate = selectedDate || toZonedTime(new Date(), "Asia/Seoul");
-      console.log("accessDate: ", accessDate);
       setSelectedDate(accessDate);
       setNewEvent({
         ...newEvent,

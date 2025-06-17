@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect } from "react"; // useEffect 추가
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { Role } from "@prisma/client";
@@ -7,6 +7,7 @@ import Button from "./Button";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toZonedTime } from "date-fns-tz";
+import { addHours, isAfter } from "date-fns";
 import { toCamelCase } from "@/utils/toCamelCase";
 
 type AddEventModalProps = {
@@ -27,7 +28,20 @@ export function AddEventModal({
   const t = useTranslations();
   const kstTimeZone = "Asia/Seoul";
 
-  // 기본 역할 설정 (MAKER 기본 체크)
+  // KST 기준 기본 날짜 설정
+  useEffect(() => {
+    if (!newEvent.startDate || !newEvent.endDate) {
+      const nowKst = toZonedTime(new Date(), kstTimeZone);
+      const defaultEnd = addHours(nowKst, 1); // startDate + 1시간
+      setNewEvent((prev) => ({
+        ...prev,
+        startDate: nowKst,
+        endDate: defaultEnd,
+      }));
+    }
+  }, [newEvent.startDate, newEvent.endDate, setNewEvent]);
+
+  // 기본 역할 설정
   useEffect(() => {
     if (!newEvent.roles || newEvent.roles.length === 0) {
       setNewEvent((prev) => ({
@@ -37,11 +51,36 @@ export function AddEventModal({
     }
   }, [newEvent.roles, setNewEvent]);
 
+  // startDate 변경 시 endDate 조정
+  useEffect(() => {
+    if (newEvent.startDate && newEvent.endDate) {
+      const start = new Date(newEvent.startDate);
+      const end = new Date(newEvent.endDate);
+      if (!isAfter(end, start)) {
+        const newEnd = addHours(start, 1);
+        setNewEvent((prev) => ({ ...prev, endDate: newEnd }));
+      }
+    }
+  }, [newEvent.startDate, setNewEvent]);
+
   // DatePicker에서 선택된 날짜를 KST로 변환
   const handleDateChange = (date: Date | null, field: keyof NewEvent) => {
     if (date) {
       const kstDate = toZonedTime(date, kstTimeZone);
-      setNewEvent((prev) => ({ ...prev, [field]: kstDate }));
+      if (field === "startDate") {
+        setNewEvent((prev) => {
+          const newStart = kstDate;
+          const currentEnd = prev.endDate ? new Date(prev.endDate) : null;
+          // endDate가 startDate 이하라면 startDate + 1시간으로 조정
+          const newEnd =
+            currentEnd && isAfter(currentEnd, newStart)
+              ? currentEnd
+              : addHours(newStart, 1);
+          return { ...prev, startDate: newStart, endDate: newEnd };
+        });
+      } else {
+        setNewEvent((prev) => ({ ...prev, [field]: kstDate }));
+      }
     } else {
       setNewEvent((prev) => ({ ...prev, [field]: null }));
     }
@@ -130,6 +169,25 @@ export function AddEventModal({
               timeFormat="HH:mm"
               dateFormat="yyyy-MM-dd HH:mm"
               timeIntervals={15}
+              minDate={newEvent.startDate}
+              minTime={
+                newEvent.startDate &&
+                new Date(newEvent.startDate).toDateString() ===
+                  new Date(newEvent.endDate || new Date()).toDateString()
+                  ? new Date(
+                      new Date(newEvent.startDate).setMinutes(
+                        new Date(newEvent.startDate).getMinutes() + 15
+                      )
+                    )
+                  : undefined
+              }
+              maxTime={
+                newEvent.startDate &&
+                new Date(newEvent.startDate).toDateString() ===
+                  new Date(newEvent.endDate || new Date()).toDateString()
+                  ? new Date(new Date().setHours(23, 45))
+                  : undefined
+              }
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               required
             />

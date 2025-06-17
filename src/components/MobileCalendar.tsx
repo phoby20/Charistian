@@ -10,7 +10,7 @@ import {
   startOfMonth,
 } from "date-fns";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { LucidePlus, LucideUserPlus } from "lucide-react";
+import { LucidePlus } from "lucide-react";
 import { useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 
@@ -39,7 +39,7 @@ export default function MobileCalendar({
   setSelectedDate,
   setSelectedEvent,
   setIsDetailModalOpen,
-  fetchDataAndEvents,
+  // fetchDataAndEvents,
   onAddClick,
 }: MobileCalendarProps) {
   const locale = useLocale();
@@ -73,18 +73,18 @@ export default function MobileCalendar({
     };
   };
 
-  const handleAttend = async (eventId: string) => {
-    const res = await fetch("/api/events/attendance", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId }),
-      credentials: "include",
-    });
+  // const handleAttend = async (eventId: string) => {
+  //   const res = await fetch("/api/events/attendance", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ eventId }),
+  //     credentials: "include",
+  //   });
 
-    if (res.ok) {
-      fetchDataAndEvents();
-    }
-  };
+  //   if (res.ok) {
+  //     fetchDataAndEvents();
+  //   }
+  // };
 
   useEffect(() => {
     const expectedPath = `/${locale}/calendar`;
@@ -204,10 +204,8 @@ export default function MobileCalendar({
                   setIsDetailModalOpen(true);
                 }}
               >
-                <span>
-                  {event.title} ({format(new Date(event.startDate), "HH:mm")})
-                </span>
-                <button
+                <span>{event.title}</span>
+                {/* <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleAttend(event.id);
@@ -215,7 +213,7 @@ export default function MobileCalendar({
                   className="ml-2 text-green-300 hover:text-green-500"
                 >
                   <LucideUserPlus size={16} />
-                </button>
+                </button> */}
               </div>
             ))}
         </div>

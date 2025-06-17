@@ -201,22 +201,6 @@ export const DayCell = ({
     })),
   ];
 
-  // 디버깅 로그
-  console.log({
-    day: format(day, "yyyy-MM-dd"),
-    maxStartIndex,
-    multiEventStartIndices: multiEventStartIndices.map((e) => ({
-      startDate: format(e.startDate, "yyyy-MM-dd"),
-      eventIndex: e.eventIndex,
-    })),
-    allEvents: allEvents.map((e) => ({
-      id: e.id,
-      title: e.title,
-      eventIndex: e.eventIndex,
-      isMultiDay: "spanCells" in e,
-    })),
-  });
-
   // 이벤트 요소를 위한 ref 배열
   const eventRefs = useRef<(HTMLDivElement | null)[]>(
     new Array(allEvents.length).fill(null)

@@ -25,9 +25,9 @@ const EVENT_MARGIN_BOTTOM = 4; // 모든 싱글 이벤트의 margin-bottom
 
 // label별 배경색
 const LABEL_COLOR_MAP: Record<string, string> = {
-  High: "bg-red-500",
-  default: "bg-blue-500",
-  Low: "bg-green-500",
+  High: "bg-red-400",
+  default: "bg-blue-300",
+  Low: "bg-green-400",
 };
 
 export const EventItem = ({

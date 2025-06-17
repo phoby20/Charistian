@@ -372,6 +372,15 @@
     "low": "낮음",
     "label": "라벨",
     "enterDescription": "일정 설명 입력",
-    "defaultLabel": "기본"
+    "defaultLabel": "기본",
+    "Sun": "일",
+    "Mon": "월",
+    "Tue": "화",
+    "Wed": "수",
+    "Thu": "목",
+    "Fri": "금",
+    "Sat": "토",
+    "nextMonth": "다음 달",
+    "prevMonth": "이전 달"
   }
 }

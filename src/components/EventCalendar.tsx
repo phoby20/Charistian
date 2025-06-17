@@ -155,14 +155,14 @@ export default function EventCalendar({
             variant="outline"
             onClick={() => setCurrentDate(addDays(currentDate, -30))}
           >
-            이전 달
+            {t("Calendar.prevMonth")}
           </Button>
           <h3 className="text-lg">{format(currentDate, "yyyy년 MM월")}</h3>
           <Button
             variant="outline"
             onClick={() => setCurrentDate(addDays(currentDate, 30))}
           >
-            다음 달
+            {t("Calendar.nextMonth")}
           </Button>
         </div>
         {isMobile ? (

@@ -8,6 +8,7 @@ export type CustomCalendarEvent = Prisma.EventGetPayload<{
     team: true;
     creator: true;
     attendees: { include: { user: true } };
+    label?: string;
   };
 }>;
 

@@ -36,7 +36,7 @@ export function EventDetailModal({
     ? toZonedTime(new Date(selectedEvent.endDate), kstTimeZone)
     : toZonedTime(new Date(), kstTimeZone);
 
-  const attendeeCount = selectedEvent.attendees.length;
+  // const attendeeCount = selectedEvent.attendees.length;
 
   // label에 따른 배지 스타일과 텍스트 (인덱스 시그니처 추가)
   const getLabelBadge = () => {
@@ -88,7 +88,7 @@ export function EventDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300">
+    <div className="fixed p-2 inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300">
       <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl transform transition-all duration-300 ease-out scale-100 hover:scale-[1.02]">
         <div className="flex items-center justify-between border-b border-gray-200 pb-4">
           <h2 className="text-2xl font-semibold text-gray-800">
@@ -127,10 +127,10 @@ export function EventDetailModal({
             </span>
           </p>
 
-          <p className="flex justify-between">
+          {/* <p className="flex justify-between">
             <span className="font-medium">{t("Calendar.attendees")}:</span>
             <span className="text-gray-900">{attendeeCount}명</span>
-          </p>
+          </p> */}
         </div>
         <div className="mt-6 flex justify-end gap-4">
           {(selectedEvent.creator.id === user.id ||

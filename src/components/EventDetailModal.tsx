@@ -1,11 +1,12 @@
 import { useTranslations } from "next-intl";
-import { X } from "lucide-react";
+import { X, Calendar, FileText, Clock } from "lucide-react"; // 추가 아이콘
 import { format } from "date-fns";
-import { toZonedTime } from "date-fns-tz"; // KST로 변환
+import { toZonedTime } from "date-fns-tz";
 import { Dispatch, SetStateAction } from "react";
 import { CustomCalendarEvent } from "@/types/calendar";
 import Button from "./Button";
 import { User } from "@prisma/client";
+import { motion, AnimatePresence } from "framer-motion"; // framer-motion 추가
 
 type EventDetailModalProps = {
   user: User;
@@ -36,117 +37,153 @@ export function EventDetailModal({
     ? toZonedTime(new Date(selectedEvent.endDate), kstTimeZone)
     : toZonedTime(new Date(), kstTimeZone);
 
-  // const attendeeCount = selectedEvent.attendees.length;
-
-  // label에 따른 배지 스타일과 텍스트 (인덱스 시그니처 추가)
+  // 라벨 배지 스타일
   const getLabelBadge = () => {
     const labelStyles: { [key: string]: string } = {
-      High: "bg-red-500 text-white",
-      Medium: "bg-yellow-500 text-black",
-      Low: "bg-green-500 text-white",
-      default: "bg-gray-500 text-white",
+      High: "bg-red-600 text-white shadow-md",
+      Medium: "bg-yellow-400 text-gray-900 shadow-md",
+      Low: "bg-green-500 text-white shadow-md",
+      default: "bg-gray-500 text-white shadow-md",
     };
 
-    if (!selectedEvent.label) {
-      // falsy 값일 경우 default 스타일 적용
-      return (
-        <span
-          className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold ${labelStyles.default}`}
-        >
-          {t("Calendar.defaultLabel")} {/* 또는 빈 문자열 "" */}
-        </span>
-      );
-    }
-    const style = labelStyles[selectedEvent.label] || labelStyles.default;
+    const label = selectedEvent.label || "default";
+    const style = labelStyles[label] || labelStyles.default;
     return (
       <span
-        className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold ${style}`}
+        className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-semibold ${style} transition-all duration-200`}
       >
-        {selectedEvent.label}
+        {label === "default" ? t("Calendar.defaultLabel") : label}
       </span>
     );
   };
 
+  // 이벤트 삭제
   const deleteEvent = async () => {
     try {
       setIsLoading(true);
       await fetch("/api/events", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: selectedEvent.id,
-        }),
+        body: JSON.stringify({ id: selectedEvent.id }),
         credentials: "include",
       });
-      fetchDataAndEvents();
+      await fetchDataAndEvents();
       setIsDetailModalOpen(false);
-      setIsLoading(false);
     } catch (error) {
       setFetchError(t("fetch_error"));
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // 모달 애니메이션 설정
+  const modalVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.2 } },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
+  };
+
+  const backdropVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.3 } },
+  };
+
   return (
-    <div className="fixed p-2 inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300">
-      <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl transform transition-all duration-300 ease-out scale-100 hover:scale-[1.02]">
-        <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-          <h2 className="text-2xl font-semibold text-gray-800">
-            {t("Calendar.eventDetails")}
-            {getLabelBadge()}
-          </h2>
-          <button
-            type="button"
-            onClick={() => setIsDetailModalOpen(false)}
-            className="text-gray-400 hover:text-gray-600 transition-colors duration-200 rounded-full p-1 hover:bg-gray-100"
-          >
-            <X size={24} />
-          </button>
-        </div>
-        <div className="mt-6 space-y-4 text-gray-700">
-          <p className="flex justify-between">
-            <span className="font-medium">{t("Calendar.title")}:</span>
-            <span className="text-gray-900">{selectedEvent.title}</span>
-          </p>
-          <p className="flex justify-between">
-            <span className="font-medium">{t("Calendar.description")}:</span>
-            <span className="text-gray-900">
-              {selectedEvent.description || "-"}
-            </span>
-          </p>
-          <p className="flex justify-between">
-            <span className="font-medium">{t("Calendar.startDate")}:</span>
-            <span className="text-gray-900">
-              {format(safeStartDate, "yyyy-MM-dd HH:mm")}
-            </span>
-          </p>
-          <p className="flex justify-between">
-            <span className="font-medium">{t("Calendar.endDate")}:</span>
-            <span className="text-gray-900">
-              {format(safeEndDate, "yyyy-MM-dd HH:mm")}
-            </span>
-          </p>
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-md"
+        variants={backdropVariants}
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
+      >
+        <motion.div
+          className="bg-gradient-to-b from-white to-gray-50 rounded-2xl shadow-2xl p-6 w-full max-w-2xl sm:max-w-2xl mx-4 overflow-hidden"
+          variants={modalVariants}
+        >
+          {/* 헤더 */}
+          <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+            <div className="flex items-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                {t("Calendar.eventDetails")}
+              </h2>
+              {getLabelBadge()}
+            </div>
+            <motion.button
+              type="button"
+              onClick={() => setIsDetailModalOpen(false)}
+              className="text-gray-500 hover:text-gray-700 rounded-full p-1.5 hover:bg-gray-100 transition-colors duration-200"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <X size={20} />
+            </motion.button>
+          </div>
 
-          {/* <p className="flex justify-between">
-            <span className="font-medium">{t("Calendar.attendees")}:</span>
-            <span className="text-gray-900">{attendeeCount}명</span>
-          </p> */}
-        </div>
-        <div className="mt-6 flex justify-end gap-4">
-          {(selectedEvent.creator.id === user.id ||
-            user.role === "SUPER_ADMIN" ||
-            user.role === "SUB_ADMIN" ||
-            user.role === "ADMIN") && (
-            <Button variant="danger" onClick={() => deleteEvent()}>
-              삭제
-            </Button>
-          )}
+          {/* 콘텐츠 */}
+          <div className="mt-5 space-y-3 text-gray-600 text-sm sm:text-base">
+            <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-2 items-center">
+              <div className="flex items-center font-medium text-gray-700">
+                <Calendar className="w-4 h-4 mr-2 text-blue-500" />
+                {t("Calendar.title")}
+              </div>
+              <p className="text-gray-900 font-medium truncate">
+                {selectedEvent.title}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-2 items-start">
+              <div className="flex items-center font-medium text-gray-700">
+                <FileText className="w-4 h-4 mr-2 text-blue-500" />
+                {t("Calendar.description")}
+              </div>
+              <p className="text-gray-900 max-h-20 overflow-y-auto">
+                {selectedEvent.description || "-"}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-2 items-center">
+              <div className="flex items-center font-medium text-gray-700">
+                <Clock className="w-4 h-4 mr-2 text-blue-500" />
+                {t("Calendar.startDate")}
+              </div>
+              <p className="text-gray-900">
+                {format(safeStartDate, "yyyy-MM-dd HH:mm")}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-2 items-center">
+              <div className="flex items-center font-medium text-gray-700">
+                <Clock className="w-4 h-4 mr-2 text-blue-500" />
+                {t("Calendar.endDate")}
+              </div>
+              <p className="text-gray-900">
+                {format(safeEndDate, "yyyy-MM-dd HH:mm")}
+              </p>
+            </div>
+          </div>
 
-          <Button variant="outline" onClick={() => setIsDetailModalOpen(false)}>
-            {t("Calendar.close")}
-          </Button>
-        </div>
-      </div>
-    </div>
+          {/* 버튼 */}
+          <div className="mt-6 flex justify-end gap-3">
+            {(selectedEvent.creator.id === user.id ||
+              user.role === "SUPER_ADMIN" ||
+              user.role === "SUB_ADMIN" ||
+              user.role === "ADMIN") && (
+              <motion.div whileTap={{ scale: 0.95 }}>
+                <Button variant="danger" onClick={deleteEvent}>
+                  {t("Calendar.delete")}
+                </Button>
+              </motion.div>
+            )}
+            <motion.div whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                onClick={() => setIsDetailModalOpen(false)}
+              >
+                {t("Calendar.close")}
+              </Button>
+            </motion.div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

@@ -1,12 +1,12 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react"; // useEffect 추가
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { Role } from "@prisma/client";
 import { NewEvent } from "@/types/calendar";
 import Button from "./Button";
-import DatePicker from "react-datepicker"; // react-datepicker 임포트
-import "react-datepicker/dist/react-datepicker.css"; // 스타일 임포트
-import { toZonedTime } from "date-fns-tz"; // KST 변환
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { toZonedTime } from "date-fns-tz";
 import { toCamelCase } from "@/utils/toCamelCase";
 
 type AddEventModalProps = {
@@ -26,6 +26,16 @@ export function AddEventModal({
 }: AddEventModalProps) {
   const t = useTranslations();
   const kstTimeZone = "Asia/Seoul";
+
+  // 기본 역할 설정 (MAKER 기본 체크)
+  useEffect(() => {
+    if (!newEvent.roles || newEvent.roles.length === 0) {
+      setNewEvent((prev) => ({
+        ...prev,
+        roles: [Role.GENERAL, Role.SUPER_ADMIN, Role.ADMIN, Role.SUB_ADMIN],
+      }));
+    }
+  }, [newEvent.roles, setNewEvent]);
 
   // DatePicker에서 선택된 날짜를 KST로 변환
   const handleDateChange = (date: Date | null, field: keyof NewEvent) => {
@@ -102,7 +112,7 @@ export function AddEventModal({
               showTimeSelect
               timeFormat="HH:mm"
               dateFormat="yyyy-MM-dd HH:mm"
-              timeIntervals={15} // 15분 단위
+              timeIntervals={15}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               required
             />
@@ -119,7 +129,7 @@ export function AddEventModal({
               showTimeSelect
               timeFormat="HH:mm"
               dateFormat="yyyy-MM-dd HH:mm"
-              timeIntervals={15} // 15분 단위
+              timeIntervals={15}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               required
             />
@@ -135,10 +145,9 @@ export function AddEventModal({
               }
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
             >
-              <option value="">{t("Calendar.selectLabel")}</option>
-              <option value="High">{t("Calendar.high")}</option>
-              <option value="Medium">{t("Calendar.medium")}</option>
               <option value="Low">{t("Calendar.low")}</option>
+              <option value="Medium">{t("Calendar.medium")}</option>
+              <option value="High">{t("Calendar.high")}</option>
             </select>
           </div>
           <div>
@@ -153,7 +162,7 @@ export function AddEventModal({
                 .map((role) => (
                   <label
                     key={role}
-                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-all duration-200"
+                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-all duration-200 cursor-pointer"
                   >
                     <span
                       className={`relative flex items-center justify-center w-5 h-5 border-2 ${

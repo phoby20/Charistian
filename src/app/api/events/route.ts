@@ -99,7 +99,10 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  if (!user || !["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"].includes(user.role)) {
+  if (
+    !user ||
+    !["ADMIN", "SUB_ADMIN", "SUPER_ADMIN", "GENERAL"].includes(user.role)
+  ) {
     return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
   }
 
@@ -177,7 +180,10 @@ export async function PUT(req: NextRequest) {
     select: { role: true },
   });
 
-  if (!user || !["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"].includes(user.role)) {
+  if (
+    !user ||
+    !["ADMIN", "SUB_ADMIN", "SUPER_ADMIN", "GENERAL"].includes(user.role)
+  ) {
     return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
   }
 
@@ -244,7 +250,10 @@ export async function DELETE(req: NextRequest) {
     select: { role: true },
   });
 
-  if (!user || !["ADMIN", "SUB_ADMIN", "SUPER_ADMIN"].includes(user.role)) {
+  if (
+    !user ||
+    !["ADMIN", "SUB_ADMIN", "SUPER_ADMIN", "GENERAL"].includes(user.role)
+  ) {
     return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
   }
 

@@ -180,7 +180,7 @@
   "notAttended": "미출석",
   "attendance": "출석체크",
   "startDate": "시작일",
-  "endDate": "출석체크",
+  "endDate": "종료일",
   "masterManagement": "마스터 설정",
   "positionManagement": "직분 설정",
   "groupManagement": "소속 설정",
@@ -214,7 +214,6 @@
   "manageMembers": "멤버 관리",
   "manageAttendance": "출석 관리",
   "superAdmin": "수퍼 관리자",
-  "subAdmin": "중간 관리자",
   "Landing": {
     "brandName": "Charistian(카리스챤)",
     "login": "로그인",
@@ -228,27 +227,15 @@
       "title": "주요 기능",
       "attendance": {
         "title": "출석 관리",
-        "description": "실시간 인사이트로 출석을 쉽게 기록하고 분석하세요"
+        "description": "스마트폰의 QR코드로 출석 체크를 하고\n실시간 인사이트로 성도님들을 위해 \n더 기도하는 기회를 가질수 있습니다"
       },
       "members": {
         "title": "성도 관리",
-        "description": "성도 프로필, 역할, 소속을 효율적으로 관리하세요"
+        "description": "성도님의 권한/소속/교구/부서/팀 설정으로\n교회 전반을 가시화해서 운영해보세요\n성도님의 권한은 관리자, 리더, 성도별로 \n접근 권한을 맞춤 설정을 할 수 있습니다"
       },
-      "dashboard": {
-        "title": "스마트 대시보드",
-        "description": "교회 활동과 통계를 한눈에 확인하세요"
-      },
-      "qrAttendance": {
-        "title": "QR코드 출석체크",
-        "description": "스마트폰의 QR코드로 출석을 간편하게 체크하세요"
-      },
-      "permissions": {
-        "title": "권한 설정",
-        "description": "관리자, 리더, 성도별로 접근 권한을 맞춤 설정하세요"
-      },
-      "churchManagement": {
-        "title": "소속/팀 관리",
-        "description": "소속/교구/부서/팀 별로 성도를 관리하세요"
+      "schedule": {
+        "title": "교회일정공유",
+        "description": "교회 활동과 일정을 성도님에게 공유할 수 있습니다\n이제는 수련회나 회의날짜를 미리미리 공지해서 \n참셕율를 높여보세요"
       }
     },
     "usage": {
@@ -383,5 +370,11 @@
     "Sat": "토",
     "nextMonth": "다음 달",
     "prevMonth": "이전 달"
+  },
+  "seo": {
+    "title": "charistian | 교회운영 올인원 플랫폼",
+    "description": "효율적인 교회 관리를 위한 올인원 플랫폼",
+    "keywords": "교회 관리, 기독교, 플랫폼, 출석, 일정",
+    "ogImageAlt": "charistian 플랫폼 미리보기"
   }
 }

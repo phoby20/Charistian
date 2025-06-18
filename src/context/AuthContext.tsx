@@ -1,4 +1,3 @@
-// src/context/AuthContext.tsx
 "use client";
 
 import {
@@ -8,9 +7,10 @@ import {
   useContext,
   useEffect,
   useState,
+  useCallback,
 } from "react";
 import { usePathname } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl"; // next-intl 번역 및 로케일
+import { useTranslations, useLocale } from "next-intl";
 import { User } from "@prisma/client";
 import { useRouter } from "@/utils/useRouter";
 
@@ -28,35 +28,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const t = useTranslations(); // 네임스페이스 없이 사용
-  const locale = useLocale(); // 현재 로케일 가져오기
+  const t = useTranslations();
+  const locale = useLocale();
+
+  // fetchUser 메모이제이션
+  const fetchUser = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/auth/me", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        setError(null);
+      } else {
+        setError(t("authError"));
+        // 루트 경로(/)에서는 리다이렉트 생략
+        if (
+          pathname !== `/${locale}` &&
+          pathname !== `/${locale}/signup` &&
+          pathname !== `/${locale}/church-registration`
+        ) {
+          router.replace(`/login`);
+        }
+      }
+    } catch (err) {
+      console.error("Fetch user error:", err);
+      setError(t("serverError"));
+      if (pathname !== "/") {
+        router.replace(`/login`);
+      }
+    } finally {
+      setIsLoading(false);
+      setHasFetched(true);
+    }
+  }, [router, pathname, t]);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch("/api/auth/me", {
-          method: "GET",
-          credentials: "include",
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-        } else {
-          setError(t("authError"));
-          router.push(`/`);
-        }
-      } catch (err) {
-        console.error("Error fetching user:", err);
-        setError(t("serverError"));
-        router.push(`/${locale}/login`); // 로케일 포함 로그인 페이지로
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     const EXCLUDED_PATHS = [
       "/login",
       "/signup",
@@ -65,12 +78,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       "/signup/complete",
     ];
 
-    if (!locale || !pathname) {
-      fetchUser(); // 방어 로직: locale 또는 pathname 없으면 기본 호출
-    } else if (!EXCLUDED_PATHS.includes(pathname.replace(`/${locale}`, ""))) {
+    if (!pathname || !locale) {
+      console.error("Missing pathname or locale, triggering fetchUser");
       fetchUser();
+      return;
     }
-  }, [router, pathname, locale]);
+
+    // cleanPath 계산
+    const cleanPath = pathname.startsWith(`/${locale}`)
+      ? pathname.replace(`/${locale}`, "") || "/"
+      : pathname;
+
+    // 로그인한 사용자가 EXCLUDED_PATHS에 접근 시 /로 리다이렉트
+    if (!isLoading && user && EXCLUDED_PATHS.includes(cleanPath)) {
+      router.replace("/");
+      return;
+    }
+
+    // 초기 인증 체크
+    if (!user && !hasFetched) {
+      fetchUser();
+    } else if (user || error) {
+      setIsLoading(false);
+    }
+  }, [pathname, locale, user, isLoading, hasFetched, error, fetchUser, router]);
 
   const logout = async () => {
     try {
@@ -79,9 +110,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         credentials: "include",
       });
       setUser(null);
-      router.push("/", { locale: locale });
+      setHasFetched(false);
+      setError(null);
+      router.replace("/");
     } catch (error) {
-      console.error("Error logging out:", error);
+      console.error("Logout error:", error);
       setError(t("serverError"));
     }
   };

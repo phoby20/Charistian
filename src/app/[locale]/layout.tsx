@@ -7,6 +7,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import Footer from "@/components/Footer";
+import GoogleAnalytics from "@/lib/GoogleAnalytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,6 +69,9 @@ export default async function RootLayout({ children, params }: LayoutProps) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />
+        ) : null}
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
             <Header />

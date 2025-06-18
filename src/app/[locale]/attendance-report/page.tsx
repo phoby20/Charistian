@@ -338,7 +338,7 @@ function AttendanceReportContent() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
               />
             </div>
             <div className="flex items-center space-x-2 w-full sm:w-auto">
@@ -349,7 +349,7 @@ function AttendanceReportContent() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
               />
             </div>
           </div>
@@ -383,10 +383,10 @@ function AttendanceReportContent() {
                   {startDate && endDate
                     ? `(${startDate} ~ ${endDate})`
                     : startDate
-                    ? `(${startDate} ~ )`
-                    : endDate
-                    ? `( ~ ${endDate})`
-                    : ""}
+                      ? `(${startDate} ~ )`
+                      : endDate
+                        ? `( ~ ${endDate})`
+                        : ""}
                 </h2>
                 {dateRange.length === 0 ? (
                   <p className="text-gray-500 italic text-center text-sm">

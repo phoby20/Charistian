@@ -26,10 +26,10 @@ export default function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      setIsDisabled(false);
 
       if (!response.ok) {
         setError(t("invalidCredentials"));
+        setIsDisabled(false);
         return;
       }
 
@@ -37,6 +37,7 @@ export default function LoginPage() {
         window.location.href = `/${locale}/dashboard`;
       }
     } catch (err) {
+      setIsDisabled(false);
       setError(
         t("serverError", {
           error: err instanceof Error ? err.message : "Unknown error",

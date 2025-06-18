@@ -10,6 +10,7 @@ import {
   Settings,
   UsersRound,
   Calendar,
+  User2,
 } from "lucide-react";
 import Button from "./Button";
 import { User } from "@prisma/client";
@@ -88,7 +89,7 @@ export default function DesktopNav({
             {isMembersMenuOpen && (
               <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
                 <Link
-                  href={getPathname({ locale, href: "/members" })} // `getPathname`으로 올바른 경로 생성
+                  href={getPathname({ locale, href: "/members" })}
                   onClick={() => closeMembersMenu("/members")}
                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
@@ -172,6 +173,14 @@ export default function DesktopNav({
           </button>
           {isUserMenuOpen && (
             <div className="absolute right-0 z-50 bg-white shadow-lg rounded-md mt-1">
+              <Link
+                href={getPathname({ locale, href: "/mypage" })}
+                onClick={() => closeAllDropdowns()}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+              >
+                <User2 className="w-4 h-4 mr-2" />
+                {t("MyPage.title")}
+              </Link>
               <button
                 onClick={logout}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"

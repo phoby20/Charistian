@@ -58,7 +58,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const EXCLUDED_PATHS = [
-      "",
       "/login",
       "/signup",
       "/church-registration",

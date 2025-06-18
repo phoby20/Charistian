@@ -11,34 +11,19 @@ export default function LandingPage() {
 
   const features = [
     {
-      icon: "📊",
       title: t("features.attendance.title"),
       description: t("features.attendance.description"),
+      img: "attendance",
     },
     {
-      icon: "👥",
       title: t("features.members.title"),
       description: t("features.members.description"),
+      img: "members",
     },
     {
-      icon: "📅",
-      title: t("features.dashboard.title"),
-      description: t("features.dashboard.description"),
-    },
-    {
-      icon: "🔲",
-      title: t("features.qrAttendance.title"),
-      description: t("features.qrAttendance.description"),
-    },
-    {
-      icon: "🔐",
-      title: t("features.permissions.title"),
-      description: t("features.permissions.description"),
-    },
-    {
-      icon: "🏛️",
-      title: t("features.churchManagement.title"),
-      description: t("features.churchManagement.description"),
+      title: t("features.schedule.title"),
+      description: t("features.schedule.description"),
+      img: "schedule",
     },
   ];
 
@@ -113,36 +98,40 @@ export default function LandingPage() {
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-wave bg-cover opacity-20"></div>
       </section>
-      <section className="py-30 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h3
-            className="text-3xl font-bold text-gray-900 text-center mb-12"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
+      {features.map((feature, index) => {
+        return (
+          <section
+            key={feature.title}
+            className="py-16 bg-cover bg-center relative min-h-[640px] flex "
+            style={{
+              backgroundImage: `url('/images/features_${feature.img}.png')`,
+            }}
+            role="region"
+            aria-labelledby={`feature-title-${index}`}
           >
-            {t("features.title")}
-          </motion.h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
+            <div className="absolute inset-0 "></div>
+            <div className="relative px-4 sm:px-6 lg:px-20 flex items-center">
               <motion.div
-                key={feature.title}
-                className="p-6 bg-gray-50 rounded-lg shadow-md hover:shadow-lg transition-shadow relative text-center"
+                className="p-6"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
                 viewport={{ once: true }}
               >
-                <span className="text-4xl mb-4 block">{feature.icon}</span>
-                <h4 className="text-xl font-semibold text-gray-900 mb-2">
+                <h4
+                  id={`feature-title-${index}`}
+                  className="text-5xl font-semibold text-gray-900 mb-4"
+                >
                   {feature.title}
                 </h4>
-                <p className="text-gray-600">{feature.description}</p>
+                <p className="text-gray-600 text-xl whitespace-break-spaces">
+                  {feature.description}
+                </p>
               </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </div>
+          </section>
+        );
+      })}
       <section
         className="py-50 bg-gray-100"
         role="region"
@@ -201,7 +190,7 @@ export default function LandingPage() {
       <section className="py-50 bg-gradient-to-r from-green-500 to-teal-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
-            className="inline-flex items-center bg-yellow-400 text-gray-900 text-sm font-semibold px-3 py-1 rounded-full mb-4"
+            className="inline-flex items-center bg-yellow-400 text-gray-900 text-sm font-semibold px-3 py-1 rounded-full mb-6"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -209,7 +198,7 @@ export default function LandingPage() {
             {t("promotion.limitedOffer")}
           </motion.div>
           <motion.h3
-            className="text-3xl font-bold mb-6"
+            className="text-xl font-bold mb-6"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -250,7 +239,7 @@ export default function LandingPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h3
             id="cta-title"
-            className="text-3xl font-bold mb-6"
+            className="text-xl font-bold mb-6"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}

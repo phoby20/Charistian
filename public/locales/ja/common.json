@@ -130,7 +130,6 @@
   "churchId": "教会ID",
   "noAccount": "まだアカウントをお持ちでないですか？",
   "send": "送信",
-  "noAccount": "まだアカウントをお持ちでないですか？",
   "roleManagement": "役割管理",
   "enterRoleName": "役割名を入力してください",
   "addRole": "役割を追加",
@@ -220,27 +219,15 @@
       "title": "主な機能",
       "attendance": {
         "title": "出席管理",
-        "description": "リアルタイムのインサイトで出席を簡単に記録・分析"
+        "description": "スマートフォンのQRコードで出席をチェックし、\nリアルタイムのインサイトを通じて信徒のためにさらに祈る機会を持つことができます。"
       },
       "members": {
-        "title": "聖徒管理",
-        "description": "聖徒のプロフィール、役割、所属を効率的に管理"
+        "title": "信徒管理",
+        "description": "信徒の権限/所属/教区/部署/チーム設定を通じて、\n教会全体を可視化して運営してみてください。\n信徒の権限は管理者、リーダー、信徒ごとにカスタマイズされたアクセス権限を設定できます。"
       },
-      "dashboard": {
-        "title": "スマートダッシュボード",
-        "description": "教会の活動と統計を一目で確認"
-      },
-      "qrAttendance": {
-        "title": "QRコード出席確認",
-        "description": "スマートフォンのQRコードで簡単に出席確認"
-      },
-      "permissions": {
-        "title": "権限設定",
-        "description": "管理者、リーダー、聖徒のアクセス権限をカスタマイズ"
-      },
-      "churchManagement": {
-        "title": "所属・チーム管理",
-        "description": "所属・教区・チームごとに聖徒を管理"
+      "schedule": {
+        "title": "教会スケジュール共有",
+        "description": "教会の活動やスケジュールを信徒と共有できます。\nこれからは修養会や会議の日程を事前に通知して参加率を高めてみましょう。"
       }
     },
     "usage": {
@@ -374,5 +361,11 @@
     "Sat": "土",
     "nextMonth": "来月",
     "prevMonth": "先月"
+  },
+  "seo": {
+    "title": "charistian | 教会運営オールインワンプラットフォーム",
+    "description": "効率的な教会管理のためのオールインワンプラットフォーム",
+    "keywords": "教会管理, キリスト教, プラットフォーム, 出席, スケジュール",
+    "ogImageAlt": "charistianプラットフォームのプレビュー"
   }
 }

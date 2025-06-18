@@ -4,10 +4,34 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/utils/useRouter";
 import { motion } from "framer-motion";
 import Button from "@/components/Button";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 export default function LandingPage() {
   const t = useTranslations("Landing");
   const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const sendUserAgent = async () => {
+      try {
+        const userAgent = navigator.userAgent;
+        const response = await fetch("/api/send-user-agent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userAgent, pathname }),
+        });
+
+        if (!response.ok) {
+          console.error("Failed to send user agent:", await response.text());
+        }
+      } catch (error) {
+        console.error("Error sending user agent:", error);
+      }
+    };
+
+    sendUserAgent();
+  }, [pathname]);
 
   const features = [
     {

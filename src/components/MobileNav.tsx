@@ -10,6 +10,7 @@ import {
   Settings,
   UsersRound,
   Calendar,
+  User2,
 } from "lucide-react";
 import { User } from "@prisma/client";
 import { getPathname } from "@/utils/useRouter";
@@ -60,6 +61,7 @@ export default function MobileNav({
     setIsUserMenuOpen(false);
     setIsSettingsMenuOpen(false);
     setIsMembersMenuOpen(false);
+    setIsEventsMenuOpen(false);
   };
 
   return (
@@ -135,7 +137,7 @@ export default function MobileNav({
                 {isEventsMenuOpen && (
                   <div className="mt-2 pl-4">
                     <Link
-                      href={getPathname({ locale, href: "/calendar" })} // `getPathname`으로 올바른 경로 생성
+                      href={getPathname({ locale, href: "/calendar" })}
                       onClick={() => closeMembersMenu("/calendar")}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
@@ -197,6 +199,17 @@ export default function MobileNav({
                 </button>
                 {isUserMenuOpen && (
                   <div className="mt-2 pl-4">
+                    <Link
+                      href={getPathname({ locale, href: "/mypage" })}
+                      onClick={() => {
+                        closeAllDropdowns();
+                        setIsMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                    >
+                      <User2 className="w-4 h-4 mr-2" />
+                      {t("MyPage.title")}
+                    </Link>
                     <button
                       onClick={() => {
                         logout();

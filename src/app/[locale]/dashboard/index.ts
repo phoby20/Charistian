@@ -1,3 +1,5 @@
+// src/app/[locale]/dashboard/index.ts
+
 import { ChurchApplication, User } from "@prisma/client";
 import { format, subDays } from "date-fns";
 import { Dispatch, SetStateAction } from "react";

@@ -263,34 +263,3 @@ export async function DELETE(req: NextRequest) {
 
   return NextResponse.json({ message: "일정이 삭제되었습니다." });
 }
-
-export async function POST_ATTENDANCE(req: NextRequest) {
-  const token = req.cookies.get("token")?.value;
-  if (!token) {
-    return NextResponse.json(
-      { error: "인증되지 않았습니다." },
-      { status: 401 }
-    );
-  }
-
-  let payload: TokenPayload;
-  try {
-    payload = verifyToken(token);
-  } catch (error) {
-    return NextResponse.json(
-      { error: `유효하지 않은 토큰입니다. ${error}` },
-      { status: 401 }
-    );
-  }
-
-  const { eventId } = await req.json();
-
-  const eventAttendance = await prisma.eventAttendance.create({
-    data: {
-      eventId,
-      userId: payload.userId,
-    },
-  });
-
-  return NextResponse.json(eventAttendance, { status: 201 });
-}

@@ -315,7 +315,6 @@ export default function GroupManagement({
                             }
                             ref={inputRef}
                             className="flex-1 p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm"
-                            aria-label={t("editGroupName")}
                           />
                           <div className="flex gap-2 w-full sm:w-auto">
                             <Button

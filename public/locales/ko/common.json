@@ -21,6 +21,7 @@
   "male": "남성",
   "female": "여성",
   "position": "직분",
+  "noChurch": "소속 교회 없음",
   "contactBirthDate": "담당자 생년월일",
   "plan": "플랜",
   "free": "무료",
@@ -319,6 +320,7 @@
     "church": "재적중인 교회명"
   },
   "myQRCode": "나의 QR 코드",
+  "membershipCard": "성도증",
   "generatingQR": "QR 코드 생성 중...",
   "scanQR": "QR 스캔",
   "cameraError": "카메라에 접근할 수 없습니다",

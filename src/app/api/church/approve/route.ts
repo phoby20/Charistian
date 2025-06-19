@@ -120,7 +120,7 @@ async function sendApprovalEmail(
       </ol>
       <h3>성도가 할 일</h3>
       <ol>
-        <li>로그인 후 <strong>QR코드</strong> 버튼을 클릭하세요.</li>
+        <li>로그인 후 <strong>성도증</strong> 버튼을 클릭하세요.</li>
         <li>교회에서 준비한 QR 스캐너에 QR 코드를 스캔하세요.</li>
       </ol>
     `,

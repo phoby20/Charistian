@@ -276,7 +276,6 @@ export default function PositionManagement({
                         value={editingNewName}
                         onChange={(e) => setEditingNewName(e.target.value)}
                         className="flex-1 p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm bg-white shadow-sm"
-                        aria-label={t("editPositionName")}
                       />
                       <Button
                         onClick={handleUpdatePosition}

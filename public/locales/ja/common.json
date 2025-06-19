@@ -30,6 +30,7 @@
   "siteTitle": "Charistian",
   "none": "未登録",
   "home": "ホーム",
+  "noChurch": "所属教会なし",
   "login": "ログイン",
   "signupTitle": "会員登録",
   "logout": "ログアウト",
@@ -311,6 +312,7 @@
     "church": "在籍中の教会名"
   },
   "myQRCode": "マイQR",
+  "membershipCard": "聖徒証",
   "generatingQR": "QRコード生成中...",
   "scanQR": "QRスキャン",
   "cameraError": "カメラにアクセスできません",

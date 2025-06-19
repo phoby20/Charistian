@@ -5,10 +5,10 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // Updated type
 ) {
   try {
-    const { id } = params;
+    const { id } = await context.params; // Await params since it's a Promise
 
     if (!id) {
       return NextResponse.json(

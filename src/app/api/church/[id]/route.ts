@@ -5,12 +5,12 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: Request,
-  { params }: { params: { churchId: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { churchId } = params;
+    const { id } = params;
 
-    if (!churchId) {
+    if (!id) {
       return NextResponse.json(
         { error: "Church ID is required" },
         { status: 400 }
@@ -18,7 +18,7 @@ export async function GET(
     }
 
     const church = await prisma.church.findUnique({
-      where: { id: churchId },
+      where: { id },
       select: { name: true },
     });
 

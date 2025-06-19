@@ -5,12 +5,12 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: Request,
-  { params }: { params: { churchId: string } }
+  context: { params: Promise<{ id: string }> } // Updated type
 ) {
   try {
-    const { churchId } = params;
+    const { id } = await context.params; // Await params since it's a Promise
 
-    if (!churchId) {
+    if (!id) {
       return NextResponse.json(
         { error: "Church ID is required" },
         { status: 400 }
@@ -18,7 +18,7 @@ export async function GET(
     }
 
     const church = await prisma.church.findUnique({
-      where: { id: churchId },
+      where: { id },
       select: { name: true },
     });
 

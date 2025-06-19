@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 interface MyQRCodeProps {
-  user: User & { groups: { id: string }[] };
+  user: User & { groups?: { id: string }[] }; // Make groups optional
   scanMessage: string;
 }
 
@@ -55,7 +55,7 @@ export default function MyQRCode({ user, scanMessage }: MyQRCodeProps) {
   }, [user.position]);
 
   useEffect(() => {
-    if (user.groups[0].id) {
+    if (user.groups && user.groups[0]?.id) {
       fetch(`/api/group/${user.groups[0].id}`)
         .then((res) => res.json())
         .then((data) => setGroupName(data.name || t("noGroup")));

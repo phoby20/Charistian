@@ -11,12 +11,14 @@ import { SaleDetailsSection } from "@/components/scores/SaleDetailsSection";
 import { TempoSection } from "@/components/scores/TempoSection";
 import { ThumbnailUploadSection } from "@/components/scores/ThumbnailUploadSection";
 import { TitleSection } from "@/components/scores/TitleSection";
+import { GENRES } from "@/data/genre";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
-import { useLocale } from "next-intl";
+import { ArrowLeft, AlertCircle } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 export default function ScoreUploadPage() {
+  const t = useTranslations("ScoreUpload");
   const {
     form,
     fields,
@@ -52,9 +54,9 @@ export default function ScoreUploadPage() {
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold text-gray-800 text-center"
+            className="text-3xl font-bold text-gray-800"
           >
-            악보 업로드
+            {t("title")}
           </motion.h1>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -63,18 +65,44 @@ export default function ScoreUploadPage() {
             className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm font-medium">목록으로 돌아가기</span>
+            <span className="text-sm font-medium">{t("backToList")}</span>
           </motion.button>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* 파일 업로드 섹션 */}
           <FileUploadSection
-            fileError={fileError}
+            fileError={fileError ? t("fileRequired") : null}
             pdfPreview={pdfPreview}
             handleFileChange={handleFileChange}
             removePdfPreview={removePdfPreview}
             errors={errors}
             control={control}
           />
+
+          {/* 장르 선택 섹션 */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {t("genreLabel")}
+            </label>
+            <select
+              {...register("genre", { required: t("genreRequired") })}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">{t("genrePlaceholder")}</option>
+              {GENRES.map((genre) => (
+                <option key={genre.value} value={genre.value}>
+                  {locale === "ja" ? genre.ja : genre.ko}
+                </option>
+              ))}
+            </select>
+            {errors.genre && (
+              <p className="text-red-500 text-sm flex items-center space-x-1">
+                <AlertCircle className="w-4 h-4" />
+                <span>{errors.genre.message}</span>
+              </p>
+            )}
+          </div>
+
           <ThumbnailUploadSection
             thumbnailPreview={thumbnailPreview}
             handleThumbnailChange={handleThumbnailChange}
@@ -113,7 +141,7 @@ export default function ScoreUploadPage() {
                 : "bg-gray-400 cursor-not-allowed"
             }`}
           >
-            업로드
+            {t("uploadButton")}
           </motion.button>
         </form>
       </div>

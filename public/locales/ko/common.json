@@ -422,5 +422,36 @@
     "admin": "관리자",
     "subAdmin": "중간 관리자",
     "master": "마스터"
+  },
+  "ScoreUpload": {
+    "title": "악보 업로드",
+    "backToList": "목록으로 돌아가기",
+    "uploadButton": "업로드",
+    "genreLabel": "장르",
+    "genrePlaceholder": "장르를 선택하세요",
+    "genreRequired": "장르를 선택해야 합니다.",
+    "fileRequired": "악보 파일은 필수입니다."
+  },
+  "ScoreDetail": {
+    "info": "악보 정보",
+    "description": "설명",
+    "tempo": "템포",
+    "lyrics": "가사",
+    "composer": "작곡가",
+    "lyricist": "작사자",
+    "price": "판매가격",
+    "isPublic": "공개 여부",
+    "isPublicTrue": "공개",
+    "isPublicFalse": "비공개",
+    "isOriginal": "자작곡 여부",
+    "isOriginalTrue": "자작곡",
+    "isOriginalFalse": "비자작곡",
+    "genre": "장르",
+    "download": "다운로드",
+    "purchase": "구매하기",
+    "backToList": "목록",
+    "share": "공유",
+    "error": "악보를 불러오지 못했습니다.",
+    "noThumbnail": "섬네일 없음"
   }
 }

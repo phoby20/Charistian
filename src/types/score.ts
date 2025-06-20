@@ -19,6 +19,7 @@ export type ScoreResponse = {
   isPublic: boolean;
   isForSale: boolean;
   isOriginal: boolean;
+  genre?: string; // 새로 추가
 };
 
 export interface ScoreFormData {
@@ -41,6 +42,7 @@ export interface ScoreFormData {
   isPublic: boolean;
   isForSale: boolean;
   isOriginal: boolean;
+  genre?: string; // 새로 추가
 }
 
 export interface ApiErrorResponse {

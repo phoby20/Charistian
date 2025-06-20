@@ -413,5 +413,36 @@
     "admin": "管理者",
     "subAdmin": "中間管理者",
     "master": "マスター"
+  },
+  "ScoreUpload": {
+    "title": "楽譜アップロード",
+    "backToList": "一覧に戻る",
+    "uploadButton": "アップロード",
+    "genreLabel": "ジャンル",
+    "genrePlaceholder": "ジャンルを選択してください",
+    "genreRequired": "ジャンルを選択する必要があります。",
+    "fileRequired": "楽譜ファイルは必須です。"
+  },
+  "ScoreDetail": {
+    "info": "楽譜情報",
+    "description": "説明",
+    "tempo": "テンポ",
+    "lyrics": "歌詞",
+    "composer": "作曲家",
+    "lyricist": "作詞家",
+    "price": "販売価格",
+    "isPublic": "公開設定",
+    "isPublicTrue": "公開",
+    "isPublicFalse": "非公開",
+    "isOriginal": "オリジナル曲",
+    "isOriginalTrue": "オリジナル",
+    "isOriginalFalse": "非オリジナル",
+    "genre": "ジャンル",
+    "download": "ダウンロード",
+    "purchase": "購入する",
+    "backToList": "一覧",
+    "share": "共有",
+    "error": "楽譜を読み込めませんでした。",
+    "noThumbnail": "サムネイルなし"
   }
 }

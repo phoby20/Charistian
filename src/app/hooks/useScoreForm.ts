@@ -54,6 +54,7 @@ export const useScoreForm = (): UseScoreFormReturn => {
       tempo: "",
       lyrics: "",
       description: "",
+      genre: "",
     },
   });
 
@@ -181,6 +182,7 @@ export const useScoreForm = (): UseScoreFormReturn => {
     formData.append("isPublic", String(data.isPublic));
     formData.append("isForSale", String(data.isForSale));
     formData.append("isOriginal", String(data.isOriginal));
+    formData.append("genre", data.genre || "");
 
     try {
       const response = await fetch("/api/scores", {

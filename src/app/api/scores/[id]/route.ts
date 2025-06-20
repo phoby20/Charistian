@@ -8,7 +8,7 @@ import { allowedRoles } from "../allowedRoles";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const token = req.cookies.get("token")?.value;
   if (!token) {
@@ -32,8 +32,10 @@ export async function GET(
     return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
   }
 
+  const { id } = await context.params;
+
   const score = await prisma.creation.findUnique({
-    where: { id: params.id },
+    where: { id: id },
     include: {
       creator: { select: { name: true } },
       likes: { where: { userId: payload.userId }, select: { id: true } },

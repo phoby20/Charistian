@@ -141,6 +141,7 @@ model Creation {
   lyricist          String?        // 작사자
   saleStartDate     DateTime?      // 판매 시작일
   saleEndDate       DateTime?      // 판매 종료일
+  genre             Genre?        　// 장르 필드
   isPublic          Boolean        @default(false) // 다른 교회 공유 여부
   isForSale         Boolean        @default(false) // 판매 허가 여부
   isOriginal        Boolean        @default(false) // 자작곡 여부
@@ -308,4 +309,16 @@ enum UserState {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum Genre {
+  BRIGHT
+  CALM
+  DARK
+  DRAMATIC
+  FUNKY
+  HAPPY
+  INSPIRATIONAL
+  ROMANTIC
+  SAD
 }

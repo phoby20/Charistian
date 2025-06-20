@@ -1,3 +1,4 @@
+// src/app/[locale]/scores/[id]/page.tsx
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -10,9 +11,12 @@ import {
   Share2,
   ImageOff,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ApiErrorResponse, ScoreResponse } from "@/types/score";
+import { GENRES } from "@/data/genre";
 
 export default function ScoreDetailPage() {
+  const t = useTranslations("ScoreDetail");
   const router = useRouter();
   const params = useParams();
   const { id, locale } = params;
@@ -28,12 +32,12 @@ export default function ScoreDetailPage() {
         const response = await fetch(`/api/scores/${id}`);
         if (!response.ok) {
           const errorData: ApiErrorResponse = await response.json();
-          throw new Error(errorData.error || "악보를 불러오지 못했습니다.");
+          throw new Error(errorData.error || t("error"));
         }
         const data = await response.json();
         setScore(data);
       } catch (error: unknown) {
-        let errorMessage = "악보를 불러오지 못했습니다.";
+        let errorMessage = t("error");
         if (error instanceof Error) {
           errorMessage = error.message;
         }
@@ -43,26 +47,24 @@ export default function ScoreDetailPage() {
     };
 
     fetchScore();
-  }, [id]);
+  }, [id, t]);
 
-  // 공유 기능 (브라우저의 Web Share API 사용)
   const handleShare = async () => {
     if (navigator.share && score) {
       try {
         await navigator.share({
           title: score.title,
-          text: score.description || "이 악보를 확인해보세요!",
+          text: score.description || t("shareText"),
           url: window.location.href,
         });
       } catch (err) {
         console.error("공유 실패:", err);
       }
     } else {
-      alert("공유 기능이 지원되지 않는 브라우저입니다.");
+      alert(t("shareNotSupported"));
     }
   };
 
-  // 에러 상태
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -79,7 +81,6 @@ export default function ScoreDetailPage() {
     );
   }
 
-  // 로딩 상태
   if (!score) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -92,13 +93,19 @@ export default function ScoreDetailPage() {
     );
   }
 
+  const getGenreLabel = (genreValue: string | undefined) => {
+    if (!genreValue) return t("noGenre");
+    const genre = GENRES.find((g) => g.value === genreValue);
+    return locale === "ja" ? genre?.ja : genre?.ko;
+  };
+
   return (
     <>
       <Head>
-        <title>{score.title} | 악보 상세</title>
+        <title>{score.title}</title>
         <meta
           name="description"
-          content={score.description || "악보 상세 페이지"}
+          content={score.description || t("descriptionMeta")}
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -110,7 +117,6 @@ export default function ScoreDetailPage() {
             transition={{ duration: 0.6 }}
             className="bg-white rounded-3xl shadow-lg p-8 md:p-12"
           >
-            {/* 헤더와 버튼 그룹 */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
               <motion.h1
                 initial={{ opacity: 0, x: -30 }}
@@ -126,26 +132,25 @@ export default function ScoreDetailPage() {
                   whileTap={{ scale: 0.9 }}
                   onClick={() => router.push(`/${locale}/scores`)}
                   className="flex items-center space-x-2 text-blue-500 hover:text-blue-600 transition-colors"
-                  aria-label="목록으로 돌아가기"
+                  aria-label={t("backToList")}
                 >
                   <ArrowLeft className="w-5 h-5" />
-                  <span className="text-sm font-medium">목록</span>
+                  <span className="text-sm font-medium">{t("backToList")}</span>
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={handleShare}
                   className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors"
-                  aria-label="악보 공유"
+                  aria-label={t("share")}
                 >
                   <Share2 className="w-5 h-5" />
-                  <span className="text-sm font-medium">공유</span>
+                  <span className="text-sm font-medium">{t("share")}</span>
                 </motion.button>
               </div>
             </div>
 
             <div className="grid gap-10 md:grid-cols-2">
-              {/* 섬네일 섹션 */}
               {score.thumbnailUrl && !imageError ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -169,12 +174,11 @@ export default function ScoreDetailPage() {
                 >
                   <div className="text-center text-gray-500">
                     <ImageOff className="w-8 h-8 mx-auto mb-2" />
-                    <p className="text-sm">섬네일 없음</p>
+                    <p className="text-sm">{t("noThumbnail")}</p>
                   </div>
                 </motion.div>
               )}
 
-              {/* 악보 정보 섹션 */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -182,73 +186,85 @@ export default function ScoreDetailPage() {
                 className="space-y-6"
               >
                 <h2 className="text-2xl font-semibold text-gray-800">
-                  악보 정보
+                  {t("info")}
                 </h2>
                 <div className="grid gap-4 text-gray-600">
                   <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">설명</span>
+                    <span className="font-medium text-gray-900 w-24">
+                      {t("description")}
+                    </span>
                     <p className="text-sm flex-1">
                       {score.description || "없음"}
                     </p>
                   </div>
                   <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">템포</span>
+                    <span className="font-medium text-gray-900 w-24">
+                      {t("tempo")}
+                    </span>
                     <p className="text-sm flex-1">
                       {score.tempo || "없음"} BPM
                     </p>
                   </div>
                   <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">가사</span>
+                    <span className="font-medium text-gray-900 w-24">
+                      {t("lyrics")}
+                    </span>
                     <p className="text-sm flex-1 whitespace-pre-wrap">
                       {score.lyrics || "없음"}
                     </p>
                   </div>
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
-                      작곡가
+                      {t("composer")}
                     </span>
                     <p className="text-sm flex-1">{score.composer || "없음"}</p>
                   </div>
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
-                      작사자
+                      {t("lyricist")}
                     </span>
                     <p className="text-sm flex-1">{score.lyricist || "없음"}</p>
                   </div>
-                  {score.isForSale && (
-                    <div className="flex items-start">
-                      <span className="font-medium text-gray-900 w-24">
-                        판매가격
-                      </span>
-                      <p className="text-sm flex-1">
-                        {score.isForSale
-                          ? `₩${score.price?.toString()}`
-                          : "무료"}
-                      </p>
-                    </div>
-                  )}
-
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
-                      공개 여부
+                      {t("genre")}
                     </span>
                     <p className="text-sm flex-1">
-                      {score.isPublic ? "공개" : "비공개인원"}
+                      {getGenreLabel(score.genre) || "없음"}
                     </p>
                   </div>
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
-                      자작곡 여부
+                      {t("price")}
                     </span>
                     <p className="text-sm flex-1">
-                      {score.isOriginal ? "자작곡" : "비자작곡"}
+                      {score.isForSale
+                        ? `₩${score.price?.toLocaleString()}`
+                        : "무료"}
+                    </p>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="font-medium text-gray-900 w-24">
+                      {t("isPublic")}
+                    </span>
+                    <p className="text-sm flex-1">
+                      {score.isPublic ? t("isPublicTrue") : t("isPublicFalse")}
+                    </p>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="font-medium text-gray-900 w-24">
+                      {t("isOriginal")}
+                    </span>
+                    <p className="text-sm flex-1">
+                      {score.isOriginal
+                        ? t("isOriginalTrue")
+                        : t("isOriginalFalse")}
                     </p>
                   </div>
                 </div>
               </motion.div>
             </div>
 
-            {/* 액션 버튼 섹션 */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
@@ -260,10 +276,10 @@ export default function ScoreDetailPage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="w-full py-3 px-6 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center space-x-2"
-                  aria-label="악보 다운로드"
+                  aria-label={t("download")}
                 >
                   <Download className="w-5 h-5" />
-                  <span>다운로드</span>
+                  <span>{t("download")}</span>
                 </motion.button>
               </a>
               {score.isForSale && (
@@ -271,9 +287,9 @@ export default function ScoreDetailPage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="flex-1 py-3 px-6 bg-green-500 text-white rounded-xl shadow-md hover:bg-green-600 transition-all duration-300"
-                  aria-label="구매하기"
+                  aria-label={t("purchase")}
                 >
-                  구매하기 (₩{score.price?.toLocaleString()})
+                  {t("purchase")} (₩{score.price?.toLocaleString()})
                 </motion.button>
               )}
             </motion.div>

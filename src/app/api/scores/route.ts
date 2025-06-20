@@ -3,11 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
-import { CreationType } from "@prisma/client"; // CreationType enum 가져오기
+import { CreationType, Genre } from "@prisma/client";
 import { allowedRoles } from "./allowedRoles";
 import { createKoreaDate } from "@/utils/creatKoreaDate";
 
-/** 악보 목록 조회 API */
 export async function GET(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   if (!token) {
@@ -33,11 +32,8 @@ export async function GET(req: NextRequest) {
 
   const scores = await prisma.creation.findMany({
     where: {
-      OR: [
-        { churchId: payload.churchId }, // 같은 교회
-        { isPublic: true }, // 공개된 악보
-      ],
-      type: { in: [CreationType.SCORE, CreationType.ORIGINAL_SCORE] }, // enum 값 사용
+      OR: [{ churchId: payload.churchId }, { isPublic: true }],
+      type: { in: [CreationType.SCORE, CreationType.ORIGINAL_SCORE] },
     },
     include: {
       creator: { select: { name: true } },
@@ -50,9 +46,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(scores, { status: 200 });
 }
 
-/** 악보 업로드 API */
 export async function POST(req: NextRequest) {
-  // 인증
   const token = req.cookies.get("token")?.value;
   if (!token) {
     return NextResponse.json(
@@ -71,12 +65,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 권한 확인
   if (!allowedRoles.includes(payload.role)) {
     return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
   }
 
-  // FormData 파싱
   const formData = await req.formData();
   const file = formData.get("file") as File;
   const thumbnail = formData.get("thumbnail") as File | null;
@@ -84,16 +76,21 @@ export async function POST(req: NextRequest) {
   const isPublic = formData.get("isPublic") === "true";
   const isForSale = formData.get("isForSale") === "true";
   const isOriginal = formData.get("isOriginal") === "true";
+  const genre = formData.get("genre") as Genre; // 새로 추가: 장르
 
-  // 파일 형식 검증
-  if (!file || !["image/jpeg", "application/pdf"].includes(file.type)) {
+  // 필수 필드 검증
+  if (!file) {
+    return NextResponse.json(
+      { error: "악보 파일은 필수입니다." },
+      { status: 400 }
+    );
+  }
+  if (!["image/jpeg", "application/pdf"].includes(file.type)) {
     return NextResponse.json(
       { error: "jpg 또는 pdf 파일만 업로드 가능합니다." },
       { status: 400 }
     );
   }
-
-  // 자작곡이 아닌 경우 판매 불가
   if (isForSale && !isOriginal) {
     return NextResponse.json(
       { error: "자작곡이 아닌 악보는 판매할 수 없습니다." },
@@ -107,10 +104,7 @@ export async function POST(req: NextRequest) {
   const fileBlob = await put(
     `scores/${payload.churchId}/${payload.userId}/${koreaDate}-${file.name}`,
     file,
-    {
-      access: "public",
-      contentType: file.type,
-    }
+    { access: "public", contentType: file.type }
   );
 
   let thumbnailBlob: { url: string } | undefined;
@@ -118,10 +112,7 @@ export async function POST(req: NextRequest) {
     thumbnailBlob = await put(
       `thumbnails/${payload.churchId}/${payload.userId}/${koreaDate}-${thumbnail.name}`,
       thumbnail,
-      {
-        access: "public",
-        contentType: thumbnail.type,
-      }
+      { access: "public", contentType: thumbnail.type }
     );
   }
 
@@ -132,7 +123,7 @@ export async function POST(req: NextRequest) {
       titleEn: formData.get("titleEn") as string,
       titleJa: formData.get("titleJa") as string,
       description: formData.get("description") as string,
-      type: isOriginal ? CreationType.ORIGINAL_SCORE : CreationType.SCORE, // enum 값 사용
+      type: isOriginal ? CreationType.ORIGINAL_SCORE : CreationType.SCORE,
       fileUrl: fileBlob.url,
       thumbnailUrl: thumbnailBlob?.url,
       price: isForSale
@@ -156,6 +147,7 @@ export async function POST(req: NextRequest) {
       isPublic,
       isForSale,
       isOriginal,
+      genre: genre || undefined, // 새로 추가: 장르
       creatorId: payload.userId,
       churchId: payload.churchId!,
     },

@@ -11,6 +11,7 @@ import {
   UsersRound,
   Calendar,
   User2,
+  FileMusic,
 } from "lucide-react";
 import Button from "./Button";
 import { User } from "@prisma/client";
@@ -119,15 +120,26 @@ export default function DesktopNav({
       {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "GENERAL"].includes(
         user?.role || ""
       ) && (
-        <Link
-          href={getPathname({ locale, href: "/calendar" })}
-          className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-        >
-          <div className="flex">
-            <Calendar className="w-5 h-5 mr-1" />
-            {t("calendar")}
-          </div>
-        </Link>
+        <>
+          <Link
+            href={getPathname({ locale, href: "/scores" })}
+            className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+          >
+            <div className="flex">
+              <FileMusic className="w-5 h-5 mr-1" />
+              {t("scores")}
+            </div>
+          </Link>
+          <Link
+            href={getPathname({ locale, href: "/calendar" })}
+            className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+          >
+            <div className="flex">
+              <Calendar className="w-5 h-5 mr-1" />
+              {t("calendar")}
+            </div>
+          </Link>
+        </>
       )}
 
       {/* 설정 메뉴 */}

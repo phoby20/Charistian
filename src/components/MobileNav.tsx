@@ -11,6 +11,7 @@ import {
   UsersRound,
   Calendar,
   User2,
+  FileMusic,
 } from "lucide-react";
 import { User } from "@prisma/client";
 import { getPathname } from "@/utils/useRouter";
@@ -115,6 +116,22 @@ export default function MobileNav({
                     </div>
                   )}
                 </div>
+              </>
+            )}
+
+            {/* 악보 메뉴 */}
+            {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "GENERAL"].includes(
+              user?.role || ""
+            ) && (
+              <>
+                <Link
+                  href={getPathname({ locale, href: "/scores" })}
+                  onClick={() => closeMembersMenu("/scores")}
+                  className="flex block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <FileMusic className="w-5 h-5 mr-1" />
+                  {t("scores")}
+                </Link>
               </>
             )}
 

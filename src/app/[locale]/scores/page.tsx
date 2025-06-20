@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, Upload, Heart, MessageCircle } from "lucide-react";
 import { useLocale } from "next-intl";
+import { ApiErrorResponse } from "@/types/score";
 
 interface Score {
   id: string;
@@ -14,10 +15,6 @@ interface Score {
   creator: { name: string };
   _count: { likes: number; comments: number };
   likes: { id: string }[];
-}
-
-interface ApiErrorResponse {
-  error: string;
 }
 
 export default function ScoreList() {

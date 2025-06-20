@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
+import { createKoreaDate } from "@/utils/creatKoreaDate";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -69,14 +70,14 @@ export async function POST(request: NextRequest) {
       console.error("Error fetching GeoIP:", geoError);
     }
 
-    const date = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+    const koreaDate = createKoreaDate();
     const emailContent = `
       <h2>New Page Access</h2>
       <p><strong>Pathname:</strong> ${pathname}</p>
       <p><strong>User Agent:</strong> ${userAgent}</p>
       <p><strong>Country:</strong> ${geoInfo.country}</p>
       <p><strong>Region:</strong> ${geoInfo.regionName}</p>
-      <p><strong>Time:</strong> ${date}</p>
+      <p><strong>Time:</strong> ${koreaDate}</p>
     `;
 
     if (isLocal) {

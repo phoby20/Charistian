@@ -39,6 +39,8 @@ model User {
   createdEvents Event[]    @relation("EventCreator")
   attendees     EventAttendance[] // 이벤트 참여자
   userEventLabels UserEventLabel[] @relation("UserEventLabel") // 추가: 사용자별 라벨 관계
+  scoreLikes    ScoreLike[]  @relation("UserScoreLikes") // 추가: ScoreLike 관계
+  scoreComments ScoreComment[] @relation("UserScoreComments") // 추가: ScoreComment 관계
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
@@ -120,19 +122,56 @@ model Duty {
 }
 
 model Creation {
+  id                String         @id @default(uuid())
+  title             String
+  titleEn           String?        // 영어 제목
+  titleJa           String?        // 일본어 제목
+  description       String?
+  type              CreationType
+  fileUrl           String         // 악보 파일 URL (jpg/pdf)
+  thumbnailUrl      String?        // 섬네일 이미지 URL
+  audioUrl          String?        // 오디오 파일 URL
+  price             Float?         // 판매 가격
+  tempo             Int?           // 템포
+  referenceUrls     String[]       // 참고 URL 배열
+  lyrics            String?        // 가사 (한국어)
+  lyricsEn          String?        // 가사 (영어)
+  lyricsJa          String?        // 가사 (일본어)
+  composer          String?        // 작곡가
+  lyricist          String?        // 작사자
+  saleStartDate     DateTime?      // 판매 시작일
+  saleEndDate       DateTime?      // 판매 종료일
+  isPublic          Boolean        @default(false) // 다른 교회 공유 여부
+  isForSale         Boolean        @default(false) // 판매 허가 여부
+  isOriginal        Boolean        @default(false) // 자작곡 여부
+  creatorId         String
+  creator           User           @relation(fields: [creatorId], references: [id])
+  churchId          String
+  church            Church         @relation(fields: [churchId], references: [id])
+  purchases         Purchase[]
+  likes             ScoreLike[]    // 좋아요
+  comments          ScoreComment[] // 댓글
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model ScoreLike {
   id            String    @id @default(uuid())
-  title         String
-  description   String
-  type          CreationType
-  fileUrl       String
-  audioUrl      String?
-  price         Float?
-  isPublic      Boolean   @default(false)
-  creatorId     String
-  creator       User      @relation(fields: [creatorId], references: [id])
-  churchId      String
-  church        Church    @relation(fields: [churchId], references: [id])
-  purchases     Purchase[]
+  creationId    String
+  creation      Creation  @relation(fields: [creationId], references: [id])
+  userId        String
+  user          User      @relation("UserScoreLikes", fields: [userId], references: [id])
+  createdAt     DateTime  @default(now())
+  @@unique([creationId, userId])
+}
+
+model ScoreComment {
+  id            String    @id @default(uuid())
+  creationId    String
+  creation      Creation  @relation(fields: [creationId], references: [id])
+  userId        String
+  user          User      @relation("UserScoreComments", fields: [userId], references: [id])
+  content       String
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -256,6 +295,7 @@ enum Plan {
 enum CreationType {
   SCORE
   ILLUSTRATION
+  ORIGINAL_SCORE // 자작곡 악보
 }
 
 enum ChurchState {

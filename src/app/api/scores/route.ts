@@ -7,6 +7,10 @@ import { CreationType, Genre } from "@prisma/client";
 import { allowedRoles } from "./allowedRoles";
 import { createKoreaDate } from "@/utils/creatKoreaDate";
 
+// 코드 키와 조 상수 정의
+const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const TONES = ["Major", "Minor"];
+
 export async function GET(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   if (!token) {
@@ -76,7 +80,8 @@ export async function POST(req: NextRequest) {
   const isPublic = formData.get("isPublic") === "true";
   const isForSale = formData.get("isForSale") === "true";
   const isOriginal = formData.get("isOriginal") === "true";
-  const genre = formData.get("genre") as Genre; // 새로 추가: 장르
+  const genre = formData.get("genre") as Genre;
+  const key = formData.get("key") as string; // 추가: 코드 키
 
   // 필수 필드 검증
   if (!file) {
@@ -94,6 +99,20 @@ export async function POST(req: NextRequest) {
   if (isForSale && !isOriginal) {
     return NextResponse.json(
       { error: "자작곡이 아닌 악보는 판매할 수 없습니다." },
+      { status: 400 }
+    );
+  }
+  if (!key) {
+    return NextResponse.json(
+      { error: "코드 키는 필수입니다." },
+      { status: 400 }
+    );
+  }
+  // 코드 키 유효성 검증
+  const [keyNote, tone] = key.split(" ");
+  if (!KEYS.includes(keyNote) || !TONES.includes(tone)) {
+    return NextResponse.json(
+      { error: "유효하지 않은 코드 키입니다." },
       { status: 400 }
     );
   }
@@ -132,6 +151,7 @@ export async function POST(req: NextRequest) {
       tempo: formData.get("tempo")
         ? parseInt(formData.get("tempo") as string)
         : undefined,
+      key,
       referenceUrls: JSON.parse(formData.get("referenceUrls") as string),
       lyrics: formData.get("lyrics") as string,
       lyricsEn: formData.get("lyricsEn") as string,
@@ -147,7 +167,7 @@ export async function POST(req: NextRequest) {
       isPublic,
       isForSale,
       isOriginal,
-      genre: genre || undefined, // 새로 추가: 장르
+      genre: genre || undefined,
       creatorId: payload.userId,
       churchId: payload.churchId!,
     },

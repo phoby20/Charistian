@@ -1,4 +1,3 @@
-// src/hooks/useScoreForm.ts
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
@@ -56,6 +55,7 @@ export const useScoreForm = (): UseScoreFormReturn => {
       lyrics: "",
       description: "",
       genre: "",
+      key: "", // 추가
     },
   });
 
@@ -82,6 +82,7 @@ export const useScoreForm = (): UseScoreFormReturn => {
     description,
     price,
     isForSale,
+    key, // 추가
   } = form.watch();
 
   const isFormValid = (): boolean => {
@@ -93,12 +94,14 @@ export const useScoreForm = (): UseScoreFormReturn => {
       !!tempo &&
       !!lyrics &&
       !!description &&
+      !!key && // 추가
       !errors.file &&
       !errors.thumbnail &&
       !errors.title &&
       !errors.tempo &&
       !errors.lyrics &&
-      !errors.description;
+      !errors.description &&
+      !errors.key; // 추가
     const priceFilled = !isForSale || (isForSale && !!price && !errors.price);
     return requiredFieldsFilled && priceFilled;
   };
@@ -184,6 +187,7 @@ export const useScoreForm = (): UseScoreFormReturn => {
     formData.append("isForSale", String(data.isForSale));
     formData.append("isOriginal", String(data.isOriginal));
     formData.append("genre", data.genre || "");
+    formData.append("key", data.key || ""); // 추가
 
     try {
       const response = await fetch("/api/scores", {

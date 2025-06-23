@@ -1,4 +1,3 @@
-// src/app/[locale]/scores/[id]/page.tsx
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -15,7 +14,6 @@ import { useTranslations } from "next-intl";
 import { ApiErrorResponse, ScoreResponse } from "@/types/score";
 import { GENRES } from "@/data/genre";
 
-// YouTube 동영상 ID 추출 함수
 const getYouTubeVideoId = (url: string): string | null => {
   const regex =
     /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
@@ -23,7 +21,6 @@ const getYouTubeVideoId = (url: string): string | null => {
   return match ? match[1] : null;
 };
 
-// YouTube 섬네일 URL 생성 함수
 const getYouTubeThumbnail = (videoId: string): string => {
   return `https://img.youtube.com/vi/${videoId}/0.jpg`;
 };
@@ -35,7 +32,7 @@ export default function ScoreDetailPage() {
   const { id, locale } = params;
   const [score, setScore] = useState<ScoreResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [imageError, setImageError] = useState<string[]>([]); // 섬네일별 에러 상태
+  const [imageError, setImageError] = useState<string[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -217,6 +214,12 @@ export default function ScoreDetailPage() {
                     <p className="text-sm flex-1">
                       {score.tempo || "없음"} BPM
                     </p>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="font-medium text-gray-900 w-24">
+                      {t("key")} {/* 추가 */}
+                    </span>
+                    <p className="text-sm flex-1">{score.key || "없음"}</p>
                   </div>
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">

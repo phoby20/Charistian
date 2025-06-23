@@ -1,4 +1,3 @@
-// app/scores/page.tsx
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -23,6 +22,7 @@ interface Score {
   thumbnailUrl?: string;
   genre?: string;
   tempo?: number;
+  key?: string; // 추가
   creator: { name: string };
   composer?: string;
   lyricist?: string;
@@ -57,14 +57,14 @@ export default function ScoreList() {
   const handleMinTempoChange = (value: number) => {
     if (value <= maxAvailableTempo) {
       setMinAvailableTempo(value);
-      setCurrentPage(1); // 필터 변경 시 페이지 리셋
+      setCurrentPage(1);
     }
   };
 
   const handleMaxTempoChange = (value: number) => {
     if (value >= minAvailableTempo) {
       setMaxAvailableTempo(value);
-      setCurrentPage(1); // 필터 변경 시 페이지 리셋
+      setCurrentPage(1);
     }
   };
 
@@ -127,13 +127,13 @@ export default function ScoreList() {
         ? prev.filter((g) => g !== genreValue)
         : [...prev, genreValue]
     );
-    setCurrentPage(1); // 필터 변경 시 페이지 리셋
+    setCurrentPage(1);
   };
 
   // 검색 핸들러
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1); // 검색 변경 시 페이지 리셋
+    setCurrentPage(1);
   };
 
   // 장르 라벨 가져오기
@@ -339,7 +339,7 @@ export default function ScoreList() {
               value={itemsPerPage}
               onChange={(e) => {
                 setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1); // 항목 수 변경 시 페이지 리셋
+                setCurrentPage(1);
               }}
               className="p-1 border border-gray-300 rounded-md"
             >
@@ -460,6 +460,9 @@ export default function ScoreList() {
                     {locale === "ja" ? "テンポ" : "템포"}
                   </th>
                   <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">
+                    {locale === "ja" ? "キー" : "키"} {/* 추가 */}
+                  </th>
+                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">
                     {locale === "ja" ? "作成者" : "작성자"}
                   </th>
                   <th className="py-3 px-4 text-center text-sm font-semibold text-gray-700">
@@ -520,6 +523,10 @@ export default function ScoreList() {
                         : locale === "ja"
                           ? "なし"
                           : "없음"}
+                    </td>
+                    <td className="py-3 px-4 text-gray-600 text-sm truncate max-w-[80px]">
+                      {score.key || (locale === "ja" ? "なし" : "없음")}{" "}
+                      {/* 추가 */}
                     </td>
                     <td className="py-3 px-4 text-gray-600 text-sm truncate max-w-xs">
                       {score.creator.name}

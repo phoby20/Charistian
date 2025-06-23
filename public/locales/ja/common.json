@@ -421,7 +421,10 @@
     "genreLabel": "ジャンル",
     "genrePlaceholder": "ジャンルを選択してください",
     "genreRequired": "ジャンルを選択する必要があります。",
-    "fileRequired": "楽譜ファイルは必須です。"
+    "fileRequired": "楽譜ファイルは必須です。",
+    "keyLabel": "キー",
+    "keyPlaceholder": "キーを選択してください",
+    "keyRequired": "キーを選択する必要があります。"
   },
   "ScoreDetail": {
     "info": "楽譜情報",
@@ -439,6 +442,7 @@
     "isOriginalFalse": "非オリジナル",
     "genre": "ジャンル",
     "referenceUrls": "参照URL",
+    "key": "キー",
     "download": "ダウンロード",
     "purchase": "購入する",
     "backToList": "一覧",

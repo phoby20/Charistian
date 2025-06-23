@@ -430,7 +430,10 @@
     "genreLabel": "장르",
     "genrePlaceholder": "장르를 선택하세요",
     "genreRequired": "장르를 선택해야 합니다.",
-    "fileRequired": "악보 파일은 필수입니다."
+    "fileRequired": "악보 파일은 필수입니다.",
+    "keyLabel": "키",
+    "keyPlaceholder": "키를 선택하세요",
+    "keyRequired": "키를 선택해야 합니다."
   },
   "ScoreDetail": {
     "info": "악보 정보",
@@ -449,6 +452,7 @@
     "genre": "장르",
     "download": "다운로드",
     "purchase": "구매하기",
+    "key": "키",
     "backToList": "목록",
     "share": "공유",
     "error": "악보를 불러오지 못했습니다.",

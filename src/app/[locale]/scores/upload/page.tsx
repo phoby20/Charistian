@@ -18,6 +18,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
 
+const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const TONES = ["Major", "Minor"];
+
 export default function ScoreUploadPage() {
   const t = useTranslations("ScoreUpload");
   const {
@@ -51,7 +54,6 @@ export default function ScoreUploadPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      {/* 로딩 컴포넌트 */}
       {isLoading && <Loading />}
       <div className="container mx-auto max-w-3xl p-6 bg-white rounded-2xl shadow-lg">
         <div className="flex items-center justify-between mb-8">
@@ -61,6 +63,7 @@ export default function ScoreUploadPage() {
             className="text-3xl font-bold text-gray-800"
           >
             {t("title")}
+            {/* "악보 업로드" */}
           </motion.h1>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -75,7 +78,7 @@ export default function ScoreUploadPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* 파일 업로드 섹션 */}
           <FileUploadSection
-            fileError={fileError ? t("fileRequired") : null}
+            fileError={fileError ? t("fileRequired") : ""}
             pdfPreview={pdfPreview}
             handleFileChange={handleFileChange}
             removePdfPreview={removePdfPreview}
@@ -86,7 +89,7 @@ export default function ScoreUploadPage() {
           {/* 장르 선택 섹션 */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              {t("genreLabel")}
+              {t("genreLabel")} {/* "장르" */}
             </label>
             <select
               {...register("genre", { required: t("genreRequired") })}
@@ -105,6 +108,46 @@ export default function ScoreUploadPage() {
                 <span>{errors.genre.message}</span>
               </p>
             )}
+          </div>
+
+          {/* 코드 키 선택 섹션 */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {t("keyLabel")} {/* "키" */}
+            </label>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <select
+                  {...register("key", {
+                    required: t("keyRequired"), // "키를 선택해야 합니다."
+                    validate: (value) => {
+                      if (!value) return t("keyRequired");
+                      const [key, tone] = value.split(" ");
+                      return (
+                        (KEYS.includes(key) && TONES.includes(tone)) ||
+                        t("keyRequired")
+                      );
+                    },
+                  })}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">{t("keyPlaceholder")}</option>
+                  {KEYS.flatMap((key) =>
+                    TONES.map((tone) => (
+                      <option key={`${key} ${tone}`} value={`${key} ${tone}`}>
+                        {`${key} ${tone}`}
+                      </option>
+                    ))
+                  )}
+                </select>
+                {errors.key && (
+                  <p className="text-red-500 text-sm flex items-center space-x-1">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{errors.key.message}</span>
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
 
           <ThumbnailUploadSection
@@ -145,7 +188,7 @@ export default function ScoreUploadPage() {
                 : "bg-gray-400 cursor-not-allowed"
             }`}
           >
-            {t("uploadButton")}
+            {t("uploadButton")} {/* "업로드" */}
           </motion.button>
         </form>
       </div>

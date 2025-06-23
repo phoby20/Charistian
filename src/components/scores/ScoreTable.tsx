@@ -57,7 +57,7 @@ export default function ScoreTable({
               />
             </th>
             <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700 w-16">
-              {t("thumbnail")}
+              {/* {t("thumbnail")} */}
             </th>
             <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">
               {t("titleHeader")}

@@ -1,3 +1,5 @@
+//src/data/genre.ts
+
 export const GENRES = [
   { value: "BRIGHT", ko: "밝은", ja: "明るい" },
   { value: "CALM", ko: "차분한", ja: "穏やか" },

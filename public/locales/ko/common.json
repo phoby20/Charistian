@@ -454,5 +454,9 @@
     "error": "악보를 불러오지 못했습니다.",
     "referenceUrls": "참고 URL",
     "noThumbnail": "섬네일 없음"
-  }
+  },
+  "tempoRange": "템포 범위",
+  "page": "페이지",
+  "itemsPerPage": "페이지당 항목 수",
+  "previous": "이전"
 }

@@ -445,5 +445,9 @@
     "share": "共有",
     "error": "楽譜を読み込めませんでした。",
     "noThumbnail": "サムネイルなし"
-  }
+  },
+  "tempoRange": "テンポ範囲",
+  "page": "ページ",
+  "itemsPerPage": "ページごとの項目数",
+  "previous": "前"
 }

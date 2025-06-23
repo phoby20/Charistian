@@ -277,6 +277,35 @@ export default function ScoreDetailPage() {
                         : t("isOriginalFalse")}
                     </p>
                   </div>
+                  {/* 다운로드 및 구매 버튼 */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                    className="mt-8 flex flex-col sm:flex-row gap-4"
+                  >
+                    <a href={score.fileUrl} download className="flex-1">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-full py-3 px-6 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center space-x-2"
+                        aria-label={t("download")}
+                      >
+                        <Download className="w-5 h-5" />
+                        <span>{t("download")}</span>
+                      </motion.button>
+                    </a>
+                    {score.isForSale && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex-1 py-3 px-6 bg-green-500 text-white rounded-xl shadow-md hover:bg-green-600 transition-all duration-300"
+                        aria-label={t("purchase")}
+                      >
+                        {t("purchase")} (₩{score.price?.toLocaleString()})
+                      </motion.button>
+                    )}
+                  </motion.div>
                 </div>
               </motion.div>
             </div>
@@ -341,36 +370,6 @@ export default function ScoreDetailPage() {
                   <p className="text-sm">없음</p>
                 )}
               </div>
-            </motion.div>
-
-            {/* 다운로드 및 구매 버튼 */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="mt-8 flex flex-col sm:flex-row gap-4"
-            >
-              <a href={score.fileUrl} download className="flex-1">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full py-3 px-6 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center space-x-2"
-                  aria-label={t("download")}
-                >
-                  <Download className="w-5 h-5" />
-                  <span>{t("download")}</span>
-                </motion.button>
-              </a>
-              {score.isForSale && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex-1 py-3 px-6 bg-green-500 text-white rounded-xl shadow-md hover:bg-green-600 transition-all duration-300"
-                  aria-label={t("purchase")}
-                >
-                  {t("purchase")} (₩{score.price?.toLocaleString()})
-                </motion.button>
-              )}
             </motion.div>
           </motion.div>
         </div>

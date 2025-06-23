@@ -462,5 +462,31 @@
   "tempoRange": "템포 범위",
   "page": "페이지",
   "itemsPerPage": "페이지당 항목 수",
-  "previous": "이전"
+  "previous": "이전",
+  "Score": {
+    "title": "악보 목록",
+    "uploadScore": "악보 업로드",
+    "searchPlaceholder": "타이틀, 설명, 작성자, 작곡가, 작사자로 검색",
+    "genreFilter": "장르 필터",
+    "keyFilter": "키 필터",
+    "sharpFilter": "샤프 필터",
+    "toneFilter": "조 필터",
+    "tempoRange": "템포 범위",
+    "all": "모두",
+    "sharp": "샤프 포함",
+    "natural": "샤프 미포함",
+    "major": "장조",
+    "minor": "단조",
+    "itemsPerPage": "페이지당 항목 수",
+    "noScores": "아직 등록된 악보가 없습니다.",
+    "thumbnail": "섬네일",
+    "titleHeader": "타이틀",
+    "genre": "장르",
+    "tempo": "템포",
+    "key": "키",
+    "creator": "작성자",
+    "likes": "좋아요",
+    "comments": "댓글",
+    "none": "없음"
+  }
 }

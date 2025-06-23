@@ -453,5 +453,31 @@
   "tempoRange": "テンポ範囲",
   "page": "ページ",
   "itemsPerPage": "ページごとの項目数",
-  "previous": "前"
+  "previous": "前",
+  "Score": {
+    "title": "楽譜一覧",
+    "uploadScore": "楽譜アップロード",
+    "searchPlaceholder": "タイトル、説明、作成者、作曲者、作詞者で検索",
+    "genreFilter": "ジャンルフィルター",
+    "keyFilter": "キーフィルター",
+    "sharpFilter": "シャープフィルター",
+    "toneFilter": "調フィルター",
+    "tempoRange": "テンポ範囲",
+    "all": "すべて",
+    "sharp": "シャープを含む",
+    "natural": "シャープを含まない",
+    "major": "長調",
+    "minor": "短調",
+    "itemsPerPage": "ページごとの項目数",
+    "noScores": "まだ登録された楽譜がありません。",
+    "thumbnail": "サムネイル",
+    "titleHeader": "タイトル",
+    "genre": "ジャンル",
+    "tempo": "テンポ",
+    "key": "キー",
+    "creator": "作成者",
+    "likes": "いいね",
+    "comments": "コメント",
+    "none": "なし"
+  }
 }

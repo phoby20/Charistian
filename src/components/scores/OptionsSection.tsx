@@ -16,6 +16,8 @@ export const OptionsSection: React.FC<OptionsSectionProps> = ({
     name: "isOriginal",
     defaultValue: false,
   });
+  // TODO: 밑의 코드는 판매기능이 추가되면 삭제할 것
+  console.log("isOriginal:", isOriginal);
 
   return (
     <div className="space-y-4">
@@ -35,7 +37,8 @@ export const OptionsSection: React.FC<OptionsSectionProps> = ({
         />
         <span className="ml-2">다른 교회 공유 동의</span>
       </label>
-      <label className="flex items-center text-sm font-medium text-gray-700">
+      {/* TODO: 밑의 버튼은 판매기능이 추가되면 활성화 할것 */}
+      {/* <label className="flex items-center text-sm font-medium text-gray-700">
         <input
           type="checkbox"
           {...register("isForSale")}
@@ -43,7 +46,7 @@ export const OptionsSection: React.FC<OptionsSectionProps> = ({
           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50"
         />
         <span className="ml-2">판매 허가</span>
-      </label>
+      </label> */}
     </div>
   );
 };

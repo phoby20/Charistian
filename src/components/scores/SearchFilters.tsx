@@ -91,7 +91,7 @@ export default function SearchFilters({
           z-index: 2;
         }
       `}</style>
-      <div className="mb-6 flex flex-col gap-6">
+      <div className="mb-16 flex flex-col gap-6 bg-white p-6 rounded-lg shadow-md">
         <input
           type="text"
           value={searchQuery}
@@ -99,7 +99,7 @@ export default function SearchFilters({
           placeholder={t("searchPlaceholder")}
           className="w-full md:w-[50%] p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
         />
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               {t("genreFilter")}

@@ -249,7 +249,7 @@ export default function ScoreDetailPage() {
                       {getGenreLabel(score.genre) || "없음"}
                     </p>
                   </div>
-                  <div className="flex items-start">
+                  {/* <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
                       {t("price")}
                     </span>
@@ -258,7 +258,7 @@ export default function ScoreDetailPage() {
                         ? `₩${score.price?.toLocaleString()}`
                         : "무료"}
                     </p>
-                  </div>
+                  </div> */}
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
                       {t("isPublic")}

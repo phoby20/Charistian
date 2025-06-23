@@ -8,7 +8,7 @@ export type ScoreResponse = {
   fileUrl: string;
   thumbnailUrl?: string;
   price?: string;
-  referenceUrls: { url: string }[];
+  referenceUrls: string[];
   lyrics?: string;
   lyricsEn?: string;
   lyricsJa?: string;

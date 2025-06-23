@@ -39,6 +39,7 @@ interface UseScoreFormReturn {
   ) => void;
   onSubmit: (data: ScoreFormData) => Promise<void>;
   control: Control<ScoreFormData>;
+  isLoading: boolean;
 }
 
 export const useScoreForm = (): UseScoreFormReturn => {
@@ -227,5 +228,6 @@ export const useScoreForm = (): UseScoreFormReturn => {
     handleDateChange,
     onSubmit,
     control: form.control,
+    isLoading: form.formState.isSubmitting,
   };
 };

@@ -15,6 +15,19 @@ import { useTranslations } from "next-intl";
 import { ApiErrorResponse, ScoreResponse } from "@/types/score";
 import { GENRES } from "@/data/genre";
 
+// YouTube 동영상 ID 추출 함수
+const getYouTubeVideoId = (url: string): string | null => {
+  const regex =
+    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+};
+
+// YouTube 섬네일 URL 생성 함수
+const getYouTubeThumbnail = (videoId: string): string => {
+  return `https://img.youtube.com/vi/${videoId}/0.jpg`;
+};
+
 export default function ScoreDetailPage() {
   const t = useTranslations("ScoreDetail");
   const router = useRouter();
@@ -22,7 +35,7 @@ export default function ScoreDetailPage() {
   const { id, locale } = params;
   const [score, setScore] = useState<ScoreResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [imageError, setImageError] = useState(false);
+  const [imageError, setImageError] = useState<string[]>([]); // 섬네일별 에러 상태
 
   useEffect(() => {
     if (!id) return;
@@ -151,7 +164,7 @@ export default function ScoreDetailPage() {
             </div>
 
             <div className="grid gap-10 md:grid-cols-2">
-              {score.thumbnailUrl && !imageError ? (
+              {score.thumbnailUrl && !imageError.includes("main") ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -162,7 +175,7 @@ export default function ScoreDetailPage() {
                     src={score.thumbnailUrl}
                     alt={score.title}
                     className="w-full max-w-sm rounded-2xl border border-gray-200 object-cover transition-transform duration-300 group-hover:scale-102"
-                    onError={() => setImageError(true)}
+                    onError={() => setImageError((prev) => [...prev, "main"])}
                   />
                 </motion.div>
               ) : (
@@ -265,11 +278,74 @@ export default function ScoreDetailPage() {
               </motion.div>
             </div>
 
+            {/* 참고 URL 섹션 */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="mt-8"
+            >
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                {t("referenceUrls")}
+              </h2>
+              <div className="text-gray-600">
+                {score.referenceUrls && score.referenceUrls.length > 0 ? (
+                  <ul className="list-disc pl-5 space-y-4">
+                    {score.referenceUrls.map((ref, index) => {
+                      const videoId = getYouTubeVideoId(ref);
+                      const thumbnailUrl = videoId
+                        ? getYouTubeThumbnail(videoId)
+                        : null;
+
+                      return (
+                        <li key={index} className="flex items-center gap-4">
+                          {thumbnailUrl && !imageError.includes(ref) ? (
+                            <a
+                              href={ref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img
+                                src={thumbnailUrl}
+                                alt={`Thumbnail for ${ref}`}
+                                className="w-48 h-32 rounded-md border border-gray-200 object-cover"
+                                onError={() =>
+                                  setImageError((prev) => [...prev, ref])
+                                }
+                              />
+                            </a>
+                          ) : imageError.includes(ref) ? (
+                            <div className="w-48 h-32 flex items-center justify-center bg-gray-100 rounded-md border border-gray-200">
+                              <div className="text-center text-gray-500">
+                                <ImageOff className="w-6 h-6 mx-auto" />
+                                <p className="text-xs">{t("noThumbnail")}</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <a
+                              href={ref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {ref}
+                            </a>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <p className="text-sm">없음</p>
+                )}
+              </div>
+            </motion.div>
+
+            {/* 다운로드 및 구매 버튼 */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-12 flex flex-col sm:flex-row gap-4"
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="mt-8 flex flex-col sm:flex-row gap-4"
             >
               <a href={score.fileUrl} download className="flex-1">
                 <motion.button

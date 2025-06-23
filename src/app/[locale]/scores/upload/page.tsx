@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/Loading";
 
 export default function ScoreUploadPage() {
   const t = useTranslations("ScoreUpload");
@@ -37,6 +38,7 @@ export default function ScoreUploadPage() {
     handleDateChange,
     onSubmit,
     control,
+    isLoading,
   } = useScoreForm();
   const router = useRouter();
   const locale = useLocale();
@@ -49,6 +51,8 @@ export default function ScoreUploadPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      {/* 로딩 컴포넌트 */}
+      {isLoading && <Loading />}
       <div className="container mx-auto max-w-3xl p-6 bg-white rounded-2xl shadow-lg">
         <div className="flex items-center justify-between mb-8">
           <motion.h1
@@ -132,7 +136,7 @@ export default function ScoreUploadPage() {
           />
           <motion.button
             type="submit"
-            disabled={!isFormValid()}
+            disabled={isLoading || !isFormValid()}
             whileHover={isFormValid() ? { scale: 1.05 } : {}}
             whileTap={isFormValid() ? { scale: 0.95 } : {}}
             className={`w-full p-3 rounded-md text-white transition-colors ${

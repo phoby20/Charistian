@@ -1,21 +1,16 @@
+// src/app/[locale]/scores/[id]/page.tsx
+
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Head from "next/head";
 import { motion } from "framer-motion";
-import {
-  AlertCircle,
-  ArrowLeft,
-  Download,
-  ImageOff,
-  Heart,
-  Send,
-  Trash2,
-} from "lucide-react";
+import { AlertCircle, ArrowLeft, Heart, ImageOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ApiErrorResponse, ScoreResponse } from "@/types/score";
-import { GENRES } from "@/data/genre";
-import { useAuth } from "@/context/AuthContext";
+import CommentsSection from "@/components/scores/CommentsSection";
+import ScoreInfo from "@/components/scores/ScoreInfo";
 
 const getYouTubeVideoId = (url: string): string | null => {
   const regex =
@@ -32,7 +27,6 @@ export default function ScoreDetailPage() {
   const t = useTranslations("ScoreDetail");
   const router = useRouter();
   const params = useParams();
-  const { user } = useAuth();
   const { id, locale } = params;
   const [score, setScore] = useState<ScoreResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,8 +34,6 @@ export default function ScoreDetailPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
-  const [comment, setComment] = useState("");
-  const [isCommenting, setIsCommenting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -98,90 +90,6 @@ export default function ScoreDetailPage() {
     }
   };
 
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!score || isCommenting || !comment.trim()) return;
-    setIsCommenting(true);
-
-    try {
-      const response = await fetch(`/api/scores/${id}/comment`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: comment.trim() }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || t("commentError"));
-      }
-
-      // 새 댓글을 기존 댓글 목록에 추가
-      setScore((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          comments: [
-            {
-              ...data,
-              user: { name: data.user?.name || "Unknown" },
-              createdAt: new Date().toISOString(),
-            },
-            ...(prev.comments || []),
-          ],
-          _count: {
-            ...prev._count,
-            comments: (prev._count?.comments || 0) + 1,
-          },
-        };
-      });
-      setComment("");
-    } catch (error: unknown) {
-      let errorMessage = t("commentError");
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      setError(errorMessage);
-    } finally {
-      setIsCommenting(false);
-    }
-  };
-
-  const handleCommentDelete = async (commentId: string) => {
-    if (!score || !confirm(t("confirmDeleteComment"))) return;
-
-    try {
-      const response = await fetch(`/api/scores/${id}/comment/${commentId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || t("deleteCommentError"));
-      }
-
-      // 댓글 목록에서 삭제된 댓글 제거
-      setScore((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          comments: prev.comments?.filter((c) => c.id !== commentId) || [],
-          _count: {
-            ...prev._count,
-            comments: (prev._count?.comments || 1) - 1,
-          },
-        };
-      });
-    } catch (error: unknown) {
-      let errorMessage = t("deleteCommentError");
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      setError(errorMessage);
-    }
-  };
-
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -209,12 +117,6 @@ export default function ScoreDetailPage() {
       </div>
     );
   }
-
-  const getGenreLabel = (genreValue: string | undefined) => {
-    if (!genreValue) return t("noGenre");
-    const genre = GENRES.find((g) => g.value === genreValue);
-    return locale === "ja" ? genre?.ja : genre?.ko;
-  };
 
   return (
     <>
@@ -254,7 +156,6 @@ export default function ScoreDetailPage() {
                   <ArrowLeft className="w-5 h-5" />
                   <span className="text-sm font-medium">{t("backToList")}</span>
                 </motion.button>
-
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -276,150 +177,13 @@ export default function ScoreDetailPage() {
               </div>
             </div>
 
-            <div className="grid gap-10 md:grid-cols-2">
-              {score.thumbnailUrl && !imageError.includes("main") ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="relative group"
-                >
-                  <img
-                    src={score.thumbnailUrl}
-                    alt={score.title}
-                    className="w-full max-w-sm rounded-2xl border border-gray-200 object-cover transition-transform duration-300 group-hover:scale-102"
-                    onError={() => setImageError((prev) => [...prev, "main"])}
-                  />
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="flex items-center justify-center w-full max-w-sm h-48 bg-gray-100 rounded-2xl border border-gray-200"
-                >
-                  <div className="text-center text-gray-500">
-                    <ImageOff className="w-8 h-8 mx-auto mb-2" />
-                    <p className="text-sm">{t("noThumbnail")}</p>
-                  </div>
-                </motion.div>
-              )}
+            <ScoreInfo
+              score={score}
+              imageError={imageError}
+              setImageError={setImageError}
+              locale={locale as string}
+            />
 
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="space-y-6"
-              >
-                <h2 className="text-2xl font-semibold text-gray-800">
-                  {t("info")}
-                </h2>
-                <div className="grid gap-4 text-gray-600">
-                  <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">
-                      {t("description")}
-                    </span>
-                    <p className="text-sm flex-1">
-                      {score.description || t("none")}
-                    </p>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">
-                      {t("tempo")}
-                    </span>
-                    <p className="text-sm flex-1">
-                      {score.tempo ? `${score.tempo} BPM` : t("none")}
-                    </p>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">
-                      {t("key")}
-                    </span>
-                    <p className="text-sm flex-1">{score.key || t("none")}</p>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">
-                      {t("lyrics")}
-                    </span>
-                    <p className="text-sm flex-1 whitespace-pre-wrap">
-                      {score.lyrics || t("none")}
-                    </p>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">
-                      {t("composer")}
-                    </span>
-                    <p className="text-sm flex-1">
-                      {score.composer || t("none")}
-                    </p>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">
-                      {t("lyricist")}
-                    </span>
-                    <p className="text-sm flex-1">
-                      {score.lyricist || t("none")}
-                    </p>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">
-                      {t("genre")}
-                    </span>
-                    <p className="text-sm flex-1">
-                      {getGenreLabel(score.genre) || t("none")}
-                    </p>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">
-                      {t("isPublic")}
-                    </span>
-                    <p className="text-sm flex-1">
-                      {score.isPublic ? t("isPublicTrue") : t("isPublicFalse")}
-                    </p>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">
-                      {t("isOriginal")}
-                    </span>
-                    <p className="text-sm flex-1">
-                      {score.isOriginal
-                        ? t("isOriginalTrue")
-                        : t("isOriginalFalse")}
-                    </p>
-                  </div>
-                  <motion.div
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.5 }}
-                    className="mt-8 flex flex-col sm:flex-row gap-4"
-                  >
-                    <a href={score.fileUrl} download className="flex-1">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-full py-3 px-6 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center space-x-2"
-                        aria-label={t("download")}
-                      >
-                        <Download className="w-5 h-5" />
-                        <span>{t("download")}</span>
-                      </motion.button>
-                    </a>
-                    {score.isForSale && (
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex-1 py-3 px-6 bg-green-500 text-white rounded-xl shadow-md hover:bg-green-600 transition-all duration-300"
-                        aria-label={t("purchase")}
-                      >
-                        {t("purchase")} (₩{score.price?.toLocaleString()})
-                      </motion.button>
-                    )}
-                  </motion.div>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* 참고 URL 섹션 */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -481,87 +245,13 @@ export default function ScoreDetailPage() {
               </div>
             </motion.div>
 
-            {/* 댓글 섹션 */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="mt-8"
-            >
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                {t("comments")} ({score._count?.comments || 0})
-              </h2>
-              <form onSubmit={handleCommentSubmit} className="mb-6">
-                <div className="flex items-center gap-3">
-                  <textarea
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder={t("writeComment")}
-                    className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none h-20"
-                    disabled={isCommenting}
-                  />
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    type="submit"
-                    disabled={isCommenting || !comment.trim()}
-                    className={`p-3 bg-blue-500 text-white rounded-lg flex items-center justify-center transition-all ${
-                      isCommenting || !comment.trim()
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-blue-600"
-                    }`}
-                    aria-label={t("submitComment")}
-                  >
-                    <Send className="w-5 h-5" />
-                  </motion.button>
-                </div>
-              </form>
-              <div className="space-y-4">
-                {score.comments && score.comments.length > 0 ? (
-                  score.comments.map((comment, index) => (
-                    <motion.div
-                      key={comment.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="p-4 bg-gray-50 rounded-lg border border-gray-200"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-gray-800">
-                            {comment.user?.name || "Unknown"}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {new Date(comment.createdAt).toLocaleDateString(
-                              locale,
-                              {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              }
-                            )}
-                          </span>
-                        </div>
-                        {user?.id === comment.userId && (
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => handleCommentDelete(comment.id)}
-                            className="text-red-500 hover:text-red-600 transition-colors cursor-pointer"
-                            aria-label={t("deleteComment")}
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </motion.button>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600">{comment.content}</p>
-                    </motion.div>
-                  ))
-                ) : (
-                  <p className="text-sm text-gray-600">{t("noComments")}</p>
-                )}
-              </div>
-            </motion.div>
+            <CommentsSection
+              score={score}
+              setScore={setScore}
+              locale={locale as string}
+              id={id as string}
+              setError={setError}
+            />
           </motion.div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 // app/api/scores/[id]/comment/[commentId]/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";

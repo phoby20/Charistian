@@ -6,11 +6,12 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Head from "next/head";
 import { motion } from "framer-motion";
-import { AlertCircle, ArrowLeft, Heart, ImageOff } from "lucide-react";
+import { AlertCircle, ArrowLeft, Heart, ImageOff, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ApiErrorResponse, ScoreResponse } from "@/types/score";
 import CommentsSection from "@/components/scores/CommentsSection";
 import ScoreInfo from "@/components/scores/ScoreInfo";
+import { useAuth } from "@/context/AuthContext";
 
 const getYouTubeVideoId = (url: string): string | null => {
   const regex =
@@ -28,12 +29,14 @@ export default function ScoreDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { id, locale } = params;
+  const { user } = useAuth();
   const [score, setScore] = useState<ScoreResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string[]>([]);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -90,6 +93,35 @@ export default function ScoreDetailPage() {
     }
   };
 
+  const handleClose = async () => {
+    if (!score || isClosing) return;
+    if (!confirm(t("confirmDeleteScore"))) return;
+
+    setIsClosing(true);
+
+    try {
+      const response = await fetch(`/api/scores/${id}`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("closeError"));
+      }
+
+      router.push(`/${locale}/scores`);
+    } catch (error: unknown) {
+      let errorMessage = t("closeError");
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setError(errorMessage);
+    } finally {
+      setIsClosing(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -97,10 +129,22 @@ export default function ScoreDetailPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="bg-white p-6 rounded-2xl shadow-lg flex items-center space-x-3 max-w-md w-full"
+          className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-4 max-w-md w-full"
         >
-          <AlertCircle className="w-8 h-8 text-red-500 flex-shrink-0" />
-          <p className="text-red-500 text-lg font-medium">{error}</p>
+          <div className="flex items-center space-x-3">
+            <AlertCircle className="w-8 h-8 text-red-500 flex-shrink-0" />
+            <p className="text-red-500 text-lg font-medium">{error}</p>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => router.push(`/${locale}/scores`)}
+            className="flex items-center space-x-2 text-blue-500 hover:text-blue-600 transition-colors"
+            aria-label={t("backToList")}
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm font-medium">{t("backToList")}</span>
+          </motion.button>
         </motion.div>
       </div>
     );
@@ -117,6 +161,12 @@ export default function ScoreDetailPage() {
       </div>
     );
   }
+
+  const canClose =
+    user &&
+    score.isOpen &&
+    (user.id === score.creatorId ||
+      ["SUPER_ADMIN", "ADMIN"].includes(user.role));
 
   return (
     <>
@@ -136,6 +186,16 @@ export default function ScoreDetailPage() {
             transition={{ duration: 0.6 }}
             className="bg-white rounded-3xl shadow-lg p-8 md:p-12"
           >
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => router.push(`/${locale}/scores`)}
+              className="flex items-center space-x-2 text-blue-500 hover:text-blue-600 transition-colors mb-10"
+              aria-label={t("backToList")}
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm font-medium">{t("backToList")}</span>
+            </motion.button>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
               <motion.h1
                 initial={{ opacity: 0, x: -30 }}
@@ -146,16 +206,6 @@ export default function ScoreDetailPage() {
                 {score.title}
               </motion.h1>
               <div className="flex space-x-3">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => router.push(`/${locale}/scores`)}
-                  className="flex items-center space-x-2 text-blue-500 hover:text-blue-600 transition-colors"
-                  aria-label={t("backToList")}
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                  <span className="text-sm font-medium">{t("backToList")}</span>
-                </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -174,6 +224,20 @@ export default function ScoreDetailPage() {
                     {t("like")} ({likeCount})
                   </span>
                 </motion.button>
+                {canClose && (
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleClose}
+                    disabled={isClosing}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors bg-gray-100 text-gray-600 hover:bg-red-200 ${
+                      isClosing ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    aria-label={t("deleteScore")}
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </motion.button>
+                )}
               </div>
             </div>
 

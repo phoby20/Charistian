@@ -39,6 +39,7 @@ export interface ScoreResponse {
   comments: ScoreComment[];
   _count: { likes: number; comments: number };
   isLiked: boolean;
+  isOpen: boolean;
   createdAt: string;
   updatedAt: string;
 }

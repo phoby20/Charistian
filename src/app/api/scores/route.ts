@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
     where: {
       OR: [{ churchId: payload.churchId }, { isPublic: true }],
       type: { in: [CreationType.SCORE, CreationType.ORIGINAL_SCORE] },
+      isOpen: true,
     },
     include: {
       creator: { select: { name: true } },

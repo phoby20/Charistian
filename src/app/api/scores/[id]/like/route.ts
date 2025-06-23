@@ -1,6 +1,3 @@
-// app/api/scores/[id]/like/route.ts
-/** 악보 좋아요 API */
-
 import { NextRequest, NextResponse } from "next/server";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
@@ -8,7 +5,7 @@ import { allowedRoles } from "../../allowedRoles";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const token = req.cookies.get("token")?.value;
   if (!token) {
@@ -32,7 +29,9 @@ export async function POST(
     return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
   }
 
-  const score = await prisma.creation.findUnique({ where: { id: params.id } });
+  const { id } = await context.params;
+
+  const score = await prisma.creation.findUnique({ where: { id } });
   if (!score || (!score.isPublic && score.churchId !== payload.churchId)) {
     return NextResponse.json(
       { error: "악보를 찾을 수 없습니다." },
@@ -42,17 +41,31 @@ export async function POST(
 
   const existingLike = await prisma.scoreLike.findUnique({
     where: {
-      creationId_userId: { creationId: params.id, userId: payload.userId },
+      creationId_userId: { creationId: id, userId: payload.userId },
     },
   });
 
   if (existingLike) {
-    await prisma.scoreLike.delete({ where: { id: existingLike.id } });
-    return NextResponse.json({ message: "좋아요 취소" }, { status: 200 });
+    await prisma.scoreLike.delete({
+      where: { id: existingLike.id },
+    });
+    const likeCount = await prisma.scoreLike.count({
+      where: { creationId: id },
+    });
+    return NextResponse.json(
+      { message: "좋아요 취소", isLiked: false, likeCount },
+      { status: 200 }
+    );
   } else {
     await prisma.scoreLike.create({
-      data: { creationId: params.id, userId: payload.userId },
+      data: { creationId: id, userId: payload.userId },
     });
-    return NextResponse.json({ message: "좋아요 성공" }, { status: 201 });
+    const likeCount = await prisma.scoreLike.count({
+      where: { creationId: id },
+    });
+    return NextResponse.json(
+      { message: "좋아요 성공", isLiked: true, likeCount },
+      { status: 201 }
+    );
   }
 }

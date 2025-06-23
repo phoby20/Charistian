@@ -1,6 +1,3 @@
-// app/api/scores/[id]/route.ts
-/** 악보 상세 조회 API */
-
 import { NextRequest, NextResponse } from "next/server";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
@@ -54,5 +51,14 @@ export async function GET(
     );
   }
 
-  return NextResponse.json(score, { status: 200 });
+  // 현재 사용자가 좋아요했는지 여부 추가
+  const isLiked = score.likes.length > 0;
+
+  return NextResponse.json(
+    {
+      ...score,
+      isLiked, // 현재 사용자의 좋아요 여부
+    },
+    { status: 200 }
+  );
 }

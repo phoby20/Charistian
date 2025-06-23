@@ -9,6 +9,7 @@ import {
   Download,
   Share2,
   ImageOff,
+  Heart,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ApiErrorResponse, ScoreResponse } from "@/types/score";
@@ -33,6 +34,9 @@ export default function ScoreDetailPage() {
   const [score, setScore] = useState<ScoreResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string[]>([]);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [isLiking, setIsLiking] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -46,6 +50,8 @@ export default function ScoreDetailPage() {
         }
         const data = await response.json();
         setScore(data);
+        setLikeCount(data._count?.likes || 0);
+        setIsLiked(data.isLiked || false); // 서버에서 반환된 isLiked 사용
       } catch (error: unknown) {
         let errorMessage = t("error");
         if (error instanceof Error) {
@@ -58,6 +64,34 @@ export default function ScoreDetailPage() {
 
     fetchScore();
   }, [id, t]);
+
+  const handleLike = async () => {
+    if (!score || isLiking) return;
+    setIsLiking(true);
+
+    try {
+      const response = await fetch(`/api/scores/${id}/like`, {
+        method: "POST",
+        credentials: "include", // 쿠키에 포함된 토큰 전송
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("likeError"));
+      }
+
+      setIsLiked(data.isLiked); // 서버에서 반환된 isLiked로 상태 업데이트
+      setLikeCount(data.likeCount); // 서버에서 반환된 likeCount로 상태 업데이트
+    } catch (error: unknown) {
+      let errorMessage = t("likeError");
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setError(errorMessage);
+    } finally {
+      setIsLiking(false);
+    }
+  };
 
   const handleShare = async () => {
     if (navigator.share && score) {
@@ -157,6 +191,24 @@ export default function ScoreDetailPage() {
                   <Share2 className="w-5 h-5" />
                   <span className="text-sm font-medium">{t("share")}</span>
                 </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleLike}
+                  disabled={isLiking}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors ${
+                    isLiked
+                      ? "bg-red-100 text-red-600 hover:bg-red-200"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  } ${isLiking ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  <Heart
+                    className={`w-5 h-5 ${isLiked ? "fill-red-600" : ""}`}
+                  />
+                  <span className="text-sm font-medium">
+                    {t("like")} ({likeCount})
+                  </span>
+                </motion.button>
               </div>
             </div>
 
@@ -204,7 +256,7 @@ export default function ScoreDetailPage() {
                       {t("description")}
                     </span>
                     <p className="text-sm flex-1">
-                      {score.description || "없음"}
+                      {score.description || t("none")}
                     </p>
                   </div>
                   <div className="flex items-start">
@@ -212,53 +264,47 @@ export default function ScoreDetailPage() {
                       {t("tempo")}
                     </span>
                     <p className="text-sm flex-1">
-                      {score.tempo || "없음"} BPM
+                      {score.tempo ? `${score.tempo} BPM` : t("none")}
                     </p>
                   </div>
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
-                      {t("key")} {/* 추가 */}
+                      {t("key")}
                     </span>
-                    <p className="text-sm flex-1">{score.key || "없음"}</p>
+                    <p className="text-sm flex-1">{score.key || t("none")}</p>
                   </div>
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
                       {t("lyrics")}
                     </span>
                     <p className="text-sm flex-1 whitespace-pre-wrap">
-                      {score.lyrics || "없음"}
+                      {score.lyrics || t("none")}
                     </p>
                   </div>
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
                       {t("composer")}
                     </span>
-                    <p className="text-sm flex-1">{score.composer || "없음"}</p>
+                    <p className="text-sm flex-1">
+                      {score.composer || t("none")}
+                    </p>
                   </div>
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
                       {t("lyricist")}
                     </span>
-                    <p className="text-sm flex-1">{score.lyricist || "없음"}</p>
+                    <p className="text-sm flex-1">
+                      {score.lyricist || t("none")}
+                    </p>
                   </div>
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
                       {t("genre")}
                     </span>
                     <p className="text-sm flex-1">
-                      {getGenreLabel(score.genre) || "없음"}
+                      {getGenreLabel(score.genre) || t("none")}
                     </p>
                   </div>
-                  {/* <div className="flex items-start">
-                    <span className="font-medium text-gray-900 w-24">
-                      {t("price")}
-                    </span>
-                    <p className="text-sm flex-1">
-                      {score.isForSale
-                        ? `₩${score.price?.toLocaleString()}`
-                        : "무료"}
-                    </p>
-                  </div> */}
                   <div className="flex items-start">
                     <span className="font-medium text-gray-900 w-24">
                       {t("isPublic")}
@@ -277,7 +323,6 @@ export default function ScoreDetailPage() {
                         : t("isOriginalFalse")}
                     </p>
                   </div>
-                  {/* 다운로드 및 구매 버튼 */}
                   <motion.div
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -310,7 +355,6 @@ export default function ScoreDetailPage() {
               </motion.div>
             </div>
 
-            {/* 참고 URL 섹션 */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -367,7 +411,7 @@ export default function ScoreDetailPage() {
                     })}
                   </ul>
                 ) : (
-                  <p className="text-sm">없음</p>
+                  <p className="text-sm">{t("none")}</p>
                 )}
               </div>
             </motion.div>

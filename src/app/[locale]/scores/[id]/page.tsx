@@ -242,6 +242,7 @@ export default function ScoreDetailPage() {
             </div>
 
             <ScoreInfo
+              user={user}
               score={score}
               imageError={imageError}
               setImageError={setImageError}

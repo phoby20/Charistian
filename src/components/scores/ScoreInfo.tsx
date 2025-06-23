@@ -7,8 +7,10 @@ import { Download, ImageOff } from "lucide-react"; // lucide-react 아이콘 사
 import { useTranslations } from "next-intl";
 import { ScoreResponse } from "@/types/score";
 import { GENRES } from "@/data/genre"; // genre 데이터 경로 확인
+import { User } from "@prisma/client";
 
 interface ScoreInfoProps {
+  user: User | null;
   score: ScoreResponse;
   imageError: string[];
   setImageError: React.Dispatch<React.SetStateAction<string[]>>;
@@ -16,6 +18,7 @@ interface ScoreInfoProps {
 }
 
 export default function ScoreInfo({
+  user,
   score,
   imageError,
   setImageError,
@@ -131,17 +134,21 @@ export default function ScoreInfo({
             transition={{ duration: 0.5, delay: 0.5 }}
             className="mt-8 flex flex-col sm:flex-row gap-4"
           >
-            <a href={score.fileUrl} download className="flex-1">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full py-3 px-6 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center space-x-2"
-                aria-label={t("download")}
-              >
-                <Download className="w-5 h-5" />
-                <span>{t("download")}</span>
-              </motion.button>
-            </a>
+            {/* 해당 악보의 교회ID가 로그인 유저의 ID와 일치할 때만 다운로드 버튼이 보이도록 수정 */}
+            {user?.churchId === score.churchId && (
+              <a href={score.fileUrl} download className="flex-1">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full py-3 px-6 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center space-x-2"
+                  aria-label={t("download")}
+                >
+                  <Download className="w-5 h-5" />
+                  <span>{t("download")}</span>
+                </motion.button>
+              </a>
+            )}
+
             {score.isForSale && (
               <motion.button
                 whileHover={{ scale: 1.05 }}

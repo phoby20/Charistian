@@ -1,5 +1,16 @@
 // src/types/score.ts
-export type ScoreResponse = {
+export interface ScoreComment {
+  id: string;
+  creationId: string;
+  userId: string;
+  user: { name: string };
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ScoreResponse {
+  id: string;
   title: string;
   titleEn?: string;
   titleJa?: string;
@@ -7,8 +18,9 @@ export type ScoreResponse = {
   tempo?: string;
   fileUrl: string;
   thumbnailUrl?: string;
-  price?: string;
-  referenceUrls: string[];
+  price?: number;
+  key?: string;
+  referenceUrls?: string[];
   lyrics?: string;
   lyricsEn?: string;
   lyricsJa?: string;
@@ -16,12 +28,20 @@ export type ScoreResponse = {
   lyricist?: string;
   saleStartDate?: string;
   saleEndDate?: string;
+  genre?: string;
   isPublic: boolean;
   isForSale: boolean;
   isOriginal: boolean;
-  genre?: string;
-  key: string;
-};
+  creatorId: string;
+  creator: { name: string };
+  churchId: string;
+  likes: { id: string }[];
+  comments: ScoreComment[];
+  _count: { likes: number; comments: number };
+  isLiked: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface ScoreFormData {
   title: string;

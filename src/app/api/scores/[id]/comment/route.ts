@@ -8,7 +8,7 @@ import { allowedRoles } from "../../allowedRoles";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const token = req.cookies.get("token")?.value;
   if (!token) {
@@ -32,9 +32,11 @@ export async function POST(
     return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
   }
 
+  const { id } = await context.params;
+
   const { content } = (await req.json()) as { content: string };
 
-  const score = await prisma.creation.findUnique({ where: { id: params.id } });
+  const score = await prisma.creation.findUnique({ where: { id } });
   if (!score || (!score.isPublic && score.churchId !== payload.churchId)) {
     return NextResponse.json(
       { error: "악보를 찾을 수 없습니다." },
@@ -43,7 +45,10 @@ export async function POST(
   }
 
   const comment = await prisma.scoreComment.create({
-    data: { content, creationId: params.id, userId: payload.userId },
+    data: { content, creationId: id, userId: payload.userId },
+    include: {
+      user: { select: { name: true } }, // 사용자 이름 포함
+    },
   });
 
   return NextResponse.json(comment, { status: 201 });

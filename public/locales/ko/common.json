@@ -461,7 +461,15 @@
     "noThumbnail": "썸네일 없음",
     "none": "없음",
     "like": "좋아요",
-    "likeError": "좋아요 처리 중 오류가 발생했습니다."
+    "likeError": "좋아요 처리 중 오류가 발생했습니다.",
+    "comments": "댓글",
+    "writeComment": "댓글을 작성하세요",
+    "submitComment": "댓글 제출",
+    "noComments": "댓글이 없습니다",
+    "commentError": "댓글 작성 중 오류가 발생했습니다.",
+    "deleteComment": "댓글 삭제",
+    "deleteCommentError": "댓글 삭제 중 오류가 발생했습니다.",
+    "confirmDeleteComment": "정말로 이 댓글을 삭제하시겠습니까?"
   },
   "tempoRange": "템포 범위",
   "page": "페이지",

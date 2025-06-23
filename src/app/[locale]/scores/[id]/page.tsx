@@ -7,13 +7,15 @@ import {
   AlertCircle,
   ArrowLeft,
   Download,
-  Share2,
   ImageOff,
   Heart,
+  Send,
+  Trash2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ApiErrorResponse, ScoreResponse } from "@/types/score";
 import { GENRES } from "@/data/genre";
+import { useAuth } from "@/context/AuthContext";
 
 const getYouTubeVideoId = (url: string): string | null => {
   const regex =
@@ -30,6 +32,7 @@ export default function ScoreDetailPage() {
   const t = useTranslations("ScoreDetail");
   const router = useRouter();
   const params = useParams();
+  const { user } = useAuth();
   const { id, locale } = params;
   const [score, setScore] = useState<ScoreResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +40,8 @@ export default function ScoreDetailPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
+  const [comment, setComment] = useState("");
+  const [isCommenting, setIsCommenting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -51,7 +56,7 @@ export default function ScoreDetailPage() {
         const data = await response.json();
         setScore(data);
         setLikeCount(data._count?.likes || 0);
-        setIsLiked(data.isLiked || false); // 서버에서 반환된 isLiked 사용
+        setIsLiked(data.isLiked || false);
       } catch (error: unknown) {
         let errorMessage = t("error");
         if (error instanceof Error) {
@@ -72,7 +77,7 @@ export default function ScoreDetailPage() {
     try {
       const response = await fetch(`/api/scores/${id}/like`, {
         method: "POST",
-        credentials: "include", // 쿠키에 포함된 토큰 전송
+        credentials: "include",
       });
       const data = await response.json();
 
@@ -80,8 +85,8 @@ export default function ScoreDetailPage() {
         throw new Error(data.error || t("likeError"));
       }
 
-      setIsLiked(data.isLiked); // 서버에서 반환된 isLiked로 상태 업데이트
-      setLikeCount(data.likeCount); // 서버에서 반환된 likeCount로 상태 업데이트
+      setIsLiked(data.isLiked);
+      setLikeCount(data.likeCount);
     } catch (error: unknown) {
       let errorMessage = t("likeError");
       if (error instanceof Error) {
@@ -93,19 +98,87 @@ export default function ScoreDetailPage() {
     }
   };
 
-  const handleShare = async () => {
-    if (navigator.share && score) {
-      try {
-        await navigator.share({
-          title: score.title,
-          text: score.description || t("shareText"),
-          url: window.location.href,
-        });
-      } catch (err) {
-        console.error("공유 실패:", err);
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!score || isCommenting || !comment.trim()) return;
+    setIsCommenting(true);
+
+    try {
+      const response = await fetch(`/api/scores/${id}/comment`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: comment.trim() }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("commentError"));
       }
-    } else {
-      alert(t("shareNotSupported"));
+
+      // 새 댓글을 기존 댓글 목록에 추가
+      setScore((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          comments: [
+            {
+              ...data,
+              user: { name: data.user?.name || "Unknown" },
+              createdAt: new Date().toISOString(),
+            },
+            ...(prev.comments || []),
+          ],
+          _count: {
+            ...prev._count,
+            comments: (prev._count?.comments || 0) + 1,
+          },
+        };
+      });
+      setComment("");
+    } catch (error: unknown) {
+      let errorMessage = t("commentError");
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setError(errorMessage);
+    } finally {
+      setIsCommenting(false);
+    }
+  };
+
+  const handleCommentDelete = async (commentId: string) => {
+    if (!score || !confirm(t("confirmDeleteComment"))) return;
+
+    try {
+      const response = await fetch(`/api/scores/${id}/comment/${commentId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("deleteCommentError"));
+      }
+
+      // 댓글 목록에서 삭제된 댓글 제거
+      setScore((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          comments: prev.comments?.filter((c) => c.id !== commentId) || [],
+          _count: {
+            ...prev._count,
+            comments: (prev._count?.comments || 1) - 1,
+          },
+        };
+      });
+    } catch (error: unknown) {
+      let errorMessage = t("deleteCommentError");
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setError(errorMessage);
     }
   };
 
@@ -181,16 +254,7 @@ export default function ScoreDetailPage() {
                   <ArrowLeft className="w-5 h-5" />
                   <span className="text-sm font-medium">{t("backToList")}</span>
                 </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={handleShare}
-                  className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors"
-                  aria-label={t("share")}
-                >
-                  <Share2 className="w-5 h-5" />
-                  <span className="text-sm font-medium">{t("share")}</span>
-                </motion.button>
+
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -355,6 +419,7 @@ export default function ScoreDetailPage() {
               </motion.div>
             </div>
 
+            {/* 참고 URL 섹션 */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -412,6 +477,88 @@ export default function ScoreDetailPage() {
                   </ul>
                 ) : (
                   <p className="text-sm">{t("none")}</p>
+                )}
+              </div>
+            </motion.div>
+
+            {/* 댓글 섹션 */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="mt-8"
+            >
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                {t("comments")} ({score._count?.comments || 0})
+              </h2>
+              <form onSubmit={handleCommentSubmit} className="mb-6">
+                <div className="flex items-center gap-3">
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder={t("writeComment")}
+                    className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none h-20"
+                    disabled={isCommenting}
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="submit"
+                    disabled={isCommenting || !comment.trim()}
+                    className={`p-3 bg-blue-500 text-white rounded-lg flex items-center justify-center transition-all ${
+                      isCommenting || !comment.trim()
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-blue-600"
+                    }`}
+                    aria-label={t("submitComment")}
+                  >
+                    <Send className="w-5 h-5" />
+                  </motion.button>
+                </div>
+              </form>
+              <div className="space-y-4">
+                {score.comments && score.comments.length > 0 ? (
+                  score.comments.map((comment, index) => (
+                    <motion.div
+                      key={comment.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-800">
+                            {comment.user?.name || "Unknown"}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {new Date(comment.createdAt).toLocaleDateString(
+                              locale,
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )}
+                          </span>
+                        </div>
+                        {user?.id === comment.userId && (
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleCommentDelete(comment.id)}
+                            className="text-red-500 hover:text-red-600 transition-colors cursor-pointer"
+                            aria-label={t("deleteComment")}
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </motion.button>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">{comment.content}</p>
+                    </motion.div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-600">{t("noComments")}</p>
                 )}
               </div>
             </motion.div>

@@ -4,7 +4,11 @@ import fs from "fs/promises";
 import path from "path";
 import sharp from "sharp";
 
-export async function uploadFile(file: File, filename: string) {
+export async function uploadFile(
+  file: File,
+  filename: string,
+  directory: string
+) {
   try {
     // 파일 유효성 검사
     if (!file || file.size === 0) {
@@ -36,7 +40,7 @@ export async function uploadFile(file: File, filename: string) {
       // 로컬 환경: 파일 시스템에 저장
       await fs.mkdir(uploadDir, { recursive: true });
       await fs.writeFile(filePath, resizedBuffer);
-      return `/uploads/${filename}`; // 클라이언트가 접근 가능한 URL 반환
+      return `/${directory}/${filename}`; // 클라이언트가 접근 가능한 URL 반환
     } else {
       // Vercel 환경: Vercel Blob에 저장
       const token = process.env.BLOB_READ_WRITE_TOKEN;

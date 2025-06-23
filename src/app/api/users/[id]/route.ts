@@ -150,7 +150,8 @@ export async function PUT(
     if (profileImage && profileImage.size > 0) {
       profileImagePath = await uploadFile(
         profileImage,
-        `profile_${email}_${Date.now()}.jpg`
+        `profile_${email}_${Date.now()}.jpg`,
+        "profile-images"
       );
     }
 

@@ -156,7 +156,8 @@ export async function POST(req: NextRequest) {
       try {
         data.contactImage = await uploadFile(
           contactImage,
-          `contact_${data.contactName}_${Date.now()}.jpg`
+          `contact_${data.contactName}_${Date.now()}.jpg`,
+          "contact-images"
         );
       } catch (fileError) {
         console.error("Contact image upload failed:", fileError);
@@ -174,7 +175,8 @@ export async function POST(req: NextRequest) {
       try {
         data.buildingImage = await uploadFile(
           buildingImage,
-          `building_${data.churchName}_${Date.now()}.jpg`
+          `building_${data.churchName}_${Date.now()}.jpg`,
+          "building-images"
         );
       } catch (fileError) {
         console.error("Building image upload failed:", fileError);

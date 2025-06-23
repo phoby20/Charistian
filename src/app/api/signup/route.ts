@@ -70,7 +70,8 @@ export async function POST(req: NextRequest) {
     if (profileImage && profileImage.size > 0) {
       data.profileImage = await uploadFile(
         profileImage,
-        `profile_${data.email}_${Date.now()}.jpg`
+        `profile_${data.email}_${Date.now()}.jpg`,
+        "profile-images"
       );
     }
 

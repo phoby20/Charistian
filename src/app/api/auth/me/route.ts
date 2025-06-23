@@ -141,7 +141,8 @@ export async function PATCH(req: NextRequest) {
     if (profileImage && profileImage.size > 0) {
       inputData.profileImage = await uploadFile(
         profileImage,
-        `profile_${inputData.email}_${Date.now()}.jpg`
+        `profile_${inputData.email}_${Date.now()}.jpg`,
+        "profile-images"
       );
     }
 

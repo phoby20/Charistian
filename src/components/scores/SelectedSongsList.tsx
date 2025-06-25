@@ -1,26 +1,88 @@
 "use client";
-import { motion } from "framer-motion";
-import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-
-interface SelectedSong {
-  id: string;
-  title: string;
-  titleEn: string;
-  titleJa: string;
-}
+import {
+  DndContext,
+  closestCenter,
+  DragEndEvent,
+  DragOverEvent,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useState } from "react";
+import { SortableSong } from "./SortableSong";
+import { SelectedSong } from "@/types/score";
 
 interface SelectedSongsListProps {
   selectedSongs: SelectedSong[];
   onRemoveSong: (index: number) => void;
+  onReorderSongs: (newSongs: SelectedSong[]) => void;
   t: ReturnType<typeof useTranslations<"Setlist">>;
 }
 
 export default function SelectedSongsList({
   selectedSongs,
   onRemoveSong,
+  onReorderSongs,
   t,
 }: SelectedSongsListProps) {
+  const [overIndex, setOverIndex] = useState<number | null>(null);
+  const [isDraggingAny, setIsDraggingAny] = useState(false);
+
+  // 센서 설정: 마우스와 터치 이벤트 지원
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 100, // 터치 지연으로 스크롤 방지
+        tolerance: 5,
+      },
+    })
+  );
+
+  const handleDragStart = () => {
+    setIsDraggingAny(true);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setOverIndex(null);
+    setIsDraggingAny(false);
+
+    if (active.id !== over?.id) {
+      const oldIndex = selectedSongs.findIndex(
+        (song, idx) => `${song.id}-${idx}` === active.id
+      );
+      const newIndex = selectedSongs.findIndex(
+        (song, idx) => `${song.id}-${idx}` === over?.id
+      );
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newSongs = [...selectedSongs];
+        const [movedSong] = newSongs.splice(oldIndex, 1);
+        newSongs.splice(newIndex, 0, movedSong);
+        onReorderSongs(newSongs);
+      }
+    }
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { over } = event;
+    if (over) {
+      const index = selectedSongs.findIndex(
+        (song, idx) => `${song.id}-${idx}` === over.id
+      );
+      setOverIndex(index);
+    } else {
+      setOverIndex(null);
+    }
+  };
+
   return (
     <div>
       <h2 className="text-lg font-semibold text-gray-800 mb-3">
@@ -29,36 +91,37 @@ export default function SelectedSongsList({
       {selectedSongs.length === 0 ? (
         <p className="text-sm text-gray-500">{t("noSelectedSongs")}</p>
       ) : (
-        <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-          {selectedSongs.map((song, index) => {
-            const count = selectedSongs
-              .slice(0, index + 1)
-              .filter((s) => s.id === song.id).length;
-            return (
-              <motion.div
-                key={`${song.id}-${index}`}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="flex justify-between items-center bg-gray-50 rounded-lg p-4"
-              >
-                <div className="flex items-center space-x-3">
-                  <span>{index + 1}</span>
-                  <span className="text-sm text-gray-700 truncate">
-                    {song.title} {count > 1 ? `(${count})` : ""}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onRemoveSong(index)}
-                  className="text-red-500 hover:text-red-600"
-                >
-                  <Trash2 className="w-5 h-5 cursor-pointer m-3" />
-                </button>
-              </motion.div>
-            );
-          })}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragOver={handleDragOver}
+        >
+          <SortableContext
+            items={selectedSongs.map((song, index) => `${song.id}-${index}`)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2 overflow-y-auto custom-scrollbar overflow-x-hidden">
+              {selectedSongs.map((song, index) => {
+                const count = selectedSongs
+                  .slice(0, index + 1)
+                  .filter((s) => s.id === song.id).length;
+                return (
+                  <SortableSong
+                    key={`${song.id}-${index}`}
+                    song={song}
+                    index={index}
+                    count={count}
+                    onRemoveSong={onRemoveSong}
+                    isOver={overIndex === index}
+                    isDraggingAny={isDraggingAny}
+                  />
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
     </div>
   );

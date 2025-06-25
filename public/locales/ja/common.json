@@ -518,6 +518,7 @@
     "groups": "グループ",
     "teams": "チーム",
     "users": "ユーザー",
+    "noGroups": "共有するグループがありません",
     "requiredFields": "タイトル、日付、選曲リストは必須です。",
     "fetchError": "データの取得に失敗しました。",
     "createError": "コンテ作成に失敗しました。",

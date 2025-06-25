@@ -2,14 +2,10 @@
 import { useEffect, useState } from "react";
 import MobileSelectedSongList from "./MobileSelectedSongList";
 import DesktopSelectedSongList from "./DesktopSelectedSongList";
+import { SelectedSong } from "@/types/score";
 
 interface SelectedSongListProps {
-  selectedSongList: {
-    id: string;
-    title: string;
-    titleEn: string;
-    titleJa: string;
-  }[];
+  selectedSongList: SelectedSong[];
   handleRemoveSong: (id: string, index: number) => void;
   locale: string;
   isOpen: boolean;

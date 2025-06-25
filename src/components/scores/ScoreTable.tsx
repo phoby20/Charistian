@@ -3,18 +3,13 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Heart, MessageCircle, Plus, Play, Pause } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Score } from "@/types/score";
+import { Score, SelectedSong } from "@/types/score";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useState, useEffect, useRef } from "react";
 
 interface ScoreTableProps {
   scores: Score[];
-  onAddSong: (score: {
-    id: string;
-    title: string;
-    titleEn: string;
-    titleJa: string;
-  }) => void;
+  onAddSong: (score: SelectedSong) => void;
   locale: string;
   getGenreLabel: (genreValue: string) => string;
 }
@@ -274,6 +269,8 @@ export default function ScoreTable({
                         title: score.title,
                         titleEn: score.titleEn,
                         titleJa: score.titleJa,
+                        key: score.key ?? "",
+                        referenceUrls: score.referenceUrls ?? [],
                       })
                     }
                     className="text-blue-500 hover:text-blue-600 cursor-pointer p-4"

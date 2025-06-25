@@ -4,13 +4,13 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, Upload } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { ApiErrorResponse } from "@/types/score";
+import { ApiErrorResponse, SelectedSong } from "@/types/score";
 import { GENRES } from "@/data/genre";
 import Loading from "@/components/Loading";
 import ScoreTable from "@/components/scores/ScoreTable";
 import SearchFilters from "@/components/scores/SearchFilters";
 import PaginationControls from "@/components/scores/PaginationControls";
-import SelectedSongList from "@/components/scores/SelectedSongList";
+import SelectedSongList from "@/components/scores/SelectedSongFlotingList";
 import { Score } from "@/types/score";
 
 export default function ScoreList() {
@@ -28,9 +28,7 @@ export default function ScoreList() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [selectedSongList, setSelectedSongList] = useState<
-    { id: string; title: string; titleEn: string; titleJa: string }[]
-  >([]);
+  const [selectedSongList, setSelectedSongList] = useState<SelectedSong[]>([]);
   const [isSongListOpen, setIsSongListOpen] = useState(true);
   const locale = useLocale();
   const t = useTranslations("Score");
@@ -56,12 +54,7 @@ export default function ScoreList() {
   }, [selectedSongList]);
 
   // 곡 추가 핸들러
-  const handleAddSong = (score: {
-    id: string;
-    title: string;
-    titleEn: string;
-    titleJa: string;
-  }) => {
+  const handleAddSong = (score: SelectedSong) => {
     setSelectedSongList((prev) => [
       ...prev,
       {
@@ -69,6 +62,8 @@ export default function ScoreList() {
         title: score.title,
         titleEn: score.titleEn,
         titleJa: score.titleJa,
+        key: score.key,
+        referenceUrls: score.referenceUrls,
       },
     ]);
   };

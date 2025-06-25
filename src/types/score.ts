@@ -147,6 +147,15 @@ export interface Setlists {
   shares: Share[];
 }
 
+export interface SelectedSong {
+  id: string;
+  title: string;
+  titleEn: string;
+  titleJa: string;
+  key: string;
+  referenceUrls: string[];
+}
+
 export interface SetlistResponse {
   id: string;
   title: string;
@@ -156,7 +165,7 @@ export interface SetlistResponse {
   creatorId: string;
   scores: {
     id: string;
-    creation: { id: string; title: string; fileUrl: string };
+    creation: SelectedSong;
     order: number;
   }[];
   comments: {

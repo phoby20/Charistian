@@ -5,20 +5,16 @@ import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, AlertCircle, Trash2, ChevronDown } from "lucide-react";
+import { ArrowLeft, AlertCircle, ChevronDown } from "lucide-react";
 import Loading from "@/components/Loading";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import { CheckboxGroup } from "@/components/CheckboxGroup";
-import { Group, SetlistResponse, Team } from "@/types/score";
+import { Group, SelectedSong, SetlistResponse, Team } from "@/types/score";
 import { useRouter } from "@/utils/useRouter";
-
-interface SelectedSong {
-  id: string;
-  title: string;
-}
+import SelectedSongsList from "@/components/scores/SelectedSongsList";
 
 export default function SetlistEditPage() {
   const t = useTranslations("Setlist");
@@ -32,9 +28,8 @@ export default function SetlistEditPage() {
   const [selectedSongs, setSelectedSongs] = useState<SelectedSong[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  // const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -61,9 +56,13 @@ export default function SetlistEditPage() {
         setDate(new Date(setlistData.date));
         setDescription(setlistData.description || "");
         setSelectedSongs(
-          setlistData.scores.map((s: { creation: SelectedSong }) => ({
-            id: s.creation.id,
-            title: s.creation.title,
+          setlistData.scores.map((score) => ({
+            id: score.creation.id,
+            title: score.creation.title,
+            titleJa: score.creation.titleJa,
+            titleEn: score.creation.titleEn,
+            key: score.creation.key,
+            referenceUrls: score.creation.referenceUrls,
           }))
         );
 
@@ -167,6 +166,13 @@ export default function SetlistEditPage() {
       updated.splice(index, 1);
       sessionStorage.setItem("selectedSongList", JSON.stringify(updated));
       return updated;
+    });
+  };
+
+  const handleReorderSongs = (newSongs: SelectedSong[]) => {
+    setSelectedSongs(() => {
+      sessionStorage.setItem("selectedSongList", JSON.stringify(newSongs));
+      return newSongs;
     });
   };
 
@@ -284,42 +290,18 @@ export default function SetlistEditPage() {
                 aria-label={t("description")}
               />
             </motion.div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-3">
-                {t("selectedSongs")}
-              </h2>
-              {selectedSongs.length === 0 ? (
-                <p className="text-sm text-gray-500">{t("noSelectedSongs")}</p>
-              ) : (
-                <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                  {selectedSongs.map((song, index) => {
-                    const count = selectedSongs
-                      .slice(0, index + 1)
-                      .filter((s) => s.id === song.id).length;
-                    return (
-                      <motion.div
-                        key={`${song.id}-${index}`}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
-                        className="flex justify-between items-center bg-gray-50 rounded-lg p-3"
-                      >
-                        <span className="text-sm text-gray-700 truncate">
-                          {song.title} {count > 1 ? `(${count})` : ""}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSong(index)}
-                          className="text-red-500 hover:text-red-600"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              <SelectedSongsList
+                selectedSongs={selectedSongs}
+                onRemoveSong={handleRemoveSong}
+                onReorderSongs={handleReorderSongs}
+                t={t}
+              />
+            </motion.div>
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-3">
                 {t("shareWith")}
@@ -328,7 +310,7 @@ export default function SetlistEditPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.3 }}
+                  transition={{ duration: 0.4, delay: 0.4 }}
                 >
                   <h3 className="text-sm font-semibold text-gray-800 mb-2">
                     {t("groups")}

@@ -44,7 +44,17 @@ export async function GET(
       scores: {
         select: {
           id: true,
-          creation: { select: { id: true, title: true, fileUrl: true } },
+          creation: {
+            select: {
+              id: true,
+              title: true,
+              titleEn: true,
+              titleJa: true,
+              fileUrl: true,
+              referenceUrls: true,
+              key: true,
+            },
+          },
           order: true,
         },
       },

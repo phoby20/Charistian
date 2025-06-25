@@ -12,23 +12,7 @@ import { format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import SelectedSongsList from "@/components/scores/SelectedSongsList";
-
-interface SelectedSong {
-  id: string;
-  title: string;
-  titleEn: string;
-  titleJa: string;
-}
-
-interface Group {
-  id: string;
-  name: string;
-}
-
-interface Team {
-  id: string;
-  name: string;
-}
+import { Group, SelectedSong, Team } from "@/types/score";
 
 export default function CreateSetlistPage() {
   const t = useTranslations("Setlist");
@@ -158,6 +142,11 @@ export default function CreateSetlistPage() {
     });
   };
 
+  const handleReorderSongs = (newSongs: SelectedSong[]) => {
+    setSelectedSongs(newSongs);
+    sessionStorage.setItem("selectedSongList", JSON.stringify(newSongs));
+  };
+
   if (isLoading) return <Loading />;
 
   return (
@@ -262,6 +251,7 @@ export default function CreateSetlistPage() {
             <SelectedSongsList
               selectedSongs={selectedSongs}
               onRemoveSong={handleRemoveSong}
+              onReorderSongs={handleReorderSongs}
               t={t}
             />
             <div>
@@ -319,14 +309,18 @@ export default function CreateSetlistPage() {
                 selectedSongs.length === 0 ||
                 !title ||
                 !date ||
-                !description
+                !description ||
+                !selectedGroup ||
+                selectedTeams.length === 0
               }
               className={`w-full py-3 rounded-xl text-white font-semibold text-sm ${
                 isSubmitting ||
                 selectedSongs.length === 0 ||
                 !title ||
                 !date ||
-                !description
+                !description ||
+                !selectedGroup ||
+                selectedTeams.length === 0
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
               } transition-colors duration-200 shadow-sm`}

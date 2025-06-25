@@ -28,10 +28,12 @@ export default function SetlistDetailPage() {
     const fetchSetlist = async () => {
       try {
         const response = await fetch(`/api/setlists/${id}`);
+
         if (!response.ok) {
           throw new Error((await response.json()).error || t("fetchError"));
         }
-        setSetlist(await response.json());
+        const data = await response.json();
+        setSetlist(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : t("fetchError"));
       }

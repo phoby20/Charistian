@@ -153,6 +153,7 @@ export interface SelectedSong {
   titleEn: string;
   titleJa: string;
   key: string;
+  fileUrl: string;
   referenceUrls: string[];
 }
 

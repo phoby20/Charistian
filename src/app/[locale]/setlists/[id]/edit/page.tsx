@@ -63,6 +63,7 @@ export default function SetlistEditPage() {
             titleEn: score.creation.titleEn,
             key: score.creation.key,
             referenceUrls: score.creation.referenceUrls,
+            fileUrl: score.creation.fileUrl,
           }))
         );
 

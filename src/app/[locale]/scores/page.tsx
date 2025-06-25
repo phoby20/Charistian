@@ -64,6 +64,7 @@ export default function ScoreList() {
         titleJa: score.titleJa,
         key: score.key,
         referenceUrls: score.referenceUrls,
+        fileUrl: score.fileUrl,
       },
     ]);
   };

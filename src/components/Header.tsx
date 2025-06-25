@@ -22,6 +22,7 @@ export default function Header() {
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
   const [isMembersMenuOpen, setIsMembersMenuOpen] = useState(false);
   const [isEventsMenuOpen, setIsEventsMenuOpen] = useState(false);
+  const [isScoresMenuOpen, setIsScoresMenuOpen] = useState(false);
 
   // 참조 관리
   const langMenuRef = useRef<HTMLDivElement>(null);
@@ -29,6 +30,7 @@ export default function Header() {
   const settingsMenuRef = useRef<HTMLDivElement>(null);
   const membersMenuRef = useRef<HTMLDivElement>(null);
   const eventsMenuRef = useRef<HTMLDivElement>(null);
+  const scoresMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -38,6 +40,7 @@ export default function Header() {
     setIsSettingsMenuOpen(false);
     setIsMembersMenuOpen(false);
     setIsEventsMenuOpen(false);
+    setIsScoresMenuOpen(false);
   };
 
   // 외부 클릭으로 드롭다운 및 모바일 메뉴 닫기
@@ -48,7 +51,6 @@ export default function Header() {
         return;
 
       let isOutside = true;
-      // DesktopNav 드롭다운 참조만 확인
       if (langMenuRef.current && langMenuRef.current.contains(target))
         isOutside = false;
       if (userMenuRef.current && userMenuRef.current.contains(target))
@@ -59,7 +61,8 @@ export default function Header() {
         isOutside = false;
       if (eventsMenuRef.current && eventsMenuRef.current.contains(target))
         isOutside = false;
-      // MobileNav 메뉴 확인
+      if (scoresMenuRef.current && scoresMenuRef.current.contains(target))
+        isOutside = false;
       if (mobileMenuRef.current && mobileMenuRef.current.contains(target))
         isOutside = false;
 
@@ -131,10 +134,13 @@ export default function Header() {
             setIsSettingsMenuOpen={setIsSettingsMenuOpen}
             isMembersMenuOpen={isMembersMenuOpen}
             setIsMembersMenuOpen={setIsMembersMenuOpen}
-            setIsEventsMenuOpen={setIsEventsMenuOpen}
+            setIsEventsMenuOpen={setIsEventsMenuOpen} // 유지
+            isScoresMenuOpen={isScoresMenuOpen}
+            setIsScoresMenuOpen={setIsScoresMenuOpen}
             userMenuRef={userMenuRef}
             settingsMenuRef={settingsMenuRef}
             membersMenuRef={membersMenuRef}
+            scoresMenuRef={scoresMenuRef}
           />
 
           {/* 모바일 메뉴 버튼 */}
@@ -172,8 +178,11 @@ export default function Header() {
         setIsMembersMenuOpen={setIsMembersMenuOpen}
         isEventsMenuOpen={isEventsMenuOpen}
         setIsEventsMenuOpen={setIsEventsMenuOpen}
+        isScoresMenuOpen={isScoresMenuOpen}
+        setIsScoresMenuOpen={setIsScoresMenuOpen}
         mobileMenuRef={mobileMenuRef}
         eventsMenuRef={eventsMenuRef}
+        scoresMenuRef={scoresMenuRef}
       />
     </header>
   );

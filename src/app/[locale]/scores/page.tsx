@@ -10,21 +10,8 @@ import Loading from "@/components/Loading";
 import ScoreTable from "@/components/scores/ScoreTable";
 import SearchFilters from "@/components/scores/SearchFilters";
 import PaginationControls from "@/components/scores/PaginationControls";
-
-interface Score {
-  id: string;
-  title: string;
-  description?: string;
-  thumbnailUrl?: string;
-  genre?: string;
-  tempo?: number;
-  key?: string;
-  creator: { name: string };
-  composer?: string;
-  lyricist?: string;
-  _count: { likes: number; comments: number };
-  likes: { id: string }[];
-}
+import SelectedSongList from "@/components/scores/SelectedSongList";
+import { Score } from "@/types/score";
 
 export default function ScoreList() {
   const [scores, setScores] = useState<Score[]>([]);
@@ -36,14 +23,64 @@ export default function ScoreList() {
     "all" | "sharp" | "natural"
   >("all");
   const [selectedTone, setSelectedTone] = useState<"Major" | "Minor" | "">("");
-  const [selectedScores, setSelectedScores] = useState<string[]>([]);
   const [minAvailableTempo, setMinAvailableTempo] = useState(0);
   const [maxAvailableTempo, setMaxAvailableTempo] = useState(200);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [selectedSongList, setSelectedSongList] = useState<
+    { id: string; title: string; titleEn: string; titleJa: string }[]
+  >([]);
+  const [isSongListOpen, setIsSongListOpen] = useState(true);
   const locale = useLocale();
   const t = useTranslations("Score");
+
+  // 세션 스토리지에서 선곡 리스트 불러오기
+  useEffect(() => {
+    const stored = sessionStorage.getItem("selectedSongList");
+    if (stored) {
+      try {
+        setSelectedSongList(JSON.parse(stored));
+      } catch (err) {
+        console.error("선곡 리스트 파싱 오류:", err);
+      }
+    }
+  }, []);
+
+  // 선곡 리스트 세션 스토리지에 저장
+  useEffect(() => {
+    sessionStorage.setItem(
+      "selectedSongList",
+      JSON.stringify(selectedSongList)
+    );
+  }, [selectedSongList]);
+
+  // 곡 추가 핸들러
+  const handleAddSong = (score: {
+    id: string;
+    title: string;
+    titleEn: string;
+    titleJa: string;
+  }) => {
+    setSelectedSongList((prev) => [
+      ...prev,
+      {
+        id: score.id,
+        title: score.title,
+        titleEn: score.titleEn,
+        titleJa: score.titleJa,
+      },
+    ]);
+  };
+
+  // 곡 삭제 핸들러
+  const handleRemoveSong = (id: string, index: number) => {
+    setSelectedSongList((prev) => {
+      const newList = [...prev];
+      newList.splice(index, 1);
+      return newList;
+    });
+  };
 
   // 템포 범위 계산
   const maxTempoLimit = Math.max(
@@ -136,19 +173,6 @@ export default function ScoreList() {
     startIndex + itemsPerPage
   );
 
-  // 체크박스 핸들러
-  const handleCheckboxChange = (scoreId: string | string[]) => {
-    if (Array.isArray(scoreId)) {
-      setSelectedScores(scoreId);
-    } else {
-      setSelectedScores((prev) =>
-        prev.includes(scoreId)
-          ? prev.filter((id) => id !== scoreId)
-          : [...prev, scoreId]
-      );
-    }
-  };
-
   // 장르 체크박스 핸들러
   const handleGenreChange = (genreValue: string) => {
     setSelectedGenres((prev) =>
@@ -206,97 +230,111 @@ export default function ScoreList() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4">
       {isLoading && <Loading />}
-      <div className="container mx-auto max-w-6xl">
-        {/* 헤더 */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex justify-between items-center mb-4"
-        >
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-            {t("title")}
-          </h1>
-          <Link href={`/${locale}/scores/upload`}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 px-4 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+      <div className="container mx-auto max-w-5xl">
+        <div className="grid grid-cols-1 sm:grid-cols-[5fr_1fr] gap-4 sm:gap-4">
+          <div>
+            {/* 헤더 */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex justify-between items-center mb-4"
             >
-              <Upload className="w-5 h-5" />
-              <span>{t("uploadScore")}</span>
-            </motion.button>
-          </Link>
-        </motion.div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+                {t("title")}
+              </h1>
+              <Link href={`/${locale}/scores/upload`}>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 px-4 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+                >
+                  <Upload className="w-5 h-5" />
+                  <span>{t("uploadScore")}</span>
+                </motion.button>
+              </Link>
+            </motion.div>
 
-        {/* 검색 및 필터링 */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <SearchFilters
-            searchQuery={searchQuery}
-            selectedGenres={selectedGenres}
-            selectedKeys={selectedKeys}
-            selectedSharp={selectedSharp}
-            selectedTone={selectedTone}
-            minAvailableTempo={minAvailableTempo}
-            maxAvailableTempo={maxAvailableTempo}
-            minTempoLimit={minTempoLimit}
-            maxTempoLimit={maxTempoLimit}
-            onSearchChange={handleSearchChange}
-            onGenreChange={handleGenreChange}
-            onKeyChange={handleKeyChange}
-            onSharpChange={handleSharpChange}
-            onToneChange={handleToneChange}
-            onMinTempoChange={handleMinTempoChange}
-            onMaxTempoChange={handleMaxTempoChange}
-          />
-        </motion.div>
-
-        {/* 페이징 컨트롤 */}
-        <PaginationControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          itemsPerPage={itemsPerPage}
-          onItemsPerPageChange={handleItemsPerPageChange}
-          onPageChange={setCurrentPage}
-        />
-
-        {/* 에러 메시지 */}
-        <AnimatePresence>
-          {error && (
+            {/* 검색 및 필터링 */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg flex items-center space-x-3"
+              transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <AlertCircle className="w-6 h-6 text-red-500" />
-              <p className="text-red-700">{error}</p>
+              <SearchFilters
+                searchQuery={searchQuery}
+                selectedGenres={selectedGenres}
+                selectedKeys={selectedKeys}
+                selectedSharp={selectedSharp}
+                selectedTone={selectedTone}
+                minAvailableTempo={minAvailableTempo}
+                maxAvailableTempo={maxAvailableTempo}
+                minTempoLimit={minTempoLimit}
+                maxTempoLimit={maxTempoLimit}
+                onSearchChange={handleSearchChange}
+                onGenreChange={handleGenreChange}
+                onKeyChange={handleKeyChange}
+                onSharpChange={handleSharpChange}
+                onToneChange={handleToneChange}
+                onMinTempoChange={handleMinTempoChange}
+                onMaxTempoChange={handleMaxTempoChange}
+              />
             </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* 악보 목록 */}
-        {paginatedScores.length === 0 && !error && !isLoading ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center text-gray-600 py-12"
-          >
-            <p className="text-lg">{t("noScores")}</p>
-          </motion.div>
-        ) : (
-          <ScoreTable
-            scores={paginatedScores}
-            selectedScores={selectedScores}
-            onCheckboxChange={handleCheckboxChange}
-            locale={locale}
-            getGenreLabel={getGenreLabel}
-          />
-        )}
+            {/* 페이징 컨트롤 */}
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              onItemsPerPageChange={handleItemsPerPageChange}
+              onPageChange={setCurrentPage}
+            />
+
+            {/* 에러 메시지 */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg flex items-center space-x-3"
+                >
+                  <AlertCircle className="w-6 h-6 text-red-500" />
+                  <p className="text-red-700">{error}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* 악보 목록 */}
+            {paginatedScores.length === 0 && !error && !isLoading ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center text-gray-600 py-12"
+              >
+                <p className="text-lg">{t("noScores")}</p>
+              </motion.div>
+            ) : (
+              <ScoreTable
+                scores={paginatedScores}
+                onAddSong={handleAddSong}
+                locale={locale}
+                getGenreLabel={getGenreLabel}
+              />
+            )}
+          </div>
+
+          {/* 오른쪽: 선곡 리스트 */}
+          <div className="sm:block">
+            <SelectedSongList
+              selectedSongList={selectedSongList}
+              handleRemoveSong={handleRemoveSong}
+              locale={locale}
+              isOpen={isSongListOpen}
+              toggleOpen={() => setIsSongListOpen(!isSongListOpen)}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

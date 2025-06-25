@@ -104,7 +104,7 @@ export default function SetlistListPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t("searchPlaceholder")}
-                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-200 bg-white text-gray-600 text-sm py-3 sm:py-3 pl-10 pr-4 transition-all duration-200 hover:bg-gray-50"
+                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 pl-10 pr-4 transition-all duration-200 hover:bg-gray-50"
                   aria-label={t("searchPlaceholder")}
                 />
               </div>
@@ -114,6 +114,7 @@ export default function SetlistListPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
+                className="flex-1"
               >
                 <DatePicker
                   id="startDate"
@@ -122,10 +123,10 @@ export default function SetlistListPage() {
                   locale={dateLocale}
                   dateFormat="yyyy-MM-dd"
                   placeholderText={t("selectStartDate")}
-                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 sm:py-5 sm:px-4 transition-all duration-200 hover:bg-gray-50"
+                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 transition-all duration-200 hover:bg-gray-50"
                   wrapperClassName="w-full"
                   aria-label={t("selectStartDate")}
-                  popperClassName="z-50"
+                  popperClassName="z-50 bg-white rounded-xl shadow-lg border border-gray-200"
                   showYearDropdown
                   yearDropdownItemNumber={10}
                 />
@@ -134,6 +135,7 @@ export default function SetlistListPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
+                className="flex-1"
               >
                 <DatePicker
                   id="endDate"
@@ -142,10 +144,10 @@ export default function SetlistListPage() {
                   locale={dateLocale}
                   dateFormat="yyyy-MM-dd"
                   placeholderText={t("selectEndDate")}
-                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 test-sm py-3 px-4 sm:py-5 sm:px-4 transition-all duration-200 hover:bg-gray-50"
+                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 transition-all duration-200 hover:bg-gray-50"
                   wrapperClassName="w-full"
                   aria-label={t("selectEndDate")}
-                  popperClassName="z-50"
+                  popperClassName="z-50 bg-white rounded-xl shadow-lg border border-gray-200"
                   showYearDropdown
                   yearDropdownItemNumber={10}
                 />
@@ -161,7 +163,7 @@ export default function SetlistListPage() {
             id="itemsPerPage"
             value={itemsPerPage}
             onChange={handleItemsPerPageChange}
-            className="rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-2 px-3"
+            className="rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-2 px-3 transition-all duration-200 hover:bg-gray-50"
             aria-label={t("itemsPerPage")}
           >
             <option value={5}>5</option>

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+import { put } from "@vercel/blob";
+import { PDFDocument } from "pdf-lib";
+import { createKoreaDate } from "@/utils/creatKoreaDate";
 
 // UpdateSetlistRequest 타입 정의 (CreateSetlistRequest와 일치하도록 수정)
 interface UpdateSetlistRequest {
@@ -13,6 +17,25 @@ interface UpdateSetlistRequest {
     teamId?: string | null;
     userId?: string | null;
   }[];
+}
+
+// Setlist 응답 타입 정의
+interface SetlistResponse {
+  id: string;
+  title: string;
+  date: Date;
+  description?: string | null;
+  fileUrl?: string | null;
+  creator: { id: string; name: string };
+  church: { name: string };
+  scores: Array<{
+    creation: { id: string; title: string; fileUrl: string | null };
+  }>;
+  shares: Array<{
+    group?: { id: string; name: string } | null;
+    team?: { id: string; name: string } | null;
+    user?: { id: string; name: string } | null;
+  }>;
 }
 
 export async function GET(
@@ -144,7 +167,7 @@ export async function DELETE(
 export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
-) {
+): Promise<NextResponse<SetlistResponse | { error: string }>> {
   const token = req.cookies.get("token")?.value;
   if (!token)
     return NextResponse.json(
@@ -165,7 +188,7 @@ export async function PUT(
   const { id } = await context.params;
   const setlist = await prisma.setlist.findUnique({
     where: { id },
-    select: { creatorId: true },
+    select: { creatorId: true, churchId: true },
   });
   if (!setlist)
     return NextResponse.json(
@@ -188,40 +211,192 @@ export async function PUT(
       { status: 400 }
     );
 
+  if (!Array.isArray(scores) || !Array.isArray(shares)) {
+    return NextResponse.json(
+      { error: "scores와 shares는 배열이어야 합니다." },
+      { status: 400 }
+    );
+  }
+
   try {
-    await prisma.$transaction([
-      prisma.setlistScore.deleteMany({ where: { setlistId: id } }), // score -> setlistScore
-      prisma.setlistShare.deleteMany({ where: { setlistId: id } }), // share -> setlistShare
-      prisma.setlist.update({
-        where: { id },
-        data: {
-          title,
-          date: new Date(date),
-          description,
-          scores: {
-            create: scores.map((s) => ({
-              creationId: s.creationId,
-              order: s.order,
-            })),
+    // scores의 creationId로 Creation에서 fileUrl 조회 (트랜잭션 밖에서)
+    const creations = await prisma.creation.findMany({
+      where: {
+        id: { in: scores.map((score) => score.creationId) },
+      },
+      select: { id: true, fileUrl: true },
+    });
+
+    // order 순서에 맞게 정렬 및 order 정보 유지
+    const sortedScores = scores
+      .sort((a, b) => a.order - b.order)
+      .map((score) => {
+        const creation = creations.find((c) => c.id === score.creationId);
+        return {
+          creationId: score.creationId,
+          fileUrl: creation?.fileUrl,
+          order: score.order,
+        };
+      })
+      .filter(
+        (
+          score
+        ): score is { creationId: string; fileUrl: string; order: number } =>
+          !!score.fileUrl
+      );
+
+    if (sortedScores.length === 0) {
+      return NextResponse.json(
+        { error: "유효한 PDF 파일이 없습니다." },
+        { status: 400 }
+      );
+    }
+
+    // sortedScores의 order 순서 로그 출력 (디버깅용)
+    console.log(
+      `PDF 병합 순서 (setlistId: ${id}):`,
+      sortedScores.map((s) => ({
+        creationId: s.creationId,
+        order: s.order,
+        fileUrl: s.fileUrl,
+      }))
+    );
+
+    // 트랜잭션 시작 (타임아웃 15초)
+    await prisma.$transaction(
+      async (tx) => {
+        // 기존 setlistScore와 setlistShare 삭제
+        await tx.setlistScore.deleteMany({ where: { setlistId: id } });
+        await tx.setlistShare.deleteMany({ where: { setlistId: id } });
+
+        // Setlist 업데이트
+        await tx.setlist.update({
+          where: { id },
+          data: {
+            title,
+            date: new Date(date),
+            description,
+            scores: {
+              create: scores.map((s) => ({
+                creationId: s.creationId,
+                order: s.order,
+              })),
+            },
+            shares: {
+              create: shares.map((s) => ({
+                groupId: s.groupId ?? undefined,
+                teamId: s.teamId ?? undefined,
+                userId: s.userId ?? undefined,
+              })),
+            },
           },
-          shares: {
-            create: shares.map((s) => ({
-              groupId: s.groupId ?? undefined,
-              teamId: s.teamId ?? undefined,
-              userId: s.userId ?? undefined,
-            })),
+        });
+      },
+      { timeout: 15000 }
+    );
+
+    // PDF 병합 (트랜잭션 밖에서 처리)
+    const mergedPdf = await PDFDocument.create();
+    const pdfPromises = sortedScores.map(async ({ fileUrl }) => {
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error(`PDF 다운로드 실패 | URL: ${fileUrl}`);
+      return response.arrayBuffer();
+    });
+
+    const pdfBuffers = await Promise.all(pdfPromises);
+    // sortedScores 순서대로 PDF 페이지 추가
+    for (let i = 0; i < pdfBuffers.length; i++) {
+      const pdf = await PDFDocument.load(pdfBuffers[i]);
+      const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+      copiedPages.forEach((page) => mergedPdf.addPage(page));
+    }
+
+    // 병합된 PDF를 바이트로 저장
+    const mergedPdfBytes = await mergedPdf.save();
+    const buffer = Buffer.from(mergedPdfBytes);
+
+    const koreanDate = createKoreaDate();
+
+    // Vercel Blob에 업로드 (기존 파일 덮어쓰기 허용)
+    const blob = await put(
+      `setlists/merged_setlist/${koreanDate}_${id}.pdf`,
+      buffer,
+      {
+        access: "public",
+        allowOverwrite: true,
+      }
+    );
+
+    // Setlist에 fileUrl 업데이트
+    await prisma.setlist.update({
+      where: { id },
+      data: { fileUrl: blob.url },
+    });
+
+    // 최종 Setlist 조회하여 응답
+    const finalSetlist = await prisma.setlist.findUnique({
+      where: { id },
+      include: {
+        creator: { select: { name: true, id: true } },
+        church: { select: { name: true } },
+        scores: {
+          include: {
+            creation: { select: { id: true, title: true, fileUrl: true } },
           },
         },
-      }),
-    ]);
-    return NextResponse.json(
-      { message: "세트리스트가 업데이트되었습니다." },
-      { status: 200 }
+        shares: {
+          include: {
+            group: { select: { id: true, name: true } },
+            team: { select: { id: true, name: true } },
+            user: { select: { id: true, name: true } },
+          },
+        },
+      },
+    });
+
+    if (!finalSetlist) {
+      throw new Error("업데이트된 세트리스트를 찾을 수 없습니다.");
+    }
+
+    return NextResponse.json(finalSetlist as SetlistResponse, { status: 200 });
+  } catch (error: unknown) {
+    console.error(
+      `세트리스트 업데이트 오류 (setlistId: ${id}, scores: ${scores.length}, shares: ${shares.length}, creationIds: ${scores.map((s) => s.creationId).join(",")}):`,
+      JSON.stringify(error, null, 2)
     );
-  } catch (error) {
-    console.error("세트리스트 업데이트 오류:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "알 수 없는 오류";
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2028") {
+        return NextResponse.json(
+          {
+            error:
+              "트랜잭션 타임아웃이 발생했습니다. 작업이 너무 오래 걸렸습니다.",
+          },
+          { status: 500 }
+        );
+      }
+      if (error.code === "P5000") {
+        return NextResponse.json(
+          {
+            error:
+              "잘못된 요청입니다. 트랜잭션 타임아웃 설정이 제한을 초과했습니다.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+    if (
+      error instanceof Error &&
+      error.message.includes("Vercel Blob: This blob already exists")
+    ) {
+      return NextResponse.json(
+        { error: "PDF 파일 업로드 중 중복 오류가 발생했습니다." },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
-      { error: "세트리스트 업데이트 중 오류가 발생했습니다." },
+      { error: `세트리스트 업데이트 중 오류가 발생했습니다: ${errorMessage}` },
       { status: 500 }
     );
   }

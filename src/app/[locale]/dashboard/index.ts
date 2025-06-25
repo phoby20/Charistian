@@ -1,5 +1,6 @@
 // src/app/[locale]/dashboard/index.ts
 
+import { getKoreaDate } from "@/utils/creatKoreaDate";
 import { ChurchApplication, User } from "@prisma/client";
 import { format, subDays } from "date-fns";
 import { Dispatch, SetStateAction } from "react";
@@ -64,12 +65,11 @@ export const fetchData = async (
 
     // Fetch attendance stats (SUPER_ADMIN, ADMIN only)
     if (["SUPER_ADMIN", "ADMIN"].includes(user.role) && user.churchId) {
-      const today = new Date();
-      const startDate = subDays(today, 7).toISOString().split("T")[0];
-      const endDate = today.toISOString().split("T")[0];
+      const today = getKoreaDate();
+      const startDate = subDays(today, 6).toISOString().split("T")[0];
 
       const attendanceResponse = await fetch(
-        `/api/attendance/search?startDate=${startDate}&endDate=${endDate}`,
+        `/api/attendance/search?startDate=${startDate}&endDate=${today}`,
         { credentials: "include" }
       );
 
@@ -79,7 +79,7 @@ export const fetchData = async (
 
       // Today’s attendance count
       const todayCount = attendances.filter(
-        (att) => att.date === endDate
+        (att) => att.date === today.toISOString().split("T")[0]
       ).length;
 
       // Weekly attendance rate

@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
 import { SetlistResponse } from "@/types/score";
 import Chip from "@/components/Chip";
+import { getDisplayTitle } from "@/utils/getDisplayTitle";
 
 export default function SetlistDetailPage() {
   const t = useTranslations("Setlist");
@@ -188,7 +189,12 @@ export default function SetlistDetailPage() {
                       {index + 1}.
                     </span>
                     <span className="text-gray-800">
-                      {score.creation.title}
+                      {getDisplayTitle(
+                        score.creation.title,
+                        score.creation.titleEn,
+                        score.creation.titleJa,
+                        locale
+                      )}
                     </span>
                   </div>
                   <a

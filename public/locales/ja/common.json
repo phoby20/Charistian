@@ -566,5 +566,14 @@
     "invalidPdf": "有効なPDFファイルではありません。",
     "fileTooLarge": "ファイルサイズは10MBを超えることはできません。",
     "fileReadError": "ファイルの読み込み中にエラーが発生しました。"
+  },
+  "ThumbnailUploadSection": {
+    "label": "サムネイル画像 (JPG, PNG)",
+    "required": "サムネイル画像は必須です。",
+    "selectOrDrag": "サムネイルを選択またはドラッグしてください",
+    "fileSelected": "選択されたファイル: {fileName}",
+    "invalidImage": "有効なJPGまたはPNGファイルではありません。",
+    "fileTooLarge": "ファイルサイズは5MBを超えることはできません。",
+    "fileReadError": "ファイルの読み込み中にエラーが発生しました。"
   }
 }

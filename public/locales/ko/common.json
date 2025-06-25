@@ -576,5 +576,14 @@
     "invalidPdf": "유효한 PDF 파일이 아닙니다.",
     "fileTooLarge": "파일 크기는 10MB를 초과할 수 없습니다.",
     "fileReadError": "파일을 읽는 중 오류가 발생했습니다."
+  },
+  "ThumbnailUploadSection": {
+    "label": "섬네일 이미지 (JPG, PNG)",
+    "required": "섬네일 이미지는 필수입니다.",
+    "selectOrDrag": "섬네일을 선택하거나 드래그하세요",
+    "fileSelected": "파일 선택됨: {fileName}",
+    "invalidImage": "유효한 JPG 또는 PNG 파일이 아닙니다.",
+    "fileTooLarge": "파일 크기는 5MB를 초과할 수 없습니다.",
+    "fileReadError": "파일을 읽는 중 오류가 발생했습니다."
   }
 }

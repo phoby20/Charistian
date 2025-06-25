@@ -284,6 +284,7 @@ model Setlist {
   title         String
   date          DateTime
   description   String?
+  fileUrl       String?          // 병합된 PDF URL 저장
   creatorId     String
   creator       User             @relation("SetlistCreator", fields: [creatorId], references: [id])
   churchId      String

@@ -1,9 +1,7 @@
-// src/app/api/setlists/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client"; // Prisma 네임스페이스에서 타입 가져오기
+import { Prisma } from "@prisma/client";
 import { put } from "@vercel/blob";
 import { PDFDocument } from "pdf-lib";
 
@@ -169,7 +167,7 @@ export async function POST(
       );
     }
 
-    // 트랜잭션 시작 (타임아웃 15초로 설정)
+    // 트랜잭션 시작 (타임아웃 10초로 설정)
     const setlist = await prisma.$transaction(
       async (tx) => {
         // Setlist 생성
@@ -198,7 +196,7 @@ export async function POST(
 
         return newSetlist;
       },
-      { timeout: 20000 } // 타임아웃 20초
+      { timeout: 15000 } // 타임아웃 15초로 조정
     );
 
     // PDF 병합 (트랜잭션 밖에서 처리)
@@ -263,17 +261,25 @@ export async function POST(
     console.error("세트리스트 생성 오류:", JSON.stringify(error, null, 2));
     const errorMessage =
       error instanceof Error ? error.message : "알 수 없는 오류";
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2028"
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "트랜잭션 타임아웃이 발생했습니다. 작업이 너무 오래 걸렸습니다.",
-        },
-        { status: 500 }
-      );
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2028") {
+        return NextResponse.json(
+          {
+            error:
+              "트랜잭션 타임아웃이 발생했습니다. 작업이 너무 오래 걸렸습니다.",
+          },
+          { status: 500 }
+        );
+      }
+      if (error.code === "P5000") {
+        return NextResponse.json(
+          {
+            error:
+              "잘못된 요청입니다. 트랜잭션 타임아웃 설정이 제한을 초과했습니다.",
+          },
+          { status: 400 }
+        );
+      }
     }
     return NextResponse.json(
       { error: `세트리스트 생성 중 오류가 발생했습니다: ${errorMessage}` },

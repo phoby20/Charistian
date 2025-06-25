@@ -78,9 +78,10 @@ export const fetchData = async (
         await attendanceResponse.json();
 
       // Today’s attendance count
-      const todayCount = attendances.filter(
-        (att) => att.date === today.toISOString().split("T")[0]
-      ).length;
+      const todayCount = attendances.filter((att) => {
+        const todayString = format(today, "yyyy-MM-dd");
+        return att.date === todayString;
+      }).length;
 
       // Weekly attendance rate
       const weekAttendees = new Set(attendances.map((att) => att.userId)).size;

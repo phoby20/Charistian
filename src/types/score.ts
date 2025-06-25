@@ -162,6 +162,7 @@ export interface SetlistResponse {
   title: string;
   date: string;
   description?: string;
+  fileUrl: string | null;
   creator: { name: string; id: string };
   creatorId: string;
   scores: {

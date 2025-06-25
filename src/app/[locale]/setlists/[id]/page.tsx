@@ -147,10 +147,10 @@ export default function SetlistDetailPage() {
               </Link>
             )}
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-10">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
             {setlist.title}
           </h1>
-          <p className="text-gray-600 mb-6 text-sm">
+          <p className="text-gray-600 mb-4 text-sm">
             {t("date")}:{" "}
             {format(new Date(setlist.date), "yyyy-MM-dd", {
               locale: dateLocale,
@@ -229,6 +229,25 @@ export default function SetlistDetailPage() {
               )}
             </div>
           </motion.div>
+          {setlist.fileUrl && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              className="mb-6"
+            >
+              <a
+                href={setlist.fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center space-x-2 bg-blue-600 text-white py-4 px-4 rounded-xl shadow-sm hover:bg-blue-700 transition-colors"
+                aria-label={t("downloadPdf")}
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-sm font-medium">{t("downloadPdf")}</span>
+              </a>
+            </motion.div>
+          )}
           <div className="mt-8">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
               {t("comments")}

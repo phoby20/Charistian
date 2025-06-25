@@ -554,7 +554,8 @@
     "backToDetail": "詳細に戻る",
     "save": "保存",
     "authError": "認証エラーが発生しました。",
-    "noSongs": "選曲リストに曲がありません。"
+    "noSongs": "選曲リストに曲がありません。",
+    "downloadPdf": "統合PDFをダウンロード"
   },
   "scoreList": "楽譜リスト",
   "setlistList": "コンテリスト",

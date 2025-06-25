@@ -564,7 +564,8 @@
     "backToDetail": "콘티 상세로 돌아가기",
     "save": "변경 사항 저장",
     "authError": "인증 오류가 발생했습니다.",
-    "noSongs": "등록된 곡이 없습니다."
+    "noSongs": "등록된 곡이 없습니다.",
+    "downloadPdf": "통합 PDF 다운로드"
   },
   "scoreList": "악보리스트",
   "setlistList": "콘티리스트",

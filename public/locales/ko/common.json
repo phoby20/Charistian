@@ -567,5 +567,14 @@
     "noSongs": "등록된 곡이 없습니다."
   },
   "scoreList": "악보리스트",
-  "setlistList": "콘티리스트"
+  "setlistList": "콘티리스트",
+  "FileUploadSection": {
+    "label": "악보 파일 (PDF)",
+    "required": "PDF 파일은 필수입니다.",
+    "selectOrDrag": "PDF 파일을 선택하거나 드래그하세요",
+    "fileSelected": "파일 선택됨: {fileName}",
+    "invalidPdf": "유효한 PDF 파일이 아닙니다.",
+    "fileTooLarge": "파일 크기는 10MB를 초과할 수 없습니다.",
+    "fileReadError": "파일을 읽는 중 오류가 발생했습니다."
+  }
 }

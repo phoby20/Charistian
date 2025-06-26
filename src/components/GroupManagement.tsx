@@ -1,3 +1,5 @@
+// src/components/GroupManagement.tsx
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -298,7 +300,7 @@ export default function GroupManagement({
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
                     transition={{ delay: index * 0.05 }}
-                    className="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-all duration-200"
+                    className="bg-gray-50 pr-4 rounded-lg hover:bg-gray-100 transition-all duration-200"
                   >
                     {/* 그룹 항목 */}
                     <div className="flex items-center gap-3">
@@ -338,7 +340,7 @@ export default function GroupManagement({
                         <>
                           <button
                             onClick={() => handleSelectGroup(group.id)}
-                            className={`flex-1 flex items-center justify-between text-left text-sm font-medium text-gray-800 hover:text-blue-600 transition-colors duration-200 truncate`}
+                            className={`flex-1 p-4 flex items-center justify-between text-left text-sm font-medium text-gray-800 hover:text-blue-600 transition-colors duration-200 truncate cursor-pointer`}
                             aria-expanded={isSelected}
                             aria-controls={`subgroup-${group.id}`}
                           >
@@ -407,7 +409,7 @@ export default function GroupManagement({
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ duration: 0.3 }}
                           id={`subgroup-${group.id}`}
-                          className="mt-3 pl-4 border-l-2 border-gray-200"
+                          className="mt-3 pl-4"
                         >
                           <SubGroupManagement
                             groupId={group.id}

@@ -58,11 +58,10 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const url = new URL(request.url);
-    const id = url.pathname.split("/").pop();
-    const { name } = await request.json();
+    const { name, subGroupId }: { name: string; subGroupId: string } =
+      await request.json();
 
-    if (!id || !name) {
+    if (!subGroupId || !name) {
       return NextResponse.json(
         { error: "id and name are required" },
         { status: 400 }
@@ -70,7 +69,7 @@ export async function PUT(request: Request) {
     }
 
     const subGroup = await prisma.subGroup.update({
-      where: { id },
+      where: { id: subGroupId },
       data: { name },
       select: { id: true, name: true, groupId: true, churchId: true },
     });

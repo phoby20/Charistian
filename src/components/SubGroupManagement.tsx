@@ -240,7 +240,6 @@ export default function SubGroupManagement({
                       })
                     }
                     className="flex-1 p-2 border rounded-md text-sm"
-                    aria-label={t("editSubGroupName")}
                   />
                   <Button
                     onClick={handleUpdateSubGroup}

@@ -595,5 +595,10 @@
     "invalidImage": "유효한 JPG 또는 PNG 파일이 아닙니다.",
     "fileTooLarge": "파일 크기는 5MB를 초과할 수 없습니다.",
     "fileReadError": "파일을 읽는 중 오류가 발생했습니다."
-  }
+  },
+  "filterByTeam": "팀으로 필터링",
+  "noTeam": "팀이 없습니다",
+  "selectTeams": "팀 선택",
+  "selectGroups": "그룹 선택",
+  "filter": "필터"
 }

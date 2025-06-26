@@ -13,14 +13,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/utils/useRouter";
 import Loading from "@/components/Loading";
+import { useAuth } from "@/context/AuthContext";
 
 function MembersContent() {
   const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [members, setMembers] = useState<User[]>([]);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [userChurchId, setUserChurchId] = useState<string | null>(null);
+  const { user, isLoading: authLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
@@ -28,53 +28,34 @@ function MembersContent() {
 
   const fetchMembers = useCallback(async () => {
     try {
-      if (userRole !== "SUPER_ADMIN" && userRole !== "ADMIN") {
-        router.push("/login");
-        return;
+      if (!authLoading) {
+        if (user?.role !== "SUPER_ADMIN" && user?.role !== "ADMIN") {
+          router.push("/login");
+          return;
+        }
+        if (!user.churchId) {
+          setMembers([]);
+          return;
+        }
+        const response = await fetch("/api/members");
+        if (!response.ok) throw new Error("Failed to fetch members");
+        const { members } = await response.json();
+        const filteredMembers = members.filter(
+          (member: User) => member.churchId === user.churchId
+        );
+        setMembers(filteredMembers);
       }
-      if (!userChurchId) {
-        setMembers([]);
-        return;
-      }
-      const response = await fetch("/api/members");
-      if (!response.ok) throw new Error("Failed to fetch members");
-      const { members } = await response.json();
-      const filteredMembers = members.filter(
-        (user: User) => user.churchId === userChurchId
-      );
-      setMembers(filteredMembers);
     } catch (err) {
       console.error("Error fetching members:", err);
       setError(t("serverError"));
     }
-  }, [userRole, router, userChurchId, t]);
+  }, [user?.role, router, user?.churchId, t]);
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const response = await fetch("/api/auth/me", {
-          credentials: "include",
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setUserRole(data.user.role);
-          setUserChurchId(data.user.churchId);
-        } else {
-          router.push("/login");
-        }
-      } catch (err) {
-        console.error("Error fetching user role:", err);
-        setError(t("serverError"));
-      }
-    };
-    fetchUserRole();
-  }, [router, t]);
-
-  useEffect(() => {
-    if (userRole !== null && userChurchId !== null) {
+    if (user?.role !== null && user?.churchId !== null) {
       fetchMembers();
     }
-  }, [userRole, userChurchId, router, fetchMembers]);
+  }, [user?.role, user?.churchId, router, fetchMembers]);
 
   // 그룹 목록 생성
   const groups = Array.from(

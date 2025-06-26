@@ -1,3 +1,5 @@
+// src/components/Chip.tsx
+
 "use client";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";

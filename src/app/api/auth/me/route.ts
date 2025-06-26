@@ -32,8 +32,10 @@ export async function GET(req: NextRequest) {
         city: true,
         region: true,
         position: true,
-        groups: { select: { id: true } },
-        subGroups: { select: { id: true } },
+        groups: { select: { id: true, name: true } },
+        subGroups: { select: { id: true, name: true } },
+        teams: { select: { id: true, name: true } },
+        duties: { select: { id: true, name: true } },
       },
     });
 

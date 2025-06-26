@@ -160,19 +160,23 @@ export default function EventCalendar({
           {t("calendar")}
         </h2>
         <div className="flex justify-between mb-4">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentDate(addDays(currentDate, -30))}
-          >
-            {t("Calendar.prevMonth")}
-          </Button>
+          <div>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentDate(addDays(currentDate, -30))}
+            >
+              {t("Calendar.prevMonth")}
+            </Button>
+          </div>
           <h3 className="text-lg">{format(currentDate, "yyyy년 MM월")}</h3>
-          <Button
-            variant="outline"
-            onClick={() => setCurrentDate(addDays(currentDate, 30))}
-          >
-            {t("Calendar.nextMonth")}
-          </Button>
+          <div>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentDate(addDays(currentDate, 30))}
+            >
+              {t("Calendar.nextMonth")}
+            </Button>
+          </div>
         </div>
         {isMobile ? (
           <MobileCalendar

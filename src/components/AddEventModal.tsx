@@ -259,20 +259,22 @@ export function AddEventModal({
                 ))}
             </div>
           </div>
-          <div className="flex justify-end space-x-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddModalOpen(false);
-                setNewEvent({});
-                setSelectedDate(null);
-              }}
-            >
-              {t("Calendar.cancel")}
-            </Button>
-            <Button variant="primary" type="submit">
-              {t("Calendar.save")}
-            </Button>
+          <div className="flex justify-end">
+            <div className="flex space-x-4 w-[200px]">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsAddModalOpen(false);
+                  setNewEvent({});
+                  setSelectedDate(null);
+                }}
+              >
+                {t("Calendar.cancel")}
+              </Button>
+              <Button variant="primary" type="submit">
+                {t("Calendar.save")}
+              </Button>
+            </div>
           </div>
         </form>
       </div>

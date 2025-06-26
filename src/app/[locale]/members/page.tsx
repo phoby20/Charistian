@@ -1,7 +1,7 @@
 // src/app/[locale]/members/page.tsx
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import UserDetailModal from "@/components/UserDetailModal";
 import Modal from "@/components/Modal";
@@ -15,7 +15,7 @@ import { useRouter } from "@/utils/useRouter";
 import Loading from "@/components/Loading";
 import { useAuth } from "@/context/AuthContext";
 
-function MembersContent() {
+export default function MembersPage() {
   const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -25,6 +25,7 @@ function MembersContent() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [isGroupMenuOpen, setIsGroupMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchMembers = useCallback(async () => {
     try {
@@ -53,7 +54,9 @@ function MembersContent() {
 
   useEffect(() => {
     if (user?.role !== null && user?.churchId !== null) {
+      setIsLoading(true);
       fetchMembers();
+      setIsLoading(false);
     }
   }, [user?.role, user?.churchId, router, fetchMembers]);
 
@@ -118,6 +121,11 @@ function MembersContent() {
     },
     [router]
   );
+
+  // 로딩 상태 처리
+  if (authLoading || isLoading) {
+    return <Loading />;
+  }
 
   return (
     <motion.div
@@ -285,13 +293,5 @@ function MembersContent() {
         </div>
       </main>
     </motion.div>
-  );
-}
-
-export default function MembersPage() {
-  return (
-    <Suspense fallback={<Loading />}>
-      <MembersContent />
-    </Suspense>
   );
 }

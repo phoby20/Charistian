@@ -59,44 +59,81 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  try {
-    // 유저가 속한 그룹과 팀의 ID 조회
-    const userGroupIds = await getUserGroupIds(payload.userId);
-    const userTeamIds = await getUserTeamIds(payload.userId);
+  if (!payload.churchId) {
+    return NextResponse.json(
+      { error: "churchId가 필요합니다." },
+      { status: 400 }
+    );
+  }
 
-    // 그룹 또는 팀에 공유된 세트리스트 조회
-    const setlists = await prisma.setlist.findMany({
-      where: {
-        OR: [
-          {
-            shares: {
-              some: { groupId: { in: userGroupIds } },
+  try {
+    // 관리자 역할 확인
+    const isAdmin = ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(
+      payload.role
+    );
+
+    let setlists;
+    if (isAdmin) {
+      // 관리자인 경우: churchId로 모든 세트리스트 조회
+      setlists = await prisma.setlist.findMany({
+        where: {
+          churchId: payload.churchId,
+        },
+        include: {
+          creator: { select: { name: true, id: true } },
+          church: { select: { name: true } },
+          scores: {
+            include: {
+              creation: { select: { id: true, title: true, fileUrl: true } },
             },
           },
-          {
-            shares: {
-              some: { teamId: { in: userTeamIds } },
+          shares: {
+            include: {
+              group: { select: { id: true, name: true } },
+              team: { select: { id: true, name: true } },
+              user: { select: { id: true, name: true } },
             },
           },
-        ],
-      },
-      include: {
-        creator: { select: { name: true, id: true } },
-        church: { select: { name: true } },
-        scores: {
-          include: {
-            creation: { select: { id: true, title: true, fileUrl: true } },
+        },
+      });
+    } else {
+      // 일반 유저: 그룹과 팀에 동시에 공유된 세트리스트 조회
+      const userGroupIds = await getUserGroupIds(payload.userId);
+      const userTeamIds = await getUserTeamIds(payload.userId);
+
+      setlists = await prisma.setlist.findMany({
+        where: {
+          AND: [
+            {
+              shares: {
+                some: { groupId: { in: userGroupIds } },
+              },
+            },
+            {
+              shares: {
+                some: { teamId: { in: userTeamIds } },
+              },
+            },
+          ],
+        },
+        include: {
+          creator: { select: { name: true, id: true } },
+          church: { select: { name: true } },
+          scores: {
+            include: {
+              creation: { select: { id: true, title: true, fileUrl: true } },
+            },
+          },
+          shares: {
+            include: {
+              group: { select: { id: true, name: true } },
+              team: { select: { id: true, name: true } },
+              user: { select: { id: true, name: true } },
+            },
           },
         },
-        shares: {
-          include: {
-            group: { select: { id: true, name: true } },
-            team: { select: { id: true, name: true } },
-            user: { select: { id: true, name: true } },
-          },
-        },
-      },
-    });
+      });
+    }
 
     return NextResponse.json(setlists as SetlistResponse[], { status: 200 });
   } catch (error) {

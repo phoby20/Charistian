@@ -59,39 +59,58 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const setlists = await prisma.setlist.findMany({
-    where: {
-      OR: [
-        { creatorId: payload.userId },
-        { shares: { some: { userId: payload.userId } } },
-        {
-          shares: {
-            some: { groupId: { in: await getUserGroupIds(payload.userId) } },
+  try {
+    // 유저가 속한 그룹과 팀의 ID 조회
+    const userGroupIds = await getUserGroupIds(payload.userId);
+    const userTeamIds = await getUserTeamIds(payload.userId);
+
+    // 그룹 또는 팀에 공유된 세트리스트 조회
+    const setlists = await prisma.setlist.findMany({
+      where: {
+        OR: [
+          {
+            shares: {
+              some: { groupId: { in: userGroupIds } },
+            },
+          },
+          {
+            shares: {
+              some: { teamId: { in: userTeamIds } },
+            },
+          },
+        ],
+      },
+      include: {
+        creator: { select: { name: true, id: true } },
+        church: { select: { name: true } },
+        scores: {
+          include: {
+            creation: { select: { id: true, title: true, fileUrl: true } },
           },
         },
-        {
-          shares: {
-            some: { teamId: { in: await getUserTeamIds(payload.userId) } },
+        shares: {
+          include: {
+            group: { select: { id: true, name: true } },
+            team: { select: { id: true, name: true } },
+            user: { select: { id: true, name: true } },
           },
-        },
-      ],
-    },
-    include: {
-      creator: { select: { name: true, id: true } },
-      church: { select: { name: true } },
-      shares: {
-        include: {
-          group: { select: { id: true, name: true } },
-          team: { select: { id: true, name: true } },
-          user: { select: { id: true, name: true } },
         },
       },
-    },
-  });
+    });
 
-  return NextResponse.json(setlists, { status: 200 });
+    return NextResponse.json(setlists as SetlistResponse[], { status: 200 });
+  } catch (error) {
+    console.error("세트리스트 조회 오류:", JSON.stringify(error, null, 2));
+    const errorMessage =
+      error instanceof Error ? error.message : "알 수 없는 오류";
+    return NextResponse.json(
+      { error: `세트리스트 조회 중 오류가 발생했습니다: ${errorMessage}` },
+      { status: 500 }
+    );
+  }
 }
 
+// POST 메서드 및 나머지 코드는 변경 없음
 export async function POST(
   req: NextRequest
 ): Promise<NextResponse<SetlistResponse | { error: string }>> {

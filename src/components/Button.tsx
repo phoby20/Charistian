@@ -14,7 +14,7 @@ const Button: FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "px-4 py-2 rounded-md font-medium transition-colors duration-200";
+    "px-4 py-2 rounded-md font-medium transition-colors duration-200 w-full flex items-center justify-center space-x-2";
   const variantStyles = {
     primary: "bg-blue-600 text-white hover:bg-blue-700",
     secondary: "bg-gray-200 text-black hover:bg-gray-300",

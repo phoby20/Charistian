@@ -472,7 +472,16 @@
     "confirmDeleteComment": "정말로 이 댓글을 삭제하시겠습니까?",
     "deleteScore": "악보 삭제",
     "confirmDeleteScore": "정말로 이 악보를 삭제하시겠습니까?",
-    "deleteError": "악보 삭제에 실패했습니다."
+    "deleteError": "악보 삭제에 실패했습니다.",
+    "closeError": "악보 삭제 중 오류가 발생했습니다.",
+    "descriptionMeta": "악보 상세 페이지",
+    "price": "가격",
+    "isOpen": "상태",
+    "open": "오픈",
+    "closed": "닫힘",
+    "showMore": "더 보기",
+    "showLess": "접기",
+    "noGenre": "장르 없음"
   },
   "tempoRange": "템포 범위",
   "page": "페이지",

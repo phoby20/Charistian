@@ -12,8 +12,8 @@ export interface ScoreComment {
 export interface ScoreResponse {
   id: string;
   title: string;
-  titleEn?: string;
-  titleJa?: string;
+  titleEn: string | null;
+  titleJa: string | null;
   description?: string;
   tempo?: string;
   fileUrl: string;

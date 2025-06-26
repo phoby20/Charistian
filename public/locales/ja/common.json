@@ -463,7 +463,16 @@
     "confirmDeleteComment": "このコメントを本当に削除しますか？",
     "deleteScore": "楽譜削除",
     "confirmDeleteScore": "本当にこの楽譜を削除しますか？",
-    "deleteError": "楽譜の削除に失敗しました。"
+    "deleteError": "楽譜の削除に失敗しました。",
+    "closeError": "楽譜を削除中にエラーが発生しました。",
+    "descriptionMeta": "楽譜の説明",
+    "price": "価格",
+    "isOpen": "オープン設定",
+    "open": "オープン",
+    "closed": "クローズ",
+    "showMore": "もっと見る",
+    "showLess": "もっと少なく",
+    "noGenre": "ジャンルなし"
   },
   "tempoRange": "テンポ範囲",
   "page": "ページ",

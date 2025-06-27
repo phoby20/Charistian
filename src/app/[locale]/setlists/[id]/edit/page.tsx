@@ -120,6 +120,7 @@ export default function SetlistEditPage() {
   }, [id, t, user]);
 
   const handleSubmit = async (e: FormEvent) => {
+    setIsLoading(true);
     e.preventDefault();
     if (!title || !date || selectedSongs.length === 0) {
       setError(t("requiredFields"));
@@ -158,6 +159,7 @@ export default function SetlistEditPage() {
       setError(err instanceof Error ? err.message : t("updateError"));
     } finally {
       setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 

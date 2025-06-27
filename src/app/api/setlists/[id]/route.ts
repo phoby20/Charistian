@@ -3,16 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob"; // del 메서드 추가
 import { PDFDocument } from "pdf-lib";
 import { Resend } from "resend";
 import { createKoreaDate } from "@/utils/creatKoreaDate";
 import { createEmailContent } from "@/utils/createSetListEmailContent";
 
-// Resend 초기화
+// Resend 초기화: 이메일 전송을 위한 Resend 클라이언트
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// UpdateSetlistRequest 타입 정의
+// UpdateSetlistRequest 타입 정의: PUT 요청의 바디 형식
 interface UpdateSetlistRequest {
   title: string;
   date: string;
@@ -25,7 +25,7 @@ interface UpdateSetlistRequest {
   }[];
 }
 
-// Setlist 응답 타입 정의
+// SetlistResponse 타입 정의: API 응답 형식
 interface SetlistResponse {
   id: string;
   title: string;
@@ -44,10 +44,12 @@ interface SetlistResponse {
   }>;
 }
 
+// GET: 특정 세트리스트 조회
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  // 인증 토큰 확인
   const token = req.cookies.get("token")?.value;
   if (!token)
     return NextResponse.json(
@@ -55,6 +57,7 @@ export async function GET(
       { status: 401 }
     );
 
+  // 토큰 검증
   let payload: TokenPayload;
   try {
     payload = verifyToken(token);
@@ -65,7 +68,9 @@ export async function GET(
     );
   }
 
+  // URL 파라미터에서 setlist ID 추출
   const { id } = await context.params;
+  // 세트리스트 조회 (관련 데이터 포함)
   const setlist = await prisma.setlist.findUnique({
     where: { id },
     include: {
@@ -101,6 +106,7 @@ export async function GET(
     },
   });
 
+  // 세트리스트가 없는 경우
   if (!setlist)
     return NextResponse.json(
       { error: "세트리스트를 찾을 수 없습니다." },
@@ -112,13 +118,16 @@ export async function GET(
   if (!hasAccess)
     return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
 
+  // 세트리스트 반환
   return NextResponse.json(setlist, { status: 200 });
 }
 
+// DELETE: 세트리스트 삭제 및 관련 PDF 파일 제거
 export async function DELETE(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  // 인증 토큰 확인
   const token = req.cookies.get("token")?.value;
   if (!token)
     return NextResponse.json(
@@ -126,6 +135,7 @@ export async function DELETE(
       { status: 401 }
     );
 
+  // 토큰 검증
   let payload: TokenPayload;
   try {
     payload = verifyToken(token);
@@ -136,18 +146,22 @@ export async function DELETE(
     );
   }
 
+  // URL 파라미터에서 setlist ID 추출
   const { id } = await context.params;
+  // 세트리스트 조회 (creatorId 확인용)
   const setlist = await prisma.setlist.findUnique({
     where: { id },
-    select: { creatorId: true },
+    select: { creatorId: true, fileUrl: true }, // fileUrl 추가
   });
 
+  // 세트리스트가 없는 경우
   if (!setlist)
     return NextResponse.json(
       { error: "세트리스트를 찾을 수 없습니다." },
       { status: 404 }
     );
 
+  // 권한 확인: 작성자 또는 관리자만 삭제 가능
   if (
     payload.userId !== setlist.creatorId &&
     !["SUPER_ADMIN", "ADMIN"].includes(payload.role)
@@ -156,6 +170,17 @@ export async function DELETE(
   }
 
   try {
+    // Vercel Blob에서 기존 PDF 파일 삭제
+    if (setlist.fileUrl) {
+      try {
+        await del(setlist.fileUrl);
+        console.log(`Vercel Blob에서 PDF 삭제 완료: ${setlist.fileUrl}`);
+      } catch (error) {
+        console.error(`Vercel Blob PDF 삭제 오류: ${setlist.fileUrl}`, error);
+      }
+    }
+
+    // Prisma를 통해 세트리스트 삭제
     await prisma.setlist.delete({ where: { id } });
     return NextResponse.json(
       { message: "세트리스트가 삭제되었습니다." },
@@ -170,10 +195,12 @@ export async function DELETE(
   }
 }
 
+// PUT: 세트리스트 업데이트, 기존 PDF 삭제 후 새 PDF 저장
 export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SetlistResponse | { error: string }>> {
+  // 인증 토큰 확인
   const token = req.cookies.get("token")?.value;
   if (!token)
     return NextResponse.json(
@@ -181,6 +208,7 @@ export async function PUT(
       { status: 401 }
     );
 
+  // 토큰 검증
   let payload: TokenPayload;
   try {
     payload = verifyToken(token);
@@ -191,10 +219,12 @@ export async function PUT(
     );
   }
 
+  // URL 파라미터에서 setlist ID 추출
   const { id } = await context.params;
+  // 세트리스트 조회 (권한 및 churchId 확인용)
   const setlist = await prisma.setlist.findUnique({
     where: { id },
-    select: { creatorId: true, churchId: true },
+    select: { creatorId: true, churchId: true, fileUrl: true }, // fileUrl 추가
   });
   if (!setlist)
     return NextResponse.json(
@@ -202,6 +232,7 @@ export async function PUT(
       { status: 404 }
     );
 
+  // 권한 확인: 작성자 또는 관리자만 수정 가능
   if (
     payload.userId !== setlist.creatorId &&
     !["SUPER_ADMIN", "ADMIN"].includes(payload.role)
@@ -209,6 +240,7 @@ export async function PUT(
     return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
   }
 
+  // 요청 바디 파싱
   const { title, date, description, scores, shares }: UpdateSetlistRequest =
     await req.json();
   if (!title || !date)
@@ -225,7 +257,7 @@ export async function PUT(
   }
 
   try {
-    // scores의 creationId로 Creation에서 fileUrl 조회 (트랜잭션 밖에서)
+    // scores의 creationId로 Creation에서 fileUrl 조회
     const creations = await prisma.creation.findMany({
       where: {
         id: { in: scores.map((score) => score.creationId) },
@@ -233,7 +265,7 @@ export async function PUT(
       select: { id: true, fileUrl: true },
     });
 
-    // order 순서에 맞게 정렬 및 order 정보 유지
+    // order 순서에 맞게 정렬 및 유효한 PDF만 필터링
     const sortedScores = scores
       .sort((a, b) => a.order - b.order)
       .map((score) => {
@@ -251,6 +283,7 @@ export async function PUT(
           !!score.fileUrl
       );
 
+    // 유효한 PDF 파일이 없는 경우
     if (sortedScores.length === 0) {
       return NextResponse.json(
         { error: "유효한 PDF 파일이 없습니다." },
@@ -258,7 +291,7 @@ export async function PUT(
       );
     }
 
-    // sortedScores의 order 순서 로그 출력 (디버깅용)
+    // PDF 병합 순서 디버깅 로그
     console.log(
       `PDF 병합 순서 (setlistId: ${id}):`,
       sortedScores.map((s) => ({
@@ -268,14 +301,14 @@ export async function PUT(
       }))
     );
 
-    // 트랜잭션 시작 (타임아웃 15초)
+    // 트랜잭션 시작: 세트리스트 업데이트
     await prisma.$transaction(
       async (tx) => {
         // 기존 setlistScore와 setlistShare 삭제
         await tx.setlistScore.deleteMany({ where: { setlistId: id } });
         await tx.setlistShare.deleteMany({ where: { setlistId: id } });
 
-        // Setlist 업데이트
+        // 세트리스트 데이터 업데이트
         await tx.setlist.update({
           where: { id },
           data: {
@@ -301,7 +334,17 @@ export async function PUT(
       { timeout: 15000 }
     );
 
-    // PDF 병합 (트랜잭션 밖에서 처리)
+    // 기존 PDF 파일 삭제
+    if (setlist.fileUrl) {
+      try {
+        await del(setlist.fileUrl);
+        console.log(`Vercel Blob에서 기존 PDF 삭제 완료: ${setlist.fileUrl}`);
+      } catch (error) {
+        console.error(`Vercel Blob PDF 삭제 오류: ${setlist.fileUrl}`, error);
+      }
+    }
+
+    // PDF 병합
     const mergedPdf = await PDFDocument.create();
     const pdfPromises = sortedScores.map(async ({ fileUrl }) => {
       const response = await fetch(fileUrl);
@@ -323,7 +366,7 @@ export async function PUT(
 
     const koreaDate = createKoreaDate();
 
-    // Vercel Blob에 업로드 (기존 파일 덮어쓰기 허용)
+    // 새 PDF를 Vercel Blob에 업로드
     const blob = await put(
       `setlists/merged_setlist/${koreaDate}_${id}.pdf`,
       buffer,
@@ -333,7 +376,7 @@ export async function PUT(
       }
     );
 
-    // Setlist에 fileUrl 업데이트
+    // Setlist에 새로운 fileUrl 업데이트
     await prisma.setlist.update({
       where: { id },
       data: { fileUrl: blob.url },
@@ -364,19 +407,11 @@ export async function PUT(
       throw new Error("업데이트된 세트리스트를 찾을 수 없습니다.");
     }
 
-    // 이메일 전송
+    // 이메일 전송 설정
     const resendFrom = process.env.RESEND_FROM;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const logoUrl = `${appUrl}/logo.png`;
     const emailTitle = "콘티 리스트가 업데이트되었습니다";
-
-    // 그룹과 팀 ID 추출
-    const groupIds = finalSetlist.shares
-      .filter((share) => share.group?.id)
-      .map((share) => share.group!.id);
-    const teamIds = finalSetlist.shares
-      .filter((share) => share.team?.id)
-      .map((share) => share.team!.id);
 
     // 이메일 전송
     if (resendFrom) {
@@ -384,24 +419,20 @@ export async function PUT(
         process.env.NODE_ENV === "development" ||
         req.headers.get("host")?.includes("localhost");
 
-      // 그룹과 팀에 속한 사용자 조회
+      // 공유 대상 사용자 조회
+      const groupIds = finalSetlist.shares
+        .filter((share) => share.group?.id)
+        .map((share) => share.group!.id);
+      const teamIds = finalSetlist.shares
+        .filter((share) => share.team?.id)
+        .map((share) => share.team!.id);
+
       const users = await prisma.user.findMany({
         where: {
           AND: [
-            {
-              OR: [
-                { groups: { some: { id: { in: groupIds } } } },
-                { teams: { some: { id: { in: teamIds } } } },
-                {
-                  id: {
-                    in: finalSetlist.shares
-                      .filter((s) => s.user?.id)
-                      .map((s) => s.user!.id),
-                  },
-                },
-              ],
-            },
-            { email: { not: "" } },
+            { groups: { some: { id: { in: groupIds } } } },
+            { teams: { some: { id: { in: teamIds } } } },
+            { email: { not: "" } }, // 이메일이 비어 있지 않은 사용자만
           ],
         },
         select: { email: true, name: true },
@@ -428,16 +459,19 @@ export async function PUT(
         emailTitle
       );
 
+      // 로컬 환경: 콘솔 출력
       if (isLocal) {
         console.log("Local environment detected. Email content (not sent):");
         console.log("To:", users.map((u) => u.email).join(", "));
-        console.log(emailContent);
+        // console.log(emailContent);
+        console.log(`이메일 전송 완료: ${users.length}명의 사용자에게 전송`);
       } else {
+        // 프로덕션 환경: 이메일 전송
         if (users.length > 0) {
           await resend.emails.send({
             from: resendFrom,
             to: users.map((u) => u.email!),
-            subject: `업데이트된 세트리스트: ${finalSetlist.title}`,
+            subject: `업데이트된 콘티 리스트: ${finalSetlist.title}`,
             html: emailContent,
           });
           console.log(`이메일 전송 완료: ${users.length}명의 사용자에게 전송`);
@@ -449,10 +483,14 @@ export async function PUT(
       console.error("RESEND_FROM 환경 변수가 설정되지 않았습니다.");
     }
 
+    // 성공 응답
     return NextResponse.json(finalSetlist as SetlistResponse, { status: 200 });
   } catch (error: unknown) {
+    // 에러 처리 및 로깅
     console.error(
-      `세트리스트 업데이트 오류 (setlistId: ${id}, scores: ${scores.length}, shares: ${shares.length}, creationIds: ${scores.map((s) => s.creationId).join(",")}):`,
+      `세트리스트 업데이트 오류 (setlistId: ${id}, scores: ${scores.length}, shares: ${shares.length}, creationIds: ${scores
+        .map((s) => s.creationId)
+        .join(",")}):`,
       JSON.stringify(error, null, 2)
     );
     const errorMessage =
@@ -493,10 +531,12 @@ export async function PUT(
   }
 }
 
+// checkAccess: 사용자 접근 권한 확인
 async function checkAccess(
   userId: string,
   setlistId: string
 ): Promise<boolean> {
+  // 세트리스트와 공유 정보 조회
   const setlist = await prisma.setlist.findUnique({
     where: { id: setlistId },
     include: {
@@ -513,8 +553,10 @@ async function checkAccess(
 
   if (!setlist) return false;
 
+  // 작성자인지 확인
   if (setlist.creator.id === userId) return true;
 
+  // 공유 대상에 포함된 사용자인지 확인
   return setlist.shares.some((share) => {
     return (
       share.userId === userId ||

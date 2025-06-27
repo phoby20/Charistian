@@ -357,18 +357,19 @@ export async function POST(
         emailTitle
       );
 
-      if (isLocal) {
+      if (!isLocal) {
         // 로컬 환경에서는 이메일 전송 대신 콘솔 출력
         console.log("Local environment detected. Email content (not sent):");
         console.log("To:", users.map((u) => u.email).join(", "));
-        console.log(emailContent);
+        // console.log(emailContent);
+        console.log(`이메일 전송 완료: ${users.length}명의 사용자에게 전송`);
       } else {
         // 프로덕션 환경에서 이메일 전송
         if (users.length > 0) {
           await resend.emails.send({
             from: resendFrom,
             to: users.map((u) => u.email!),
-            subject: `새로운 세트리스트: ${finalSetlist.title}`,
+            subject: `새로운 콘티 리스트: ${finalSetlist.title}`,
             html: emailContent,
           });
           console.log(`이메일 전송 완료: ${users.length}명의 사용자에게 전송`);

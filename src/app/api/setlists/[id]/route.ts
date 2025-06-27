@@ -1,12 +1,18 @@
+// src/app/api/setlists/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { put } from "@vercel/blob";
 import { PDFDocument } from "pdf-lib";
+import { Resend } from "resend";
 import { createKoreaDate } from "@/utils/creatKoreaDate";
+import { createEmailContent } from "@/utils/createSetListEmailContent";
 
-// UpdateSetlistRequest 타입 정의 (CreateSetlistRequest와 일치하도록 수정)
+// Resend 초기화
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// UpdateSetlistRequest 타입 정의
 interface UpdateSetlistRequest {
   title: string;
   date: string;
@@ -315,11 +321,11 @@ export async function PUT(
     const mergedPdfBytes = await mergedPdf.save();
     const buffer = Buffer.from(mergedPdfBytes);
 
-    const koreanDate = createKoreaDate();
+    const koreaDate = createKoreaDate();
 
     // Vercel Blob에 업로드 (기존 파일 덮어쓰기 허용)
     const blob = await put(
-      `setlists/merged_setlist/${koreanDate}_${id}.pdf`,
+      `setlists/merged_setlist/${koreaDate}_${id}.pdf`,
       buffer,
       {
         access: "public",
@@ -333,7 +339,7 @@ export async function PUT(
       data: { fileUrl: blob.url },
     });
 
-    // 최종 Setlist 조회하여 응답
+    // 최종 Setlist 조회
     const finalSetlist = await prisma.setlist.findUnique({
       where: { id },
       include: {
@@ -356,6 +362,91 @@ export async function PUT(
 
     if (!finalSetlist) {
       throw new Error("업데이트된 세트리스트를 찾을 수 없습니다.");
+    }
+
+    // 이메일 전송
+    const resendFrom = process.env.RESEND_FROM;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const logoUrl = `${appUrl}/logo.png`;
+    const emailTitle = "콘티 리스트가 업데이트되었습니다";
+
+    // 그룹과 팀 ID 추출
+    const groupIds = finalSetlist.shares
+      .filter((share) => share.group?.id)
+      .map((share) => share.group!.id);
+    const teamIds = finalSetlist.shares
+      .filter((share) => share.team?.id)
+      .map((share) => share.team!.id);
+
+    // 이메일 전송
+    if (resendFrom) {
+      const isLocal =
+        process.env.NODE_ENV === "development" ||
+        req.headers.get("host")?.includes("localhost");
+
+      // 그룹과 팀에 속한 사용자 조회
+      const users = await prisma.user.findMany({
+        where: {
+          AND: [
+            {
+              OR: [
+                { groups: { some: { id: { in: groupIds } } } },
+                { teams: { some: { id: { in: teamIds } } } },
+                {
+                  id: {
+                    in: finalSetlist.shares
+                      .filter((s) => s.user?.id)
+                      .map((s) => s.user!.id),
+                  },
+                },
+              ],
+            },
+            { email: { not: "" } },
+          ],
+        },
+        select: { email: true, name: true },
+      });
+
+      // 이메일 내용 생성
+      const scoresList = finalSetlist.scores
+        .map((score) => `<li>${score.creation.title}</li>`)
+        .join("");
+      const sharesList = finalSetlist.shares
+        .map((share) => {
+          if (share.group) return `<li>그룹: ${share.group.name}</li>`;
+          if (share.team) return `<li>팀: ${share.team.name}</li>`;
+          if (share.user) return `<li>사용자: ${share.user.name}</li>`;
+          return "";
+        })
+        .join("");
+      const emailContent = createEmailContent(
+        logoUrl,
+        finalSetlist,
+        scoresList,
+        sharesList,
+        koreaDate,
+        emailTitle
+      );
+
+      if (isLocal) {
+        console.log("Local environment detected. Email content (not sent):");
+        console.log("To:", users.map((u) => u.email).join(", "));
+        console.log(emailContent);
+      } else {
+        if (users.length > 0) {
+          await resend.emails.send({
+            from: resendFrom,
+            to: users.map((u) => u.email!),
+            subject: `업데이트된 세트리스트: ${finalSetlist.title}`,
+            html: emailContent,
+          });
+          console.log(`이메일 전송 완료: ${users.length}명의 사용자에게 전송`);
+        } else {
+          console.log("공유 대상 사용자가 없습니다.");
+        }
+      }
+    } else {
+      console.error("RESEND_FROM 환경 변수가 설정되지 않았습니다.");
     }
 
     return NextResponse.json(finalSetlist as SetlistResponse, { status: 200 });

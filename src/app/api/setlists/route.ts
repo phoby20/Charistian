@@ -1,14 +1,22 @@
+// src/app/api/setlist/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { put } from "@vercel/blob";
 import { PDFDocument } from "pdf-lib";
+import { Resend } from "resend";
+import { createKoreaDate } from "@/utils/creatKoreaDate";
+import { SetlistResponse } from "@/types/setList";
+import { createEmailContent } from "@/utils/createSetListEmailContent";
+
+// Resend 초기화
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // 요청 바디의 타입 정의
 interface CreateSetlistRequest {
   title: string;
-  date: string; // ISO 형식 문자열 (예: "2025-06-24T00:00:00.000Z")
+  date: string;
   description?: string;
   scores: Array<{
     creationId: string;
@@ -21,26 +29,9 @@ interface CreateSetlistRequest {
   }>;
 }
 
-// Setlist 응답 타입 정의
-interface SetlistResponse {
-  id: string;
-  title: string;
-  date: Date;
-  description?: string | null;
-  fileUrl?: string | null;
-  creator: { id: string; name: string };
-  church: { name: string };
-  scores: Array<{
-    creation: { id: string; title: string; fileUrl: string | null };
-  }>;
-  shares: Array<{
-    group?: { id: string; name: string } | null;
-    team?: { id: string; name: string } | null;
-    user?: { id: string; name: string } | null;
-  }>;
-}
-
+// GET 메서드는 변경 없음
 export async function GET(req: NextRequest) {
+  // 기존 GET 메서드 코드 (변경 없음)
   const token = req.cookies.get("token")?.value;
   if (!token) {
     return NextResponse.json(
@@ -67,14 +58,12 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // 관리자 역할 확인
     const isAdmin = ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(
       payload.role
     );
 
     let setlists;
     if (isAdmin) {
-      // 관리자인 경우: churchId로 모든 세트리스트 조회
       setlists = await prisma.setlist.findMany({
         where: {
           churchId: payload.churchId,
@@ -97,7 +86,6 @@ export async function GET(req: NextRequest) {
         },
       });
     } else {
-      // 일반 유저: 그룹과 팀에 동시에 공유된 세트리스트 조회
       const userGroupIds = await getUserGroupIds(payload.userId);
       const userTeamIds = await getUserTeamIds(payload.userId);
 
@@ -147,7 +135,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST 메서드 및 나머지 코드는 변경 없음
 export async function POST(
   req: NextRequest
 ): Promise<NextResponse<SetlistResponse | { error: string }>> {
@@ -223,7 +210,7 @@ export async function POST(
       );
     }
 
-    // 트랜잭션 시작 (타임아웃 10초로 설정)
+    // 트랜잭션 시작 (타임아웃 15초로 설정)
     const setlist = await prisma.$transaction(
       async (tx) => {
         // Setlist 생성
@@ -252,7 +239,7 @@ export async function POST(
 
         return newSetlist;
       },
-      { timeout: 15000 } // 타임아웃 15초로 조정
+      { timeout: 15000 }
     );
 
     // PDF 병합 (트랜잭션 밖에서 처리)
@@ -287,7 +274,7 @@ export async function POST(
       data: { fileUrl: blob.url },
     });
 
-    // 최종 Setlist 조회하여 응답
+    // 최종 Setlist 조회
     const finalSetlist = await prisma.setlist.findUnique({
       where: { id: setlist.id },
       include: {
@@ -310,6 +297,85 @@ export async function POST(
 
     if (!finalSetlist) {
       throw new Error("생성된 세트리스트를 찾을 수 없습니다.");
+    }
+
+    // 이메일 전송: 그룹과 팀에 속한 사용자들에게 알림
+    const resendFrom = process.env.RESEND_FROM;
+    if (!resendFrom) {
+      console.error("RESEND_FROM 환경 변수가 설정되지 않았습니다.");
+    } else {
+      // 로컬 환경 체크
+      const isLocal =
+        process.env.NODE_ENV === "development" ||
+        req.headers.get("host")?.includes("localhost");
+
+      // 그룹과 팀 ID 추출
+      const groupIds = finalSetlist.shares
+        .filter((share) => share.group?.id)
+        .map((share) => share.group!.id);
+      const teamIds = finalSetlist.shares
+        .filter((share) => share.team?.id)
+        .map((share) => share.team!.id);
+
+      // 그룹과 팀에 속한 사용자 조회
+      const users = await prisma.user.findMany({
+        where: {
+          AND: [
+            { groups: { some: { id: { in: groupIds } } } },
+            { teams: { some: { id: { in: teamIds } } } },
+            { email: { not: "" } }, // 이메일이 비어 있지 않은 사용자만
+          ],
+        },
+        select: { email: true, name: true },
+      });
+
+      // 이메일 내용 생성
+      const koreaDate = createKoreaDate();
+      const scoresList = finalSetlist.scores
+        .map((score) => `<li>${score.creation.title}</li>`)
+        .join("");
+      const sharesList = finalSetlist.shares
+        .map((share) => {
+          if (share.group) return `<li>그룹: ${share.group.name}</li>`;
+          if (share.team) return `<li>팀: ${share.team.name}</li>`;
+          if (share.user) return `<li>사용자: ${share.user.name}</li>`;
+          return "";
+        })
+        .join("");
+
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const logoUrl = `${appUrl}/logo.png`;
+      const emailTitle = "새로운 콘티리스트가 생성되었습니다";
+
+      // 이메일 템플릿 작성
+      const emailContent = createEmailContent(
+        logoUrl,
+        finalSetlist,
+        scoresList,
+        sharesList,
+        koreaDate,
+        emailTitle
+      );
+
+      if (isLocal) {
+        // 로컬 환경에서는 이메일 전송 대신 콘솔 출력
+        console.log("Local environment detected. Email content (not sent):");
+        console.log("To:", users.map((u) => u.email).join(", "));
+        console.log(emailContent);
+      } else {
+        // 프로덕션 환경에서 이메일 전송
+        if (users.length > 0) {
+          await resend.emails.send({
+            from: resendFrom,
+            to: users.map((u) => u.email!),
+            subject: `새로운 세트리스트: ${finalSetlist.title}`,
+            html: emailContent,
+          });
+          console.log(`이메일 전송 완료: ${users.length}명의 사용자에게 전송`);
+        } else {
+          console.log("공유 대상 사용자가 없습니다.");
+        }
+      }
     }
 
     return NextResponse.json(finalSetlist as SetlistResponse, { status: 201 });

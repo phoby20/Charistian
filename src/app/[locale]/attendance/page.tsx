@@ -9,7 +9,7 @@ import MemberCard from "@/components/MemberCard";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
-import { User } from "@/types/customUser";
+import { CustomUser } from "@/types/customUser";
 import Loading from "@/components/Loading";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/utils/useRouter";
@@ -24,7 +24,7 @@ function AttendanceContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading, error: authError } = useAuth();
-  const [members, setMembers] = useState<User[]>([]);
+  const [members, setMembers] = useState<CustomUser[]>([]);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [selectedSubGroup, setSelectedSubGroup] = useState<string | null>(null);
@@ -53,9 +53,9 @@ function AttendanceContent() {
         credentials: "include",
       });
       if (!response.ok) throw new Error(t("failedToFetchMembers"));
-      const { members }: { members: User[] } = await response.json();
+      const { members }: { members: CustomUser[] } = await response.json();
       const filteredMembers = members.filter(
-        (userData: User) => userData.churchId === user.churchId
+        (userData: CustomUser) => userData.churchId === user.churchId
       );
       setMembers(filteredMembers);
     } catch (err) {

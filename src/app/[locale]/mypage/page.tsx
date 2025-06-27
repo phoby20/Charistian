@@ -12,6 +12,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "@/utils/useRouter";
 import { useAuth } from "@/context/AuthContext";
 import { toCamelCase } from "@/utils/toCamelCase";
+import Chip from "@/components/Chip";
+import {
+  Group,
+  SubGroup,
+  Team,
+  Duty,
+  User as PrismaUser,
+} from "@prisma/client";
+
+interface ExtendedUser extends PrismaUser {
+  groups: Group[];
+  subGroups: SubGroup[];
+  teams: Team[];
+  duties: Duty[];
+}
 
 export default function MyPage() {
   const t = useTranslations("MyPage");
@@ -35,9 +50,9 @@ export default function MyPage() {
     position: "",
     profileImage: undefined as File | undefined,
   });
-  const [positions, setPositions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  // const [positions, setPositions] = useState<
+  //   { value: string; label: string }[]
+  // >([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null); // 미리보기 URL 상태
   const fileInputRef = useRef<HTMLInputElement>(null); // 파일 입력 참조
 
@@ -71,31 +86,31 @@ export default function MyPage() {
     setPreviewImage(user.profileImage || null);
 
     // 직분 조회
-    const fetchPositions = async () => {
-      if (user.churchId) {
-        try {
-          const response = await fetch(
-            `/api/churches/${encodeURIComponent(user.churchId)}/positions`
-          );
-          if (response.ok) {
-            const data = await response.json();
-            setPositions(
-              data.map((p: { id: string; name: string }) => ({
-                value: p.id,
-                label: p.name,
-              }))
-            );
-          } else {
-            setError(t("noPositionsFound"));
-          }
-        } catch (err) {
-          console.error("Error fetching positions:", err);
-          setError(t("serverError"));
-        }
-      }
-    };
+    // const fetchPositions = async () => {
+    //   if (user.churchId) {
+    //     try {
+    //       const response = await fetch(
+    //         `/api/churches/${encodeURIComponent(user.churchId)}/positions`
+    //       );
+    //       if (response.ok) {
+    //         const data = await response.json();
+    //         setPositions(
+    //           data.map((p: { id: string; name: string }) => ({
+    //             value: p.id,
+    //             label: p.name,
+    //           }))
+    //         );
+    //       } else {
+    //         setError(t("noPositionsFound"));
+    //       }
+    //     } catch (err) {
+    //       console.error("Error fetching positions:", err);
+    //       setError(t("serverError"));
+    //     }
+    //   }
+    // };
 
-    fetchPositions();
+    // fetchPositions();
   }, [user, router, t]);
 
   const handleInputChange = (
@@ -273,6 +288,39 @@ export default function MyPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Groups, SubGroups, Teams, Duties 배지 */}
+        <div className="mb-6 text-center">
+          {user && (
+            <div className="flex flex-wrap justify-center gap-2">
+              {(user as ExtendedUser).groups &&
+                (user as ExtendedUser).groups.length > 0 &&
+                (user as ExtendedUser).groups.map((group: Group) => (
+                  <Chip key={`group-${group.id}`} label={group.name} />
+                ))}
+              {(user as ExtendedUser).subGroups &&
+                (user as ExtendedUser).subGroups.length > 0 &&
+                (user as ExtendedUser).subGroups.map((subGroup: SubGroup) => (
+                  <Chip key={`subGroup-${subGroup.id}`} label={subGroup.name} />
+                ))}
+              {(user as ExtendedUser).teams &&
+                (user as ExtendedUser).teams.length > 0 &&
+                (user as ExtendedUser).teams.map((team: Team) => (
+                  <Chip
+                    key={`team-${team.id}`}
+                    label={team.name}
+                    color="yellow"
+                  />
+                ))}
+              {(user as ExtendedUser).duties &&
+                (user as ExtendedUser).duties.length > 0 &&
+                (user as ExtendedUser).duties.map((duty: Duty) => (
+                  <Chip key={`duty-${duty.id}`} label={duty.name} color="red" />
+                ))}
+            </div>
+          )}
+        </div>
+
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -383,7 +431,7 @@ export default function MyPage() {
             className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
             placeholder={t("region")}
           />
-          <Select
+          {/* <Select
             label={t("position")}
             name="position"
             options={positions}
@@ -391,7 +439,7 @@ export default function MyPage() {
             onChange={handleInputChange}
             disabled={positions.length === 0}
             className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
-          />
+          /> */}
 
           <div className="col-span-full flex justify-center mt-6">
             <Button

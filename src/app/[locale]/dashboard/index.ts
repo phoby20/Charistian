@@ -1,8 +1,9 @@
 // src/app/[locale]/dashboard/index.ts
-
+import { getKoreaDate } from "@/utils/creatKoreaDate";
 import { ChurchApplication, User } from "@prisma/client";
-import { format, subDays } from "date-fns";
+import { subDays } from "date-fns";
 import { Dispatch, SetStateAction } from "react";
+import { UserWithRelations } from "@/types/customUser";
 
 interface AttendanceRecord {
   userId: string;
@@ -12,7 +13,7 @@ interface AttendanceRecord {
 export interface MemberStatsData {
   totalMembers: number;
   roleDistribution: { [role: string]: number };
-  recentMembers: User[];
+  recentMembers: UserWithRelations[];
 }
 
 export interface AttendanceStatsData {
@@ -24,16 +25,18 @@ export interface AttendanceStatsData {
 export const fetchData = async (
   user: User | null,
   isLoading: boolean,
-  memberStats: MemberStatsData,
   setPendingChurches: Dispatch<SetStateAction<ChurchApplication[]>>,
   setPendingUsers: Dispatch<SetStateAction<User[]>>,
-  setAttendanceStats: Dispatch<SetStateAction<AttendanceStatsData>>,
-  setMemberStats: Dispatch<SetStateAction<MemberStatsData>>,
   setFetchError: Dispatch<SetStateAction<string | null>>,
   setIsLoading: Dispatch<SetStateAction<boolean>>,
-  t: (key: string, values?: Record<string, string | number | Date>) => string // 번역 함수 타입 명시
-) => {
-  if (!user || isLoading) return;
+  t: (key: string, values?: Record<string, string | number | Date>) => string
+): Promise<{
+  members: UserWithRelations[];
+  attendances: AttendanceRecord[];
+}> => {
+  if (!user || isLoading) {
+    return { members: [], attendances: [] };
+  }
   setIsLoading(true);
   try {
     // Fetch pending data
@@ -45,8 +48,10 @@ export const fetchData = async (
     const {
       pendingChurches,
       pendingUsers,
-    }: { pendingChurches: ChurchApplication[]; pendingUsers: User[] } =
-      await pendingResponse.json();
+    }: {
+      pendingChurches: ChurchApplication[];
+      pendingUsers: User[];
+    } = await pendingResponse.json();
     setPendingChurches(pendingChurches);
 
     if (["MASTER", "SUPER_ADMIN", "ADMIN"].includes(user.role)) {
@@ -62,80 +67,36 @@ export const fetchData = async (
       setPendingUsers([]);
     }
 
+    // Fetch all members
+    const membersResponse = await fetch("/api/members", {
+      credentials: "include",
+    });
+
+    if (!membersResponse.ok) throw new Error("Failed to fetch members");
+    const { members }: { members: UserWithRelations[] } =
+      await membersResponse.json();
+
     // Fetch attendance stats (SUPER_ADMIN, ADMIN only)
+    let attendances: AttendanceRecord[] = [];
     if (["SUPER_ADMIN", "ADMIN"].includes(user.role) && user.churchId) {
-      const today = new Date();
-      const startDate = subDays(today, 7).toISOString().split("T")[0];
-      const endDate = today.toISOString().split("T")[0];
+      const today = getKoreaDate();
+      const startDate = subDays(today, 6).toISOString().split("T")[0];
 
       const attendanceResponse = await fetch(
-        `/api/attendance/search?startDate=${startDate}&endDate=${endDate}`,
+        `/api/attendance/search?startDate=${startDate}&endDate=${today.toISOString().split("T")[0]}`,
         { credentials: "include" }
       );
 
       if (!attendanceResponse.ok) throw new Error("Failed to fetch attendance");
-      const { attendances }: { attendances: AttendanceRecord[] } =
-        await attendanceResponse.json();
-
-      // Today’s attendance count
-      const todayCount = attendances.filter(
-        (att) => att.date === endDate
-      ).length;
-
-      // Weekly attendance rate
-      const weekAttendees = new Set(attendances.map((att) => att.userId)).size;
-      const weekRate =
-        memberStats.totalMembers > 0
-          ? (weekAttendees / memberStats.totalMembers) * 100
-          : 0;
-
-      // Last 7 days trend
-      const last7Days = Array.from({ length: 7 }, (_, i) => {
-        const date = subDays(today, 6 - i);
-        return {
-          date: format(date, "yyyy-MM-dd"),
-          count: attendances.filter(
-            (att) => att.date === format(date, "yyyy-MM-dd")
-          ).length,
-        };
-      });
-
-      setAttendanceStats({ todayCount, weekRate, last7Days });
+      const responseData = await attendanceResponse.json();
+      attendances = responseData.attendances || [];
     }
 
-    // Fetch member stats
-    if (["MASTER", "SUPER_ADMIN", "ADMIN"].includes(user.role)) {
-      const membersResponse = await fetch("/api/members", {
-        credentials: "include",
-      });
-
-      if (!membersResponse.ok) throw new Error("Failed to fetch members");
-      const { members }: { members: User[] } = await membersResponse.json();
-
-      const filteredMembers = user.churchId
-        ? members.filter((m: User) => m.churchId === user.churchId)
-        : members;
-
-      const totalMembers = filteredMembers.length;
-      const roleDistribution = filteredMembers.reduce(
-        (acc: { [role: string]: number }, m: User) => {
-          acc[m.role] = (acc[m.role] || 0) + 1;
-          return acc;
-        },
-        {}
-      );
-      const recentMembers = filteredMembers
-        .sort(
-          (a: User, b: User) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )
-        .slice(0, 5);
-
-      setMemberStats({ totalMembers, roleDistribution, recentMembers });
-    }
+    return { members, attendances };
   } catch (err) {
     console.error("Error fetching data:", err);
     setFetchError(t("serverError"));
+    return { members: [], attendances: [] };
   } finally {
     setIsLoading(false);
   }

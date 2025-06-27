@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    if (!["MASTER", "SUPER_ADMIN"].includes(role)) {
+    if (!["MASTER", "SUPER_ADMIN", "ADMIN", "GENERAL"].includes(role)) {
       return NextResponse.json(
         { error: "Insufficient permissions" },
         { status: 403 }

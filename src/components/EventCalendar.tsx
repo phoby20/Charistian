@@ -155,24 +155,28 @@ export default function EventCalendar({
 
   return (
     <>
-      <div className="bg-gradient-to-br from-gray-50 to-gray-200 p-2 rounded-lg h-screen flex flex-col">
+      <div className="p-2 rounded-lg h-screen flex flex-col bg-white">
         <h2 className="text-xl font-bold mt-6 mb-4 text-center">
           {t("calendar")}
         </h2>
         <div className="flex justify-between mb-4">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentDate(addDays(currentDate, -30))}
-          >
-            {t("Calendar.prevMonth")}
-          </Button>
+          <div>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentDate(addDays(currentDate, -30))}
+            >
+              {t("Calendar.prevMonth")}
+            </Button>
+          </div>
           <h3 className="text-lg">{format(currentDate, "yyyy년 MM월")}</h3>
-          <Button
-            variant="outline"
-            onClick={() => setCurrentDate(addDays(currentDate, 30))}
-          >
-            {t("Calendar.nextMonth")}
-          </Button>
+          <div>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentDate(addDays(currentDate, 30))}
+            >
+              {t("Calendar.nextMonth")}
+            </Button>
+          </div>
         </div>
         {isMobile ? (
           <MobileCalendar

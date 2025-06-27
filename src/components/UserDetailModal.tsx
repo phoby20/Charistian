@@ -2,18 +2,18 @@
 "use client";
 
 import { useState } from "react";
-import { User } from "@/types/customUser";
+import { CustomUser } from "@/types/customUser";
 import UserDetailView from "./UserDetailView";
 import UserDetailEditForm from "./UserDetailEditForm";
 import { useUserDetailData } from "@/app/hooks/useUserDetailData";
 
 interface UserDetailModalProps {
-  user: User;
+  user: CustomUser;
   isOpen: boolean;
   onClose: () => void;
   onApprove?: () => void;
   onReject?: () => void;
-  onUpdate?: (updatedUser: User) => void;
+  onUpdate?: (updatedUser: CustomUser) => void;
 }
 
 export default function UserDetailModal({
@@ -25,7 +25,7 @@ export default function UserDetailModal({
   onUpdate,
 }: UserDetailModalProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [user, setUser] = useState<User>(initialUser);
+  const [user, setUser] = useState<CustomUser>(initialUser);
   const { positions, groups, subGroups, duties, teams, isLoading, error } =
     useUserDetailData(
       user.churchId || "", // churchId가 null일 경우 빈 문자열
@@ -46,7 +46,7 @@ export default function UserDetailModal({
         setIsEditing(false);
         onClose();
       }}
-      onSave={(updatedUser: User) => {
+      onSave={(updatedUser: CustomUser) => {
         setUser(updatedUser);
         setIsEditing(false); // UserDetailView로 전환
         onUpdate?.(updatedUser);

@@ -1,4 +1,11 @@
-type UserRole = "MASTER" | "SUPER_ADMIN" | "ADMIN" | "GENERAL" | "VISITOR";
+type UserRole =
+  | "MASTER"
+  | "SUPER_ADMIN"
+  | "SUB_ADMIN"
+  | "ADMIN"
+  | "GENERAL"
+  | "CHECKER"
+  | "VISITOR";
 
 export type User = {
   id: string;

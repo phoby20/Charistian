@@ -7,17 +7,17 @@ import UserDetailModal from "@/components/UserDetailModal";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import Image from "next/image";
-import { User } from "@/types/customUser";
+import { CustomUser } from "@/types/customUser";
 import { useRouter } from "@/utils/useRouter";
 
 export default function PendingUsersPage() {
   const t = useTranslations();
   const router = useRouter();
-  const [pendingUsers, setPendingUsers] = useState<User[]>([]);
+  const [pendingUsers, setPendingUsers] = useState<CustomUser[]>([]);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userChurchId, setUserChurchId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<CustomUser | null>(null);
   const [isRejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -51,7 +51,7 @@ export default function PendingUsersPage() {
       if (userRole === "SUPER_ADMIN" || userRole === "ADMIN") {
         if (userChurchId) {
           const filteredUsers = pendingUsers.filter(
-            (user: User) => user.churchId === userChurchId
+            (user: CustomUser) => user.churchId === userChurchId
           );
           setPendingUsers(filteredUsers);
         } else {

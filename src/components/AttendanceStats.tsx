@@ -1,3 +1,4 @@
+// src/components/AttendanceStats.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -16,7 +17,6 @@ import {
 } from "chart.js";
 import { User } from "@prisma/client";
 
-// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -36,22 +36,27 @@ interface AttendanceStatsData {
 interface AttendanceStatsProps {
   user: User | null;
   attendanceStats: AttendanceStatsData;
+  selectedGroups: string[];
+  selectedSubGroups: string[];
+  selectedTeams: string[];
 }
 
 export default function AttendanceStats({
   user,
   attendanceStats,
+  selectedGroups,
+  selectedSubGroups,
+  selectedTeams,
 }: AttendanceStatsProps) {
   const t = useTranslations();
 
-  // Chart.js data for last 7 days attendance
   const chartData = {
     labels: attendanceStats.last7Days.map((day) => day.date),
     datasets: [
       {
         label: t("last7Days"),
         data: attendanceStats.last7Days.map((day) => day.count),
-        borderColor: "rgba(59, 130, 246, 1)", // Tailwind's blue-600
+        borderColor: "rgba(59, 130, 246, 1)",
         backgroundColor: "rgba(59, 130, 246, 0.2)",
         fill: true,
         tension: 0.4,
@@ -77,7 +82,7 @@ export default function AttendanceStats({
       tooltip: {
         callbacks: {
           label: (context: TooltipItem<"line">) =>
-            `${t("attendance")}: ${context.parsed.y} ${t("people")}`,
+            `${t("attendanceCount")}: ${context.parsed.y} ${t("people")}`,
         },
       },
     },
@@ -114,9 +119,25 @@ export default function AttendanceStats({
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-white p-6 rounded-lg shadow-md"
+      className="bg-white p-6 rounded-lg shadow-md w-full"
     >
       <h2 className="text-xl font-semibold mb-4">{t("attendanceStats")}</h2>
+      <div className="mb-4">
+        <p className="text-gray-600">
+          {t("filtersApplied")}:{" "}
+          {selectedGroups.length > 0
+            ? `${t("groupLabel")}: ${selectedGroups.join(", ")}`
+            : t("noGroups")}
+          {", "}
+          {selectedSubGroups.length > 0
+            ? `${t("subGroupLabel")}: ${selectedSubGroups.join(", ")}`
+            : t("noSubGroups")}
+          {", "}
+          {selectedTeams.length > 0
+            ? `${t("teamLabel")}: ${selectedTeams.join(", ")}`
+            : t("noTeams")}
+        </p>
+      </div>
       <div className="space-y-4">
         <div>
           <p className="text-gray-600">{t("todayAttendance")}</p>

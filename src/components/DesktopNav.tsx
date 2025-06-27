@@ -31,10 +31,13 @@ interface DesktopNavProps {
   setIsSettingsMenuOpen: (open: boolean) => void;
   isMembersMenuOpen: boolean;
   setIsMembersMenuOpen: (open: boolean) => void;
-  setIsEventsMenuOpen: (open: boolean) => void;
+  setIsEventsMenuOpen: (open: boolean) => void; // 유지
+  isScoresMenuOpen: boolean;
+  setIsScoresMenuOpen: (open: boolean) => void;
   userMenuRef: React.RefObject<HTMLDivElement | null>;
   settingsMenuRef: React.RefObject<HTMLDivElement | null>;
   membersMenuRef: React.RefObject<HTMLDivElement | null>;
+  scoresMenuRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function DesktopNav({
@@ -50,16 +53,20 @@ export default function DesktopNav({
   setIsSettingsMenuOpen,
   isMembersMenuOpen,
   setIsMembersMenuOpen,
-  setIsEventsMenuOpen,
+  setIsEventsMenuOpen, // 유지
+  isScoresMenuOpen,
+  setIsScoresMenuOpen,
   userMenuRef,
   settingsMenuRef,
   membersMenuRef,
+  scoresMenuRef,
 }: DesktopNavProps) {
   const closeAllDropdowns = () => {
     setIsUserMenuOpen(false);
     setIsSettingsMenuOpen(false);
     setIsMembersMenuOpen(false);
-    setIsEventsMenuOpen(false);
+    setIsEventsMenuOpen(false); // MobileNav를 위해 유지
+    setIsScoresMenuOpen(false);
   };
 
   return (
@@ -116,33 +123,59 @@ export default function DesktopNav({
         </>
       )}
 
-      {/* 달력 메뉴 */}
+      {/* Scores Dropdown */}
       {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "GENERAL"].includes(
         user?.role || ""
       ) && (
-        <>
-          <Link
-            href={getPathname({ locale, href: "/scores" })}
-            className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+        <div className="relative" ref={scoresMenuRef}>
+          <button
+            onClick={() => {
+              closeAllDropdowns();
+              setIsScoresMenuOpen(!isScoresMenuOpen);
+            }}
+            className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
           >
-            <div className="flex">
-              <FileMusic className="w-5 h-5 mr-1" />
-              {t("scores")}
+            <FileMusic className="w-5 h-5 mr-1" />
+            {t("scores")}
+            <ChevronDown className="w-4 h-4 ml-1" />
+          </button>
+          {isScoresMenuOpen && (
+            <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
+              <Link
+                href={getPathname({ locale, href: "/scores" })}
+                onClick={closeAllDropdowns}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                {t("scoreList")}
+              </Link>
+              <Link
+                href={getPathname({ locale, href: "/setlists" })}
+                onClick={closeAllDropdowns}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                {t("setlistList")}
+              </Link>
             </div>
-          </Link>
-          <Link
-            href={getPathname({ locale, href: "/calendar" })}
-            className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-          >
-            <div className="flex">
-              <Calendar className="w-5 h-5 mr-1" />
-              {t("calendar")}
-            </div>
-          </Link>
-        </>
+          )}
+        </div>
       )}
 
-      {/* 설정 메뉴 */}
+      {/* Calendar Menu */}
+      {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "GENERAL"].includes(
+        user?.role || ""
+      ) && (
+        <Link
+          href={getPathname({ locale, href: "/calendar" })}
+          className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+        >
+          <div className="flex">
+            <Calendar className="w-5 h-5 mr-1" />
+            {t("calendar")}
+          </div>
+        </Link>
+      )}
+
+      {/* Settings Menu */}
       {user && user.role === "SUPER_ADMIN" && (
         <div className="relative" ref={settingsMenuRef}>
           <button
@@ -169,7 +202,7 @@ export default function DesktopNav({
           )}
         </div>
       )}
-      {/* 사용자 메뉴 */}
+      {/* User Menu */}
       {user ? (
         <div className="relative" ref={userMenuRef}>
           <button

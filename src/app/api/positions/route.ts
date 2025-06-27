@@ -32,7 +32,11 @@ export async function GET() {
     }
 
     // 권한 확인
-    if (decoded.role !== "MASTER" && decoded.role !== "SUPER_ADMIN") {
+    if (
+      decoded.role !== "MASTER" &&
+      decoded.role !== "SUPER_ADMIN" &&
+      decoded.role !== "ADMIN"
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

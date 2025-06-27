@@ -26,7 +26,7 @@ export interface Team {
   name: string;
 }
 
-export interface User
+export interface CustomUser
   extends Omit<PrismaUser, "position" | "birthDate" | "createdAt"> {
   position: Position | null;
   birthDate: string;
@@ -41,7 +41,10 @@ export interface User
 }
 
 export interface UserFormData
-  extends Omit<User, "birthDate" | "group" | "subGroup" | "duties" | "teams"> {
+  extends Omit<
+    CustomUser,
+    "birthDate" | "group" | "subGroup" | "duties" | "teams"
+  > {
   birthDate: string;
   groupId: string | null;
   subGroupId: string | null;
@@ -49,4 +52,13 @@ export interface UserFormData
   teamIds: string[];
   role: Role;
   profileImage: string | null;
+}
+
+export interface UserWithRelations
+  extends Omit<CustomUser, "group" | "subGroup" | "duties" | "teams"> {
+  groups: { id: string; name: string }[];
+  subGroups: { id: string; name: string; groupId: string }[];
+  teams: { id: string; name: string }[];
+  duties: { id: string; name: string }[];
+  position: { id: string; name: string } | null;
 }

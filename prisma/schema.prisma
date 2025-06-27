@@ -41,6 +41,9 @@ model User {
   userEventLabels UserEventLabel[] @relation("UserEventLabel") // 추가: 사용자별 라벨 관계
   scoreLikes    ScoreLike[]  @relation("UserScoreLikes") // 추가: ScoreLike 관계
   scoreComments ScoreComment[] @relation("UserScoreComments") // 추가: ScoreComment 관계
+  setlists        Setlist[]        @relation("SetlistCreator")       // 추가됨
+  setlistShares   SetlistShare[]   @relation("UserSetlistShares")    // 추가됨
+  setlistComments SetlistComment[] @relation("UserSetlistComments")
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
@@ -64,6 +67,7 @@ model Church {
   positions         ChurchPosition[]   // 직분 목록 (예: ["목사", "집사"])
   creations         Creation[]
   events            Event[]    @relation("ChurchEvents")
+  setlists          Setlist[]        @relation("ChurchSetlists")
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
@@ -83,6 +87,7 @@ model Group {
   users         User[]    @relation("UserGroups")
   subGroups     SubGroup[]
   events        Event[]   @relation("GroupEvents")
+  setlistShares SetlistShare[]   @relation("GroupSetlistShares")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -107,6 +112,7 @@ model Team {
   church        Church    @relation(fields: [churchId], references: [id])
   users         User[]    @relation("UserTeams")
   events        Event[]   @relation("TeamEvents")
+  setlistShares SetlistShare[]   @relation("TeamSetlistShares")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -154,6 +160,7 @@ model Creation {
   purchases         Purchase[]
   likes             ScoreLike[]    // 좋아요
   comments          ScoreComment[] // 댓글
+  setlistScores     SetlistScore[]   @relation("CreationSetlistScores")
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 }
@@ -270,6 +277,57 @@ model Event {
   label         String?   // 새로 추가: 라벨 (예: "High", "Medium", "Low")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+}
+
+model Setlist {
+  id            String           @id @default(uuid())
+  title         String
+  date          DateTime
+  description   String?
+  fileUrl       String?          // 병합된 PDF URL 저장
+  creatorId     String
+  creator       User             @relation("SetlistCreator", fields: [creatorId], references: [id])
+  churchId      String
+  church        Church           @relation("ChurchSetlists", fields: [churchId], references: [id])
+  scores        SetlistScore[]
+  shares        SetlistShare[]
+  comments      SetlistComment[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model SetlistScore {
+  id          String    @id @default(uuid())
+  setlistId   String
+  setlist     Setlist   @relation(fields: [setlistId], references: [id])
+  creationId  String
+  creation    Creation  @relation("CreationSetlistScores", fields: [creationId], references: [id])
+  order       Int
+  createdAt   DateTime  @default(now())
+}
+
+model SetlistShare {
+  id          String    @id @default(uuid())
+  setlistId   String
+  setlist     Setlist   @relation(fields: [setlistId], references: [id])
+  groupId     String?
+  group       Group?    @relation("GroupSetlistShares", fields: [groupId], references: [id])
+  teamId      String?
+  team        Team?     @relation("TeamSetlistShares", fields: [teamId], references: [id])
+  userId      String?
+  user        User?     @relation("UserSetlistShares", fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+model SetlistComment {
+  id          String    @id @default(uuid())
+  setlistId   String
+  setlist     Setlist   @relation(fields: [setlistId], references: [id])
+  userId      String
+  user        User      @relation("UserSetlistComments", fields: [userId], references: [id])
+  content     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 enum EventStatus {

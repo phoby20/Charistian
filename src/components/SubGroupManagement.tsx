@@ -1,4 +1,3 @@
-// src/components/SubGroupManagement.tsx
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -134,11 +133,15 @@ export default function SubGroupManagement({
       return;
     }
     try {
-      const response = await fetch(`/api/subGroups/${editingSubGroup.id}`, {
+      console.log("Updating subGroup with ID:", editingSubGroup.id); // 디버깅 로그 추가
+      const response = await fetch("/api/subGroups", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ name: editingSubGroup.name }),
+        body: JSON.stringify({
+          name: editingSubGroup.name,
+          subGroupId: editingSubGroup.id,
+        }),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -169,6 +172,7 @@ export default function SubGroupManagement({
   // 서브그룹 삭제
   const handleDeleteSubGroup = async (id: string) => {
     try {
+      console.log("Deleting subGroup with ID:", id); // 디버깅 로그 추가
       const response = await fetch(`/api/subGroups/${id}`, {
         method: "DELETE",
         credentials: "include",
@@ -201,7 +205,7 @@ export default function SubGroupManagement({
   return (
     <div className="ml-4 mt-2">
       {/* 서브그룹 추가 */}
-      <div className="mb-4 flex flex-col sm:flex-row items-center gap-2">
+      <div className="mb-6 flex flex-col sm:flex-row items-center gap-2">
         <input
           type="text"
           value={newSubGroupName}
@@ -225,9 +229,9 @@ export default function SubGroupManagement({
       ) : subGroups.length === 0 ? (
         <p className="text-gray-500 italic text-sm">{t("noSubGroups")}</p>
       ) : (
-        <ul className="space-y-1">
+        <ul className="space-y-1 pl-3 pb-6">
           {subGroups.map((subGroup) => (
-            <li key={subGroup.id} className="flex items-center gap-2">
+            <li key={subGroup.id} className="flex items-center gap-2 mt-4">
               {editingSubGroup?.id === subGroup.id ? (
                 <div className="flex-1 flex items-center gap-2">
                   <input
@@ -240,11 +244,10 @@ export default function SubGroupManagement({
                       })
                     }
                     className="flex-1 p-2 border rounded-md text-sm"
-                    aria-label={t("editSubGroupName")}
                   />
                   <Button
                     onClick={handleUpdateSubGroup}
-                    className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 text-xs"
+                    className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"
                   >
                     {t("save")}
                   </Button>
@@ -253,7 +256,7 @@ export default function SubGroupManagement({
                       setEditingSubGroup(null);
                       setOpenMenuId(null);
                     }}
-                    className="bg-gray-400 text-white px-3 py-1 rounded-md hover:bg-blue-600 text-xs"
+                    className="bg-gray-400 text-white px-3 py-1 rounded-md hover:bg-blue-600"
                   >
                     {t("cancel")}
                   </Button>

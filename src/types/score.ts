@@ -12,8 +12,8 @@ export interface ScoreComment {
 export interface ScoreResponse {
   id: string;
   title: string;
-  titleEn?: string;
-  titleJa?: string;
+  titleEn: string | null;
+  titleJa: string | null;
   description?: string;
   tempo?: string;
   fileUrl: string;
@@ -74,4 +74,108 @@ export interface ApiErrorResponse {
 
 export interface ApiSuccessResponse {
   id: string;
+}
+
+export interface Score {
+  id: string;
+  title: string;
+  titleEn: string;
+  titleJa: string;
+  description?: string;
+  thumbnailUrl?: string;
+  genre?: string;
+  tempo?: number;
+  key?: string;
+  fileUrl: string;
+  referenceUrls?: string[];
+  creator: { name: string };
+  composer?: string;
+  lyricist?: string;
+  _count: { likes: number; comments: number };
+  likes: { id: string }[];
+}
+
+export interface Share {
+  id: string;
+  group?: { id: string; name: string };
+  team?: { id: string; name: string };
+  user?: { id: string; name: string };
+}
+
+export interface Setlists {
+  id: string;
+  title: string;
+  date: string;
+  creator: { name: string; id: string };
+  church: { name: string };
+  shares: Share[];
+}
+
+export interface Creation {
+  id: string;
+  title: string;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+}
+
+export interface Share {
+  id: string;
+  group?: { id: string; name: string };
+  team?: { id: string; name: string };
+  user?: { id: string; name: string };
+}
+
+export interface Setlists {
+  id: string;
+  title: string;
+  date: string;
+  description?: string;
+  creatorId: string;
+  scores: { id: string; creation: Creation; order: number }[];
+  shares: Share[];
+}
+
+export interface SelectedSong {
+  id: string;
+  title: string;
+  titleEn: string;
+  titleJa: string;
+  key: string;
+  fileUrl: string;
+  referenceUrls: string[];
+}
+
+export interface SetlistResponse {
+  id: string;
+  title: string;
+  date: string;
+  description?: string;
+  fileUrl: string | null;
+  creator: { name: string; id: string };
+  creatorId: string;
+  scores: {
+    id: string;
+    creation: SelectedSong;
+    order: number;
+  }[];
+  comments: {
+    id: string;
+    user: { name: string };
+    content: string;
+    createdAt: string;
+  }[];
+  shares: Share[];
 }

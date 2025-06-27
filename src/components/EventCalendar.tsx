@@ -155,7 +155,7 @@ export default function EventCalendar({
 
   return (
     <>
-      <div className="bg-gradient-to-br from-gray-50 to-gray-200 p-2 rounded-lg h-screen flex flex-col">
+      <div className="p-2 rounded-lg h-screen flex flex-col bg-white">
         <h2 className="text-xl font-bold mt-6 mb-4 text-center">
           {t("calendar")}
         </h2>

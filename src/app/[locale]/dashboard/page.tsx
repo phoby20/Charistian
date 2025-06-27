@@ -6,8 +6,8 @@ import { useState, useEffect } from "react";
 import { ChurchApplication, User } from "@prisma/client";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/utils/useRouter";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { motion } from "framer-motion";
+import { format, subDays } from "date-fns";
 import AttendanceStats from "@/components/AttendanceStats";
 import MemberStats from "@/components/MemberStats";
 import { AttendanceStatsData, fetchData, MemberStatsData } from "./index";
@@ -18,6 +18,13 @@ import MyQRCode from "@/components/MyQRCode";
 import QRScanner from "@/components/QRScanner";
 import EventCalendar from "@/components/EventCalendar";
 import { UserWithRelations } from "@/types/customUser";
+import MobileFilterDropdowns from "@/components/dashboard/MobileFilterDropdowns";
+import DesktopFilterTabs from "@/components/dashboard/DesktopFilterTabs";
+
+interface AttendanceRecord {
+  userId: string;
+  date: string;
+}
 
 export default function DashboardPage() {
   const t = useTranslations();
@@ -54,83 +61,132 @@ export default function DashboardPage() {
   const [isGroupMenuOpen, setIsGroupMenuOpen] = useState<boolean>(false);
   const [isSubGroupMenuOpen, setIsSubGroupMenuOpen] = useState<boolean>(false);
   const [isTeamMenuOpen, setIsTeamMenuOpen] = useState<boolean>(false);
+  const [cachedData, setCachedData] = useState<{
+    members: UserWithRelations[];
+    attendances: AttendanceRecord[];
+  }>({ members: [], attendances: [] });
 
-  // 그룹, 서브그룹, 팀 데이터를 가져오는 함수
+  // 초기 데이터 페칭
   useEffect(() => {
-    const fetchFilterData = async () => {
-      if (!user || !user.churchId) return;
-      try {
-        const response = await fetch("/api/members", {
-          credentials: "include",
-        });
-        if (!response.ok) throw new Error(t("serverError"));
-        const { members }: { members: UserWithRelations[] } =
-          await response.json();
+    const fetchInitialData = async () => {
+      if (!user || isAuthLoading) return;
+      const data = await fetchData(
+        user,
+        isAuthLoading,
+        setPendingChurches,
+        setPendingUsers,
+        setFetchError,
+        setIsLoading,
+        t
+      );
+      setCachedData(data);
 
-        // 고유한 그룹, 서브그룹, 팀 목록 추출
-        const uniqueGroups = Array.from(
-          new Set(members.flatMap((m) => m.groups.map((g) => g.name)))
-        ).sort();
-        const uniqueSubGroups = Array.from(
-          new Set(members.flatMap((m) => m.subGroups.map((sg) => sg.name)))
-        ).sort();
-        const uniqueTeams = Array.from(
-          new Set(members.flatMap((m) => m.teams.map((t) => t.name)))
-        ).sort();
+      // 그룹, 서브그룹, 팀 목록 추출
+      const uniqueGroups = Array.from(
+        new Set(data.members.flatMap((m) => m.groups.map((g) => g.name)))
+      ).sort();
+      const uniqueSubGroups = Array.from(
+        new Set(data.members.flatMap((m) => m.subGroups.map((sg) => sg.name)))
+      ).sort();
+      const uniqueTeams = Array.from(
+        new Set(data.members.flatMap((m) => m.teams.map((t) => t.name)))
+      ).sort();
 
-        setGroups(uniqueGroups);
-        setSubGroups(uniqueSubGroups);
-        setTeams(uniqueTeams);
-      } catch (err) {
-        console.error("Error fetching filter data:", err);
-        setFetchError(t("serverError"));
-      }
+      setGroups(uniqueGroups);
+      setSubGroups(uniqueSubGroups);
+      setTeams(uniqueTeams);
     };
 
-    fetchFilterData();
-  }, [user, t]);
+    fetchInitialData();
+  }, [user, isAuthLoading, t]);
 
-  // 데이터 페칭
+  // 필터링 및 통계 계산
   useEffect(() => {
-    fetchData(
-      user,
-      isAuthLoading,
-      memberStats,
-      setPendingChurches,
-      setPendingUsers,
-      setAttendanceStats,
-      setMemberStats,
-      setFetchError,
-      setIsLoading,
-      t,
-      selectedGroups,
-      selectedSubGroups,
-      selectedTeams
-    );
-  }, [user, isAuthLoading, selectedGroups, selectedSubGroups, selectedTeams]);
+    if (!user || isAuthLoading) return;
 
-  const handleGroupSelect = (group: string) => {
-    setSelectedGroups((prev) =>
-      prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]
+    // 필터링된 멤버 목록
+    const filteredMembers = cachedData.members.filter(
+      (m: UserWithRelations) => {
+        const inSelectedGroups =
+          selectedGroups.length === 0 ||
+          m.groups.some((g) => selectedGroups.includes(g.name));
+        const inSelectedSubGroups =
+          selectedSubGroups.length === 0 ||
+          m.subGroups.some((sg) => selectedSubGroups.includes(sg.name));
+        const inSelectedTeams =
+          selectedTeams.length === 0 ||
+          m.teams.some((t) => selectedTeams.includes(t.name));
+        return (
+          inSelectedGroups &&
+          inSelectedSubGroups &&
+          inSelectedTeams &&
+          m.churchId === user.churchId
+        );
+      }
     );
-    setIsGroupMenuOpen(false);
-  };
 
-  const handleSubGroupSelect = (subGroup: string) => {
-    setSelectedSubGroups((prev) =>
-      prev.includes(subGroup)
-        ? prev.filter((sg) => sg !== subGroup)
-        : [...prev, subGroup]
+    // Member stats 계산
+    const totalMembers = filteredMembers.length;
+    const roleDistribution = filteredMembers.reduce(
+      (acc: { [role: string]: number }, m: UserWithRelations) => {
+        acc[m.role] = (acc[m.role] || 0) + 1;
+        return acc;
+      },
+      {}
     );
-    setIsSubGroupMenuOpen(false);
-  };
+    const recentMembers = filteredMembers
+      .sort(
+        (a: UserWithRelations, b: UserWithRelations) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      .slice(0, 5);
 
-  const handleTeamSelect = (team: string) => {
-    setSelectedTeams((prev) =>
-      prev.includes(team) ? prev.filter((t) => t !== team) : [...prev, team]
-    );
-    setIsTeamMenuOpen(false);
-  };
+    setMemberStats({ totalMembers, roleDistribution, recentMembers });
+
+    // 출석 통계 계산 (SUPER_ADMIN, ADMIN only)
+    if (["SUPER_ADMIN", "ADMIN"].includes(user.role) && user.churchId) {
+      const filteredAttendances = cachedData.attendances.filter((att) =>
+        filteredMembers.some((m) => m.id === att.userId)
+      );
+
+      const today = new Date();
+      const todayString = format(today, "yyyy-MM-dd");
+
+      // Today’s attendance count
+      const todayCount = filteredAttendances.filter(
+        (att) => att.date === todayString
+      ).length;
+
+      // Weekly attendance rate
+      const weekAttendees = new Set(
+        filteredAttendances.map((att) => att.userId)
+      ).size;
+      const weekRate =
+        totalMembers > 0 ? (weekAttendees / totalMembers) * 100 : 0;
+
+      // Last 7 days trend
+      const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const date = subDays(today, 6 - i);
+        const dateString = format(date, "yyyy-MM-dd");
+        return {
+          date: dateString,
+          count: filteredAttendances.filter((att) => att.date === dateString)
+            .length,
+        };
+      });
+
+      setAttendanceStats({ todayCount, weekRate, last7Days });
+    } else {
+      setAttendanceStats({ todayCount: 0, weekRate: 0, last7Days: [] });
+    }
+  }, [
+    user,
+    isAuthLoading,
+    cachedData,
+    selectedGroups,
+    selectedSubGroups,
+    selectedTeams,
+  ]);
 
   if (isLoading || !user) {
     return <Loading />;
@@ -153,220 +209,35 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* 모바일 필터 드롭다운 */}
-        <div className="flex space-x-2 mb-6 md:hidden">
-          {/* 그룹 선택 드롭다운 */}
-          <div className="relative">
-            <button
-              onClick={() => setIsGroupMenuOpen(!isGroupMenuOpen)}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-              aria-expanded={isGroupMenuOpen}
-              aria-haspopup="true"
-            >
-              <span className="truncate max-w-[120px]">
-                {selectedGroups.length > 0
-                  ? selectedGroups.join(", ")
-                  : t("selectGroups")}
-              </span>
-              <ChevronDown
-                className="w-4 h-4 transition-transform duration-200"
-                style={{
-                  transform: isGroupMenuOpen
-                    ? "rotate(180deg)"
-                    : "rotate(0deg)",
-                }}
-              />
-            </button>
-            <AnimatePresence>
-              {isGroupMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-30 overflow-hidden"
-                >
-                  {groups.map((group) => (
-                    <button
-                      key={group}
-                      onClick={() => handleGroupSelect(group)}
-                      className={`block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 ${
-                        selectedGroups.includes(group) ? "bg-blue-100" : ""
-                      }`}
-                      role="menuitem"
-                    >
-                      {group}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+        <MobileFilterDropdowns
+          groups={groups}
+          subGroups={subGroups}
+          teams={teams}
+          selectedGroups={selectedGroups}
+          selectedSubGroups={selectedSubGroups}
+          selectedTeams={selectedTeams}
+          setSelectedGroups={setSelectedGroups}
+          setSelectedSubGroups={setSelectedSubGroups}
+          setSelectedTeams={setSelectedTeams}
+          isGroupMenuOpen={isGroupMenuOpen}
+          isSubGroupMenuOpen={isSubGroupMenuOpen}
+          isTeamMenuOpen={isTeamMenuOpen}
+          setIsGroupMenuOpen={setIsGroupMenuOpen}
+          setIsSubGroupMenuOpen={setIsSubGroupMenuOpen}
+          setIsTeamMenuOpen={setIsTeamMenuOpen}
+        />
 
-          {/* 서브그룹 선택 드롭다운 */}
-          <div className="relative">
-            <button
-              onClick={() => setIsSubGroupMenuOpen(!isSubGroupMenuOpen)}
-              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-full text-sm font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
-              aria-expanded={isSubGroupMenuOpen}
-              aria-haspopup="true"
-            >
-              <span className="truncate max-w-[120px]">
-                {selectedSubGroups.length > 0
-                  ? selectedSubGroups.join(", ")
-                  : t("selectSubGroups")}
-              </span>
-              <ChevronDown
-                className="w-4 h-4 transition-transform duration-200"
-                style={{
-                  transform: isSubGroupMenuOpen
-                    ? "rotate(180deg)"
-                    : "rotate(0deg)",
-                }}
-              />
-            </button>
-            <AnimatePresence>
-              {isSubGroupMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-30 overflow-hidden"
-                >
-                  {subGroups.map((subGroup) => (
-                    <button
-                      key={subGroup}
-                      onClick={() => handleSubGroupSelect(subGroup)}
-                      className={`block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors duration-200 ${
-                        selectedSubGroups.includes(subGroup)
-                          ? "bg-purple-100"
-                          : ""
-                      }`}
-                      role="menuitem"
-                    >
-                      {subGroup}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* 팀 선택 드롭다운 */}
-          <div className="relative">
-            <button
-              onClick={() => setIsTeamMenuOpen(!isTeamMenuOpen)}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
-              aria-expanded={isTeamMenuOpen}
-              aria-haspopup="true"
-            >
-              <span className="truncate max-w-[120px]">
-                {selectedTeams.length > 0
-                  ? selectedTeams.join(", ")
-                  : t("selectTeams")}
-              </span>
-              <ChevronDown
-                className="w-4 h-4 transition-transform duration-200"
-                style={{
-                  transform: isTeamMenuOpen ? "rotate(180deg)" : "rotate(0deg)",
-                }}
-              />
-            </button>
-            <AnimatePresence>
-              {isTeamMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-30 overflow-hidden"
-                >
-                  {teams.map((team) => (
-                    <button
-                      key={team}
-                      onClick={() => handleTeamSelect(team)}
-                      className={`block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-200 ${
-                        selectedTeams.includes(team) ? "bg-green-100" : ""
-                      }`}
-                      role="menuitem"
-                    >
-                      {team}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* 데스크톱 필터 탭 */}
-        <div className="hidden md:block space-y-4 bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-200 mb-6">
-          <p className="font-bold">{t("filter")}</p>
-          <div className="flex items-center space-x-4 p-1">
-            <span className="w-24 min-w-24">{t("selectGroups")}</span>
-            <nav className="flex space-x-1 bg-gray-100 p-1 pl-4 rounded-full border border-gray-200 items-center w-full">
-              {groups.map((group) => (
-                <motion.button
-                  key={group}
-                  onClick={() => handleGroupSelect(group)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-4 py-2 text-sm font-medium rounded-full transition-colors duration-200 ${
-                    selectedGroups.includes(group)
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "bg-white text-gray-600 hover:bg-gray-200"
-                  }`}
-                  aria-selected={selectedGroups.includes(group)}
-                  role="tab"
-                >
-                  {group}
-                </motion.button>
-              ))}
-            </nav>
-          </div>
-          <div className="flex items-center space-x-4 p-1">
-            <span className="w-24 min-w-24">{t("selectSubGroups")}</span>
-            <nav className="flex space-x-1 bg-gray-100 p-1 pl-4 rounded-full border border-gray-200 items-center w-full">
-              {subGroups.map((subGroup) => (
-                <motion.button
-                  key={subGroup}
-                  onClick={() => handleSubGroupSelect(subGroup)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-4 py-2 text-sm font-medium rounded-full transition-colors duration-200 ${
-                    selectedSubGroups.includes(subGroup)
-                      ? "bg-purple-600 text-white shadow-sm"
-                      : "bg-white text-gray-600 hover:bg-gray-200"
-                  }`}
-                  aria-selected={selectedSubGroups.includes(subGroup)}
-                  role="tab"
-                >
-                  {subGroup}
-                </motion.button>
-              ))}
-            </nav>
-          </div>
-          <div className="flex items-center space-x-4 p-1">
-            <span className="w-24 min-w-24">{t("selectTeams")}</span>
-            <nav className="flex space-x-1 bg-gray-100 p-1 pl-4 rounded-full border border-gray-200 items-center w-full">
-              {teams.map((team) => (
-                <motion.button
-                  key={team}
-                  onClick={() => handleTeamSelect(team)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-4 py-2 text-sm font-medium rounded-full transition-colors duration-200 ${
-                    selectedTeams.includes(team)
-                      ? "bg-green-600 text-white shadow-sm"
-                      : "bg-white text-gray-600 hover:bg-gray-200"
-                  }`}
-                  aria-selected={selectedTeams.includes(team)}
-                  role="tab"
-                >
-                  {team}
-                </motion.button>
-              ))}
-            </nav>
-          </div>
-        </div>
+        <DesktopFilterTabs
+          groups={groups}
+          subGroups={subGroups}
+          teams={teams}
+          selectedGroups={selectedGroups}
+          selectedSubGroups={selectedSubGroups}
+          selectedTeams={selectedTeams}
+          setSelectedGroups={setSelectedGroups}
+          setSelectedSubGroups={setSelectedSubGroups}
+          setSelectedTeams={setSelectedTeams}
+        />
 
         <PendingAlerts
           user={user}
@@ -375,25 +246,29 @@ export default function DashboardPage() {
         />
 
         <div className="grid grid-cols-1 gap-6">
-          <AttendanceStats
-            user={user}
-            attendanceStats={attendanceStats}
-            selectedGroups={selectedGroups}
-            selectedSubGroups={selectedSubGroups}
-            selectedTeams={selectedTeams}
-          />
-          <MemberStats
-            user={user}
-            memberStats={memberStats}
-            selectedGroups={selectedGroups}
-            selectedSubGroups={selectedSubGroups}
-            selectedTeams={selectedTeams}
-          />
-          <EventCalendar
-            user={user}
-            setFetchError={setFetchError}
-            setIsLoading={setIsLoading}
-          />
+          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6 w-full">
+            <AttendanceStats
+              user={user}
+              attendanceStats={attendanceStats}
+              selectedGroups={selectedGroups}
+              selectedSubGroups={selectedSubGroups}
+              selectedTeams={selectedTeams}
+            />
+            <MemberStats
+              user={user}
+              memberStats={memberStats}
+              selectedGroups={selectedGroups}
+              selectedSubGroups={selectedSubGroups}
+              selectedTeams={selectedTeams}
+            />
+          </div>
+          <div className="w-full bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <EventCalendar
+              user={user}
+              setFetchError={setFetchError}
+              setIsLoading={setIsLoading}
+            />
+          </div>
         </div>
 
         <ErrorModal

@@ -42,7 +42,7 @@ export default function MemberStats({
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-white p-6 rounded-lg shadow-md"
+      className="bg-white p-6 rounded-lg shadow-md w-full"
     >
       <h2 className="text-xl font-bold mb-4">{t("memberStats")}</h2>
       <div className="mb-4">

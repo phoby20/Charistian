@@ -1,3 +1,4 @@
+// src/app/[locale]/scores/[id]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -33,6 +34,7 @@ export default function ScoreDetailPage() {
   const { id, locale } = params;
   const { user } = useAuth();
   const [score, setScore] = useState<ScoreResponse | null>(null);
+  const [appUrl, setAppUrl] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string[]>([]);
   const [isLiked, setIsLiked] = useState(false);
@@ -60,6 +62,7 @@ export default function ScoreDetailPage() {
         setScore(data);
         setLikeCount(data._count?.likes || 0);
         setIsLiked(data.isLiked || false);
+        setAppUrl(data.appUrl);
       } catch (error: unknown) {
         let errorMessage = t("error");
         if (error instanceof Error) {
@@ -253,6 +256,7 @@ export default function ScoreDetailPage() {
               user={user}
               score={score}
               imageError={imageError}
+              appUrl={appUrl}
               setImageError={setImageError}
             />
             <motion.div

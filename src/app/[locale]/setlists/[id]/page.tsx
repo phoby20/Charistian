@@ -1,3 +1,4 @@
+// src/app/[locale]/setlists/[id]/page.tsx
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
@@ -5,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
-import { AlertCircle, ArrowLeft, Download, Edit } from "lucide-react";
+import { AlertCircle, ArrowLeft, Edit, Eye } from "lucide-react"; // Eye 아이콘 추가
 import Loading from "@/components/Loading";
 import { format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
@@ -211,12 +212,13 @@ export default function SetlistDetailPage() {
                     </span>
                   </div>
                   <a
-                    href={score.creation.fileUrl}
-                    download
+                    href={`${appUrl}/api/proxy/creation/${score.creation.id}/file`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-blue-600 hover:text-blue-700 transition-colors"
-                    aria-label={`Download ${score.creation.title}`}
+                    aria-label={`View ${score.creation.title}`}
                   >
-                    <Download className="w-5 h-5" />
+                    <Eye className="w-5 h-5" />
                   </a>
                 </motion.li>
               ))}
@@ -260,10 +262,10 @@ export default function SetlistDetailPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center space-x-2 bg-blue-600 text-white py-4 px-4 rounded-xl shadow-sm hover:bg-blue-700 transition-colors"
-                aria-label={t("downloadPdf")}
+                aria-label={t("viewPdf")}
               >
-                <Download className="w-5 h-5" />
-                <span className="text-sm font-medium">{t("downloadPdf")}</span>
+                <Eye className="w-5 h-5" />
+                <span className="text-sm font-medium">{t("viewPdf")}</span>
               </a>
             </motion.div>
           )}

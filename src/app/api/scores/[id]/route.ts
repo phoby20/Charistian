@@ -1,9 +1,9 @@
 // src/app/api/scores/[id]/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
 import { allowedRoles } from "../allowedRoles";
+import { getLocalIpAddress } from "@/utils/getLocalIpAddress";
 
 export async function GET(
   req: NextRequest,
@@ -53,6 +53,9 @@ export async function GET(
     );
   }
 
+  const ip = getLocalIpAddress();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${ip}:3001`;
+
   // 현재 사용자가 좋아요했는지 여부 추가
   const isLiked = score.likes.length > 0;
 
@@ -60,6 +63,7 @@ export async function GET(
     {
       ...score,
       isLiked, // 현재 사용자의 좋아요 여부
+      appUrl,
     },
     { status: 200 }
   );

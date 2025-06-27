@@ -1,19 +1,19 @@
 // src/components/scores/ScoreInfo.tsx
-
 "use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Download, ImageOff, ChevronDown, ChevronUp } from "lucide-react";
+import { ImageOff, ChevronDown, ChevronUp, Eye } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ScoreResponse } from "@/types/score";
 import { User } from "@prisma/client";
-import Button from "@/components/Button"; // Button 컴포넌트 임포트
+import Button from "@/components/Button";
 
 interface ScoreInfoProps {
   user: User | null;
   score: ScoreResponse;
   imageError: string[];
+  appUrl: string;
   setImageError: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
@@ -21,6 +21,7 @@ export default function ScoreInfo({
   user,
   score,
   imageError,
+  appUrl,
   setImageError,
 }: ScoreInfoProps) {
   const t = useTranslations("ScoreDetail");
@@ -38,6 +39,12 @@ export default function ScoreInfo({
     en: score.lyricsEn || t("none"),
     ja: score.lyricsJa || t("none"),
   };
+
+  // 프록시 URL 생성
+  const proxyFileUrl =
+    score.id && score.fileUrl
+      ? `${appUrl}/api/proxy/creation/${score.id}/file`
+      : "#";
 
   return (
     <div className="flex flex-col max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -154,7 +161,7 @@ export default function ScoreInfo({
                 </button>
               </div>
               <motion.p
-                key={activeLyricsTab} // 탭 전환 시 애니메이션 재생
+                key={activeLyricsTab}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
@@ -245,10 +252,15 @@ export default function ScoreInfo({
           className="flex flex-col sm:flex-row gap-4 mt-6"
         >
           {user?.churchId === score.churchId && score.fileUrl && (
-            <a href={score.fileUrl} download className="flex-1">
-              <Button variant="outline" aria-label={t("download")}>
-                <Download className="w-5 h-5" />
-                <span>{t("download")}</span>
+            <a
+              href={proxyFileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1"
+            >
+              <Button variant="outline" aria-label={t("viewPdf")}>
+                <Eye className="w-5 h-5" />
+                <span>{t("viewPdf")}</span>
               </Button>
             </a>
           )}

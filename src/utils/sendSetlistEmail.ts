@@ -1,4 +1,4 @@
-// src/utils/email.ts
+// src/utils/sendSetlistEmail.ts
 import { NextRequest } from "next/server";
 import { Resend } from "resend";
 import { createKoreaDate } from "@/utils/creatKoreaDate";

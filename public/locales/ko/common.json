@@ -481,7 +481,8 @@
     "closed": "닫힘",
     "showMore": "더 보기",
     "showLess": "접기",
-    "noGenre": "장르 없음"
+    "noGenre": "장르 없음",
+    "viewPdf": "PDF 보기"
   },
   "tempoRange": "템포 범위",
   "page": "페이지",
@@ -574,7 +575,9 @@
     "save": "변경 사항 저장",
     "authError": "인증 오류가 발생했습니다.",
     "noSongs": "등록된 곡이 없습니다.",
-    "downloadPdf": "통합 PDF 다운로드"
+    "downloadPdf": "통합 PDF 다운로드",
+    "viewPdf": "통합 악보 열기",
+    "invalidId": "잘못된 ID입니다"
   },
   "scoreList": "악보리스트",
   "setlistList": "콘티리스트",

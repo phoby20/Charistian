@@ -472,7 +472,8 @@
     "closed": "クローズ",
     "showMore": "もっと見る",
     "showLess": "もっと少なく",
-    "noGenre": "ジャンルなし"
+    "noGenre": "ジャンルなし",
+    "viewPdf": "PDFを開く"
   },
   "tempoRange": "テンポ範囲",
   "page": "ページ",
@@ -564,7 +565,9 @@
     "save": "保存",
     "authError": "認証エラーが発生しました。",
     "noSongs": "選曲リストに曲がありません。",
-    "downloadPdf": "統合PDFをダウンロード"
+    "downloadPdf": "統合PDFをダウンロード",
+    "viewPdf": "統合楽譜を開く",
+    "invalidId": "誤ったIDです"
   },
   "scoreList": "楽譜リスト",
   "setlistList": "コンテリスト",

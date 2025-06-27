@@ -1,8 +1,7 @@
 // src/app/[locale]/members/page.tsx
-
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import UserDetailModal from "@/components/UserDetailModal";
 import Modal from "@/components/Modal";
@@ -17,8 +16,8 @@ import { useRouter } from "@/utils/useRouter";
 import Loading from "@/components/Loading";
 import { useAuth } from "@/context/AuthContext";
 
-export default function MembersPage() {
-  const t = useTranslations();
+function MembersContent() {
+  const t = useTranslations("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [members, setMembers] = useState<CustomUser[]>([]);
@@ -33,38 +32,32 @@ export default function MembersPage() {
 
   const fetchMembers = useCallback(async () => {
     try {
-      if (!authLoading) {
-        if (user?.role !== "SUPER_ADMIN" && user?.role !== "ADMIN") {
-          router.push("/login");
-          return;
-        }
-        if (!user.churchId) {
-          setMembers([]);
-          return;
-        }
-        const response = await fetch("/api/members");
-        if (!response.ok) throw new Error("Failed to fetch members");
-        const { members } = await response.json();
-        const filteredMembers = members.filter(
-          (member: CustomUser) => member.churchId === user.churchId
-        );
-        setMembers(filteredMembers);
+      if (authLoading) return;
+      if (!user || (user?.role !== "SUPER_ADMIN" && user?.role !== "ADMIN")) {
+        router.push("/login");
+        return;
       }
+      if (!user.churchId) {
+        setMembers([]);
+        setIsLoading(false);
+        return;
+      }
+      const response = await fetch("/api/members");
+      if (!response.ok) throw new Error(t("serverError"));
+      const { members } = await response.json();
+      const filteredMembers = members.filter(
+        (member: CustomUser) => member.churchId === user.churchId
+      );
+      setMembers(filteredMembers);
     } catch (err) {
       console.error("Error fetching members:", err);
       setError(t("serverError"));
-    }
-  }, [user?.role, router, user?.churchId, t]);
-
-  useEffect(() => {
-    if (user?.role !== null && user?.churchId !== null) {
-      setIsLoading(true);
-      fetchMembers();
+    } finally {
       setIsLoading(false);
     }
-  }, [user?.role, user?.churchId, router, fetchMembers]);
+  }, [authLoading, user, router, t]);
 
-  // 그룹 목록 생성
+  // 그룹 및 팀 목록 생성
   const groups = Array.from(
     new Set(members.map((user) => user.group?.name || t("noGroup")))
   ).sort((a, b) => {
@@ -73,42 +66,43 @@ export default function MembersPage() {
     return a.localeCompare(b);
   });
 
-  // 팀 목록 생성
   const teams = Array.from(
     new Set(members.flatMap((user) => user.teams.map((team) => team.name)))
   ).sort((a, b) => a.localeCompare(b));
 
   // URL 파라미터로 선택된 그룹 및 팀 설정
   useEffect(() => {
+    if (!searchParams) return;
+
     const groupParams = searchParams.getAll("group");
     const teamParams = searchParams.getAll("team");
 
-    if (groupParams.length > 0) {
-      const validGroups = groupParams.filter((group) => groups.includes(group));
-      setSelectedGroups(validGroups);
-    } else {
-      setSelectedGroups([]);
-    }
+    const validGroups = groupParams.filter((group) => groups.includes(group));
+    setSelectedGroups(validGroups.length > 0 ? validGroups : []);
 
-    if (teamParams.length > 0) {
-      const validTeams = teamParams.filter((team) => teams.includes(team));
-      setSelectedTeams(validTeams);
-    } else {
-      setSelectedTeams([]);
-    }
+    const validTeams = teamParams.filter((team) => teams.includes(team));
+    setSelectedTeams(validTeams.length > 0 ? validTeams : []);
 
     // URL 동기화
     const newSearchParams = new URLSearchParams();
-    selectedGroups.forEach((group) => {
+    validGroups.forEach((group) => {
       newSearchParams.append("group", encodeURIComponent(group));
     });
-    selectedTeams.forEach((team) => {
+    validTeams.forEach((team) => {
       newSearchParams.append("team", encodeURIComponent(team));
     });
     router.replace(`/members?${newSearchParams.toString()}`, {
       scroll: false,
     });
   }, []);
+
+  // 회원 데이터 가져오기
+  useEffect(() => {
+    if (user?.role && user?.churchId) {
+      setIsLoading(true);
+      fetchMembers();
+    }
+  }, [user?.role, user?.churchId, fetchMembers]);
 
   // 선택된 그룹 및 팀으로 회원 필터링
   const filteredMembers = members.filter((user) => {
@@ -295,5 +289,13 @@ export default function MembersPage() {
         </div>
       </main>
     </motion.div>
+  );
+}
+
+export default function MembersPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <MembersContent />
+    </Suspense>
   );
 }

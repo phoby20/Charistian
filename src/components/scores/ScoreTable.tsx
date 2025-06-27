@@ -271,6 +271,7 @@ export default function ScoreTable({
                         titleJa: score.titleJa,
                         key: score.key ?? "",
                         referenceUrls: score.referenceUrls ?? [],
+                        fileUrl: score.fileUrl,
                       })
                     }
                     className="text-blue-500 hover:text-blue-600 cursor-pointer p-4"

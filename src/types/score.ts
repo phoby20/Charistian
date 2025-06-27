@@ -86,6 +86,7 @@ export interface Score {
   genre?: string;
   tempo?: number;
   key?: string;
+  fileUrl: string;
   referenceUrls?: string[];
   creator: { name: string };
   composer?: string;

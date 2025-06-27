@@ -588,7 +588,13 @@
   },
   "filterByTeam": "チームでフィルタリング",
   "noTeam": "チームなし",
-  "selectTeams": "チーム選択",
-  "selectGroups": "グループ選択",
-  "filter": "フィルター"
+  "selectSubGroups": "サブグループを選択",
+  "selectTeams": "チームを選択",
+  "noGroups": "グループなし",
+  "filter": "フィルター",
+  "filtersApplied": "適用されたフィルター",
+  "selectGroups": "グループを選択",
+  "groupLabel": "グループ",
+  "subGroupLabel": "サブグループ",
+  "teamLabel": "チーム"
 }

@@ -53,3 +53,12 @@ export interface UserFormData
   role: Role;
   profileImage: string | null;
 }
+
+export interface UserWithRelations
+  extends Omit<CustomUser, "group" | "subGroup" | "duties" | "teams"> {
+  groups: { id: string; name: string }[];
+  subGroups: { id: string; name: string; groupId: string }[];
+  teams: { id: string; name: string }[];
+  duties: { id: string; name: string }[];
+  position: { id: string; name: string } | null;
+}

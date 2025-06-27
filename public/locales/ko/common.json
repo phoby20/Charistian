@@ -598,7 +598,13 @@
   },
   "filterByTeam": "팀으로 필터링",
   "noTeam": "팀이 없습니다",
+  "selectSubGroups": "서브그룹 선택",
   "selectTeams": "팀 선택",
+  "noGroups": "그룹 없음",
+  "filter": "필터",
+  "filtersApplied": "적용된 필터",
   "selectGroups": "그룹 선택",
-  "filter": "필터"
+  "groupLabel": "그룹",
+  "subGroupLabel": "서브그룹",
+  "teamLabel": "팀"
 }

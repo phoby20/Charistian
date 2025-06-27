@@ -10,7 +10,7 @@ import Button from "@/components/Button";
 import MobileFilterDropdowns from "@/components/members/MobileFilterDropdowns";
 import DesktopFilterTabs from "@/components/members/DesktopFilterTabs";
 import MemberList from "@/components/members/MemberList";
-import { User } from "@/types/customUser";
+import { CustomUser } from "@/types/customUser";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/utils/useRouter";
@@ -21,10 +21,10 @@ export default function MembersPage() {
   const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [members, setMembers] = useState<User[]>([]);
+  const [members, setMembers] = useState<CustomUser[]>([]);
   const { user, isLoading: authLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<CustomUser | null>(null);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [isGroupMenuOpen, setIsGroupMenuOpen] = useState(false);
@@ -46,7 +46,7 @@ export default function MembersPage() {
         if (!response.ok) throw new Error("Failed to fetch members");
         const { members } = await response.json();
         const filteredMembers = members.filter(
-          (member: User) => member.churchId === user.churchId
+          (member: CustomUser) => member.churchId === user.churchId
         );
         setMembers(filteredMembers);
       }
@@ -130,7 +130,7 @@ export default function MembersPage() {
 
   // subGroup별로 회원 그룹화
   const subGroupedMembers = filteredMembers.reduce(
-    (acc: { [key: string]: User[] }, user: User) => {
+    (acc: { [key: string]: CustomUser[] }, user: CustomUser) => {
       const subGroupKey = user.subGroup?.name || t("noSubGroup");
       if (!acc[subGroupKey]) {
         acc[subGroupKey] = [];

@@ -4,13 +4,13 @@ import Image from "next/image";
 import Modal from "./Modal";
 import Button from "./Button";
 import Loading from "./Loading";
-import { User } from "@/types/customUser";
+import { CustomUser } from "@/types/customUser";
 import { getBorderColor } from "./roleBadge";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 
 interface UserDetailViewProps {
-  user: User;
+  user: CustomUser;
   isOpen: boolean;
   onClose: () => void;
   onApprove?: () => void;
@@ -167,20 +167,25 @@ export default function UserDetailView({
                           ? new Date(user.birthDate).toLocaleDateString()
                           : t("none")
                         : key === "position"
-                        ? user.position?.name || t("noPosition")
-                        : key === "groupId"
-                        ? user.group?.name || t("noGroup")
-                        : key === "subGroupId"
-                        ? user.subGroup?.name || t("noSubGroup")
-                        : key === "dutyIds"
-                        ? user.duties && user.duties.length > 0
-                          ? user.duties.map((duty) => duty.name).join(", ")
-                          : t("noDuties")
-                        : key === "teamIds"
-                        ? user.teams && user.teams.length > 0
-                          ? user.teams.map((team) => team.name).join(", ")
-                          : t("noTeams")
-                        : (user[key as keyof User] as string) || t("none")}
+                          ? user.position?.name || t("noPosition")
+                          : key === "groupId"
+                            ? user.group?.name || t("noGroup")
+                            : key === "subGroupId"
+                              ? user.subGroup?.name || t("noSubGroup")
+                              : key === "dutyIds"
+                                ? user.duties && user.duties.length > 0
+                                  ? user.duties
+                                      .map((duty) => duty.name)
+                                      .join(", ")
+                                  : t("noDuties")
+                                : key === "teamIds"
+                                  ? user.teams && user.teams.length > 0
+                                    ? user.teams
+                                        .map((team) => team.name)
+                                        .join(", ")
+                                    : t("noTeams")
+                                  : (user[key as keyof CustomUser] as string) ||
+                                    t("none")}
                     </p>
                   </div>
                 </div>

@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
 import MemberCard from "@/components/MemberCard";
-import { User } from "@/types/customUser";
+import { CustomUser } from "@/types/customUser";
 import { useTranslations } from "next-intl";
 
 interface MemberListProps {
-  filteredMembers: User[];
-  subGroupedMembers: { [key: string]: User[] };
+  filteredMembers: CustomUser[];
+  subGroupedMembers: { [key: string]: CustomUser[] };
   sortedSubGroupKeys: string[];
-  setSelectedUser: (user: User | null) => void;
+  setSelectedUser: (user: CustomUser | null) => void;
 }
 
 export default function MemberList({

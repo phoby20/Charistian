@@ -1,14 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { User } from "@/types/customUser";
+import { CustomUser } from "@/types/customUser";
 import { getBorderColor } from "./roleBadge";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 
 interface MemberCardProps {
-  user: User;
-  onClick: (user: User) => void;
+  user: CustomUser;
+  onClick: (user: CustomUser) => void;
   attendanceStatus?: {
     [key: string]: boolean;
   };

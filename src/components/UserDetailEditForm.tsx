@@ -6,7 +6,7 @@ import Button from "./Button";
 import Image from "next/image";
 import Loading from "./Loading";
 import {
-  User,
+  CustomUser,
   UserFormData,
   Position,
   Group,
@@ -50,10 +50,10 @@ interface Field {
 }
 
 interface UserDetailEditFormProps {
-  user: User;
+  user: CustomUser;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (updatedUser: User) => void;
+  onSave: (updatedUser: CustomUser) => void;
   positions: Position[];
   groups: Group[];
   subGroups: SubGroup[];
@@ -296,7 +296,7 @@ export default function UserDetailEditForm({
   };
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const role = e.target.value as User["role"];
+    const role = e.target.value as CustomUser["role"];
     setFormData((prev) => ({ ...prev, role }));
   };
 
@@ -357,7 +357,7 @@ export default function UserDetailEditForm({
 
       const apiUser = await response.json();
 
-      const updatedUser: User = {
+      const updatedUser: CustomUser = {
         ...user,
         name: apiUser.user.name || formData.name,
         email: apiUser.user.email || formData.email,

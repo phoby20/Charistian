@@ -65,8 +65,12 @@ export async function GET(
     }
 
     // PDF 파일 가져오기
+    console.log(`Fetching PDF from: ${setlist.fileUrl}`); // 디버깅 로그
     const response = await fetch(setlist.fileUrl);
     if (!response.ok) {
+      console.error(
+        `PDF 다운로드 실패: ${setlist.fileUrl}, status: ${response.status}`
+      );
       return NextResponse.json(
         { error: "PDF 파일을 가져오는 데 실패했습니다." },
         { status: 500 }
@@ -79,10 +83,11 @@ export async function GET(
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="setlist_${id}.pdf"`,
+        "Content-Disposition": `inline; filename="setlist_${id}.pdf"`, // attachment -> inline
       },
     });
   } catch (error) {
+    console.error(`PDF 프록시 오류 (setlistId: ${id}):`, error);
     return handleApiError(error, "PDF 파일 프록시");
   }
 }

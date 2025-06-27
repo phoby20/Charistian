@@ -5,27 +5,9 @@ import { createKoreaDate } from "@/utils/creatKoreaDate";
 import { createEmailContent } from "@/utils/createSetListEmailContent";
 import { SetlistResponse } from "@/types/setList";
 import prisma from "@/lib/prisma";
-import os from "os";
+import { getLocalIpAddress } from "./getLocalIpAddress";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-// 로컬 IP를 취득
-function getLocalIpAddress() {
-  const interfaces = os.networkInterfaces();
-
-  for (const name of Object.keys(interfaces)) {
-    const net = interfaces[name];
-    if (!net) continue;
-
-    for (const iface of net) {
-      if (iface.family === "IPv4" && !iface.internal) {
-        return iface.address; // 예: 192.168.0.10
-      }
-    }
-  }
-
-  return "localhost";
-}
 
 export async function sendSetlistEmail(
   req: NextRequest,

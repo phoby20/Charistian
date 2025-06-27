@@ -6,6 +6,7 @@ import { sendSetlistEmail } from "@/utils/sendSetlistEmail";
 import { handleApiError } from "@/utils/handleApiError";
 import { SetlistResponse } from "@/types/setList";
 import { del } from "@vercel/blob";
+import { getLocalIpAddress } from "@/utils/getLocalIpAddress";
 
 interface UpdateSetlistRequest {
   title: string;
@@ -70,12 +71,15 @@ export async function GET(
       );
     }
 
+    const ip = getLocalIpAddress();
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${ip}:3001`;
+
     const hasAccess = await checkAccess(authResult.payload.userId, id);
     if (!hasAccess) {
       return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
     }
 
-    return NextResponse.json(setlist, { status: 200 });
+    return NextResponse.json({ setlist, appUrl }, { status: 200 });
   } catch (error) {
     return handleApiError(error, "세트리스트 조회");
   }

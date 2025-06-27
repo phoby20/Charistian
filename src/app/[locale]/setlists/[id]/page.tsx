@@ -19,6 +19,7 @@ export default function SetlistDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const [setlist, setSetlist] = useState<SetlistResponse | null>(null);
+  const [appUrl, setAppUrl] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,13 +29,17 @@ export default function SetlistDetailPage() {
   useEffect(() => {
     const fetchSetlist = async () => {
       try {
+        if (typeof id !== "string") {
+          throw new Error(t("invalidId"));
+        }
         const response = await fetch(`/api/setlists/${id}`);
 
         if (!response.ok) {
           throw new Error((await response.json()).error || t("fetchError"));
         }
         const data = await response.json();
-        setSetlist(data);
+        setSetlist(data.setlist);
+        setAppUrl(data.appUrl);
       } catch (err) {
         setError(err instanceof Error ? err.message : t("fetchError"));
       }
@@ -48,6 +53,9 @@ export default function SetlistDetailPage() {
     setIsSubmitting(true);
 
     try {
+      if (typeof id !== "string") {
+        throw new Error(t("invalidId"));
+      }
       const response = await fetch(`/api/setlists/${id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,6 +80,11 @@ export default function SetlistDetailPage() {
     user &&
     (user.id === setlist?.creatorId ||
       ["SUPER_ADMIN", "ADMIN"].includes(user.role));
+
+  // 프록시 URL 생성
+  const proxyFileUrl = setlist?.id
+    ? `${appUrl}/api/proxy/setlist/${setlist.id}/file`
+    : "#";
 
   if (error) {
     return (
@@ -243,7 +256,7 @@ export default function SetlistDetailPage() {
               className="mb-6"
             >
               <a
-                href={setlist.fileUrl}
+                href={proxyFileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center space-x-2 bg-blue-600 text-white py-4 px-4 rounded-xl shadow-sm hover:bg-blue-700 transition-colors"

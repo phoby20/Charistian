@@ -1,19 +1,20 @@
 // src/app/[locale]/setlists/[id]/page.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
-import { AlertCircle, ArrowLeft, Edit, Eye } from "lucide-react"; // Eye 아이콘 추가
+import { AlertCircle, ArrowLeft, Edit, Eye, Play, Pause } from "lucide-react";
 import Loading from "@/components/Loading";
 import { format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
-
 import { SetlistResponse } from "@/types/score";
 import Chip from "@/components/Chip";
 import { getDisplayTitle } from "@/utils/getDisplayTitle";
+import YouTube, { YouTubePlayer } from "react-youtube";
+import { debounce } from "lodash";
 
 export default function SetlistDetailPage() {
   const t = useTranslations("Setlist");
@@ -25,8 +26,119 @@ export default function SetlistDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentPlayingId, setCurrentPlayingId] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const playerRef = useRef<YouTubePlayer | null>(null);
 
   const dateLocale = locale === "ko" ? ko : ja;
+
+  // YouTube URL에서 videoId 추출
+  const getYouTubeVideoId = (url?: string): string | undefined => {
+    if (!url) return undefined;
+    const regex =
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : undefined;
+  };
+
+  // 첫 번째 YouTube URL의 videoId 가져오기
+  const getFirstYouTubeVideoId = (urls?: string[]): string | undefined => {
+    if (!urls || urls.length === 0) return undefined;
+    for (const url of urls) {
+      const videoId = getYouTubeVideoId(url);
+      if (videoId) return videoId;
+    }
+    return undefined;
+  };
+
+  // 시간 포맷팅 (초 -> MM:SS)
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+  };
+
+  // 디바운싱된 재생/정지 핸들러
+  const handlePlayPause = useCallback(
+    debounce(async (scoreId: string) => {
+      if (currentPlayingId === scoreId) {
+        if (playerRef.current) {
+          try {
+            await playerRef.current.pauseVideo();
+            setCurrentPlayingId(null);
+          } catch (err) {
+            console.error("Error pausing video:", err);
+          }
+        }
+      } else {
+        if (playerRef.current && currentPlayingId) {
+          try {
+            await playerRef.current.pauseVideo();
+          } catch (err) {
+            console.error("Error pausing current video:", err);
+          }
+        }
+        setCurrentPlayingId(scoreId);
+        const videoId = getFirstYouTubeVideoId(
+          setlist?.scores.find((s) => s.id === scoreId)?.creation.referenceUrls
+        );
+        if (videoId && playerRef.current) {
+          try {
+            await playerRef.current.loadVideoById(videoId);
+          } catch (err) {
+            console.error("Error loading new video:", err);
+            setError(t("youtubeError"));
+          }
+        }
+      }
+    }, 300),
+    [currentPlayingId, setlist]
+  );
+
+  // YouTube 플레이어 준비 완료
+  const onPlayerReady = (event: { target: YouTubePlayer }) => {
+    playerRef.current = event.target;
+    setDuration(event.target.getDuration());
+    if (currentPlayingId) {
+      event.target.playVideo();
+    }
+  };
+
+  // YouTube 상태 변경 감지
+  const onStateChange = (event: { target: YouTubePlayer; data: number }) => {
+    if (event.data === 1) {
+      setDuration(event.target.getDuration());
+    } else if (event.data === 2 || event.data === 0) {
+      setCurrentPlayingId(null);
+    }
+  };
+
+  // 레인지바로 시간 이동
+  const handleSeek = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newTime = parseFloat(event.target.value);
+    if (playerRef.current) {
+      playerRef.current.seekTo(newTime, true);
+      setCurrentTime(newTime);
+    }
+  };
+
+  // 현재 시간 업데이트
+  useEffect(() => {
+    if (currentPlayingId && playerRef.current) {
+      const interval = setInterval(() => {
+        setCurrentTime(playerRef.current!.getCurrentTime());
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [currentPlayingId]);
+
+  // 컴포넌트 언마운트 시 playerRef 정리
+  useEffect(() => {
+    return () => {
+      playerRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     const fetchSetlist = async () => {
@@ -88,6 +200,14 @@ export default function SetlistDetailPage() {
     ? `${appUrl}/api/proxy/setlist/${setlist.id}/file`
     : "#";
 
+  // 현재 재생 중인 비디오 ID
+  const currentVideoId = currentPlayingId
+    ? getFirstYouTubeVideoId(
+        setlist?.scores.find((s) => s.id === currentPlayingId)?.creation
+          .referenceUrls
+      )
+    : undefined;
+
   if (error) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -103,6 +223,7 @@ export default function SetlistDetailPage() {
           </div>
           <Link href={`/${locale}/setlists`}>
             <motion.button
+              type="button"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="flex items-center space-x-2 bg-blue-600 text-white py-2 px-4 rounded-xl shadow-sm hover:bg-blue-700 transition-colors"
@@ -134,10 +255,31 @@ export default function SetlistDetailPage() {
           transition={{ duration: 0.6 }}
           className="bg-white rounded-2xl shadow-xl p-8"
         >
+          {/* YouTube 플레이어 (숨김) */}
+          {currentPlayingId && currentVideoId && (
+            <div className="hidden">
+              <YouTube
+                key={currentVideoId}
+                videoId={currentVideoId}
+                opts={{
+                  width: 0,
+                  height: 0,
+                  playerVars: { autoplay: 0, controls: 0, showinfo: 0 },
+                }}
+                onReady={onPlayerReady}
+                onStateChange={onStateChange}
+                onError={(e) => {
+                  console.error("YouTube 플레이어 오류:", e);
+                  setError(t("youtubeError"));
+                }}
+              />
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div className="flex items-center space-x-4">
               <Link href={`/${locale}/setlists`}>
                 <motion.button
+                  type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="flex items-center space-x-2 bg-gray-200 text-gray-700 py-2 px-4 rounded-xl shadow-sm hover:bg-gray-300 transition-colors"
@@ -148,10 +290,10 @@ export default function SetlistDetailPage() {
                 </motion.button>
               </Link>
             </div>
-
             {canEdit && (
               <Link href={`/${locale}/setlists/${id}/edit`}>
                 <motion.button
+                  type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="flex items-center space-x-2 bg-blue-600 text-white py-2 px-4 rounded-xl shadow-sm hover:bg-blue-700 transition-colors"
@@ -191,39 +333,99 @@ export default function SetlistDetailPage() {
           <ul className="space-y-3 mb-8">
             {setlist.scores
               .sort((a, b) => a.order - b.order)
-              .map((score, index) => (
-                <motion.li
-                  key={score.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className="flex items-center justify-between bg-gray-50 rounded-xl p-4 shadow-sm"
-                >
-                  <div className="flex items-center space-x-3">
-                    <span className="text-gray-700 font-medium">
-                      {index + 1}.
-                    </span>
-                    <span className="text-gray-800">
-                      {getDisplayTitle(
-                        score.creation.title,
-                        score.creation.titleEn,
-                        score.creation.titleJa,
-                        locale
-                      )}
-                    </span>
-                  </div>
-                  <a
-                    href={`${appUrl}/api/proxy/creation/${score.creation.id}/file`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700 transition-colors"
-                    aria-label={`View ${score.creation.title}`}
+              .map((score, index) => {
+                const youtubeVideoId = getFirstYouTubeVideoId(
+                  score.creation.referenceUrls
+                );
+                return (
+                  <motion.li
+                    key={score.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    className={`flex items-center justify-between bg-gray-50 rounded-xl p-4 shadow-sm ${
+                      currentPlayingId === score.id ? "bg-blue-100" : ""
+                    }`}
                   >
-                    <Eye className="w-5 h-5" />
-                  </a>
-                </motion.li>
-              ))}
+                    <div className="flex items-center space-x-3">
+                      <span className="text-gray-700 font-medium">
+                        {index + 1}.
+                      </span>
+                      <div className="flex sm:flex-row flex-col">
+                        <Chip label={score.creation.key} />
+                        <span className="text-gray-800">
+                          {getDisplayTitle(
+                            score.creation.title,
+                            score.creation.titleEn,
+                            score.creation.titleJa,
+                            locale
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-5">
+                      {youtubeVideoId && (
+                        <motion.button
+                          type="button"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePlayPause(score.id);
+                          }}
+                          className="text-red-500 hover:text-red-600 cursor-pointer p-2"
+                          aria-label={
+                            currentPlayingId === score.id
+                              ? t("pause")
+                              : t("play")
+                          }
+                        >
+                          {currentPlayingId === score.id ? (
+                            <Pause className="w-5 h-5" />
+                          ) : (
+                            <Play className="w-5 h-5" />
+                          )}
+                        </motion.button>
+                      )}
+                      <a
+                        href={`${appUrl}/api/proxy/creation/${score.creation.id}/file`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-700 transition-colors"
+                        aria-label={`View ${score.creation.title}`}
+                      >
+                        <Eye className="w-5 h-5" />
+                      </a>
+                    </div>
+                  </motion.li>
+                );
+              })}
           </ul>
+          {/* 레인지바 */}
+          {currentPlayingId && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="mt-4 bg-white shadow-lg p-4 flex items-center gap-4 rounded-lg mb-8"
+            >
+              <span className="text-sm text-gray-600">
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </span>
+              <input
+                type="range"
+                min={0}
+                max={duration}
+                value={currentTime}
+                onChange={handleSeek}
+                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                aria-label={t("seek")}
+                aria-valuenow={currentTime}
+                aria-valuemin={0}
+                aria-valuemax={duration}
+              />
+            </motion.div>
+          )}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -291,9 +493,9 @@ export default function SetlistDetailPage() {
                 />
               </motion.div>
               <motion.button
+                type="submit"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                type="submit"
                 disabled={isSubmitting || !comment || !user}
                 className={`mt-3 py-2 px-6 rounded-xl text-white font-semibold text-sm ${
                   isSubmitting || !comment || !user

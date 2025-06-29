@@ -35,22 +35,16 @@ export default function SetlistEditPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isFormInvalid, setIsFormInvalid] = useState<boolean>(true);
 
   const dateLocale = locale === "ko" ? ko : ja;
 
   // 폼 유효성 검사
-
-  useEffect(() => {
-    const isInvalid =
-      !title.trim() ||
-      !date ||
-      !description ||
-      selectedSongs.length === 0 ||
-      selectedTeams.length === 0 ||
-      (!selectedGroup && selectedTeams.length === 0);
-    setIsFormInvalid(isInvalid);
-  }, [title, description, date, selectedSongs, selectedGroup, selectedTeams]);
+  const isFormInvalid =
+    !title.trim() ||
+    !date ||
+    !description.trim() ||
+    selectedSongs.length === 0 ||
+    (!selectedGroup && selectedTeams.length === 0);
 
   useEffect(() => {
     if (!user || !user.churchId) {
@@ -69,8 +63,7 @@ export default function SetlistEditPage() {
         const { setlist }: { setlist: SetlistResponse; appUrl: string } =
           await setlistRes.json();
 
-        setTitle(setlist.title);
-        // 날짜 유효성 검사
+        setTitle(setlist.title || "");
         if (setlist.date) {
           const parsedDate = parseISO(setlist.date);
           if (!isNaN(parsedDate.getTime())) {
@@ -84,15 +77,17 @@ export default function SetlistEditPage() {
         }
         setDescription(setlist.description || "");
         setSelectedSongs(
-          setlist.scores.map((score) => ({
-            id: score.creation.id,
-            title: score.creation.title,
-            titleJa: score.creation.titleJa,
-            titleEn: score.creation.titleEn,
-            key: score.creation.key,
-            referenceUrls: score.creation.referenceUrls,
-            fileUrl: score.creation.fileUrl,
-          }))
+          Array.isArray(setlist.scores)
+            ? setlist.scores.map((score) => ({
+                id: score.creation.id,
+                title: score.creation.title || "",
+                titleJa: score.creation.titleJa || "",
+                titleEn: score.creation.titleEn || "",
+                key: score.creation.key || "",
+                referenceUrls: score.creation.referenceUrls || [],
+                fileUrl: score.creation.fileUrl || "",
+              }))
+            : []
         );
 
         // Fetch available groups and teams
@@ -119,12 +114,13 @@ export default function SetlistEditPage() {
         setTeams(teamData.teams);
 
         // Initialize selected groups and teams from shares
-        const groupShare = setlist.shares.find(
+        const groupShare = setlist.shares?.find(
           (s: { group?: Group }) => s.group
         )?.group?.id;
-        const teamShares = setlist.shares
-          .filter((s: { team?: Team }) => s.team)
-          .map((s) => s.team?.id ?? "");
+        const teamShares =
+          setlist.shares
+            ?.filter((s: { team?: Team }) => s.team)
+            .map((s) => s.team?.id ?? "") || [];
         setSelectedGroup(groupShare || "");
         setSelectedTeams(teamShares);
       } catch (err) {
@@ -134,29 +130,32 @@ export default function SetlistEditPage() {
       }
     };
 
-    // Load selected songs from sessionStorage
-    const stored = sessionStorage.getItem("selectedSongList");
-    if (stored) {
-      try {
-        setSelectedSongs(JSON.parse(stored));
-      } catch (err) {
-        console.error("Error parsing selectedSongList:", err);
+    // Load selected songs from sessionStorage after fetchData
+    fetchData().then(() => {
+      const stored = sessionStorage.getItem("selectedSongList");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            setSelectedSongs(parsed);
+          } else {
+            console.error("Invalid selectedSongList format");
+          }
+        } catch (err) {
+          console.error("Error parsing selectedSongList:", err);
+        }
       }
-    }
-
-    fetchData();
+    });
   }, [id, t, user]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!title || !date || selectedSongs.length === 0) {
+    if (isFormInvalid) {
       setError(t("requiredFields"));
-      setIsLoading(false);
       return;
     }
     if (!user?.id || !user?.churchId) {
       setError(t("authError"));
-      setIsLoading(false);
       return;
     }
     setIsSubmitting(true);
@@ -188,7 +187,6 @@ export default function SetlistEditPage() {
       setError(err instanceof Error ? err.message : t("updateError"));
     } finally {
       setIsSubmitting(false);
-      setIsLoading(false);
     }
   };
 
@@ -223,6 +221,7 @@ export default function SetlistEditPage() {
             <div className="flex items-center space-x-4">
               <Link href={`/${locale}/setlists/${id}`}>
                 <motion.button
+                  type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="flex items-center space-x-2 bg-gray-200 text-gray-700 py-2 px-4 rounded-xl shadow-sm hover:bg-gray-300 transition-colors"
@@ -269,7 +268,9 @@ export default function SetlistEditPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t("enterTitle")}
-                className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 transition-all duration-200 hover:bg-gray-50"
+                className={`block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 transition-all duration-200 hover:bg-gray-50 ${
+                  error && !title.trim() ? "border-red-500" : ""
+                }`}
                 required
                 aria-label={t("title")}
               />
@@ -292,7 +293,9 @@ export default function SetlistEditPage() {
                 locale={dateLocale}
                 dateFormat="yyyy-MM-dd"
                 placeholderText={t("selectDate")}
-                className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 transition-all duration-200 hover:bg-gray-50"
+                className={`block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 transition-all duration-200 hover:bg-gray-50 ${
+                  error && !date ? "border-red-500" : ""
+                }`}
                 wrapperClassName="w-full"
                 required
                 aria-label={t("date")}
@@ -317,8 +320,11 @@ export default function SetlistEditPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder={t("enterDescription")}
-                className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 min-h-[100px] resize-y transition-all duration-200 hover:bg-gray-50"
+                className={`block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 min-h-[100px] resize-y transition-all duration-200 hover:bg-gray-50 ${
+                  error && !description.trim() ? "border-red-500" : ""
+                }`}
                 rows={4}
+                required
                 aria-label={t("description")}
               />
             </motion.div>
@@ -355,7 +361,11 @@ export default function SetlistEditPage() {
                         id="group"
                         value={selectedGroup}
                         onChange={(e) => setSelectedGroup(e.target.value)}
-                        className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 pr-10 appearance-none transition-all duration-200 hover:bg-gray-50"
+                        className={`block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 pr-10 appearance-none transition-all duration-200 hover:bg-gray-50 ${
+                          error && !selectedGroup && selectedTeams.length === 0
+                            ? "border-red-500"
+                            : ""
+                        }`}
                         aria-label={t("groups")}
                       >
                         <option value="">{t("selectGroup")}</option>
@@ -381,17 +391,41 @@ export default function SetlistEditPage() {
               </div>
             </div>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               type="submit"
+              whileHover={{ scale: isFormInvalid || isSubmitting ? 1 : 1.05 }}
+              whileTap={{ scale: isFormInvalid || isSubmitting ? 1 : 0.95 }}
               disabled={isSubmitting || isFormInvalid}
-              className={`w-full py-3 rounded-xl text-white font-semibold text-sm ${
+              className={`w-full py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center ${
                 isSubmitting || isFormInvalid
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
               } transition-colors duration-200 shadow-sm`}
             >
-              {isSubmitting ? t("submitting") : t("save")}
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 mr-2 text-white"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  {t("submitting")}
+                </>
+              ) : (
+                t("save")
+              )}
             </motion.button>
           </form>
         </motion.div>

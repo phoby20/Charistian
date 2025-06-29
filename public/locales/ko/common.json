@@ -577,7 +577,14 @@
     "noSongs": "등록된 곡이 없습니다.",
     "downloadPdf": "통합 PDF 다운로드",
     "viewPdf": "통합 악보 열기",
-    "invalidId": "잘못된 ID입니다"
+    "invalidId": "잘못된 ID입니다",
+    "invalidResponseFormat": "잘못된 응답 형식입니다",
+    "invalidDateFormat": "잘못된 날짜 형식입니다",
+    "play": "재생",
+    "pause": "일시정지",
+    "seek": "탐색",
+    "remove": "삭제",
+    "youtubeError": "YouTube 비디오 재생에 실패했습니다"
   },
   "scoreList": "악보리스트",
   "setlistList": "콘티리스트",

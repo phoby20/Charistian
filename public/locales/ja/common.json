@@ -567,7 +567,14 @@
     "noSongs": "選曲リストに曲がありません。",
     "downloadPdf": "統合PDFをダウンロード",
     "viewPdf": "統合楽譜を開く",
-    "invalidId": "誤ったIDです"
+    "invalidId": "誤ったIDです",
+    "invalidResponseFormat": "無効なレスポンス形式です",
+    "invalidDateFormat": "無効な日付形式です",
+    "play": "再生",
+    "pause": "一時停止",
+    "seek": "シーク",
+    "remove": "削除",
+    "youtubeError": "YouTube動画の再生に失敗しました"
   },
   "scoreList": "楽譜リスト",
   "setlistList": "コンテリスト",

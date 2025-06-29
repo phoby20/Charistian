@@ -10,6 +10,7 @@ import { AlertCircle, ArrowLeft, Edit, Eye } from "lucide-react"; // Eye 아이�
 import Loading from "@/components/Loading";
 import { format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
+
 import { SetlistResponse } from "@/types/score";
 import Chip from "@/components/Chip";
 import { getDisplayTitle } from "@/utils/getDisplayTitle";

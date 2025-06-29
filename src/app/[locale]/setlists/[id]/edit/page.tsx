@@ -1,4 +1,6 @@
+// src/app/[locale]/setlists/[id]/edit/page.tsx
 "use client";
+
 import { useState, useEffect, FormEvent } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -8,9 +10,9 @@ import Link from "next/link";
 import { ArrowLeft, AlertCircle, ChevronDown } from "lucide-react";
 import Loading from "@/components/Loading";
 import DatePicker from "react-datepicker";
-import { format } from "date-fns";
-import { ko, ja } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
+import { parseISO, format } from "date-fns";
+import { ko, ja } from "date-fns/locale";
 import { CheckboxGroup } from "@/components/CheckboxGroup";
 import { Group, SelectedSong, SetlistResponse, Team } from "@/types/score";
 import { useRouter } from "@/utils/useRouter";
@@ -33,8 +35,22 @@ export default function SetlistEditPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isFormInvalid, setIsFormInvalid] = useState<boolean>(true);
 
   const dateLocale = locale === "ko" ? ko : ja;
+
+  // 폼 유효성 검사
+
+  useEffect(() => {
+    const isInvalid =
+      !title.trim() ||
+      !date ||
+      !description ||
+      selectedSongs.length === 0 ||
+      selectedTeams.length === 0 ||
+      (!selectedGroup && selectedTeams.length === 0);
+    setIsFormInvalid(isInvalid);
+  }, [title, description, date, selectedSongs, selectedGroup, selectedTeams]);
 
   useEffect(() => {
     if (!user || !user.churchId) {
@@ -50,13 +66,25 @@ export default function SetlistEditPage() {
         // Fetch setlist
         const setlistRes = await fetch(`/api/setlists/${id}`);
         if (!setlistRes.ok) throw new Error(t("fetchError"));
-        const setlistData: SetlistResponse = await setlistRes.json();
+        const { setlist }: { setlist: SetlistResponse; appUrl: string } =
+          await setlistRes.json();
 
-        setTitle(setlistData.title);
-        setDate(new Date(setlistData.date));
-        setDescription(setlistData.description || "");
+        setTitle(setlist.title);
+        // 날짜 유효성 검사
+        if (setlist.date) {
+          const parsedDate = parseISO(setlist.date);
+          if (!isNaN(parsedDate.getTime())) {
+            setDate(parsedDate);
+          } else {
+            setError(t("invalidDateFormat"));
+            setDate(null);
+          }
+        } else {
+          setDate(null);
+        }
+        setDescription(setlist.description || "");
         setSelectedSongs(
-          setlistData.scores.map((score) => ({
+          setlist.scores.map((score) => ({
             id: score.creation.id,
             title: score.creation.title,
             titleJa: score.creation.titleJa,
@@ -84,17 +112,17 @@ export default function SetlistEditPage() {
           !Array.isArray(groupData.groups) ||
           !Array.isArray(teamData.teams)
         ) {
-          throw new Error("Invalid response format");
+          throw new Error(t("invalidResponseFormat"));
         }
 
         setGroups(groupData.groups);
         setTeams(teamData.teams);
 
         // Initialize selected groups and teams from shares
-        const groupShare = setlistData.shares.find(
+        const groupShare = setlist.shares.find(
           (s: { group?: Group }) => s.group
         )?.group?.id;
-        const teamShares = setlistData.shares
+        const teamShares = setlist.shares
           .filter((s: { team?: Team }) => s.team)
           .map((s) => s.team?.id ?? "");
         setSelectedGroup(groupShare || "");
@@ -120,14 +148,15 @@ export default function SetlistEditPage() {
   }, [id, t, user]);
 
   const handleSubmit = async (e: FormEvent) => {
-    setIsLoading(true);
     e.preventDefault();
     if (!title || !date || selectedSongs.length === 0) {
       setError(t("requiredFields"));
+      setIsLoading(false);
       return;
     }
     if (!user?.id || !user?.churchId) {
       setError(t("authError"));
+      setIsLoading(false);
       return;
     }
     setIsSubmitting(true);
@@ -138,7 +167,7 @@ export default function SetlistEditPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
-          date: format(date, "yyyy-MM-dd"),
+          date: date ? format(date, "yyyy-MM-dd") : null,
           description,
           scores: selectedSongs.map((song, index) => ({
             creationId: song.id,
@@ -355,9 +384,9 @@ export default function SetlistEditPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isFormInvalid}
               className={`w-full py-3 rounded-xl text-white font-semibold text-sm ${
-                isSubmitting
+                isSubmitting || isFormInvalid
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
               } transition-colors duration-200 shadow-sm`}

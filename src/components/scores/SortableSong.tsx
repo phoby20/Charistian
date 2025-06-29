@@ -7,6 +7,7 @@ import { getDisplayTitle } from "@/utils/getDisplayTitle";
 import { useLocale, useTranslations } from "next-intl";
 import { SelectedSong } from "@/types/score";
 import { motion } from "framer-motion";
+import Chip from "../Chip";
 
 export interface SortableSongProps {
   song: SelectedSong;
@@ -104,9 +105,12 @@ export function SortableSong({
         {...listeners}
       >
         <span>{index + 1}</span>
-        <span className="text-sm text-gray-700 truncate">
-          {displayTitle} {count > 1 ? `(${count})` : ""}
-        </span>
+        <div className="flex sm:flex-row flex-col">
+          <Chip label={song.key} />
+          <span className="text-sm text-gray-700 truncate">
+            {displayTitle} {count > 1 ? `(${count})` : ""}
+          </span>
+        </div>
       </div>
       <div className="flex items-center space-x-2">
         {youtubeVideoId && (

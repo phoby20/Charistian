@@ -26,7 +26,7 @@ export default function DesktopTableLayout({
             {t("title")}
           </th>
 
-          <th className="text-left w-30 py-4 px-6 text-sm font-semibold text-gray-700">
+          <th className="text-left w-40 py-4 px-6 text-sm font-semibold text-gray-700">
             {t("creator")}
           </th>
           <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">

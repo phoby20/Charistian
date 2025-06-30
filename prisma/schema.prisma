@@ -56,7 +56,7 @@ model Church {
   region            String
   address           String
   phone             String
-  buildingImage     String?
+  logo              String? // buildingImage에서 logo로 변경
   plan              Plan      @default(FREE)
   state             ChurchState @default(PENDING)
   users             User[]
@@ -214,7 +214,7 @@ model ChurchApplication {
   contactBirthDate  DateTime
   contactImage      String?
   churchPhone       String
-  buildingImage     String?
+  logo              String? // buildingImage에서 logo로 변경
   plan              Plan
   state             ChurchState @default(PENDING)
   rejectionReason   String?

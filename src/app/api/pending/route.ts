@@ -16,7 +16,7 @@ export async function GET() {
         contactName: true,
         contactPhone: true,
         plan: true,
-        buildingImage: true,
+        logo: true,
       },
     });
 

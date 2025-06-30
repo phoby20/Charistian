@@ -33,15 +33,15 @@ export default function ChurchApplicationCard({
       <p className="text-sm text-gray-600 mb-3">
         <span className="font-medium">{t("plan")}:</span> {church.plan}
       </p>
-      {church.buildingImage && (
+      {church.logo && (
         <div className="mb-4">
           <Image
-            src={church.buildingImage}
+            src={church.logo}
             alt={`${church.churchName} building`}
             width={100}
             height={100}
             className="rounded-md object-cover cursor-pointer"
-            onClick={() => onImageClick(church.buildingImage!)}
+            onClick={() => onImageClick(church.logo!)}
           />
         </div>
       )}

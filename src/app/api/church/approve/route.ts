@@ -194,7 +194,7 @@ export async function POST(req: NextRequest) {
             region: application.region,
             country: application.country,
             phone: application.churchPhone,
-            buildingImage: application.buildingImage,
+            logo: application.logo,
             plan: application.plan,
             state: "APPROVED",
           },

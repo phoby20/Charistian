@@ -156,7 +156,7 @@ export default function PendingChurchPage() {
         <ImagePreviewModal
           isOpen={isImageModalOpen}
           imageUrl={selectedImage}
-          alt={t("buildingImage")}
+          alt={t("logo")}
         />
 
         {/* 에러 모달 */}

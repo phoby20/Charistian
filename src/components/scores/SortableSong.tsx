@@ -39,6 +39,16 @@ const getYouTubeVideoId = (url?: string): string | undefined => {
   return match ? match[1] : undefined;
 };
 
+// 첫 번째 YouTube URL의 videoId 가져오기
+const getFirstYouTubeVideoId = (urls?: string[]): string | null => {
+  if (!urls || urls.length === 0) return null;
+  for (const url of urls) {
+    const videoId = getYouTubeVideoId(url);
+    if (videoId) return videoId; // 첫 번째 유효한 YouTube URL 반환
+  }
+  return null;
+};
+
 export function SortableSong({
   song,
   index,
@@ -79,6 +89,8 @@ export function SortableSong({
     touchAction: "none",
     backgroundColor: currentPlayingId === song.id ? "#e6f0ff" : "#ffffff",
   };
+
+  const firstYoutubeVideoId = getFirstYouTubeVideoId(song.referenceUrls);
 
   // locale에 따라 표시할 제목 선택
   const displayTitle = getDisplayTitle(
@@ -128,7 +140,7 @@ export function SortableSong({
           <Trash2 className="w-4 h-4" />
         </motion.button>
         <div className="w-full">
-          {/* 상단: 곡 정보 및 삭제 버튼 */}
+          {/* 상단: 곡 정보 및 플레이 버튼 */}
           <div className="flex items-center justify-between border border-gray-200 p-5 cursor-grab rounded-full">
             <div
               className="flex items-center gap-3 grow"
@@ -142,6 +154,8 @@ export function SortableSong({
                 </span>
               </div>
             </div>
+
+            {/* 참고 URL에 youtube URL이 2개 이상이면 아래 코드가 실행 됨 */}
             {youtubeVideoId ? (
               <motion.button
                 type="button"
@@ -167,18 +181,46 @@ export function SortableSong({
                   <Play className="w-5 h-5" />
                 )}
               </motion.button>
+            ) : firstYoutubeVideoId ? (
+              // // 참고 URL에 youtube URL이 1개라면 아래 코드가 실행 됨 1개라면 아래 코드가 실행 됨
+              <motion.button
+                type="button"
+                whileHover={{ scale: isDragging ? 1 : 1.1 }}
+                whileTap={{ scale: isDragging ? 1 : 0.9 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPlayPause(song.id);
+                }}
+                className={`p-2 rounded-full ${
+                  currentPlayingId === song.id
+                    ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                } transition-colors`}
+                aria-label={
+                  currentPlayingId === song.id ? t("pause") : t("play")
+                }
+                disabled={isDragging}
+              >
+                {currentPlayingId === song.id ? (
+                  <Pause className="w-5 h-5" />
+                ) : (
+                  <Play className="w-5 h-5" />
+                )}
+              </motion.button>
             ) : (
+              // 참고 URL에 youtube URL이 없다면 아래 코드가 실행 됨
               <span
                 className="p-2 rounded-full bg-gray-100 text-gray-400 cursor-not-allowed"
                 aria-label={t("noSelectedUrl")}
               >
                 <Play className="w-5 h-5" />
+                !!
               </span>
             )}
           </div>
 
           {/* 하단: YouTube 드롭다운 */}
-          <div className="flex items-center justify-end gap-2 mt-6">
+          <div className="flex items-center justify-end gap-2 mt-1">
             {youtubeUrls.length > 1 ? (
               <div
                 className="relative flex-1 max-w-[250px] cursor-pointer"

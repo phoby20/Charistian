@@ -1,4 +1,3 @@
-// src/app/[locale]/setlists/[id]/edit/page.tsx
 "use client";
 import { useState, useEffect, FormEvent } from "react";
 import { useParams } from "next/navigation";
@@ -6,7 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, AlertCircle, ChevronDown } from "lucide-react";
+import { ArrowLeft, AlertCircle, ChevronDown, Trash2 } from "lucide-react"; // Trash2 아이콘 추가
 import Loading from "@/components/Loading";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -39,6 +38,8 @@ export default function SetlistEditPage() {
   const [selectedUrls, setSelectedUrls] = useState<{ [key: string]: string }>(
     {}
   );
+  // 삭제 상태 추가
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const dateLocale = locale === "ko" ? ko : ja;
 
@@ -95,7 +96,6 @@ export default function SetlistEditPage() {
               }))
           : [];
         setSelectedSongs(initialSongs);
-        // 초기 selectedUrls 설정
         const initialUrls: { [key: string]: string } = {};
         setlist.scores.forEach((score) => {
           if (score.selectedReferenceUrl) {
@@ -147,6 +147,28 @@ export default function SetlistEditPage() {
     setSelectedUrls((prev) => ({ ...prev, [songId]: url }));
   };
 
+  // 삭제 핸들러 추가
+  const handleDelete = async () => {
+    if (!confirm(t("confirmDelete"))) return; // 삭제 확인 프롬프트
+    setIsDeleting(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/setlists/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!response.ok) {
+        throw new Error((await response.json()).error || t("deleteError"));
+      }
+      sessionStorage.removeItem("selectedSongList");
+      router.push(`/setlists`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("deleteError"));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isFormInvalid) {
@@ -158,7 +180,6 @@ export default function SetlistEditPage() {
       return;
     }
     setIsSubmitting(true);
-
     try {
       const response = await fetch(`/api/setlists/${id}`, {
         method: "PUT",
@@ -222,7 +243,7 @@ export default function SetlistEditPage() {
           className="bg-white rounded-2xl shadow-xl p-6 sm:p-8"
         >
           <div className="flex items-center justify-between mb-14">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-between w-full">
               <Link href={`/${locale}/setlists/${id}`}>
                 <motion.button
                   type="button"
@@ -236,6 +257,22 @@ export default function SetlistEditPage() {
                   </span>
                 </motion.button>
               </Link>
+              {/* 삭제 버튼 추가 */}
+              <motion.button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                whileHover={{ scale: isDeleting ? 1 : 1.05 }}
+                whileTap={{ scale: isDeleting ? 1 : 0.95 }}
+                className={`flex items-center space-x-2 ${
+                  isDeleting
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-600 hover:bg-red-700"
+                } text-white py-2 px-4 rounded-xl shadow-sm transition-colors`}
+              >
+                <Trash2 className="w-5 h-5" />
+                <span className="text-sm font-medium">{t("delete")}</span>
+              </motion.button>
             </div>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
@@ -342,8 +379,8 @@ export default function SetlistEditPage() {
                 onRemoveSong={handleRemoveSong}
                 onReorderSongs={handleReorderSongs}
                 t={t}
-                onUrlSelect={handleUrlSelect} // URL 선택 핸들러 전달
-                selectedUrls={selectedUrls} // 선택된 URL 상태 전달
+                onUrlSelect={handleUrlSelect}
+                selectedUrls={selectedUrls}
               />
             </motion.div>
             <div>

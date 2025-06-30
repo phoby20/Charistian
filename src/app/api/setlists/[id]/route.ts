@@ -115,12 +115,32 @@ export async function DELETE(
       return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
     }
 
+    // 트랜잭션 내에서 관련 데이터 삭제
+    await prisma.$transaction(async (tx) => {
+      // 1. SetlistScore 삭제
+      await tx.setlistScore.deleteMany({
+        where: { setlistId: id },
+      });
+      // 2. SetlistShare 삭제
+      await tx.setlistShare.deleteMany({
+        where: { setlistId: id },
+      });
+      // 3. SetlistComment 삭제
+      await tx.setlistComment.deleteMany({
+        where: { setlistId: id },
+      });
+      // 4. Setlist 삭제
+      await tx.setlist.delete({
+        where: { id },
+      });
+    });
+
+    // Vercel Blob에서 PDF 삭제
     if (setlist.fileUrl) {
       await del(setlist.fileUrl);
       console.log(`Vercel Blob에서 PDF 삭제 완료: ${setlist.fileUrl}`);
     }
 
-    await prisma.setlist.delete({ where: { id } });
     return NextResponse.json(
       { message: "세트리스트가 삭제되었습니다." },
       { status: 200 }

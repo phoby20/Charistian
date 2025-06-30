@@ -35,16 +35,22 @@ export default function SetlistEditPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
 
   const dateLocale = locale === "ko" ? ko : ja;
 
   // 폼 유효성 검사
-  const isFormInvalid =
-    !title.trim() ||
-    !date ||
-    !description.trim() ||
-    selectedSongs.length === 0 ||
-    (!selectedGroup && selectedTeams.length === 0);
+  useEffect(() => {
+    const isInvalid =
+      !title.trim() ||
+      !date ||
+      !description.trim() ||
+      selectedSongs.length === 0 ||
+      !selectedGroup ||
+      selectedTeams.length === 0;
+
+    setIsFormInvalid(isInvalid);
+  }, [title, date, description, selectedSongs, selectedGroup, selectedTeams]);
 
   useEffect(() => {
     if (!user || !user.churchId) {
@@ -76,9 +82,10 @@ export default function SetlistEditPage() {
           setDate(null);
         }
         setDescription(setlist.description || "");
-        setSelectedSongs(
-          Array.isArray(setlist.scores)
-            ? setlist.scores.map((score) => ({
+        const initialSongs: SelectedSong[] = Array.isArray(setlist.scores)
+          ? setlist.scores
+              .sort((a, b) => a.order - b.order) // order 기준 정렬
+              .map((score) => ({
                 id: score.creation.id,
                 title: score.creation.title || "",
                 titleJa: score.creation.titleJa || "",
@@ -87,7 +94,12 @@ export default function SetlistEditPage() {
                 referenceUrls: score.creation.referenceUrls || [],
                 fileUrl: score.creation.fileUrl || "",
               }))
-            : []
+          : [];
+        setSelectedSongs(initialSongs);
+        // API 데이터를 기반으로 sessionStorage 초기화
+        sessionStorage.setItem(
+          "selectedSongList",
+          JSON.stringify(initialSongs)
         );
 
         // Fetch available groups and teams
@@ -130,22 +142,7 @@ export default function SetlistEditPage() {
       }
     };
 
-    // Load selected songs from sessionStorage after fetchData
-    fetchData().then(() => {
-      const stored = sessionStorage.getItem("selectedSongList");
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            setSelectedSongs(parsed);
-          } else {
-            console.error("Invalid selectedSongList format");
-          }
-        } catch (err) {
-          console.error("Error parsing selectedSongList:", err);
-        }
-      }
-    });
+    fetchData();
   }, [id, t, user]);
 
   const handleSubmit = async (e: FormEvent) => {

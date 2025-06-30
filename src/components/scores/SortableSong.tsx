@@ -105,7 +105,7 @@ export function SortableSong({
         {...listeners}
       >
         <span>{index + 1}</span>
-        <div className="flex sm:flex-row flex-col">
+        <div className="flex sm:flex-row flex-col items-center">
           <Chip label={song.key} />
           <span className="text-sm text-gray-700 truncate">
             {displayTitle} {count > 1 ? `(${count})` : ""}

@@ -91,6 +91,8 @@ export interface Score {
   creator: { name: string };
   composer?: string;
   lyricist?: string;
+  lyricsEn?: string;
+  lyricsJa?: string;
   _count: { likes: number; comments: number };
   likes: { id: string }[];
 }
@@ -170,6 +172,7 @@ export interface SetlistResponse {
     id: string;
     creation: SelectedSong;
     order: number;
+    selectedReferenceUrl?: string; // 선택된 YouTube URL 추가
   }[];
   comments: {
     id: string;

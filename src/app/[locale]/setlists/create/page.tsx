@@ -1,3 +1,4 @@
+// src/app/[locale]/setlists/create/page.tsx
 "use client";
 import { useState, useEffect, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,13 +31,15 @@ export default function CreateSetlistPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // 선택된 YouTube URL 상태 추가
+  const [selectedUrls, setSelectedUrls] = useState<{ [key: string]: string }>(
+    {}
+  );
 
-  // date-fns 로케일 매핑
   const dateLocale = locale === "ko" ? ko : ja;
 
   useEffect(() => {
     if (!user || !user.churchId) return;
-
     const stored = sessionStorage.getItem("selectedSongList");
     if (stored) {
       try {
@@ -45,7 +48,6 @@ export default function CreateSetlistPage() {
         console.error("Error parsing selectedSongList:", err);
       }
     }
-
     const fetchShares = async () => {
       setIsLoading(true);
       setError(null);
@@ -54,21 +56,17 @@ export default function CreateSetlistPage() {
           fetch(`/api/groups/public?churchId=${user.churchId}`),
           fetch(`/api/teams?churchId=${user.churchId}`),
         ]);
-
         if (!groupRes.ok || !teamRes.ok) {
           throw new Error(t("fetchError"));
         }
-
         const groupData = await groupRes.json();
         const teamData = await teamRes.json();
-
         if (
           !Array.isArray(groupData.groups) ||
           !Array.isArray(teamData.teams)
         ) {
           throw new Error("Invalid response format");
         }
-
         setGroups(groupData.groups);
         setTeams(teamData.teams);
       } catch (err: unknown) {
@@ -78,9 +76,13 @@ export default function CreateSetlistPage() {
         setIsLoading(false);
       }
     };
-
     fetchShares();
   }, [user, t]);
+
+  // YouTube URL 선택 핸들러
+  const handleUrlSelect = (songId: string, url: string) => {
+    setSelectedUrls((prev) => ({ ...prev, [songId]: url }));
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -113,6 +115,11 @@ export default function CreateSetlistPage() {
           scores: selectedSongs.map((song, index) => ({
             creationId: song.id,
             order: index + 1,
+            selectedReferenceUrl:
+              selectedUrls[song.id] ||
+              song.referenceUrls.find(
+                (url) => url.includes("youtube.com") || url.includes("youtu.be")
+              ),
           })),
           shares: [
             ...(selectedGroup ? [{ groupId: selectedGroup }] : []),
@@ -246,13 +253,13 @@ export default function CreateSetlistPage() {
                 aria-label={t("description")}
               />
             </motion.div>
-
-            {/* 선곡된 리스트 */}
             <SelectedSongsList
               selectedSongs={selectedSongs}
               onRemoveSong={handleRemoveSong}
               onReorderSongs={handleReorderSongs}
               t={t}
+              onUrlSelect={handleUrlSelect} // URL 선택 핸들러 전달
+              selectedUrls={selectedUrls} // 선택된 URL 상태 전달
             />
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-3">

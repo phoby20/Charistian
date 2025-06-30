@@ -5,7 +5,14 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Head from "next/head";
 import { motion } from "framer-motion";
-import { AlertCircle, ArrowLeft, Heart, ImageOff, Trash2 } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Edit2,
+  Heart,
+  ImageOff,
+  Trash2,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ApiErrorResponse, ScoreResponse } from "@/types/score";
 import CommentsSection from "@/components/scores/CommentsSection";
@@ -150,7 +157,7 @@ export default function ScoreDetailPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push(`/${locale}/scores`)}
-            className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-blue-700 transition-all"
+            className="cursor-pointer flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-blue-700 transition-all"
             aria-label={t("backToList")}
           >
             <ArrowLeft className="w-5 h-5" />
@@ -165,11 +172,17 @@ export default function ScoreDetailPage() {
     return <Loading />;
   }
 
+  const canEdit =
+    user &&
+    score.isOpen &&
+    (user.id === score.creatorId ||
+      ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
+
   const canClose =
     user &&
     score.isOpen &&
     (user.id === score.creatorId ||
-      ["SUPER_ADMIN", "ADMIN"].includes(user.role));
+      ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
 
   return (
     <>
@@ -225,7 +238,7 @@ export default function ScoreDetailPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLike}
                   disabled={isLiking}
-                  className={`flex items-center space-x-2 px-5 py-3 rounded-full shadow-md transition-all ${
+                  className={`flex items-center space-x-2 px-5 py-3 rounded-full shadow-md transition-all cursor-pointer ${
                     isLiked
                       ? "bg-red-500 text-white hover:bg-red-600"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -236,13 +249,31 @@ export default function ScoreDetailPage() {
                     {t("like")} ({likeCount})
                   </span>
                 </motion.button>
+                {canEdit && (
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() =>
+                        (window.location.href = `/${locale}/scores/${id}/edit`)
+                      }
+                      className="flex items-center space-x-2 px-5 py-3 rounded-full shadow-md bg-gray-200 text-gray-700 hover:bg-blue-500 hover:text-white transition-all cursor-pointer"
+                      aria-label={t("editScore")}
+                    >
+                      <Edit2 className="w-6 h-6" />
+                      <span className="text-base font-medium">
+                        {t("editScore")}
+                      </span>
+                    </motion.button>
+                  </>
+                )}
                 {canClose && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleClose}
                     disabled={isClosing}
-                    className={`flex items-center space-x-2 px-5 py-3 rounded-full shadow-md bg-gray-200 text-gray-700 hover:bg-red-500 hover:text-white transition-all ${
+                    className={`flex items-center space-x-2 px-5 py-3 rounded-full shadow-md bg-gray-200 text-gray-700 hover:bg-red-500 hover:text-white transition-all cursor-pointer ${
                       isClosing ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                     aria-label={t("deleteScore")}

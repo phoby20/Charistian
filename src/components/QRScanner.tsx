@@ -243,7 +243,7 @@ export default function QRScanner({ user, onMessage }: QRScannerProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200"
+        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 text-sm"
       >
         {t("scanQR")}
       </button>

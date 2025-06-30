@@ -13,7 +13,7 @@ interface UpdateSetlistRequest {
   title: string;
   date: string;
   description?: string;
-  scores: { creationId: string; order: number }[];
+  scores: { creationId: string; order: number; selectedReferenceUrl: string }[];
   shares: {
     groupId?: string | null;
     teamId?: string | null;
@@ -49,6 +49,7 @@ export async function GET(
               },
             },
             order: true,
+            selectedReferenceUrl: true,
           },
         },
         comments: {
@@ -109,17 +110,37 @@ export async function DELETE(
 
     if (
       authResult.payload.userId !== setlist.creatorId &&
-      !["SUPER_ADMIN", "ADMIN"].includes(authResult.payload.role)
+      !["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(authResult.payload.role)
     ) {
       return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
     }
 
+    // 트랜잭션 내에서 관련 데이터 삭제
+    await prisma.$transaction(async (tx) => {
+      // 1. SetlistScore 삭제
+      await tx.setlistScore.deleteMany({
+        where: { setlistId: id },
+      });
+      // 2. SetlistShare 삭제
+      await tx.setlistShare.deleteMany({
+        where: { setlistId: id },
+      });
+      // 3. SetlistComment 삭제
+      await tx.setlistComment.deleteMany({
+        where: { setlistId: id },
+      });
+      // 4. Setlist 삭제
+      await tx.setlist.delete({
+        where: { id },
+      });
+    });
+
+    // Vercel Blob에서 PDF 삭제
     if (setlist.fileUrl) {
       await del(setlist.fileUrl);
       console.log(`Vercel Blob에서 PDF 삭제 완료: ${setlist.fileUrl}`);
     }
 
-    await prisma.setlist.delete({ where: { id } });
     return NextResponse.json(
       { message: "세트리스트가 삭제되었습니다." },
       { status: 200 }
@@ -227,6 +248,7 @@ export async function PUT(
               create: scores.map((s) => ({
                 creationId: s.creationId,
                 order: s.order,
+                selectedReferenceUrl: s.selectedReferenceUrl,
               })),
             },
             shares: {

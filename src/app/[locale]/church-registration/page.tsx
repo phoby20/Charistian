@@ -34,7 +34,7 @@ export default function ChurchRegistrationPage() {
     contactGender: string;
     contactBirthDate: string;
     plan: string;
-    buildingImage?: File;
+    logo?: File;
     contactImage?: File;
   }>({
     churchName: "",
@@ -51,7 +51,7 @@ export default function ChurchRegistrationPage() {
     contactGender: "M",
     contactBirthDate: "",
     plan: "FREE",
-    buildingImage: undefined,
+    logo: undefined,
     contactImage: undefined,
   });
   const [selectedCountry, setSelectedCountry] = useState<string>(
@@ -172,7 +172,7 @@ export default function ChurchRegistrationPage() {
   };
 
   // 파일 입력 초기화
-  const handleFileReset = (name: "buildingImage" | "contactImage") => {
+  const handleFileReset = (name: "logo" | "contactImage") => {
     setFormData((prev) => ({ ...prev, [name]: undefined }));
   };
 
@@ -227,7 +227,7 @@ export default function ChurchRegistrationPage() {
       "contactGender",
       "contactBirthDate",
       "plan",
-      "buildingImage",
+      "logo",
       "contactImage",
     ];
     keys.forEach((key) => {
@@ -328,24 +328,24 @@ export default function ChurchRegistrationPage() {
       />
       <div>
         <label className="block text-sm font-medium text-gray-800 mb-2">
-          {t("buildingImage")}
+          {t("logo")}
           <span className="text-gray-500"> ({t("optional")})</span>
         </label>
         <input
           type="file"
-          name="buildingImage"
+          name="logo"
           accept="image/*"
           className="w-full p-3 border rounded-lg border-gray-300 shadow-sm bg-white text-gray-800 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-500 hover:file:bg-blue-100 transition-all duration-200"
           onChange={handleFileChange}
-          aria-label={t("buildingImage")}
+          aria-label={t("logo")}
         />
-        {formData.buildingImage && (
+        {formData.logo && (
           <div className="mt-2 text-sm text-gray-600 flex items-center">
-            <span className="truncate">{formData.buildingImage.name}</span>
+            <span className="truncate">{formData.logo.name}</span>
             <button
               type="button"
               className="ml-2 text-red-600 hover:text-red-800 transition-colors"
-              onClick={() => handleFileReset("buildingImage")}
+              onClick={() => handleFileReset("logo")}
             >
               <X size={16} />
             </button>

@@ -8,7 +8,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const t = useTranslations(); // 네임스페이스 제거
+  const t = useTranslations();
   const [error, setError] = useState<string | null>(null);
   const locale = useLocale();
   const [isDisabled, setIsDisabled] = useState(false);
@@ -20,7 +20,7 @@ export default function LoginPage() {
     const password = formData.get("password") as string;
 
     try {
-      setIsDisabled(true);
+      setIsDisabled(true); // 제출 시 비활성화
       const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -29,7 +29,7 @@ export default function LoginPage() {
 
       if (!response.ok) {
         setError(t("invalidCredentials"));
-        setIsDisabled(false);
+        setIsDisabled(false); // 에러 발생 시 다시 활성화
         return;
       }
 
@@ -37,7 +37,7 @@ export default function LoginPage() {
         window.location.href = `/${locale}/dashboard`;
       }
     } catch (err) {
-      setIsDisabled(false);
+      setIsDisabled(false); // 에러 발생 시 다시 활성화
       setError(
         t("serverError", {
           error: err instanceof Error ? err.message : "Unknown error",
@@ -53,12 +53,19 @@ export default function LoginPage() {
       <div className="bg-white p-8 rounded-md shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6">{t("login")}</h1>
         <form onSubmit={handleSubmit}>
-          <Input label={t("email")} type="email" name="email" required />
+          <Input
+            label={t("email")}
+            type="email"
+            name="email"
+            required
+            disabled={isDisabled} // Input에 disabled 속성 추가
+          />
           <Input
             label={t("password")}
             type="password"
             name="password"
             required
+            disabled={isDisabled} // Input에 disabled 속성 추가
           />
           <Button type="submit" isDisabled={isDisabled}>
             {t("login")}

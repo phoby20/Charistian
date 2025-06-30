@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       contactBirthDate: undefined as Date | undefined,
       plan: formData.get("plan") as string,
       contactImage: undefined as string | undefined,
-      buildingImage: undefined as string | undefined,
+      logo: undefined as string | undefined,
     };
 
     // 입력 검증
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
 
     // 파일 업로드
     const contactImage = formData.get("contactImage") as File;
-    const buildingImage = formData.get("buildingImage") as File;
+    const logo = formData.get("logo") as File;
 
     if (contactImage && contactImage instanceof File && contactImage.size > 0) {
       try {
@@ -167,14 +167,10 @@ export async function POST(req: NextRequest) {
         );
       }
     }
-    if (
-      buildingImage &&
-      buildingImage instanceof File &&
-      buildingImage.size > 0
-    ) {
+    if (logo && logo instanceof File && logo.size > 0) {
       try {
-        data.buildingImage = await uploadFile(
-          buildingImage,
+        data.logo = await uploadFile(
+          logo,
           `building_${data.churchName}_${Date.now()}.jpg`,
           "building-images"
         );
@@ -205,7 +201,7 @@ export async function POST(req: NextRequest) {
         contactBirthDate: data.contactBirthDate,
         plan,
         contactImage: data.contactImage,
-        buildingImage: data.buildingImage,
+        logo: data.logo,
         state: "PENDING",
       },
     });

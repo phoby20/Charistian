@@ -5,12 +5,12 @@ import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, AlertCircle, ChevronDown } from "lucide-react";
+import { ArrowLeft, AlertCircle, ChevronDown, Trash2 } from "lucide-react"; // Trash2 아이콘 추가
 import Loading from "@/components/Loading";
 import DatePicker from "react-datepicker";
-import { format } from "date-fns";
-import { ko, ja } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
+import { parseISO, format } from "date-fns";
+import { ko, ja } from "date-fns/locale";
 import { CheckboxGroup } from "@/components/CheckboxGroup";
 import { Group, SelectedSong, SetlistResponse, Team } from "@/types/score";
 import { useRouter } from "@/utils/useRouter";
@@ -33,8 +33,26 @@ export default function SetlistEditPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
+  // 선택된 YouTube URL 상태 추가
+  const [selectedUrls, setSelectedUrls] = useState<{ [key: string]: string }>(
+    {}
+  );
+  // 삭제 상태 추가
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const dateLocale = locale === "ko" ? ko : ja;
+
+  useEffect(() => {
+    const isInvalid =
+      !title.trim() ||
+      !date ||
+      !description.trim() ||
+      selectedSongs.length === 0 ||
+      !selectedGroup ||
+      selectedTeams.length === 0;
+    setIsFormInvalid(isInvalid);
+  }, [title, date, description, selectedSongs, selectedGroup, selectedTeams]);
 
   useEffect(() => {
     if (!user || !user.churchId) {
@@ -47,56 +65,83 @@ export default function SetlistEditPage() {
       setIsLoading(true);
       setError(null);
       try {
-        // Fetch setlist
         const setlistRes = await fetch(`/api/setlists/${id}`);
         if (!setlistRes.ok) throw new Error(t("fetchError"));
-        const setlistData: SetlistResponse = await setlistRes.json();
+        const { setlist }: { setlist: SetlistResponse; appUrl: string } =
+          await setlistRes.json();
 
-        setTitle(setlistData.title);
-        setDate(new Date(setlistData.date));
-        setDescription(setlistData.description || "");
-        setSelectedSongs(
-          setlistData.scores.map((score) => ({
-            id: score.creation.id,
-            title: score.creation.title,
-            titleJa: score.creation.titleJa,
-            titleEn: score.creation.titleEn,
-            key: score.creation.key,
-            referenceUrls: score.creation.referenceUrls,
-            fileUrl: score.creation.fileUrl,
-          }))
+        const canEdit =
+          user &&
+          (user.id === setlist?.creatorId ||
+            ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
+
+        if (!canEdit) {
+          router.push(`/setlists`);
+          return;
+        }
+
+        setTitle(setlist.title || "");
+        if (setlist.date) {
+          const parsedDate = parseISO(setlist.date);
+          if (!isNaN(parsedDate.getTime())) {
+            setDate(parsedDate);
+          } else {
+            setError(t("invalidDateFormat"));
+            setDate(null);
+          }
+        } else {
+          setDate(null);
+        }
+        setDescription(setlist.description || "");
+        const initialSongs: SelectedSong[] = Array.isArray(setlist.scores)
+          ? setlist.scores
+              .sort((a, b) => a.order - b.order)
+              .map((score) => ({
+                id: score.creation.id,
+                title: score.creation.title || "",
+                titleJa: score.creation.titleJa || "",
+                titleEn: score.creation.titleEn || "",
+                key: score.creation.key || "",
+                referenceUrls: score.creation.referenceUrls || [],
+                fileUrl: score.creation.fileUrl || "",
+              }))
+          : [];
+        setSelectedSongs(initialSongs);
+        const initialUrls: { [key: string]: string } = {};
+        setlist.scores.forEach((score) => {
+          if (score.selectedReferenceUrl) {
+            initialUrls[score.creation.id] = score.selectedReferenceUrl;
+          }
+        });
+        setSelectedUrls(initialUrls);
+        sessionStorage.setItem(
+          "selectedSongList",
+          JSON.stringify(initialSongs)
         );
-
-        // Fetch available groups and teams
         const [groupRes, teamRes] = await Promise.all([
           fetch(`/api/groups/public?churchId=${user.churchId}`),
           fetch(`/api/teams?churchId=${user.churchId}`),
         ]);
-
         if (!groupRes.ok || !teamRes.ok) {
           throw new Error(t("fetchError"));
         }
-
         const groupData = await groupRes.json();
         const teamData = await teamRes.json();
-
         if (
           !Array.isArray(groupData.groups) ||
           !Array.isArray(teamData.teams)
         ) {
-          throw new Error("Invalid response format");
+          throw new Error(t("invalidResponseFormat"));
         }
-
         setGroups(groupData.groups);
         setTeams(teamData.teams);
-
-        // Initialize selected groups and teams from shares
-        const groupShare = setlistData.shares.find(
+        const groupShare = setlist.shares?.find(
           (s: { group?: Group }) => s.group
         )?.group?.id;
-        const teamShares = setlistData.shares
-          .filter((s: { team?: Team }) => s.team)
-          .map((s) => s.team?.id ?? "");
+        const teamShares =
+          setlist.shares
+            ?.filter((s: { team?: Team }) => s.team)
+            .map((s) => s.team?.id ?? "") || [];
         setSelectedGroup(groupShare || "");
         setSelectedTeams(teamShares);
       } catch (err) {
@@ -105,24 +150,39 @@ export default function SetlistEditPage() {
         setIsLoading(false);
       }
     };
-
-    // Load selected songs from sessionStorage
-    const stored = sessionStorage.getItem("selectedSongList");
-    if (stored) {
-      try {
-        setSelectedSongs(JSON.parse(stored));
-      } catch (err) {
-        console.error("Error parsing selectedSongList:", err);
-      }
-    }
-
     fetchData();
   }, [id, t, user]);
 
+  // YouTube URL 선택 핸들러
+  const handleUrlSelect = (songId: string, url: string) => {
+    setSelectedUrls((prev) => ({ ...prev, [songId]: url }));
+  };
+
+  // 삭제 핸들러 추가
+  const handleDelete = async () => {
+    if (!confirm(t("confirmDelete"))) return; // 삭제 확인 프롬프트
+    setIsDeleting(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/setlists/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!response.ok) {
+        throw new Error((await response.json()).error || t("deleteError"));
+      }
+      sessionStorage.removeItem("selectedSongList");
+      router.push(`/setlists`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("deleteError"));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
-    setIsLoading(true);
     e.preventDefault();
-    if (!title || !date || selectedSongs.length === 0) {
+    if (isFormInvalid) {
       setError(t("requiredFields"));
       return;
     }
@@ -131,18 +191,22 @@ export default function SetlistEditPage() {
       return;
     }
     setIsSubmitting(true);
-
     try {
       const response = await fetch(`/api/setlists/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
-          date: format(date, "yyyy-MM-dd"),
+          date: date ? format(date, "yyyy-MM-dd") : null,
           description,
           scores: selectedSongs.map((song, index) => ({
             creationId: song.id,
             order: index + 1,
+            selectedReferenceUrl:
+              selectedUrls[song.id] ||
+              song.referenceUrls.find(
+                (url) => url.includes("youtube.com") || url.includes("youtu.be")
+              ),
           })),
           shares: [
             ...(selectedGroup ? [{ groupId: selectedGroup }] : []),
@@ -159,7 +223,6 @@ export default function SetlistEditPage() {
       setError(err instanceof Error ? err.message : t("updateError"));
     } finally {
       setIsSubmitting(false);
-      setIsLoading(false);
     }
   };
 
@@ -191,9 +254,10 @@ export default function SetlistEditPage() {
           className="bg-white rounded-2xl shadow-xl p-6 sm:p-8"
         >
           <div className="flex items-center justify-between mb-14">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-between w-full">
               <Link href={`/${locale}/setlists/${id}`}>
                 <motion.button
+                  type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="flex items-center space-x-2 bg-gray-200 text-gray-700 py-2 px-4 rounded-xl shadow-sm hover:bg-gray-300 transition-colors"
@@ -204,6 +268,22 @@ export default function SetlistEditPage() {
                   </span>
                 </motion.button>
               </Link>
+              {/* 삭제 버튼 추가 */}
+              <motion.button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                whileHover={{ scale: isDeleting ? 1 : 1.05 }}
+                whileTap={{ scale: isDeleting ? 1 : 0.95 }}
+                className={`flex items-center space-x-2 ${
+                  isDeleting
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-600 hover:bg-red-700"
+                } text-white py-2 px-4 rounded-xl shadow-sm transition-colors`}
+              >
+                <Trash2 className="w-5 h-5" />
+                <span className="text-sm font-medium">{t("delete")}</span>
+              </motion.button>
             </div>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
@@ -240,7 +320,9 @@ export default function SetlistEditPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t("enterTitle")}
-                className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 transition-all duration-200 hover:bg-gray-50"
+                className={`block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 transition-all duration-200 hover:bg-gray-50 ${
+                  error && !title.trim() ? "border-red-500" : ""
+                }`}
                 required
                 aria-label={t("title")}
               />
@@ -263,7 +345,9 @@ export default function SetlistEditPage() {
                 locale={dateLocale}
                 dateFormat="yyyy-MM-dd"
                 placeholderText={t("selectDate")}
-                className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 transition-all duration-200 hover:bg-gray-50"
+                className={`block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 transition-all duration-200 hover:bg-gray-50 ${
+                  error && !date ? "border-red-500" : ""
+                }`}
                 wrapperClassName="w-full"
                 required
                 aria-label={t("date")}
@@ -288,8 +372,11 @@ export default function SetlistEditPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder={t("enterDescription")}
-                className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 min-h-[100px] resize-y transition-all duration-200 hover:bg-gray-50"
+                className={`block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 min-h-[100px] resize-y transition-all duration-200 hover:bg-gray-50 ${
+                  error && !description.trim() ? "border-red-500" : ""
+                }`}
                 rows={4}
+                required
                 aria-label={t("description")}
               />
             </motion.div>
@@ -303,6 +390,8 @@ export default function SetlistEditPage() {
                 onRemoveSong={handleRemoveSong}
                 onReorderSongs={handleReorderSongs}
                 t={t}
+                onUrlSelect={handleUrlSelect}
+                selectedUrls={selectedUrls}
               />
             </motion.div>
             <div>
@@ -326,7 +415,11 @@ export default function SetlistEditPage() {
                         id="group"
                         value={selectedGroup}
                         onChange={(e) => setSelectedGroup(e.target.value)}
-                        className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 pr-10 appearance-none transition-all duration-200 hover:bg-gray-50"
+                        className={`block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 pr-10 appearance-none transition-all duration-200 hover:bg-gray-50 ${
+                          error && !selectedGroup && selectedTeams.length === 0
+                            ? "border-red-500"
+                            : ""
+                        }`}
                         aria-label={t("groups")}
                       >
                         <option value="">{t("selectGroup")}</option>
@@ -352,17 +445,41 @@ export default function SetlistEditPage() {
               </div>
             </div>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               type="submit"
-              disabled={isSubmitting}
-              className={`w-full py-3 rounded-xl text-white font-semibold text-sm ${
-                isSubmitting
+              whileHover={{ scale: isFormInvalid || isSubmitting ? 1 : 1.05 }}
+              whileTap={{ scale: isFormInvalid || isSubmitting ? 1 : 0.95 }}
+              disabled={isSubmitting || isFormInvalid}
+              className={`w-full py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center ${
+                isSubmitting || isFormInvalid
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
               } transition-colors duration-200 shadow-sm`}
             >
-              {isSubmitting ? t("submitting") : t("save")}
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 mr-2 text-white"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  {t("submitting")}
+                </>
+              ) : (
+                t("save")
+              )}
             </motion.button>
           </form>
         </motion.div>

@@ -11,7 +11,11 @@ interface CreateSetlistRequest {
   title: string;
   date: string;
   description?: string;
-  scores: Array<{ creationId: string; order: number }>;
+  scores: Array<{
+    creationId: string;
+    order: number;
+    selectedReferenceUrl: string | null;
+  }>;
   shares: Array<{
     groupId?: string | null;
     teamId?: string | null;
@@ -137,13 +141,18 @@ export async function POST(
           creationId: score.creationId,
           fileUrl: creation?.fileUrl,
           order: score.order,
+          selectedReferenceUrl: score.selectedReferenceUrl,
         };
       })
       .filter(
         (
           score
-        ): score is { creationId: string; fileUrl: string; order: number } =>
-          !!score.fileUrl
+        ): score is {
+          creationId: string;
+          fileUrl: string;
+          order: number;
+          selectedReferenceUrl: string | null;
+        } => !!score.fileUrl
       );
 
     if (sortedScores.length === 0) {
@@ -166,6 +175,7 @@ export async function POST(
               create: scores.map((score) => ({
                 creationId: score.creationId,
                 order: score.order,
+                selectedReferenceUrl: score.selectedReferenceUrl,
               })),
             },
             shares: {
@@ -197,7 +207,17 @@ export async function POST(
         church: { select: { name: true } },
         scores: {
           include: {
-            creation: { select: { id: true, title: true, fileUrl: true } },
+            creation: {
+              select: {
+                id: true,
+                title: true,
+                fileUrl: true,
+                referenceUrls: true,
+                titleEn: true,
+                titleJa: true,
+                key: true,
+              },
+            },
           },
         },
         shares: {

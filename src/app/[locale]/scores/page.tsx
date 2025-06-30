@@ -130,10 +130,14 @@ export default function ScoreList() {
     const searchLower = searchQuery.toLowerCase();
     const matchesSearch =
       score.title.toLowerCase().includes(searchLower) ||
+      (score.titleJa?.toLowerCase().includes(searchLower) ?? false) ||
+      (score.titleEn?.toLowerCase().includes(searchLower) ?? false) ||
       (score.description?.toLowerCase().includes(searchLower) ?? false) ||
       score.creator.name.toLowerCase().includes(searchLower) ||
       (score.composer?.toLowerCase().includes(searchLower) ?? false) ||
-      (score.lyricist?.toLowerCase().includes(searchLower) ?? false);
+      (score.lyricist?.toLowerCase().includes(searchLower) ?? false) ||
+      (score.lyricsEn?.toLowerCase().includes(searchLower) ?? false) ||
+      (score.lyricsJa?.toLowerCase().includes(searchLower) ?? false);
     const matchesGenre =
       selectedGenres.length === 0 || selectedGenres.includes(score.genre ?? "");
     const matchesTempo =

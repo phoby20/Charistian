@@ -473,7 +473,8 @@
     "showMore": "もっと見る",
     "showLess": "もっと少なく",
     "noGenre": "ジャンルなし",
-    "viewPdf": "PDFを開く"
+    "viewPdf": "PDFを開く",
+    "editScore": "編集"
   },
   "tempoRange": "テンポ範囲",
   "page": "ページ",
@@ -608,5 +609,20 @@
   "selectGroups": "グループを選択",
   "groupLabel": "グループ",
   "subGroupLabel": "サブグループ",
-  "teamLabel": "チーム"
+  "teamLabel": "チーム",
+  "ScoreEdit": {
+    "title": "楽譜編集",
+    "backToDetail": "楽譜詳細に戻る",
+    "error": "楽譜の読み込みに失敗しました。",
+    "updateError": "楽譜の更新に失敗しました。",
+    "updateButton": "更新",
+    "genreLabel": "ジャンル",
+    "genrePlaceholder": "ジャンルを選択してください",
+    "genreRequired": "ジャンルを選択する必要があります。",
+    "keyLabel": "キー",
+    "keyPlaceholder": "キーを選択してください",
+    "keyRequired": "キーを選択する必要があります。",
+    "fileRequired": "PDFファイルをアップロードする必要があります。",
+    "backToList": "一覧に戻る"
+  }
 }

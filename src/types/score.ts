@@ -91,6 +91,8 @@ export interface Score {
   creator: { name: string };
   composer?: string;
   lyricist?: string;
+  lyricsEn?: string;
+  lyricsJa?: string;
   _count: { likes: number; comments: number };
   likes: { id: string }[];
 }

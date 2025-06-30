@@ -8,7 +8,36 @@ async function checkAccess(
   userId: string,
   creationId: string
 ): Promise<boolean> {
-  // Creation에 대한 접근 권한 확인 (예: Setlist를 통해 간접적으로 권한 확인)
+  // Creation과 User 정보 조회
+  const creation = await prisma.creation.findUnique({
+    where: { id: creationId },
+    select: { churchId: true },
+  });
+
+  if (!creation) {
+    console.error(`Creation not found for creationId: ${creationId}`);
+    return false;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { churchId: true },
+  });
+
+  if (!user) {
+    console.error(`User not found for userId: ${userId}`);
+    return false;
+  }
+
+  // churchId 비교
+  if (user.churchId && creation.churchId === user.churchId) {
+    console.log(
+      `Access granted: User churchId (${user.churchId}) matches Creation churchId (${creation.churchId})`
+    );
+    return true;
+  }
+
+  // 기존 Setlist 기반 권한 확인
   const setlists = await prisma.setlist.findMany({
     where: {
       scores: {
@@ -29,7 +58,7 @@ async function checkAccess(
     },
   });
 
-  return setlists.some((setlist) => {
+  const hasSetlistAccess = setlists.some((setlist) => {
     if (setlist.creator.id === userId) return true;
     return setlist.shares.some((share) => {
       return (
@@ -39,6 +68,11 @@ async function checkAccess(
       );
     });
   });
+
+  console.log(
+    `Setlist-based access: ${hasSetlistAccess} for userId: ${userId}, creationId: ${creationId}`
+  );
+  return hasSetlistAccess;
 }
 
 export async function GET(

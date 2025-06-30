@@ -211,10 +211,12 @@ export default function SetlistDetailPage() {
   const canEdit =
     user &&
     (user.id === setlist?.creatorId ||
-      ["SUPER_ADMIN", "ADMIN"].includes(user.role));
+      ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
+
   const proxyFileUrl = setlist?.id
     ? `${appUrl}/api/proxy/setlist/${setlist.id}/file`
     : "#";
+
   const currentVideoId = currentPlayingId
     ? getYouTubeVideoId(
         setlist?.scores.find((s) => s.id === currentPlayingId)

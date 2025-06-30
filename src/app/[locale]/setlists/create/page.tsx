@@ -1,3 +1,4 @@
+// src/app/[locale]/setlists/create/page.tsx
 "use client";
 import { useState, useEffect, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";

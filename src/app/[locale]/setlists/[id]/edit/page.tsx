@@ -69,6 +69,17 @@ export default function SetlistEditPage() {
         if (!setlistRes.ok) throw new Error(t("fetchError"));
         const { setlist }: { setlist: SetlistResponse; appUrl: string } =
           await setlistRes.json();
+
+        const canEdit =
+          user &&
+          (user.id === setlist?.creatorId ||
+            ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
+
+        if (!canEdit) {
+          router.push(`/setlists`);
+          return;
+        }
+
         setTitle(setlist.title || "");
         if (setlist.date) {
           const parsedDate = parseISO(setlist.date);

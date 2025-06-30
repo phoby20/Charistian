@@ -1,6 +1,5 @@
 // src/app/[locale]/setlists/[id]/edit/page.tsx
 "use client";
-
 import { useState, useEffect, FormEvent } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -36,10 +35,13 @@ export default function SetlistEditPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
+  // 선택된 YouTube URL 상태 추가
+  const [selectedUrls, setSelectedUrls] = useState<{ [key: string]: string }>(
+    {}
+  );
 
   const dateLocale = locale === "ko" ? ko : ja;
 
-  // 폼 유효성 검사
   useEffect(() => {
     const isInvalid =
       !title.trim() ||
@@ -48,7 +50,6 @@ export default function SetlistEditPage() {
       selectedSongs.length === 0 ||
       !selectedGroup ||
       selectedTeams.length === 0;
-
     setIsFormInvalid(isInvalid);
   }, [title, date, description, selectedSongs, selectedGroup, selectedTeams]);
 
@@ -63,12 +64,10 @@ export default function SetlistEditPage() {
       setIsLoading(true);
       setError(null);
       try {
-        // Fetch setlist
         const setlistRes = await fetch(`/api/setlists/${id}`);
         if (!setlistRes.ok) throw new Error(t("fetchError"));
         const { setlist }: { setlist: SetlistResponse; appUrl: string } =
           await setlistRes.json();
-
         setTitle(setlist.title || "");
         if (setlist.date) {
           const parsedDate = parseISO(setlist.date);
@@ -84,7 +83,7 @@ export default function SetlistEditPage() {
         setDescription(setlist.description || "");
         const initialSongs: SelectedSong[] = Array.isArray(setlist.scores)
           ? setlist.scores
-              .sort((a, b) => a.order - b.order) // order 기준 정렬
+              .sort((a, b) => a.order - b.order)
               .map((score) => ({
                 id: score.creation.id,
                 title: score.creation.title || "",
@@ -96,36 +95,35 @@ export default function SetlistEditPage() {
               }))
           : [];
         setSelectedSongs(initialSongs);
-        // API 데이터를 기반으로 sessionStorage 초기화
+        // 초기 selectedUrls 설정
+        const initialUrls: { [key: string]: string } = {};
+        setlist.scores.forEach((score) => {
+          if (score.selectedReferenceUrl) {
+            initialUrls[score.creation.id] = score.selectedReferenceUrl;
+          }
+        });
+        setSelectedUrls(initialUrls);
         sessionStorage.setItem(
           "selectedSongList",
           JSON.stringify(initialSongs)
         );
-
-        // Fetch available groups and teams
         const [groupRes, teamRes] = await Promise.all([
           fetch(`/api/groups/public?churchId=${user.churchId}`),
           fetch(`/api/teams?churchId=${user.churchId}`),
         ]);
-
         if (!groupRes.ok || !teamRes.ok) {
           throw new Error(t("fetchError"));
         }
-
         const groupData = await groupRes.json();
         const teamData = await teamRes.json();
-
         if (
           !Array.isArray(groupData.groups) ||
           !Array.isArray(teamData.teams)
         ) {
           throw new Error(t("invalidResponseFormat"));
         }
-
         setGroups(groupData.groups);
         setTeams(teamData.teams);
-
-        // Initialize selected groups and teams from shares
         const groupShare = setlist.shares?.find(
           (s: { group?: Group }) => s.group
         )?.group?.id;
@@ -141,9 +139,13 @@ export default function SetlistEditPage() {
         setIsLoading(false);
       }
     };
-
     fetchData();
   }, [id, t, user]);
+
+  // YouTube URL 선택 핸들러
+  const handleUrlSelect = (songId: string, url: string) => {
+    setSelectedUrls((prev) => ({ ...prev, [songId]: url }));
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -168,6 +170,11 @@ export default function SetlistEditPage() {
           scores: selectedSongs.map((song, index) => ({
             creationId: song.id,
             order: index + 1,
+            selectedReferenceUrl:
+              selectedUrls[song.id] ||
+              song.referenceUrls.find(
+                (url) => url.includes("youtube.com") || url.includes("youtu.be")
+              ),
           })),
           shares: [
             ...(selectedGroup ? [{ groupId: selectedGroup }] : []),
@@ -335,6 +342,8 @@ export default function SetlistEditPage() {
                 onRemoveSong={handleRemoveSong}
                 onReorderSongs={handleReorderSongs}
                 t={t}
+                onUrlSelect={handleUrlSelect} // URL 선택 핸들러 전달
+                selectedUrls={selectedUrls} // 선택된 URL 상태 전달
               />
             </motion.div>
             <div>

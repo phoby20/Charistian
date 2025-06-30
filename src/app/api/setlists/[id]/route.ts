@@ -13,7 +13,7 @@ interface UpdateSetlistRequest {
   title: string;
   date: string;
   description?: string;
-  scores: { creationId: string; order: number }[];
+  scores: { creationId: string; order: number; selectedReferenceUrl: string }[];
   shares: {
     groupId?: string | null;
     teamId?: string | null;
@@ -49,6 +49,7 @@ export async function GET(
               },
             },
             order: true,
+            selectedReferenceUrl: true,
           },
         },
         comments: {
@@ -227,6 +228,7 @@ export async function PUT(
               create: scores.map((s) => ({
                 creationId: s.creationId,
                 order: s.order,
+                selectedReferenceUrl: s.selectedReferenceUrl,
               })),
             },
             shares: {

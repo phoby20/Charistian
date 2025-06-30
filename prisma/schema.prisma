@@ -303,6 +303,7 @@ model SetlistScore {
   creationId  String
   creation    Creation  @relation("CreationSetlistScores", fields: [creationId], references: [id])
   order       Int
+  selectedReferenceUrl String? // 선택된 YouTube URL 저장
   createdAt   DateTime  @default(now())
 }
 

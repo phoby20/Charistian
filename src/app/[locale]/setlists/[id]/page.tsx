@@ -1,4 +1,3 @@
-// src/app/[locale]/setlists/[id]/page.tsx
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
@@ -15,6 +14,7 @@ import Chip from "@/components/Chip";
 import { getDisplayTitle } from "@/utils/getDisplayTitle";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { debounce } from "lodash";
+import { toast } from "react-toastify"; // react-toastify 추가
 
 export default function SetlistDetailPage() {
   const t = useTranslations("Setlist");
@@ -29,11 +29,12 @@ export default function SetlistDetailPage() {
   const [currentPlayingId, setCurrentPlayingId] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isPlayerReady, setIsPlayerReady] = useState(false); // 플레이어 준비 상태
+  const [pendingPlay, setPendingPlay] = useState<string | null>(null); // 대기 중인 재생 요청
   const playerRef = useRef<YouTubePlayer | null>(null);
 
   const dateLocale = locale === "ko" ? ko : ja;
 
-  // YouTube URL에서 videoId 추출
   const getYouTubeVideoId = (url?: string): string | undefined => {
     if (!url) return undefined;
     const regex =
@@ -42,7 +43,6 @@ export default function SetlistDetailPage() {
     return match ? match[1] : undefined;
   };
 
-  // 첫 번째 YouTube URL의 videoId 가져오기
   const getFirstYouTubeVideoId = (urls?: string[]): string | undefined => {
     if (!urls || urls.length === 0) return undefined;
     for (const url of urls) {
@@ -52,91 +52,107 @@ export default function SetlistDetailPage() {
     return undefined;
   };
 
-  // 시간 포맷팅 (초 -> MM:SS)
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  // 디바운싱된 재생/정지 핸들러
   const handlePlayPause = useCallback(
     debounce(async (scoreId: string) => {
+      if (!playerRef.current || !isPlayerReady) {
+        console.warn("Player is not ready yet, adding to pending play");
+        setPendingPlay(scoreId);
+        return;
+      }
+
       if (currentPlayingId === scoreId) {
-        if (playerRef.current) {
-          try {
-            await playerRef.current.pauseVideo();
-            setCurrentPlayingId(null);
-          } catch (err) {
-            console.error("Error pausing video:", err);
-          }
+        try {
+          await playerRef.current.pauseVideo();
+          setCurrentPlayingId(null);
+        } catch (err) {
+          console.error("Error pausing video:", err);
+          setError(t("youtubeError"));
+          toast.error(t("youtubeError"));
         }
       } else {
-        if (playerRef.current && currentPlayingId) {
-          try {
+        try {
+          if (currentPlayingId) {
             await playerRef.current.pauseVideo();
-          } catch (err) {
-            console.error("Error pausing current video:", err);
           }
-        }
-        setCurrentPlayingId(scoreId);
-        const videoId = getFirstYouTubeVideoId(
-          setlist?.scores.find((s) => s.id === scoreId)?.creation.referenceUrls
-        );
-        if (videoId && playerRef.current) {
-          try {
+          setCurrentPlayingId(scoreId);
+          const score = setlist?.scores.find((s) => s.id === scoreId);
+          const videoId = score?.selectedReferenceUrl
+            ? getYouTubeVideoId(score.selectedReferenceUrl)
+            : getFirstYouTubeVideoId(score?.creation.referenceUrls);
+          if (videoId) {
             await playerRef.current.loadVideoById(videoId);
-          } catch (err) {
-            console.error("Error loading new video:", err);
+          } else {
+            console.warn("No valid YouTube URL found for scoreId:", scoreId);
+            setCurrentPlayingId(null);
             setError(t("youtubeError"));
+            toast.error(t("youtubeError"));
           }
+        } catch (err) {
+          console.error("Error loading new video:", err);
+          setError(t("youtubeError"));
+          toast.error(t("youtubeError"));
         }
       }
     }, 300),
-    [currentPlayingId, setlist]
+    [currentPlayingId, setlist, isPlayerReady]
   );
 
-  // YouTube 플레이어 준비 완료
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
     playerRef.current = event.target;
+    setIsPlayerReady(true);
     setDuration(event.target.getDuration());
-    if (currentPlayingId) {
-      event.target.playVideo();
+    if (pendingPlay) {
+      handlePlayPause(pendingPlay);
+    } else if (currentPlayingId) {
+      const score = setlist?.scores.find((s) => s.id === currentPlayingId);
+      const videoId = score?.selectedReferenceUrl
+        ? getYouTubeVideoId(score.selectedReferenceUrl)
+        : getFirstYouTubeVideoId(score?.creation.referenceUrls);
+      if (videoId) {
+        event.target.loadVideoById(videoId);
+      }
     }
   };
 
-  // YouTube 상태 변경 감지
   const onStateChange = (event: { target: YouTubePlayer; data: number }) => {
     if (event.data === 1) {
+      // Playing
       setDuration(event.target.getDuration());
     } else if (event.data === 2 || event.data === 0) {
+      // Paused or Ended
       setCurrentPlayingId(null);
+      setPendingPlay(null);
     }
   };
 
-  // 레인지바로 시간 이동
   const handleSeek = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(event.target.value);
-    if (playerRef.current) {
+    if (playerRef.current && isPlayerReady) {
       playerRef.current.seekTo(newTime, true);
       setCurrentTime(newTime);
     }
   };
 
-  // 현재 시간 업데이트
   useEffect(() => {
-    if (currentPlayingId && playerRef.current) {
+    if (currentPlayingId && playerRef.current && isPlayerReady) {
       const interval = setInterval(() => {
         setCurrentTime(playerRef.current!.getCurrentTime());
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [currentPlayingId]);
+  }, [currentPlayingId, isPlayerReady]);
 
-  // 컴포넌트 언마운트 시 playerRef 정리
   useEffect(() => {
     return () => {
       playerRef.current = null;
+      setIsPlayerReady(false);
+      setPendingPlay(null);
     };
   }, []);
 
@@ -147,7 +163,6 @@ export default function SetlistDetailPage() {
           throw new Error(t("invalidId"));
         }
         const response = await fetch(`/api/setlists/${id}`);
-
         if (!response.ok) {
           throw new Error((await response.json()).error || t("fetchError"));
         }
@@ -156,6 +171,7 @@ export default function SetlistDetailPage() {
         setAppUrl(data.appUrl);
       } catch (err) {
         setError(err instanceof Error ? err.message : t("fetchError"));
+        toast.error(err instanceof Error ? err.message : t("fetchError"));
       }
     };
     fetchSetlist();
@@ -183,8 +199,10 @@ export default function SetlistDetailPage() {
         prev ? { ...prev, comments: [newComment, ...prev.comments] } : null
       );
       setComment("");
+      toast.success(t("commentSuccess"));
     } catch (err) {
       setError(err instanceof Error ? err.message : t("commentError"));
+      toast.error(err instanceof Error ? err.message : t("commentError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -194,17 +212,17 @@ export default function SetlistDetailPage() {
     user &&
     (user.id === setlist?.creatorId ||
       ["SUPER_ADMIN", "ADMIN"].includes(user.role));
-
-  // 프록시 URL 생성
   const proxyFileUrl = setlist?.id
     ? `${appUrl}/api/proxy/setlist/${setlist.id}/file`
     : "#";
-
-  // 현재 재생 중인 비디오 ID
   const currentVideoId = currentPlayingId
-    ? getFirstYouTubeVideoId(
-        setlist?.scores.find((s) => s.id === currentPlayingId)?.creation
-          .referenceUrls
+    ? getYouTubeVideoId(
+        setlist?.scores.find((s) => s.id === currentPlayingId)
+          ?.selectedReferenceUrl ||
+          getFirstYouTubeVideoId(
+            setlist?.scores.find((s) => s.id === currentPlayingId)?.creation
+              .referenceUrls
+          )
       )
     : undefined;
 
@@ -255,26 +273,27 @@ export default function SetlistDetailPage() {
           transition={{ duration: 0.6 }}
           className="bg-white rounded-2xl shadow-xl p-8"
         >
-          {/* YouTube 플레이어 (숨김) */}
-          {currentPlayingId && currentVideoId && (
-            <div className="hidden">
-              <YouTube
-                key={currentVideoId}
-                videoId={currentVideoId}
-                opts={{
-                  width: 0,
-                  height: 0,
-                  playerVars: { autoplay: 0, controls: 0, showinfo: 0 },
-                }}
-                onReady={onPlayerReady}
-                onStateChange={onStateChange}
-                onError={(e) => {
-                  console.error("YouTube 플레이어 오류:", e);
-                  setError(t("youtubeError"));
-                }}
-              />
-            </div>
-          )}
+          {/* 항상 YouTube 플레이어 렌더링 */}
+          <div className="hidden">
+            <YouTube
+              key={currentVideoId || "default"}
+              videoId={currentVideoId}
+              opts={{
+                width: 0,
+                height: 0,
+                playerVars: { autoplay: 0, controls: 0, showinfo: 0 },
+              }}
+              onReady={onPlayerReady}
+              onStateChange={onStateChange}
+              onError={(e) => {
+                console.error("YouTube player error:", e);
+                setError(t("youtubeError"));
+                toast.error(t("youtubeError"));
+                setCurrentPlayingId(null);
+                setPendingPlay(null);
+              }}
+            />
+          </div>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div className="flex items-center space-x-4">
               <Link href={`/${locale}/setlists`}>
@@ -334,9 +353,9 @@ export default function SetlistDetailPage() {
             {setlist.scores
               .sort((a, b) => a.order - b.order)
               .map((score, index) => {
-                const youtubeVideoId = getFirstYouTubeVideoId(
-                  score.creation.referenceUrls
-                );
+                const youtubeVideoId = score.selectedReferenceUrl
+                  ? getYouTubeVideoId(score.selectedReferenceUrl)
+                  : getFirstYouTubeVideoId(score.creation.referenceUrls);
                 return (
                   <motion.li
                     key={score.id}
@@ -401,7 +420,6 @@ export default function SetlistDetailPage() {
                 );
               })}
           </ul>
-          {/* 레인지바 */}
           {currentPlayingId && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}

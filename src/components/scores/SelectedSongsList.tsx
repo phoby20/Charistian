@@ -1,5 +1,4 @@
 // src/components/scores/SelectedSongsList.tsx
-"use client";
 import { useTranslations } from "next-intl";
 import {
   DndContext,
@@ -20,16 +19,23 @@ import { SortableSong } from "./SortableSong";
 import { SelectedSong } from "@/types/score";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { motion } from "framer-motion";
-import { debounce } from "lodash"; // lodash 디바운스 사용 (설치 필요: npm install lodash)
+import { debounce } from "lodash";
 
 interface SelectedSongsListProps {
   selectedSongs: SelectedSong[];
   onRemoveSong: (index: number) => void;
   onReorderSongs: (newSongs: SelectedSong[]) => void;
   t: ReturnType<typeof useTranslations<"Setlist">>;
+  onUrlSelect: (songId: string, url: string) => void;
+  selectedUrls: { [key: string]: string };
 }
 
-// YouTube URL에서 videoId 추출
+interface YouTubeVideo {
+  url: string;
+  title: string;
+  videoId: string;
+}
+
 const getYouTubeVideoId = (url?: string): string | undefined => {
   if (!url) return undefined;
   const regex =
@@ -38,17 +44,13 @@ const getYouTubeVideoId = (url?: string): string | undefined => {
   return match ? match[1] : undefined;
 };
 
-// 첫 번째 YouTube URL의 videoId 가져오기
-const getFirstYouTubeVideoId = (urls?: string[]): string | undefined => {
-  if (!urls || urls.length === 0) return undefined;
-  for (const url of urls) {
-    const videoId = getYouTubeVideoId(url);
-    if (videoId) return videoId;
-  }
-  return undefined;
+const getYouTubeUrls = (urls?: string[]): string[] => {
+  if (!urls || urls.length === 0) return [];
+  return urls.filter(
+    (url) => url.includes("youtube.com") || url.includes("youtu.be")
+  );
 };
 
-// 시간 포맷팅 (초 -> MM:SS)
 const formatTime = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
@@ -60,24 +62,73 @@ export default function SelectedSongsList({
   onRemoveSong,
   onReorderSongs,
   t,
+  onUrlSelect,
+  selectedUrls,
 }: SelectedSongsListProps) {
   const [overIndex, setOverIndex] = useState<number | null>(null);
   const [isDraggingAny, setIsDraggingAny] = useState(false);
   const [currentPlayingId, setCurrentPlayingId] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [videoTitles, setVideoTitles] = useState<{
+    [songId: string]: YouTubeVideo[];
+  }>({});
   const playerRef = useRef<YouTubePlayer | null>(null);
 
-  // 센서 설정: 마우스와 터치 이벤트 지원
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 100,
-        tolerance: 5,
-      },
+      activationConstraint: { delay: 100, tolerance: 5 },
     })
   );
+
+  // YouTube 비디오 타이틀 가져오기
+  useEffect(() => {
+    const fetchTitles = async () => {
+      const titles: { [songId: string]: YouTubeVideo[] } = {};
+      const cachedTitles = sessionStorage.getItem("videoTitles");
+      if (cachedTitles) {
+        try {
+          Object.assign(titles, JSON.parse(cachedTitles));
+        } catch (err) {
+          console.error("Error parsing cached video titles:", err);
+        }
+      }
+
+      for (const song of selectedSongs) {
+        if (!titles[song.id]) {
+          const youtubeUrls = getYouTubeUrls(song.referenceUrls);
+          if (youtubeUrls.length > 0) {
+            try {
+              const response = await fetch("/api/youtube-titles", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ urls: youtubeUrls }),
+              });
+              if (!response.ok) {
+                throw new Error("Failed to fetch YouTube titles");
+              }
+              const { videos } = await response.json();
+              titles[song.id] = videos;
+            } catch (error) {
+              console.error(
+                `Failed to fetch titles for song ${song.id}:`,
+                error
+              );
+              titles[song.id] = youtubeUrls.map((url, idx) => ({
+                url,
+                title: `YouTube URL ${idx + 1}`,
+                videoId: getYouTubeVideoId(url) || "",
+              }));
+            }
+          }
+        }
+      }
+      setVideoTitles(titles);
+      sessionStorage.setItem("videoTitles", JSON.stringify(titles));
+    };
+    fetchTitles();
+  }, [selectedSongs]);
 
   const handleDragStart = () => {
     setIsDraggingAny(true);
@@ -95,7 +146,6 @@ export default function SelectedSongsList({
       const newIndex = selectedSongs.findIndex(
         (song, idx) => `${song.id}-${idx}` === over?.id
       );
-
       if (oldIndex !== -1 && newIndex !== -1) {
         const newSongs = [...selectedSongs];
         const [movedSong] = newSongs.splice(oldIndex, 1);
@@ -117,9 +167,8 @@ export default function SelectedSongsList({
     }
   };
 
-  // 디바운싱된 재생/정지 핸들러
   const handlePlayPause = useCallback(
-    debounce(async (songId: string) => {
+    debounce(async (songId: string, videoId?: string) => {
       if (currentPlayingId === songId) {
         if (playerRef.current) {
           try {
@@ -138,22 +187,34 @@ export default function SelectedSongsList({
           }
         }
         setCurrentPlayingId(songId);
-        const videoId = getFirstYouTubeVideoId(
-          selectedSongs.find((s) => s.id === songId)?.referenceUrls
-        );
-        if (videoId && playerRef.current) {
+        const selectedUrl = videoId
+          ? videoId
+          : getYouTubeVideoId(selectedUrls[songId]) ||
+            getYouTubeVideoId(
+              getYouTubeUrls(
+                selectedSongs.find((s) => s.id === songId)?.referenceUrls
+              )[0]
+            );
+        if (selectedUrl && playerRef.current) {
           try {
-            await playerRef.current.loadVideoById(videoId);
+            await playerRef.current.loadVideoById(selectedUrl);
           } catch (err) {
             console.error("Error loading new video:", err);
           }
         }
       }
-    }, 300), // 300ms 디바운스
-    [currentPlayingId, selectedSongs]
+    }, 300),
+    [currentPlayingId, selectedSongs, selectedUrls]
   );
 
-  // YouTube 플레이어 준비 완료
+  const handleUrlSelect = (songId: string, url: string) => {
+    onUrlSelect(songId, url);
+    const videoId = getYouTubeVideoId(url);
+    if (videoId) {
+      handlePlayPause(songId, videoId); // 선택 시 즉시 재생
+    }
+  };
+
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
     playerRef.current = event.target;
     setDuration(event.target.getDuration());
@@ -162,7 +223,6 @@ export default function SelectedSongsList({
     }
   };
 
-  // YouTube 상태 변경 감지
   const onStateChange = (event: { target: YouTubePlayer; data: number }) => {
     if (event.data === 1) {
       setDuration(event.target.getDuration());
@@ -171,7 +231,6 @@ export default function SelectedSongsList({
     }
   };
 
-  // 레인지바로 시간 이동
   const handleSeek = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(event.target.value);
     if (playerRef.current) {
@@ -180,7 +239,6 @@ export default function SelectedSongsList({
     }
   };
 
-  // 현재 시간 업데이트
   useEffect(() => {
     if (currentPlayingId && playerRef.current) {
       const interval = setInterval(() => {
@@ -190,17 +248,18 @@ export default function SelectedSongsList({
     }
   }, [currentPlayingId]);
 
-  // 컴포넌트 언마운트 시 playerRef 정리
   useEffect(() => {
     return () => {
       playerRef.current = null;
     };
   }, []);
 
-  // 현재 재생 중인 비디오 ID
   const currentVideoId = currentPlayingId
-    ? getFirstYouTubeVideoId(
-        selectedSongs.find((s) => s.id === currentPlayingId)?.referenceUrls
+    ? getYouTubeVideoId(
+        selectedUrls[currentPlayingId] ||
+          getYouTubeUrls(
+            selectedSongs.find((s) => s.id === currentPlayingId)?.referenceUrls
+          )[0]
       )
     : undefined;
 
@@ -213,11 +272,10 @@ export default function SelectedSongsList({
         <p className="text-sm text-gray-500">{t("noSelectedSongs")}</p>
       ) : (
         <>
-          {/* YouTube 플레이어 (숨김) */}
           {currentPlayingId && currentVideoId && (
             <div className="hidden">
               <YouTube
-                key={currentVideoId} // videoId 변경 시 컴포넌트 리마운트
+                key={currentVideoId}
                 videoId={currentVideoId}
                 opts={{
                   width: 0,
@@ -246,24 +304,35 @@ export default function SelectedSongsList({
                   const count = selectedSongs
                     .slice(0, index + 1)
                     .filter((s) => s.id === song.id).length;
+                  const youtubeUrls = getYouTubeUrls(song.referenceUrls);
+                  const titles = videoTitles[song.id] || [];
                   return (
-                    <SortableSong
+                    <div
                       key={`${song.id}-${index}`}
-                      song={song}
-                      index={index}
-                      count={count}
-                      onRemoveSong={onRemoveSong}
-                      onPlayPause={handlePlayPause}
-                      isOver={overIndex === index}
-                      isDraggingAny={isDraggingAny}
-                      currentPlayingId={currentPlayingId}
-                    />
+                      className={`flex items-center justify-between bg-gray-50 rounded-xl p-4 shadow-sm ${
+                        overIndex === index ? "bg-blue-100" : ""
+                      }`}
+                    >
+                      <SortableSong
+                        song={song}
+                        index={index}
+                        count={count}
+                        onRemoveSong={onRemoveSong}
+                        onPlayPause={handlePlayPause}
+                        isOver={overIndex === index}
+                        isDraggingAny={isDraggingAny}
+                        currentPlayingId={currentPlayingId}
+                        youtubeUrls={youtubeUrls}
+                        titles={titles}
+                        selectedUrls={selectedUrls}
+                        handleUrlSelect={handleUrlSelect}
+                      />
+                    </div>
                   );
                 })}
               </div>
             </SortableContext>
           </DndContext>
-          {/* 레인지바 */}
           {currentPlayingId && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}

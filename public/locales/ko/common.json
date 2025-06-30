@@ -584,7 +584,9 @@
     "pause": "일시정지",
     "seek": "탐색",
     "remove": "삭제",
-    "youtubeError": "YouTube 비디오 재생에 실패했습니다"
+    "youtubeError": "YouTube 비디오 재생에 실패했습니다",
+    "noSelectedUrl": "선택된 YouTube URL이 없습니다.",
+    "selecteReference": "참고음원 선택"
   },
   "scoreList": "악보리스트",
   "setlistList": "콘티리스트",

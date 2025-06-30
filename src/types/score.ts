@@ -170,6 +170,7 @@ export interface SetlistResponse {
     id: string;
     creation: SelectedSong;
     order: number;
+    selectedReferenceUrl?: string; // 선택된 YouTube URL 추가
   }[];
   comments: {
     id: string;

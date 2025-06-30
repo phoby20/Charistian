@@ -72,7 +72,7 @@ export default function MobileFilterDropdowns({
       <div className="relative">
         <button
           onClick={() => setIsGroupMenuOpen(!isGroupMenuOpen)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-full text-xs font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
           aria-expanded={isGroupMenuOpen}
           aria-haspopup="true"
         >
@@ -100,7 +100,7 @@ export default function MobileFilterDropdowns({
                 <button
                   key={group}
                   onClick={() => handleGroupSelect(group)}
-                  className={`block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 ${
+                  className={`block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 ${
                     selectedGroups.includes(group) ? "bg-blue-100" : ""
                   }`}
                   role="menuitem"
@@ -117,7 +117,7 @@ export default function MobileFilterDropdowns({
       <div className="relative">
         <button
           onClick={() => setIsSubGroupMenuOpen(!isSubGroupMenuOpen)}
-          className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-full text-sm font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
+          className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-full text-xs font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
           aria-expanded={isSubGroupMenuOpen}
           aria-haspopup="true"
         >
@@ -162,7 +162,7 @@ export default function MobileFilterDropdowns({
       <div className="relative">
         <button
           onClick={() => setIsTeamMenuOpen(!isTeamMenuOpen)}
-          className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
+          className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-full text-xs font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
           aria-expanded={isTeamMenuOpen}
           aria-haspopup="true"
         >

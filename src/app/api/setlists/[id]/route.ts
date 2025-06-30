@@ -110,7 +110,7 @@ export async function DELETE(
 
     if (
       authResult.payload.userId !== setlist.creatorId &&
-      !["SUPER_ADMIN", "ADMIN"].includes(authResult.payload.role)
+      !["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(authResult.payload.role)
     ) {
       return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
     }

@@ -366,7 +366,7 @@ export default function SetlistDetailPage() {
               onError={onError}
             />
           </div>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <div className="flex flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div className="flex items-center space-x-4">
               <Link href={`/${locale}/setlists`}>
                 <motion.button

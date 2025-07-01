@@ -74,6 +74,8 @@ const districtSubGroups = ["1교구(1教区)", "2교구(2教区)", "3교구(3教
 // SubGroupInput 인터페이스 정의
 interface SubGroupInput {
   name: string;
+  groupId: string;
+  churchId: string;
 }
 
 // 6자리 랜덤 숫자 비밀번호 생성 함수
@@ -168,154 +170,172 @@ export async function POST(req: NextRequest) {
 
     // 트랜잭션으로 Church, User(SUPER_ADMIN), User(CHECKER), ChurchPosition, Duty, Group, SubGroup, Team 생성 및 Application 업데이트
     const [church, superAdminUser, checkerUser, updatedApplication] =
-      await prisma.$transaction(async (tx) => {
-        // 1. SUPER_ADMIN 이메일 중복 체크
-        const existingSuperAdmin = await tx.user.findUnique({
-          where: { email: superAdminEmail },
-        });
-        if (existingSuperAdmin) {
-          throw new Error("SUPER_ADMIN 이메일이 이미 등록되어 있습니다");
-        }
+      await prisma.$transaction(
+        async (tx) => {
+          // 1. SUPER_ADMIN 이메일 중복 체크
+          const existingSuperAdmin = await tx.user.findUnique({
+            where: { email: superAdminEmail },
+          });
+          if (existingSuperAdmin) {
+            throw new Error("SUPER_ADMIN 이메일이 이미 등록되어 있습니다");
+          }
 
-        // 2. CHECKER 이메일 중복 체크
-        const existingChecker = await tx.user.findUnique({
-          where: { email: checkerEmail },
-        });
-        if (existingChecker) {
-          throw new Error("CHECKER 이메일이 이미 등록되어 있습니다");
-        }
+          // 2. CHECKER 이메일 중복 체크
+          const existingChecker = await tx.user.findUnique({
+            where: { email: checkerEmail },
+          });
+          if (existingChecker) {
+            throw new Error("CHECKER 이메일이 이미 등록되어 있습니다");
+          }
 
-        // 3. 교회 생성
-        const church = await tx.church.create({
-          data: {
-            name: application.churchName,
-            address: application.address,
-            city: application.city,
-            region: application.region,
-            country: application.country,
-            phone: application.churchPhone,
-            logo: application.logo,
-            plan: application.plan,
-            state: "APPROVED",
-          },
-        });
-
-        // 4. SUPER_ADMIN 유저 생성
-        const superAdminUser = await tx.user.create({
-          data: {
-            email: superAdminEmail,
-            password: application.password,
-            name: application.contactName,
-            birthDate: application.contactBirthDate,
-            phone: application.contactPhone,
-            country: application.country,
-            region: "Unknown",
-            gender: application.contactGender,
-            profileImage: application.contactImage,
-            role: "SUPER_ADMIN",
-            state: "APPROVED",
-            church: {
-              connect: { id: church.id },
-            },
-          },
-        });
-
-        // 5. CHECKER 유저 생성
-        const checkerUser = await tx.user.create({
-          data: {
-            email: checkerEmail,
-            password: checkerPassword,
-            name: "Checker User",
-            birthDate: new Date("1970-01-01"),
-            gender: "Unknown",
-            country: application.country,
-            region: "Unknown",
-            role: "CHECKER",
-            state: "APPROVED",
-            church: {
-              connect: { id: church.id },
-            },
-          },
-        });
-
-        // 6. 기본 직분(ChurchPosition) 생성
-        const positionData = defaultPositions.map((name) => ({
-          name,
-          churchId: church.id,
-        }));
-        await tx.churchPosition.createMany({
-          data: positionData,
-        });
-
-        // 7. 기본 직책(Duty) 생성
-        const dutyData = defaultDuties.map((name) => ({
-          name,
-          churchId: church.id,
-        }));
-        await tx.duty.createMany({
-          data: dutyData,
-        });
-
-        // 8. 기본 그룹(Group) 및 서브그룹(SubGroup) 생성
-        const classGroupNames = [
-          "유아부(幼兒部)",
-          "유치부(幼稚部)",
-          "초등부(小学部)",
-          "중등부(中学部)",
-          "고등부(高校部)",
-          "중고등부(中高等部)",
-        ];
-        const districtGroupNames = [
-          "청년부(青年部)",
-          "청장년부(靑長年部)",
-          "대학부(大學部)",
-          "장년부(長年部)",
-        ];
-
-        for (const name of defaultGroups) {
-          const group = await tx.group.create({
+          // 3. 교회 생성
+          const church = await tx.church.create({
             data: {
-              name,
-              churchId: church.id,
+              name: application.churchName,
+              address: application.address,
+              city: application.city,
+              region: application.region,
+              country: application.country,
+              phone: application.churchPhone,
+              logo: application.logo,
+              plan: application.plan,
+              state: "APPROVED",
             },
           });
 
-          const subGroups: SubGroupInput[] = classGroupNames.includes(name)
-            ? classSubGroups.map((subGroupName) => ({ name: subGroupName }))
-            : districtGroupNames.includes(name)
-              ? districtSubGroups.map((subGroupName) => ({
-                  name: subGroupName,
-                }))
-              : [];
+          // 4. SUPER_ADMIN 유저 생성
+          const superAdminUser = await tx.user.create({
+            data: {
+              email: superAdminEmail,
+              password: application.password,
+              name: application.contactName,
+              birthDate: application.contactBirthDate,
+              phone: application.contactPhone,
+              country: application.country,
+              region: "Unknown",
+              gender: application.contactGender,
+              profileImage: application.contactImage,
+              role: "SUPER_ADMIN",
+              state: "APPROVED",
+              church: {
+                connect: { id: church.id },
+              },
+            },
+          });
 
-          if (subGroups.length > 0) {
+          // 5. CHECKER 유저 생성
+          const checkerUser = await tx.user.create({
+            data: {
+              email: checkerEmail,
+              password: checkerPassword,
+              name: "Checker User",
+              birthDate: new Date("1970-01-01"),
+              gender: "Unknown",
+              country: application.country,
+              region: "Unknown",
+              role: "CHECKER",
+              state: "APPROVED",
+              church: {
+                connect: { id: church.id },
+              },
+            },
+          });
+
+          // 6. 기본 직분(ChurchPosition) 생성
+          const positionData = defaultPositions.map((name) => ({
+            name,
+            churchId: church.id,
+          }));
+          await tx.churchPosition.createMany({
+            data: positionData,
+          });
+
+          // 7. 기본 직책(Duty) 생성
+          const dutyData = defaultDuties.map((name) => ({
+            name,
+            churchId: church.id,
+          }));
+          await tx.duty.createMany({
+            data: dutyData,
+          });
+
+          // 8. 기본 그룹(Group) 생성
+          const groupData = defaultGroups.map((name) => ({
+            name,
+            churchId: church.id,
+          }));
+          await tx.group.createMany({
+            data: groupData,
+            skipDuplicates: true, // 중복 방지
+          });
+
+          // 생성된 그룹 조회
+          const createdGroups = await tx.group.findMany({
+            where: { churchId: church.id },
+            select: { id: true, name: true },
+          });
+
+          // 9. 기본 서브그룹(SubGroup) 생성
+          const classGroupNames = [
+            "유아부(幼兒部)",
+            "유치부(幼稚部)",
+            "초등부(小学部)",
+            "중등부(中学部)",
+            "고등부(高校部)",
+            "중고등부(中高等部)",
+          ];
+          const districtGroupNames = [
+            "청년부(青年部)",
+            "청장년부(靑長年部)",
+            "대학부(大學部)",
+            "장년부(長年部)",
+          ];
+
+          const subGroupData: SubGroupInput[] = [];
+          createdGroups.forEach((group) => {
+            const subGroups = classGroupNames.includes(group.name)
+              ? classSubGroups.map((subGroupName) => ({
+                  name: subGroupName,
+                  groupId: group.id,
+                  churchId: church.id,
+                }))
+              : districtGroupNames.includes(group.name)
+                ? districtSubGroups.map((subGroupName) => ({
+                    name: subGroupName,
+                    groupId: group.id,
+                    churchId: church.id,
+                  }))
+                : [];
+            subGroupData.push(...subGroups);
+          });
+
+          if (subGroupData.length > 0) {
             await tx.subGroup.createMany({
-              data: subGroups.map((subGroup) => ({
-                name: subGroup.name,
-                groupId: group.id,
-                churchId: church.id,
-              })),
+              data: subGroupData,
+              skipDuplicates: true, // 중복 방지
             });
           }
-        }
 
-        // 9. 기본 팀(Team) 생성
-        const teamData = defaultTeams.map((name) => ({
-          name,
-          churchId: church.id,
-        }));
-        await tx.team.createMany({
-          data: teamData,
-        });
+          // 10. 기본 팀(Team) 생성
+          const teamData = defaultTeams.map((name) => ({
+            name,
+            churchId: church.id,
+          }));
+          await tx.team.createMany({
+            data: teamData,
+            skipDuplicates: true, // 중복 방지
+          });
 
-        // 10. ChurchApplication 상태 업데이트
-        const updatedApplication = await tx.churchApplication.update({
-          where: { id: applicationId },
-          data: { state: "APPROVED" },
-        });
+          // 11. ChurchApplication 상태 업데이트
+          const updatedApplication = await tx.churchApplication.update({
+            where: { id: applicationId },
+            data: { state: "APPROVED" },
+          });
 
-        return [church, superAdminUser, checkerUser, updatedApplication];
-      });
+          return [church, superAdminUser, checkerUser, updatedApplication];
+        },
+        { timeout: 15000 } // 타임아웃을 15초로 증가
+      );
 
     // 이메일 전송
     await sendApprovalEmail(
@@ -364,6 +384,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           { error: "중복된 데이터가 존재합니다" },
           { status: 400 }
+        );
+      }
+      if (error.code === "P2028") {
+        return NextResponse.json(
+          { error: "트랜잭션 타임아웃이 발생했습니다. 다시 시도해주세요." },
+          { status: 500 }
         );
       }
     }

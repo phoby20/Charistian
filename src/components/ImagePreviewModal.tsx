@@ -1,7 +1,6 @@
 // src/components/ImagePreviewModal.tsx
 "use client";
 import Modal from "@/components/Modal";
-import Image from "next/image";
 
 interface ImagePreviewModalProps {
   isOpen: boolean;
@@ -18,13 +17,7 @@ export default function ImagePreviewModal({
     <Modal isOpen={isOpen}>
       {imageUrl && (
         <div className="flex justify-center">
-          <Image
-            src={imageUrl}
-            alt={alt}
-            width={600}
-            height={400}
-            className="rounded-md object-contain"
-          />
+          <img src={imageUrl} alt={alt} className="rounded-md object-contain" />
         </div>
       )}
       <div className="flex justify-end mt-4"></div>

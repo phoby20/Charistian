@@ -1,6 +1,5 @@
-// src/components/ChurchApplicationCard.tsx
+"use client";
 import Button from "@/components/Button";
-import Image from "next/image";
 import { ChurchApplication } from "@prisma/client";
 import { useTranslations } from "next-intl";
 
@@ -35,11 +34,9 @@ export default function ChurchApplicationCard({
       </p>
       {church.logo && (
         <div className="mb-4">
-          <Image
+          <img
             src={church.logo}
-            alt={`${church.churchName} building`}
-            width={100}
-            height={100}
+            alt={`${church.churchName} logo`}
             className="rounded-md object-cover cursor-pointer"
             onClick={() => onImageClick(church.logo!)}
           />

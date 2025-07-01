@@ -20,11 +20,6 @@ export async function uploadFile(
       throw new Error("이미지 파일만 업로드 가능합니다.");
     }
 
-    // 환경 확인
-    const isLocal = process.env.NODE_ENV === "development";
-    const uploadDir = path.join(process.cwd(), "public/uploads");
-    const filePath = path.join(uploadDir, filename);
-
     // sharp로 이미지 리사이징
     const buffer = Buffer.from(await file.arrayBuffer());
     const resizedBuffer = await sharp(buffer)
@@ -36,26 +31,17 @@ export async function uploadFile(
       })
       .toBuffer(); // 리사이징된 이미지를 Buffer로 변환
 
-    if (isLocal) {
-      // 로컬 환경: 파일 시스템에 저장
-      await fs.mkdir(uploadDir, { recursive: true });
-      await fs.writeFile(filePath, resizedBuffer);
-      return `/${directory}/${filename}`; // 클라이언트가 접근 가능한 URL 반환
-    } else {
-      // Vercel 환경: Vercel Blob에 저장
-      const token = process.env.BLOB_READ_WRITE_TOKEN;
-      if (!token) {
-        throw new Error(
-          "BLOB_READ_WRITE_TOKEN 환경 변수가 설정되지 않았습니다."
-        );
-      }
-
-      const { url } = await put(filename, resizedBuffer, {
-        access: "public",
-        token,
-      });
-      return url;
+    // Vercel 환경: Vercel Blob에 저장
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) {
+      throw new Error("BLOB_READ_WRITE_TOKEN 환경 변수가 설정되지 않았습니다.");
     }
+
+    const { url } = await put(`/${directory}/${filename}`, resizedBuffer, {
+      access: "public",
+      token,
+    });
+    return url;
   } catch (error) {
     console.error("파일 업로드 오류:", error);
     throw error;

@@ -1,11 +1,20 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
-import { AlertCircle, ArrowLeft, Edit, Eye, Play, Pause } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Edit,
+  Eye,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import Loading from "@/components/Loading";
 import { format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
@@ -14,7 +23,8 @@ import Chip from "@/components/Chip";
 import { getDisplayTitle } from "@/utils/getDisplayTitle";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { debounce } from "lodash";
-import { toast } from "react-toastify"; // react-toastify 추가
+import { toast } from "react-toastify";
+import CommentSection from "@/components/setList/CommentSection";
 
 export default function SetlistDetailPage() {
   const t = useTranslations("Setlist");
@@ -24,14 +34,24 @@ export default function SetlistDetailPage() {
   const [setlist, setSetlist] = useState<SetlistResponse | null>(null);
   const [appUrl, setAppUrl] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const [comment, setComment] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPlayingId, setCurrentPlayingId] = useState<string | null>(null);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [isPlayerReady, setIsPlayerReady] = useState(false); // 플레이어 준비 상태
-  const [pendingPlay, setPendingPlay] = useState<string | null>(null); // 대기 중인 재생 요청
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+  const [isPlayerReady, setIsPlayerReady] = useState<boolean>(false);
+  const [pendingPlay, setPendingPlay] = useState<string | null>(null);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
   const playerRef = useRef<YouTubePlayer | null>(null);
+
+  // iOS 디바이스 감지
+  const isIOS = useCallback((): boolean => {
+    const userAgent: string = navigator.userAgent || "";
+    const vendor: string = navigator.vendor || "";
+    return /iPad|iPhone|iPod/.test(userAgent) && vendor.includes("Apple");
+  }, []);
+
+  useEffect(() => {
+    console.log("Is iOS device:", isIOS());
+  }, [isIOS]);
 
   const dateLocale = locale === "ko" ? ko : ja;
 
@@ -60,23 +80,22 @@ export default function SetlistDetailPage() {
 
   const handlePlayPause = useCallback(
     debounce(async (scoreId: string) => {
+      // 플레이어 준비 상태와 playerRef 확인
       if (!playerRef.current || !isPlayerReady) {
         console.warn("Player is not ready yet, adding to pending play");
         setPendingPlay(scoreId);
         return;
       }
 
-      if (currentPlayingId === scoreId) {
-        try {
+      try {
+        if (currentPlayingId === scoreId) {
+          // 현재 재생 중인 비디오 일시정지
           await playerRef.current.pauseVideo();
           setCurrentPlayingId(null);
-        } catch (err) {
-          console.error("Error pausing video:", err);
-          setError(t("youtubeError"));
-          toast.error(t("youtubeError"));
-        }
-      } else {
-        try {
+          setPendingPlay(null);
+          setIsMuted(false);
+        } else {
+          // 새로운 비디오 재생
           if (currentPlayingId) {
             await playerRef.current.pauseVideo();
           }
@@ -87,26 +106,57 @@ export default function SetlistDetailPage() {
             : getFirstYouTubeVideoId(score?.creation.referenceUrls);
           if (videoId) {
             await playerRef.current.loadVideoById(videoId);
+            await playerRef.current.playVideo();
+            setIsMuted(isIOS());
+            if (isIOS()) {
+              try {
+                await playerRef.current.unMute();
+                setIsMuted(false);
+              } catch (unmuteErr: unknown) {
+                console.warn("Failed to unmute video on iOS:", unmuteErr);
+                setIsMuted(true);
+                toast.warn(t("unmuteWarning"), {
+                  position: "top-right",
+                  autoClose: 3000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  theme: "light",
+                });
+              }
+            }
           } else {
-            console.warn("No valid YouTube URL found for scoreId:", scoreId);
-            setCurrentPlayingId(null);
-            setError(t("youtubeError"));
-            toast.error(t("youtubeError"));
+            throw new Error("No valid YouTube URL found");
           }
-        } catch (err) {
-          console.error("Error loading new video:", err);
-          setError(t("youtubeError"));
-          toast.error(t("youtubeError"));
         }
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : t("youtubeError");
+        console.error("Error loading/playing video:", err);
+        setError(errorMessage);
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+        setCurrentPlayingId(null);
+        setPendingPlay(null);
+        setIsMuted(false);
       }
     }, 300),
-    [currentPlayingId, setlist, isPlayerReady]
+    [currentPlayingId, setlist, isPlayerReady, t, isIOS]
   );
 
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
     playerRef.current = event.target;
     setIsPlayerReady(true);
     setDuration(event.target.getDuration());
+    setIsMuted(isIOS());
     if (pendingPlay) {
       handlePlayPause(pendingPlay);
     } else if (currentPlayingId) {
@@ -116,19 +166,41 @@ export default function SetlistDetailPage() {
         : getFirstYouTubeVideoId(score?.creation.referenceUrls);
       if (videoId) {
         event.target.loadVideoById(videoId);
+        event.target.playVideo();
       }
     }
   };
 
   const onStateChange = (event: { target: YouTubePlayer; data: number }) => {
     if (event.data === 1) {
-      // Playing
       setDuration(event.target.getDuration());
+      setIsMuted(event.target.isMuted());
     } else if (event.data === 2 || event.data === 0) {
-      // Paused or Ended
       setCurrentPlayingId(null);
       setPendingPlay(null);
+      setIsMuted(false);
     }
+  };
+
+  const onError = (event: { data: number }) => {
+    console.error("YouTube player error code:", event.data);
+    let errorMessage = t("youtubeError");
+    if (event.data === 150 || event.data === 101) {
+      errorMessage = t("youtubeRestricted");
+    }
+    setError(errorMessage);
+    toast.error(errorMessage, {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "light",
+    });
+    setCurrentPlayingId(null);
+    setPendingPlay(null);
+    setIsMuted(false);
   };
 
   const handleSeek = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,10 +211,37 @@ export default function SetlistDetailPage() {
     }
   };
 
+  const handleToggleMute = () => {
+    if (!playerRef.current || !isPlayerReady) {
+      toast.warn(t("playerNotReady"), {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+      return;
+    }
+    try {
+      if (isMuted) {
+        playerRef.current.unMute();
+        setIsMuted(false);
+      } else {
+        playerRef.current.mute();
+        setIsMuted(true);
+      }
+    } catch (err: unknown) {
+      console.warn("Failed to toggle mute:", err);
+    }
+  };
+
   useEffect(() => {
     if (currentPlayingId && playerRef.current && isPlayerReady) {
       const interval = setInterval(() => {
         setCurrentTime(playerRef.current!.getCurrentTime());
+        setIsMuted(playerRef.current!.isMuted());
       }, 1000);
       return () => clearInterval(interval);
     }
@@ -153,6 +252,7 @@ export default function SetlistDetailPage() {
       playerRef.current = null;
       setIsPlayerReady(false);
       setPendingPlay(null);
+      setIsMuted(false);
     };
   }, []);
 
@@ -166,58 +266,30 @@ export default function SetlistDetailPage() {
         if (!response.ok) {
           throw new Error((await response.json()).error || t("fetchError"));
         }
-        const data = await response.json();
+        const data: { setlist: SetlistResponse; appUrl: string } =
+          await response.json();
         setSetlist(data.setlist);
         setAppUrl(data.appUrl);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t("fetchError"));
-        toast.error(err instanceof Error ? err.message : t("fetchError"));
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : t("fetchError");
+        setError(errorMessage);
+        toast.error(errorMessage);
       }
     };
     fetchSetlist();
   }, [id, t]);
 
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!comment || !user) return;
-    setIsSubmitting(true);
-
-    try {
-      if (typeof id !== "string") {
-        throw new Error(t("invalidId"));
-      }
-      const response = await fetch(`/api/setlists/${id}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: comment, userId: user.id }),
-      });
-      if (!response.ok) {
-        throw new Error((await response.json()).error || t("commentError"));
-      }
-      const newComment = await response.json();
-      setSetlist((prev) =>
-        prev ? { ...prev, comments: [newComment, ...prev.comments] } : null
-      );
-      setComment("");
-      toast.success(t("commentSuccess"));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("commentError"));
-      toast.error(err instanceof Error ? err.message : t("commentError"));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const canEdit =
-    user &&
+  const canEdit: boolean =
+    user != null &&
     (user.id === setlist?.creatorId ||
       ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
 
-  const proxyFileUrl = setlist?.id
+  const proxyFileUrl: string = setlist?.id
     ? `${appUrl}/api/proxy/setlist/${setlist.id}/file`
     : "#";
 
-  const currentVideoId = currentPlayingId
+  const currentVideoId: string | undefined = currentPlayingId
     ? getYouTubeVideoId(
         setlist?.scores.find((s) => s.id === currentPlayingId)
           ?.selectedReferenceUrl ||
@@ -275,25 +347,23 @@ export default function SetlistDetailPage() {
           transition={{ duration: 0.6 }}
           className="bg-white rounded-2xl shadow-xl p-8"
         >
-          {/* 항상 YouTube 플레이어 렌더링 */}
-          <div className="hidden">
+          <div className="relative w-[1px] h-[1px] overflow-hidden">
             <YouTube
               key={currentVideoId || "default"}
               videoId={currentVideoId}
               opts={{
-                width: 0,
-                height: 0,
-                playerVars: { autoplay: 0, controls: 0, showinfo: 0 },
+                width: 1,
+                height: 1,
+                playerVars: {
+                  autoplay: 0,
+                  controls: 1,
+                  mute: isIOS() ? 1 : 0,
+                  playsinline: 1,
+                },
               }}
               onReady={onPlayerReady}
               onStateChange={onStateChange}
-              onError={(e) => {
-                console.error("YouTube player error:", e);
-                setError(t("youtubeError"));
-                toast.error(t("youtubeError"));
-                setCurrentPlayingId(null);
-                setPendingPlay(null);
-              }}
+              onError={onError}
             />
           </div>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
@@ -444,6 +514,20 @@ export default function SetlistDetailPage() {
                 aria-valuemin={0}
                 aria-valuemax={duration}
               />
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleToggleMute}
+                className="text-gray-600 hover:text-gray-800 p-2"
+                aria-label={isMuted ? t("unmute") : t("mute")}
+              >
+                {isMuted ? (
+                  <VolumeX className="w-5 h-5" aria-label={t("mute")} />
+                ) : (
+                  <Volume2 className="w-5 h-5" aria-label={t("unmute")} />
+                )}
+              </motion.button>
             </motion.div>
           )}
           <motion.div
@@ -492,66 +576,13 @@ export default function SetlistDetailPage() {
               </a>
             </motion.div>
           )}
-          <div className="mt-8">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              {t("comments")}
-            </h2>
-            <form onSubmit={handleCommentSubmit} className="mb-8">
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 min-h-[100px] resize-y transition-all duration-200 hover:bg-gray-50"
-                  rows={4}
-                  placeholder={t("writeComment")}
-                  disabled={!user}
-                  aria-label={t("writeComment")}
-                />
-              </motion.div>
-              <motion.button
-                type="submit"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                disabled={isSubmitting || !comment || !user}
-                className={`mt-3 py-2 px-6 rounded-xl text-white font-semibold text-sm ${
-                  isSubmitting || !comment || !user
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                } transition-colors duration-200 shadow-sm`}
-              >
-                {t("submitComment")}
-              </motion.button>
-            </form>
-            <AnimatePresence>
-              {setlist.comments.map((c) => (
-                <motion.div
-                  key={c.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.4 }}
-                  className="border-t border-gray-200 py-4"
-                >
-                  <p className="text-sm text-gray-500 flex items-center space-x-2">
-                    <span className="font-medium text-gray-700">
-                      {c.user.name}
-                    </span>
-                    <span>·</span>
-                    <span>
-                      {format(new Date(c.createdAt), "yyyy-MM-dd HH:mm", {
-                        locale: dateLocale,
-                      })}
-                    </span>
-                  </p>
-                  <p className="text-gray-700 mt-1">{c.content}</p>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+          <CommentSection
+            setlist={setlist}
+            user={user}
+            locale={locale}
+            id={id}
+            setSetlist={setSetlist}
+          />
         </motion.div>
       </div>
     </div>

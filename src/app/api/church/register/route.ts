@@ -171,11 +171,11 @@ export async function POST(req: NextRequest) {
       try {
         data.logo = await uploadFile(
           logo,
-          `building_${data.churchName}_${Date.now()}.jpg`,
-          "building-images"
+          `${data.churchName}_${Date.now()}.jpg`,
+          "logo"
         );
       } catch (fileError) {
-        console.error("Building image upload failed:", fileError);
+        console.error("Logo image upload failed:", fileError);
         return NextResponse.json(
           { error: "건물 이미지 업로드 실패" },
           { status: 500 }

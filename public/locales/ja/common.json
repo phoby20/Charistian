@@ -577,7 +577,10 @@
     "remove": "削除",
     "youtubeError": "YouTube動画の再生に失敗しました",
     "noSelectedUrl": "選択されたYouTube URLがありません。",
-    "selecteReference": "参考音源"
+    "selecteReference": "参考音源",
+    "youtubeRestricted": "このビデオは再生ができません",
+    "unmute": "ミュート解除",
+    "mute": "ミュート"
   },
   "scoreList": "楽譜リスト",
   "setlistList": "コンテリスト",

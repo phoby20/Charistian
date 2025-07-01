@@ -587,7 +587,10 @@
     "remove": "삭제",
     "youtubeError": "YouTube 비디오 재생에 실패했습니다",
     "noSelectedUrl": "선택된 YouTube URL이 없습니다.",
-    "selecteReference": "참고음원 선택"
+    "selecteReference": "참고음원 선택",
+    "youtubeRestricted": "이 비디오는 재생이 제한되어 있습니다.",
+    "unmute": "음소거 해제",
+    "mute": "음소거"
   },
   "scoreList": "악보리스트",
   "setlistList": "콘티리스트",

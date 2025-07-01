@@ -21,7 +21,7 @@ export default function Chip({ label, color, onRemove }: ChipProps) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
       exit={{ opacity: 0, scale: 0.8 }}
-      className={`inline-flex items-center bg-${colorClass}-100 text-${colorClass}-800 text-sm font-medium px-3 py-1 rounded-full mr-2`}
+      className={`inline-flex items-center bg-${colorClass}-100 text-${colorClass}-800 text-sm font-medium px-3 py-1 rounded-full mr-2 w-max`}
     >
       {label}
       {onRemove && (

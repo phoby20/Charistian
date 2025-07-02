@@ -61,6 +61,8 @@
   "back": "뒤로",
   "step": "단계",
   "of": "중",
+  "location": "위치",
+  "contact": "연락처",
   "weakPassword": "비밀번호는 최소 8자이며, 문자와 숫자를 포함해야 합니다.",
   "fileTooLarge": "파일 크기가 5MB를 초과했습니다.",
   "unsupportedFileType": "지원되지 않는 파일 형식입니다.",

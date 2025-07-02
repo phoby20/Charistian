@@ -61,6 +61,8 @@
   "back": "戻る",
   "step": "ステップ",
   "of": "の",
+  "location": "所在地",
+  "contact": "連絡先",
   "weakPassword": "パスワードは8文字以上で、文字と数字を含む必要があります。",
   "fileTooLarge": "ファイルサイズが5MBを超えています。",
   "fileTypeNotSupported": "サポートされていないファイルタイプです。",

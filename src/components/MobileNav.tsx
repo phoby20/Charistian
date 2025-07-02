@@ -77,7 +77,7 @@ export default function MobileNav({
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden bg-white shadow-md" ref={mobileMenuRef}>
-          <nav className="flex flex-col px-4 py-2 space-y-1">
+          <nav className="flex flex-col px-4 py-4 space-y-1">
             {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(
               user?.role || ""
             ) && (
@@ -99,14 +99,14 @@ export default function MobileNav({
                       <Link
                         href={getPathname({ locale, href: "/members" })}
                         onClick={() => closeMembersMenu("/members")}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         {t("memberList")}
                       </Link>
                       <Link
                         href={getPathname({ locale, href: "/attendance" })}
                         onClick={() => closeMembersMenu("/attendance")}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         {t("checkAttendance")}
                       </Link>
@@ -116,7 +116,7 @@ export default function MobileNav({
                           href: "/attendance-report",
                         })}
                         onClick={() => closeMembersMenu("/attendance-report")}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         {t("attendanceReport")}
                       </Link>
@@ -150,7 +150,7 @@ export default function MobileNav({
                         closeAllDropdowns();
                         setIsMenuOpen(false);
                       }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       {t("scoreList")}
                     </Link>
@@ -160,7 +160,7 @@ export default function MobileNav({
                         closeAllDropdowns();
                         setIsMenuOpen(false);
                       }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       {t("setlistList")}
                     </Link>
@@ -190,7 +190,7 @@ export default function MobileNav({
                     <Link
                       href={getPathname({ locale, href: "/calendar" })}
                       onClick={() => closeMembersMenu("/calendar")}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       {t("calendar")}
                     </Link>
@@ -203,7 +203,7 @@ export default function MobileNav({
               <Link
                 href={getPathname({ locale, href: "/church-registration" })}
                 onClick={() => setIsMenuOpen(false)}
-                className="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
+                className="text-gray-600 hover:text-blue-600 px-4 py-4 rounded-md text-sm font-medium"
               >
                 {t("churchRegistration")}
               </Link>
@@ -226,7 +226,7 @@ export default function MobileNav({
                     <Link
                       href={getPathname({ locale, href: "/master-management" })}
                       onClick={closeSettingsMenu}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       {t("masterManagement")}
                     </Link>
@@ -256,7 +256,7 @@ export default function MobileNav({
                         closeAllDropdowns();
                         setIsMenuOpen(false);
                       }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                     >
                       <User2 className="w-4 h-4 mr-2" />
                       {t("MyPage.title")}
@@ -266,7 +266,7 @@ export default function MobileNav({
                         logout();
                         setIsMenuOpen(false);
                       }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       {t("logout")}
@@ -278,7 +278,7 @@ export default function MobileNav({
               <Link
                 href={getPathname({ locale, href: "/login" })}
                 onClick={() => setIsMenuOpen(false)}
-                className="block text-gray-600 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium"
+                className="block text-gray-600 hover:text-blue-600 px-4 py-4 rounded-md text-sm font-medium"
               >
                 {t("login")}
               </Link>

@@ -1,41 +1,50 @@
-// src/app/[locale]/login/page.tsx
+// src/app/[locale]/reset-password/confirm/page.tsx
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import { FormEvent, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function LoginPage() {
+export default function ResetPasswordConfirmPage() {
   const t = useTranslations();
   const [error, setError] = useState<string | null>(null);
-  const locale = useLocale();
+  const [success, setSuccess] = useState<string | null>(null);
   const [isDisabled, setIsDisabled] = useState(false);
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const locale = useLocale();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    if (password !== confirmPassword) {
+      setError(t("passwordsDoNotMatch"));
+      return;
+    }
 
     try {
       setIsDisabled(true);
-      const response = await fetch("/api/login", {
+      const response = await fetch("/api/reset-password/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ token, password }),
       });
 
       if (!response.ok) {
-        setError(t("invalidCredentials"));
+        const data = await response.json();
+        setError(data.message || t("serverError"));
         setIsDisabled(false);
         return;
       }
 
-      if (typeof window !== "undefined") {
-        window.location.href = `/${locale}/dashboard`;
-      }
+      setSuccess(t("passwordResetSuccess"));
+      setIsDisabled(false);
     } catch (err) {
       setIsDisabled(false);
       setError(
@@ -46,28 +55,37 @@ export default function LoginPage() {
     }
   };
 
-  const signUpUrl = `/${locale}/signup`;
-  const resetPasswordUrl = `/${locale}/reset-password`;
+  if (!token) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+          <p className="text-red-600 text-sm text-center">
+            {t("invalidOrExpiredToken")}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md transform transition-all duration-300 hover:shadow-xl">
         <h1 className="text-3xl font-semibold text-gray-800 mb-6 text-center">
-          {t("login")}
+          {t("setNewPassword")}
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <Input
-            label={t("email")}
-            type="email"
-            name="email"
+            label={t("newPassword")}
+            type="password"
+            name="password"
             required
             disabled={isDisabled}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           />
           <Input
-            label={t("password")}
+            label={t("confirmPassword")}
             type="password"
-            name="password"
+            name="confirmPassword"
             required
             disabled={isDisabled}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
@@ -79,31 +97,23 @@ export default function LoginPage() {
               isDisabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
-            {t("login")}
+            {t("resetPassword")}
           </Button>
         </form>
         {error && (
           <div className="mt-4 text-red-600 text-sm text-center">{error}</div>
         )}
-        <div className="mt-4 text-sm text-center text-gray-600">
-          <p>
+        {success && (
+          <div className="mt-4 text-green-600 text-sm text-center">
+            {success}{" "}
             <Link
-              href={resetPasswordUrl}
+              href={`/${locale}/login`}
               className="text-blue-600 hover:underline font-medium"
             >
-              {t("forgotPassword")}
+              {t("backToLogin")}
             </Link>
-          </p>
-          <p className="mt-2">
-            {t("noAccount")}{" "}
-            <Link
-              href={signUpUrl}
-              className="text-blue-600 hover:underline font-medium"
-            >
-              {t("signupTitle")}
-            </Link>
-          </p>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

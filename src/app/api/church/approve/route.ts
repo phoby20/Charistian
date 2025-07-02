@@ -102,29 +102,165 @@ async function sendApprovalEmail(
     to: superAdminEmail,
     subject: `${churchName} 교회 등록 완료 안내`,
     html: `
-      <h1>${churchName} 교회 등록 완료</h1>
-      <p>안녕하세요, ${churchName} 교회의 등록이 성공적으로 완료되었습니다.</p>
-      <h2>CHECKER 유저 정보</h2>
-      <p>QR 코드 스캔을 위한 CHECKER 유저 계정이 아래와 같이 생성되었습니다:</p>
-      <ul>
-        <li><strong>이메일</strong>: ${checkerEmail}</li>
-        <li><strong>비밀번호</strong>: ${checkerPassword}</li>
-      </ul>
-      <h2>서비스 이용 안내</h2>
-      <h3>교회가 할 일</h3>
-      <ol>
-        <li>로그인 후 <strong>설정 > 마스터 설정</strong>에서 "직분설정", "소속설정", "직책설정", "팀 설정"을 진행하세요.</li>
-        <li>교회 성도들에게 <a href="https://www.charistian.com/">https://www.charistian.com/</a> 가입을 안내하세요. 성도는 재적 중인 교회의 나라, 도시, 지역을 선택하면 등록된 교회 목록에서 ${churchName}을 선택할 수 있습니다.</li>
-        <li>성도가 회원 등록을 신청하면 <strong>${superAdminEmail}</strong>으로 로그인하여 등록 신청을 승인/거부하세요.</li>
-        <li>승인된 성도의 소속, 직책, 팀을 설정하세요.</li>
-        <li>예배일 또는 이벤트 날에 스마트폰/태블릿으로 CHECKER 유저(${checkerEmail})로 로그인한 뒤 <strong>QR스캔</strong> 버튼을 클릭하여 입장하는 성도의 QR 코드를 스캔하세요.</li>
-        <li>QR 코드가 없는 성도는 화면 상단 메뉴에서 <strong>성도관리 > 출석체크</strong>로 이동하여 소속된 회원을 찾아 클릭하면 출석체크가 완료됩니다.</li>
-      </ol>
-      <h3>성도가 할 일</h3>
-      <ol>
-        <li>로그인 후 <strong>성도증</strong> 버튼을 클릭하세요.</li>
-        <li>교회에서 준비한 QR 스캐너에 QR 코드를 스캔하세요.</li>
-      </ol>
+      <!DOCTYPE html>
+      <html lang="ko">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${churchName} 교회 등록 완료</title>
+          <style>
+              body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                  background-color: #f9fafb;
+                  color: #333333;
+                  margin: 0;
+                  padding: 20px;
+                  line-height: 1.5;
+              }
+              .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  background-color: #ffffff;
+                  border-radius: 6px;
+                  padding: 30px;
+                  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              }
+              h1 {
+                  font-size: 24px;
+                  font-weight: 600;
+                  color: #1f2937;
+                  margin: 0 0 15px;
+                  text-align: center;
+              }
+              h2 {
+                  font-size: 20px;
+                  font-weight: 600;
+                  color: #1f2937;
+                  margin: 25px 0 10px;
+              }
+              h3 {
+                  font-size: 18px;
+                  font-weight: 500;
+                  color: #374151;
+                  margin: 20px 0 10px;
+              }
+              p {
+                  font-size: 16px;
+                  color: #374151;
+                  margin: 8px 0;
+              }
+              ul, ol {
+                  font-size: 16px;
+                  color: #374151;
+                  padding-left: 20px;
+                  margin: 8px 0 15px;
+              }
+              li {
+                  margin-bottom: 8px;
+              }
+              a {
+                  color: #3b82f6;
+                  text-decoration: none;
+              }
+              a:hover {
+                  text-decoration: underline;
+              }
+              strong {
+                  font-weight: 600;
+                  color: #1f2937;
+              }
+              .section {
+                  border-top: 1px solid #e5e7eb;
+                  padding-top: 20px;
+                  margin-top: 20px;
+              }
+              .button {
+                  display: inline-block;
+                  padding: 12px 24px;
+                  background-color: #3b82f6;
+                  color: #ffffff;
+                  text-decoration: none;
+                  border-radius: 6px;
+                  font-size: 16px;
+                  font-weight: 500;
+                  text-align: center;
+                  transition: background-color 0.2s ease;
+                  margin: 20px 0;
+              }
+              .button:hover {
+                  background-color: #2563eb;
+              }
+              .footer {
+                  text-align: center;
+                  padding-top: 20px;
+                  border-top: 1px solid #e5e7eb;
+                  margin-top: 20px;
+              }
+              .footer p {
+                  font-size: 14px;
+                  color: #6b7280;
+                  margin: 5px 0;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <!-- 헤더 섹션 -->
+              <h1>${churchName} 교회 등록 완료</h1>
+              <p>안녕하세요, ${churchName} 교회의 등록이 성공적으로 완료되었습니다.</p>
+
+              <!-- CHECKER 유저 정보 섹션 -->
+              <div class="section">
+                  <p>QR 코드 스캔을 위한 계정(CHECKER 유저)이 아래와 같이 생성되었습니다.</p>
+                  <ul>
+                      <li><strong>이메일</strong>: ${checkerEmail}</li>
+                      <li><strong>비밀번호</strong>: ${checkerPassword}</li>
+                  </ul>
+              </div>
+
+              <!-- 서비스 이용 안내 섹션 -->
+              <div class="section">
+                  <h2>서비스 이용 안내</h2>
+
+                  <!-- 교회가 할 일 -->
+                  <h3>교회가 할 일</h3>
+                  <ol>
+                      <li>로그인 후 <strong>설정 > 마스터 설정</strong>에서 "직분설정", "소속설정", "직책설정", "팀 설정"을 진행하세요.</li>
+                      <li>교회 성도들에게 <a href="https://www.charistian.com/">https://www.charistian.com/</a> 가입을 안내하세요. 성도는 재적 중인 교회의 나라, 도시, 지역을 선택하면 등록된 교회 목록에서 ${churchName}을 선택할 수 있습니다.</li>
+                      <li>성도가 회원가입을 하면 대시보드 페이지에 알림이 표시됩니다. <strong>${superAdminEmail}</strong>으로 로그인하여 등록 신청을 승인/거부하세요.</li>
+                      <li>승인된 성도의 소속, 직책, 팀, 권한을 설정하세요.</li>
+                      <li>예배일 또는 이벤트 날에 스마트폰/태블릿으로 앞서 알려드린 CHECKER 유저(${checkerEmail})로 로그인한 뒤 <strong>QR스캔</strong> 버튼을 클릭하여 입장하는 성도의 QR 코드를 스캔하세요.</li>
+                      <li>QR 코드가 없는 성도는 화면 상단 메뉴에서 <strong>성도관리 > 출석체크</strong>로 이동하여 소속된 회원을 찾아 클릭하면 출석체크가 완료됩니다.</li>
+                  </ol>
+
+                  <!-- 성도가 할 일 -->
+                  <h3>성도가 할 일</h3>
+                  <ol>
+                      <li>로그인 후 <strong>성도증</strong> 버튼을 클릭하세요.</li>
+                      <li>교회에서 준비한 QR 스캐너에 QR 코드를 스캔하세요.</li>
+                      <li>또한 악보를 업로드하고 찬양 콘티를 작성하고 악보를 공유할 수 있습니다.</li>
+                  </ol>
+
+                  <h3>주의사항</h3>
+                  <ol>
+                  <li>권한은 총 5개로 나누어지며, 수퍼 어드민, 어드민, 서브 어드민, 일반, 방문자로 나뉩니다.</li>
+                    <li>수퍼 어드민은 교회등록시 입력한 아이디이며, 이후 등록되는 성도들은 "일반" 권한으로 자동등록이 됩니다.</li>
+                    <li>"직분설정", "소속설정", "직책설정", "팀 설정"은 수퍼 어드민만 할 수 있고 출석 체크는 수퍼 어드민, 어드민, 서브 어드민만 할 수 있습니다.</li>
+                  </ol>
+              </div>
+
+              <!-- 버튼 섹션 -->
+              <div style="text-align: center;">
+                  <a href="https://www.charistian.com/" class="button">Charistian 방문하기</a>
+              </div>
+
+              <!-- 푸터 섹션 -->
+              <div class="footer">
+                  <p>이 이메일은 Charistian에서 자동 발송되었습니다.</p>
+              </div>
+          </div>
+      </body>
+      </html>
     `,
   });
 }

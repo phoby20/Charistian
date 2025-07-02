@@ -61,6 +61,7 @@
   "back": "戻る",
   "step": "ステップ",
   "of": "の",
+  "weakPassword": "パスワードは8文字以上で、文字と数字を含む必要があります。",
   "fileTooLarge": "ファイルサイズが5MBを超えています。",
   "fileTypeNotSupported": "サポートされていないファイルタイプです。",
   "fileUploadError": "ファイルアップロード中にエラーが発生しました。",

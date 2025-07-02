@@ -44,6 +44,7 @@ model User {
   setlists        Setlist[]        @relation("SetlistCreator")       // 추가됨
   setlistShares   SetlistShare[]   @relation("UserSetlistShares")    // 추가됨
   setlistComments SetlistComment[] @relation("UserSetlistComments")
+  passwordResetTokens PasswordResetToken[] @relation("UserPasswordResetTokens")
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
@@ -329,6 +330,15 @@ model SetlistComment {
   content     String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation("UserPasswordResetTokens", fields: [userId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 enum EventStatus {

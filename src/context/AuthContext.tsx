@@ -52,7 +52,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (
           pathname !== `/${locale}` &&
           pathname !== `/${locale}/signup` &&
-          pathname !== `/${locale}/church-registration`
+          pathname !== `/${locale}/church-registration` &&
+          pathname !== `/${locale}/reset-password` &&
+          pathname !== `/${locale}/reset-password/confirm`
         ) {
           router.replace(`/login`);
         }
@@ -76,6 +78,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       "/church-registration",
       "/church-registration/success",
       "/signup/complete",
+      "/reset-password",
+      "/reset-password/confirm",
     ];
 
     if (!pathname || !locale) {

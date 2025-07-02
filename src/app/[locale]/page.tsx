@@ -91,7 +91,7 @@ export default function LandingPage() {
             {t("hero.title")}
           </motion.h2>
           <motion.p
-            className="text-lg md:text-xl mb-8 max-w-xl text-gray-600"
+            className="text-lg md:text-xl mb-8 max-w-xl text-gray-600 whitespace-pre"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}

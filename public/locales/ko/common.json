@@ -37,6 +37,7 @@
   "logout": "로그아웃",
   "language": "언어",
   "visitor": "방문자",
+  "checker": "QR코드 체커계정",
   "general": "일반",
   "admin": "관리자",
   "subAdmin": "중간 관리자",

@@ -44,7 +44,7 @@
   "master": "마스터",
   "registrationComplete": "등록 신청 완료",
   "waitForApproval": "신청 허가가 완료될 때까지 잠시 기다려 주세요.",
-  "approvalTime": "보통 영업일 기준 2~3일 정도 소요됩니다.",
+  "approvalTime": "보통 영업일 기준 2~3일 정도 소요됩니다. \n결과는 등록하신 Email로 알려드리며 메일이 확인이 안되시면 \n스팸메일함을 확인해 주세요.",
   "goToHome": "홈으로 이동",
   "pleaseFillAllFields": "모든 필수 필드를 입력해주세요",
   "optional": "선택 사항",

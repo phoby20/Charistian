@@ -17,6 +17,9 @@ export async function GET() {
         contactPhone: true,
         plan: true,
         logo: true,
+        churchPhone: true,
+        contactGender: true,
+        superAdminEmail: true,
       },
     });
 

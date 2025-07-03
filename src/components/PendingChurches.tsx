@@ -26,9 +26,13 @@ export default function PendingChurches({
   return (
     <section className="mb-12">
       {pendingChurches.length === 0 ? (
-        <p className="text-gray-500 italic">{t("noPendingChurches")}</p>
+        <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <p className="text-gray-500 text-lg italic">
+            {t("noPendingChurches")}
+          </p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {pendingChurches.map((church) => (
             <ChurchApplicationCard
               key={church.id}

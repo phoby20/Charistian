@@ -1,7 +1,7 @@
 // src/app/[locale]/dashboard/page.tsx
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { ChurchApplication, User } from "@prisma/client";
 import { useAuth } from "@/context/AuthContext";
@@ -20,6 +20,7 @@ import EventCalendar from "@/components/EventCalendar";
 import { UserWithRelations } from "@/types/customUser";
 import MobileFilterDropdowns from "@/components/dashboard/MobileFilterDropdowns";
 import DesktopFilterTabs from "@/components/dashboard/DesktopFilterTabs";
+import Link from "next/link";
 
 interface AttendanceRecord {
   userId: string;
@@ -65,6 +66,7 @@ export default function DashboardPage() {
     members: UserWithRelations[];
     attendances: AttendanceRecord[];
   }>({ members: [], attendances: [] });
+  const locale = useLocale();
 
   // 초기 데이터 페칭
   useEffect(() => {
@@ -204,6 +206,14 @@ export default function DashboardPage() {
             {t("dashboard")}
           </h1>
           <div className="flex space-x-2">
+            {user.role === "MASTER" && (
+              <Link
+                href={`/${locale}/send-email/`}
+                className="p-2 bg-blue-600 text-white cursor-pointer"
+              >
+                유저에게 Email 보내기
+              </Link>
+            )}
             <MyQRCode user={user} scanMessage={scanMessage} />
             <QRScanner user={user} onMessage={setScanMessage} />
           </div>

@@ -662,5 +662,27 @@
     "keyRequired": "키를 선택해야 합니다.",
     "fileRequired": "PDF 파일을 업로드해야 합니다.",
     "backToList": "목록으로 돌아가기"
+  },
+  "toUserSendEmail": {
+    "sendEmail": "이메일 전송",
+    "sendEmailDescription": "유저에게 메시지를 보내세요.",
+    "sendEmailForm": "이메일 작성",
+    "email": "이메일 주소",
+    "enterEmail": "수신자 이메일을 입력하세요.",
+    "subject": "제목",
+    "enterSubject": "이메일 제목을 입력하세요.",
+    "message": "메시지",
+    "enterMessage": "메시지를 입력하세요.",
+    "send": "전송",
+    "reset": "초기화",
+    "cancel": "취소",
+    "close": "닫기",
+    "accessDenied": "이 페이지에 접근할 권한이 없습니다.",
+    "loading": "로딩 중...",
+    "fillAllFields": "모든 필드를 입력해야 합니다.",
+    "confirmSendEmail": "{email}로 이메일을 보내시겠습니까?",
+    "confirmSendEmailDescription": "이메일 전송을 확인해 주세요.",
+    "emailSentSuccess": "이메일이 성공적으로 전송되었습니다.",
+    "serverError": "서버 오류가 발생했습니다."
   }
 }

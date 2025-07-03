@@ -652,5 +652,27 @@
     "keyRequired": "キーを選択する必要があります。",
     "fileRequired": "PDFファイルをアップロードする必要があります。",
     "backToList": "一覧に戻る"
+  },
+  "toUserSendEmail": {
+    "sendEmail": "メール送信",
+    "sendEmailDescription": "ユーザーにメッセージを送信します。",
+    "sendEmailForm": "メール作成",
+    "email": "メールアドレス",
+    "enterEmail": "受信者のメールアドレスを入力してください。",
+    "subject": "件名",
+    "enterSubject": "メールの件名を入力してください。",
+    "message": "メッセージ",
+    "enterMessage": "メッセージを入力してください。",
+    "send": "送信",
+    "reset": "リセット",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "accessDenied": "このページにアクセスする権限がありません。",
+    "loading": "ロード中...",
+    "fillAllFields": "すべてのフィールドを入力してください。",
+    "confirmSendEmail": "{email}にメールを送信しますか？",
+    "confirmSendEmailDescription": "メール送信を確認してください。",
+    "emailSentSuccess": "メールが正常に送信されました。",
+    "serverError": "サーバーエラーが発生しました。"
   }
 }

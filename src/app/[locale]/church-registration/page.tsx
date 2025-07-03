@@ -72,6 +72,7 @@ export default function ChurchRegistrationPage() {
       ...prev,
       country: selectedCountry,
       city: defaultCity,
+      region: regionsByCity[defaultCity]?.[0]?.value || "",
     }));
   }, [selectedCountry]);
 
@@ -86,12 +87,43 @@ export default function ChurchRegistrationPage() {
     }));
   }, [selectedCity]);
 
-  // formData 업데이트
+  // 입력 변경 처리
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // 파일 입력 처리
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      try {
+        const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+        if (!allowedTypes.includes(files[0].type)) {
+          setError(t("unsupportedFileType"));
+          return;
+        }
+        if (files[0].size > 5 * 1024 * 1024) {
+          setError(t("fileTooLarge"));
+          return;
+        }
+
+        const resizedFile = await resizeImage(files[0]);
+        setFormData((prev) => ({ ...prev, [name]: resizedFile }));
+      } catch (error) {
+        console.error("이미지 리사이즈 오류:", error);
+        setError(t("imageProcessingError"));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  // 파일 입력 초기화
+  const handleFileReset = (name: "logo" | "contactImage") => {
+    setFormData((prev) => ({ ...prev, [name]: undefined }));
   };
 
   // 이미지 리사이즈 함수
@@ -143,37 +175,6 @@ export default function ChurchRegistrationPage() {
       img.onerror = (err) => reject(err);
       reader.readAsDataURL(file);
     });
-  };
-
-  // 파일 입력 처리
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, files } = e.target;
-    if (files && files[0]) {
-      try {
-        const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
-        if (!allowedTypes.includes(files[0].type)) {
-          setError(t("unsupportedFileType"));
-          return;
-        }
-        if (files[0].size > 5 * 1024 * 1024) {
-          setError(t("fileTooLarge"));
-          return;
-        }
-
-        const resizedFile = await resizeImage(files[0]);
-        setFormData((prev) => ({ ...prev, [name]: resizedFile }));
-      } catch (error) {
-        console.error("이미지 리사이즈 오류:", error);
-        setError(t("imageProcessingError"));
-      }
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: undefined }));
-    }
-  };
-
-  // 파일 입력 초기화
-  const handleFileReset = (name: "logo" | "contactImage") => {
-    setFormData((prev) => ({ ...prev, [name]: undefined }));
   };
 
   // 첫 번째 스텝에서 다음 버튼 클릭 시
@@ -261,6 +262,7 @@ export default function ChurchRegistrationPage() {
   // 첫 번째 스텝: 교회 정보 입력
   const renderStep1 = () => (
     <motion.form
+      key="step1"
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
@@ -309,13 +311,13 @@ export default function ChurchRegistrationPage() {
         className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
       />
       <Input
-        label={t("address")}
+        label={t("churchAddress")}
         name="address"
         value={formData.address}
         onChange={handleInputChange}
         required
         className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
-        placeholder={t("address")}
+        placeholder={t("churchAddress")}
       />
       <Input
         label={t("churchPhone")}
@@ -366,6 +368,7 @@ export default function ChurchRegistrationPage() {
   // 두 번째 스텝: 신청자 정보 입력
   const renderStep2 = () => (
     <motion.form
+      key="step2"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
@@ -373,16 +376,22 @@ export default function ChurchRegistrationPage() {
       onSubmit={handleSubmit}
       className="space-y-4"
     >
-      <Input
-        label={t("superAdminEmail")}
-        name="superAdminEmail"
-        type="email"
-        value={formData.superAdminEmail}
-        onChange={handleInputChange}
-        required
-        className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
-        placeholder={t("superAdminEmail")}
-      />
+      <div>
+        <label className="block text-sm font-medium text-gray-800 mb-2">
+          {t("superAdminEmail")}
+          <span className="text-red-600"> *</span>
+        </label>
+        <input
+          type="email"
+          name="superAdminEmail"
+          value={formData.superAdminEmail}
+          onChange={handleInputChange}
+          required
+          className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
+          placeholder={t("superAdminEmail")}
+          aria-label={t("superAdminEmail")}
+        />
+      </div>
       <Input
         label={t("password")}
         name="password"

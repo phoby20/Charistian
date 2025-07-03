@@ -14,7 +14,7 @@ export default function SuccessPage() {
       <div className="bg-white p-8 rounded-md shadow-md w-full max-w-lg text-center">
         <h1 className="text-2xl font-bold mb-6">{t("registrationComplete")}</h1>
         <p className="text-gray-700 mb-4">{t("waitForApproval")}</p>
-        <p className="text-gray-700 mb-6">{t("approvalTime")}</p>
+        <p className="text-gray-700 mb-6 whitespace-pre">{t("approvalTime")}</p>
         <div className="flex justify-center">
           <Button onClick={() => router.push("/")}>{t("goToHome")}</Button>
         </div>

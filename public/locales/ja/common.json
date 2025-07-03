@@ -44,7 +44,7 @@
   "scores": "楽譜関連",
   "registrationComplete": "登録申請完了",
   "waitForApproval": "申請承認が完了するまでしばらくお待ちください。",
-  "approvalTime": "通常、営業日で2〜3日程度かかります。",
+  "approvalTime": "通常、営業日で2〜3日程度かかります。 \n結果は登録しましたEmailにお知らせをします。\nメールが届かない場合、迷惑メールをご確認ください。",
   "goToHome": "ホームへ移動",
   "pleaseFillAllFields": "すべての必須フィールドに入力してください",
   "optional": "オプション",

@@ -27,6 +27,18 @@ interface AttendanceRecord {
   date: string;
 }
 
+interface UsageLimit {
+  plan: "FREE" | "SMART" | "ENTERPRISE";
+  maxUsers: number;
+  remainingUsers: number;
+  weeklySetlists: number;
+  remainingWeeklySetlists: number;
+  monthlySetlists: number;
+  remainingMonthlySetlists: number;
+  maxScores: number;
+  remainingScores: number;
+}
+
 export default function DashboardPage() {
   const t = useTranslations();
   const router = useRouter();
@@ -50,6 +62,7 @@ export default function DashboardPage() {
     roleDistribution: {},
     recentMembers: [],
   });
+  const [usageLimit, setUsageLimit] = useState<UsageLimit | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [scanMessage, setScanMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -68,7 +81,6 @@ export default function DashboardPage() {
   }>({ members: [], attendances: [] });
   const locale = useLocale();
 
-  // 초기 데이터 페칭
   useEffect(() => {
     const fetchInitialData = async () => {
       if (!user || isAuthLoading) return;
@@ -83,7 +95,6 @@ export default function DashboardPage() {
       );
       setCachedData(data);
 
-      // 그룹, 서브그룹, 팀 목록 추출
       const uniqueGroups = Array.from(
         new Set(data.members.flatMap((m) => m.groups.map((g) => g.name)))
       ).sort();
@@ -97,16 +108,21 @@ export default function DashboardPage() {
       setGroups(uniqueGroups);
       setSubGroups(uniqueSubGroups);
       setTeams(uniqueTeams);
+
+      // 사용량 제한 데이터 가져오기
+      const response = await fetch("/api/secure/usage-limits", {
+        credentials: "include",
+      });
+      const usageData = await response.json();
+      setUsageLimit(usageData);
     };
 
     fetchInitialData();
   }, [user, isAuthLoading, t]);
 
-  // 필터링 및 통계 계산
   useEffect(() => {
     if (!user || isAuthLoading) return;
 
-    // 필터링된 멤버 목록
     const filteredMembers = cachedData.members.filter(
       (m: UserWithRelations) => {
         const inSelectedGroups =
@@ -127,7 +143,6 @@ export default function DashboardPage() {
       }
     );
 
-    // Member stats 계산
     const totalMembers = filteredMembers.length;
     const roleDistribution = filteredMembers.reduce(
       (acc: { [role: string]: number }, m: UserWithRelations) => {
@@ -145,28 +160,20 @@ export default function DashboardPage() {
 
     setMemberStats({ totalMembers, roleDistribution, recentMembers });
 
-    // 출석 통계 계산 (SUPER_ADMIN, ADMIN only)
     if (["SUPER_ADMIN", "ADMIN"].includes(user.role) && user.churchId) {
       const filteredAttendances = cachedData.attendances.filter((att) =>
         filteredMembers.some((m) => m.id === att.userId)
       );
-
       const today = new Date();
       const todayString = format(today, "yyyy-MM-dd");
-
-      // Today’s attendance count
       const todayCount = filteredAttendances.filter(
         (att) => att.date === todayString
       ).length;
-
-      // Weekly attendance rate
       const weekAttendees = new Set(
         filteredAttendances.map((att) => att.userId)
       ).size;
       const weekRate =
         totalMembers > 0 ? (weekAttendees / totalMembers) * 100 : 0;
-
-      // Last 7 days trend
       const last7Days = Array.from({ length: 7 }, (_, i) => {
         const date = subDays(today, 6 - i);
         const dateString = format(date, "yyyy-MM-dd");
@@ -203,7 +210,7 @@ export default function DashboardPage() {
           className="flex justify-between items-center mb-8 space-x-4"
         >
           <h1 className="text-xl font-extrabold text-gray-900">
-            {t("dashboard")}
+            {t("dashboard.title")}
           </h1>
           <div className="flex space-x-2">
             {user.role === "MASTER" && (
@@ -218,6 +225,37 @@ export default function DashboardPage() {
             <QRScanner user={user} onMessage={setScanMessage} />
           </div>
         </motion.div>
+
+        {usageLimit && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200"
+          >
+            <h2 className="text-lg font-semibold">플랜 및 사용량</h2>
+            <p>플랜: {usageLimit.plan}</p>
+            <p>
+              남은 성도 등록: {usageLimit.remainingUsers}/{usageLimit.maxUsers}
+            </p>
+            <p>
+              주간 세트리스트: {usageLimit.remainingWeeklySetlists}/
+              {usageLimit.weeklySetlists}
+            </p>
+            <p>
+              월간 세트리스트: {usageLimit.remainingMonthlySetlists}/
+              {usageLimit.monthlySetlists}
+            </p>
+            <p>
+              남은 악보 업로드: {usageLimit.remainingScores}/
+              {usageLimit.maxScores}
+            </p>
+            {user.role === "SUPER_ADMIN" && (
+              <Link href={`/${locale}/plans`} className="text-blue-600">
+                플랜 관리
+              </Link>
+            )}
+          </motion.div>
+        )}
 
         <MobileFilterDropdowns
           groups={groups}

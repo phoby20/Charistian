@@ -684,5 +684,81 @@
     "confirmSendEmailDescription": "이메일 전송을 확인해 주세요.",
     "emailSentSuccess": "이메일이 성공적으로 전송되었습니다.",
     "serverError": "서버 오류가 발생했습니다."
+  },
+  "plans": {
+    "title": "플랜 선택",
+    "superAdminRequired": "SuperAdmin 권한이 필요합니다.",
+    "free": {
+      "title": "FREE",
+      "description": "최대 50명 성도 등록, 주 2회/월 8회 세트리스트, 최대 50곡 악보",
+      "price": "무료",
+      "currentPlan": "현재 플랜",
+      "select": "선택"
+    },
+    "smart": {
+      "title": "SMART",
+      "description": "최대 150명 성도 등록, 주 10회/월 50회 세트리스트, 최대 200곡 악보",
+      "price": "월 요금 (자세한 금액은 결제 페이지에서 확인)",
+      "subscribe": "구독 시작"
+    },
+    "enterprise": {
+      "title": "ENTERPRISE",
+      "description": "무제한 성도 등록, 세트리스트, 악보 업로드",
+      "price": "월 요금 (자세한 금액은 결제 페이지에서 확인)",
+      "subscribe": "구독 시작"
+    },
+    "cancel": {
+      "title": "구독 취소",
+      "confirm": "정말로 구독을 취소하시겠습니까? 현재 구독은 {expirationDate}까지 유효합니다.",
+      "submit": "구독 취소",
+      "cancel": "취소",
+      "processing": "처리 중...",
+      "error": {
+        "cancelFailed": "구독 취소에 실패했습니다."
+      }
+    },
+    "cancelSubscription": "구독 취소"
+  },
+  "success": {
+    "title": "결제 완료",
+    "message": "구독이 성공적으로 완료되었습니다. 이제 새로운 플랜의 모든 기능을 이용할 수 있습니다!",
+    "goToDashboard": "대시보드로 이동"
+  },
+  "manage": {
+    "title": "구독 관리",
+    "currentPlan": "현재 플랜",
+    "status": "상태",
+    "cancelSubscription": "구독 취소",
+    "changePlan": "플랜 변경",
+    "superAdminRequired": "SuperAdmin만 구독을 관리할 수 있습니다."
+  },
+  "dashboard": {
+    "title": "대시보드",
+    "planAndUsage": "플랜 및 사용량",
+    "plan": "플랜",
+    "remainingUsers": "남은 성도 등록",
+    "weeklySetlists": "주간 세트리스트",
+    "monthlySetlists": "월간 세트리스트",
+    "remainingScores": "남은 악보 업로드",
+    "managePlan": "플랜 관리",
+    "limitExceededUsers": "성도 등록 한도를 초과했습니다. 플랜을 업그레이드하세요.",
+    "limitExceededSetlists": "세트리스트 생성 한도를 초과했습니다. 플랜을 업그레이드하세요.",
+    "limitExceededScores": "악보 업로드 한도를 초과했습니다. 플랜을 업그레이드하세요."
+  },
+  "checkout": {
+    "title": "결제",
+    "limitExceeded": "한도를 초과했습니다. 플랜을 업그레이드하세요.",
+    "error": {
+      "config": "Stripe 설정을 불러오지 못했습니다.",
+      "alreadySubscribed": "이미 구독 중입니다. 구독 관리 페이지에서 변경하세요.",
+      "server": "서버 오류가 발생했습니다.",
+      "clientSecret": "결제 정보를 가져오지 못했습니다.",
+      "payment": "결제 처리 중 오류가 발생했습니다."
+    },
+    "processing": "처리 중...",
+    "submit": "{plan} 플랜 결제",
+    "goToManage": "구독 관리 페이지로 이동",
+    "successMessage": "구독이 성공적으로 완료되었습니다. \n이제 새로운 플랜의 모든 기능을 이용할 수 있습니다!",
+    "goToDashboard": "대시보드로 이동"
   }
 }

@@ -674,5 +674,80 @@
     "confirmSendEmailDescription": "メール送信を確認してください。",
     "emailSentSuccess": "メールが正常に送信されました。",
     "serverError": "サーバーエラーが発生しました。"
+  },
+  "plans": {
+    "title": "プラン選択",
+    "superAdminRequired": "SuperAdmin権限が必要です。",
+    "free": {
+      "title": "FREE",
+      "description": "最大50名の信徒登録、週2回/月8回のセットリスト、最大50曲の楽譜",
+      "price": "無料",
+      "currentPlan": "現在のプラン",
+      "select": "選択"
+    },
+    "smart": {
+      "title": "SMART",
+      "description": "最大150名の信徒登録、週10回/月50回のセットリスト、最大200曲の楽譜",
+      "price": "月額料金（詳細は支払いページで確認）",
+      "subscribe": "サブスクリプション開始"
+    },
+    "enterprise": {
+      "title": "ENTERPRISE",
+      "description": "無制限の信徒登録、セットリスト、楽譜アップロード",
+      "price": "月額料金（詳細は支払いページで確認）",
+      "subscribe": "サブスクリプション開始"
+    },
+    "cancel": {
+      "title": "サブスクリプション取消",
+      "confirm": "サブスクリプション取消をしますか? サブスクリプションは{expirationDate}まで有効です。",
+      "submit": "구サブスクリプション取消",
+      "cancel": "キャンセル",
+      "processing": "処理中...",
+      "error": {
+        "cancelFailed": "サブスクリプション取消に失敗しました"
+      }
+    },
+    "cancelSubscription": "サブスクリプション取消"
+  },
+  "success": {
+    "title": "支払い完了",
+    "message": "サブスクリプションが正常に完了しました。新しいプランのすべての機能を利用できます！",
+    "goToDashboard": "ダッシュボードに移動"
+  },
+  "manage": {
+    "title": "サブスクリプション管理",
+    "currentPlan": "現在のプラン",
+    "status": "状態",
+    "cancelSubscription": "サブスクリプションをキャンセル",
+    "changePlan": "プランを変更",
+    "superAdminRequired": "SuperAdminのみがサブスクリプションを管理できます。"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "planAndUsage": "プランと使用量",
+    "plan": "プラン",
+    "remainingUsers": "残りの信徒登録",
+    "weeklySetlists": "週次セットリスト",
+    "monthlySetlists": "月次セットリスト",
+    "remainingScores": "残りの楽譜アップロード",
+    "managePlan": "プラン管理",
+    "limitExceededUsers": "信徒登録の制限を超えました。プランをアップグレードしてください。",
+    "limitExceededSetlists": "セットリスト作成の制限を超えました。プランをアップグレードしてください。",
+    "limitExceededScores": "楽譜アップロードの制限を超えました。プランをアップグレードしてください。"
+  },
+  "checkout": {
+    "title": "決済",
+    "goToManage": "サブスクリプション管理ページに移動",
+    "error": {
+      "config": "Stripe設定の取得に失敗しました。",
+      "alreadySubscribed": "すでにサブスクリプションに登録されています。サブスクリプション管理ページで変更してください。",
+      "server": "サーバーエラーが発生しました。",
+      "clientSecret": "決済情報を取得できませんでした。",
+      "payment": "決済処理中にエラーが発生しました。"
+    },
+    "processing": "処理中...",
+    "submit": "{{plan}} プランのサブスクリプション",
+    "successMessage": "サブスクリプションの決済が完了しました。 \n今から新しいプランのすべての機能がご利用できます",
+    "goToDashboard": "ダッシュボードへ"
   }
 }

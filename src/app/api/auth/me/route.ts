@@ -1,3 +1,4 @@
+// src/app/api/auth/me/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifyToken } from "@/lib/jwt";
@@ -21,6 +22,19 @@ export async function GET(req: NextRequest) {
         name: true,
         role: true,
         churchId: true,
+        church: {
+          select: {
+            id: true,
+            name: true,
+            subscriptions: {
+              select: {
+                plan: true,
+              },
+              take: 1, // 가장 최근 구독 정보 가져오기
+              orderBy: { createdAt: "desc" },
+            },
+          },
+        },
         profileImage: true,
         birthDate: true,
         phone: true,

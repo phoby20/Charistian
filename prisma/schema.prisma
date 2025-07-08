@@ -343,15 +343,16 @@ model PasswordResetToken {
 }
 
 model Subscription {
-  id            String       @id @default(uuid())
-  churchId      String
-  church        Church       @relation(fields: [churchId], references: [id])
-  stripeCustomerId String?   // Stripe 고객 ID
-  stripeSubscriptionId String? // Stripe 구독 ID
-  plan          Plan         @default(FREE)
-  status        SubscriptionStatus @default(ACTIVE) // 구독 상태
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id                           String       @id @default(uuid())
+  churchId                     String
+  church                       Church       @relation(fields: [churchId], references: [id])
+  stripeCustomerId             String?   // Stripe 고객 ID
+  stripeCheckoutSessionId      String? // Checkout 세션 ID
+  stripeSubscriptionId         String? // 실제 구독 ID
+  plan                         Plan         @default(FREE)
+  status                       SubscriptionStatus @default(ACTIVE) // 구독 상태
+  createdAt                    DateTime     @default(now())
+  updatedAt                    DateTime     @updatedAt
 }
 
 model UsageLimit {

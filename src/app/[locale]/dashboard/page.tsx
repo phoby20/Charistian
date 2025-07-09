@@ -21,6 +21,7 @@ import { UserWithRelations } from "@/types/customUser";
 import MobileFilterDropdowns from "@/components/dashboard/MobileFilterDropdowns";
 import DesktopFilterTabs from "@/components/dashboard/DesktopFilterTabs";
 import Link from "next/link";
+import UsageLimitCard from "@/components/dashboard/UsageLimitCard";
 
 interface AttendanceRecord {
   userId: string;
@@ -226,102 +227,7 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {usageLimit && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200"
-          >
-            <h2 className="text-lg font-semibold mb-4">
-              {t("dashboard.planAndUsage")}
-            </h2>
-            <div className="space-y-4">
-              {/* 성도 수 */}
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-1">
-                  {t("dashboard.registeredMembers")} (
-                  {usageLimit.remainingUsers}/{usageLimit.maxUsers})
-                </p>
-                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <motion.div
-                    className="bg-blue-500 h-full rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${(usageLimit.remainingUsers / usageLimit.maxUsers) * 100}%`,
-                    }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
-              {/* 주간 콘티 수 */}
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-1">
-                  {t("dashboard.weeklySetlists")} (
-                  {usageLimit.remainingWeeklySetlists}/
-                  {usageLimit.weeklySetlists})
-                </p>
-                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <motion.div
-                    className="bg-green-500 h-full rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${(usageLimit.remainingWeeklySetlists / usageLimit.weeklySetlists) * 100}%`,
-                    }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
-              {/* 월간 콘티 수 */}
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-1">
-                  {t("dashboard.monthlySetlists")} (
-                  {usageLimit.remainingMonthlySetlists}/
-                  {usageLimit.monthlySetlists})
-                </p>
-                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <motion.div
-                    className="bg-orange-500 h-full rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${(usageLimit.remainingMonthlySetlists / usageLimit.monthlySetlists) * 100}%`,
-                    }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
-              {/* 악보 업로드 수 */}
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-1">
-                  {t("dashboard.scoreUploads")} ({usageLimit.remainingScores}/
-                  {usageLimit.maxScores})
-                </p>
-                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <motion.div
-                    className="bg-purple-500 h-full rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${(usageLimit.remainingScores / usageLimit.maxScores) * 100}%`,
-                    }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
-              {/* 플랜 */}
-              <p className="text-sm font-medium text-gray-700">
-                {t("dashboard.plan")}: {usageLimit.plan}
-              </p>
-              {/* 플랜 관리 링크 */}
-              {user.role === "SUPER_ADMIN" && (
-                <Link
-                  href={`/${locale}/plans`}
-                  className="text-blue-600 hover:underline"
-                >
-                  {t("dashboard.managePlan")}
-                </Link>
-              )}
-            </div>
-          </motion.div>
-        )}
+        <UsageLimitCard user={user} usageLimit={usageLimit} />
 
         <MobileFilterDropdowns
           groups={groups}

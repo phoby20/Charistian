@@ -120,6 +120,13 @@ const MobileSelectedSongList = ({
                 })}
               </ul>
             )}
+            {isCreateDisabled ? (
+              <span className="text-xs mt-4 text-red-600 whitespace-pre-wrap">
+                {t("noMakeSetlist")}
+              </span>
+            ) : (
+              ""
+            )}
             <Link href={`/${locale}/setlists/create`}>
               <motion.button
                 whileHover={{ scale: isCreateDisabled ? 1 : 1.05 }}

@@ -688,6 +688,7 @@
   "plans": {
     "title": "플랜 선택",
     "superAdminRequired": "SuperAdmin 권한이 필요합니다.",
+    "month": "월",
     "free": {
       "title": "FREE",
       "description": "최대 50명 성도 등록, 주 2회/월 8회 세트리스트, 최대 50곡 악보",
@@ -698,13 +699,13 @@
     "smart": {
       "title": "SMART",
       "description": "최대 150명 성도 등록, 주 10회/월 50회 세트리스트, 최대 200곡 악보",
-      "price": "월 요금 (자세한 금액은 결제 페이지에서 확인)",
+      "price": "10,000원",
       "subscribe": "구독 시작"
     },
     "enterprise": {
       "title": "ENTERPRISE",
       "description": "무제한 성도 등록, 세트리스트, 악보 업로드",
-      "price": "월 요금 (자세한 금액은 결제 페이지에서 확인)",
+      "price": "50,000원",
       "subscribe": "구독 시작"
     },
     "cancel": {

@@ -678,6 +678,7 @@
   "plans": {
     "title": "プラン選択",
     "superAdminRequired": "SuperAdmin権限が必要です。",
+    "month": "月",
     "free": {
       "title": "FREE",
       "description": "最大50名の信徒登録、週2回/月8回のセットリスト、最大50曲の楽譜",
@@ -688,13 +689,13 @@
     "smart": {
       "title": "SMART",
       "description": "最大150名の信徒登録、週10回/月50回のセットリスト、最大200曲の楽譜",
-      "price": "月額料金（詳細は支払いページで確認）",
+      "price": "10,000ウォン",
       "subscribe": "サブスクリプション開始"
     },
     "enterprise": {
       "title": "ENTERPRISE",
       "description": "無制限の信徒登録、セットリスト、楽譜アップロード",
-      "price": "月額料金（詳細は支払いページで確認）",
+      "price": "50,000ウォン",
       "subscribe": "サブスクリプション開始"
     },
     "cancel": {

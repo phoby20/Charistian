@@ -18,7 +18,7 @@ interface Subscription {
 
 export default function PlansPage() {
   const t = useTranslations("plans");
-  const { user, isLoading } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const locale = useLocale();
   const router = useRouter();
   const [currentPlan, setCurrentPlan] = useState<string>("FREE");
@@ -29,6 +29,7 @@ export default function PlansPage() {
   const [stripePromise, setStripePromise] =
     useState<Promise<Stripe | null> | null>(null);
   const [isSubscriptionId, setIsSubscriptionId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Stripe 초기화
   const initializeStripe = useCallback(async () => {
@@ -134,6 +135,7 @@ export default function PlansPage() {
     }
 
     try {
+      setIsLoading(true);
       // 1. 구독 상태 확인
       const isSubscribed = await checkSubscription();
       if (isSubscribed) {
@@ -164,10 +166,12 @@ export default function PlansPage() {
     } catch (error) {
       console.error("Client - Failed to process subscription:", error);
       setError(t("error.payment"));
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (isLoading || planLoading || !user) {
+  if (isAuthLoading || planLoading || !user || isLoading) {
     return <Loading />;
   }
 
@@ -208,6 +212,7 @@ export default function PlansPage() {
             title={t("free.title")}
             description={t("free.description")}
             price={t("free.price")}
+            month={""}
             buttonText={
               currentPlan === "FREE" ? t("free.currentPlan") : t("free.select")
             }
@@ -225,6 +230,7 @@ export default function PlansPage() {
             title={t("smart.title")}
             description={t("smart.description")}
             price={t("smart.price")}
+            month={t("month")}
             buttonText={
               currentPlan === "SMART" && isSuperAdmin && isSubscriptionId
                 ? t("cancelSubscription")
@@ -246,6 +252,7 @@ export default function PlansPage() {
             title={t("enterprise.title")}
             description={t("enterprise.description")}
             price={t("enterprise.price")}
+            month={t("month")}
             buttonText={
               currentPlan === "ENTERPRISE" && isSuperAdmin && isSubscriptionId
                 ? t("cancelSubscription")
@@ -282,6 +289,7 @@ interface PlanCardProps {
   title: string;
   description: string;
   price: string;
+  month: string;
   buttonText: string;
   disabled?: boolean;
   href: string;
@@ -295,6 +303,7 @@ function PlanCard({
   title,
   description,
   price,
+  month,
   buttonText,
   disabled,
   isSuperAdmin,
@@ -315,7 +324,10 @@ function PlanCard({
       <p className="text-gray-500 text-base mt-2 leading-relaxed">
         {description}
       </p>
-      <p className="text-gray-900 text-2xl font-semibold mt-4">{price}</p>
+      <p className="text-gray-900 text-2xl font-semibold mt-4">
+        <span className="text-gray-600 text-lg mr-1">{month}</span>
+        {price}
+      </p>
       {isSuperAdmin ? (
         isCurrentPlan && buttonText === t("cancelSubscription") ? (
           <button

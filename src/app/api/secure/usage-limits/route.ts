@@ -98,6 +98,10 @@ export async function GET() {
       where: { churchId: churchId },
     });
 
+    const currentScores = await prisma.creation.findMany({
+      where: { churchId: churchId },
+    });
+
     return NextResponse.json({
       plan,
       maxUsers: limits[plan].maxUsers,
@@ -107,7 +111,7 @@ export async function GET() {
       monthlySetlists: limits[plan].monthlySetlists,
       remainingMonthlySetlists: currentUsage?.monthlySetlistCount || 0,
       maxScores: limits[plan].maxScores,
-      remainingScores: currentUsage?.scoreCount || 0,
+      remainingScores: currentScores.length,
     });
   } catch (error) {
     console.error("Usage limits fetch error:", error);

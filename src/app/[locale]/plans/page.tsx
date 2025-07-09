@@ -13,6 +13,7 @@ interface Subscription {
   plan: "FREE" | "SMART" | "ENTERPRISE";
   status: "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID";
   currentPeriodEnd?: number; // Stripe의 current_period_end (Unix timestamp)
+  stripeSubscriptionId: string | null;
 }
 
 // interface SubscriptionResponse {
@@ -32,6 +33,7 @@ export default function PlansPage() {
   const [error, setError] = useState<string | null>(null);
   const [stripePromise, setStripePromise] =
     useState<Promise<Stripe | null> | null>(null);
+  const [isSubscriptionId, setIsSubscriptionId] = useState<string | null>(null);
 
   // Stripe 초기화
   const initializeStripe = useCallback(async () => {
@@ -70,6 +72,7 @@ export default function PlansPage() {
         }
         const data: Subscription = await response.json();
         setCurrentPlan(data.plan || "FREE");
+        setIsSubscriptionId(data.stripeSubscriptionId);
         setCurrentPeriodEnd(data.currentPeriodEnd || null);
       } catch (error) {
         console.error("Failed to fetch plan:", error);
@@ -113,7 +116,9 @@ export default function PlansPage() {
         credentials: "include",
       });
       const data = await response.json();
-      return data.plan !== "FREE" && data.status === "ACTIVE";
+      return (
+        data.plan !== "FREE" && data.status === "ACTIVE" && isSubscriptionId
+      );
     } catch (error) {
       console.error("Client - Failed to check subscription:", error);
       return false;
@@ -226,7 +231,7 @@ export default function PlansPage() {
             description={t("smart.description")}
             price={t("smart.price")}
             buttonText={
-              currentPlan === "SMART" && isSuperAdmin
+              currentPlan === "SMART" && isSuperAdmin && isSubscriptionId
                 ? t("cancelSubscription")
                 : isSuperAdmin
                   ? t("smart.subscribe")
@@ -247,7 +252,7 @@ export default function PlansPage() {
             description={t("enterprise.description")}
             price={t("enterprise.price")}
             buttonText={
-              currentPlan === "ENTERPRISE" && isSuperAdmin
+              currentPlan === "ENTERPRISE" && isSuperAdmin && isSubscriptionId
                 ? t("cancelSubscription")
                 : isSuperAdmin
                   ? t("enterprise.subscribe")

@@ -44,7 +44,8 @@ export async function GET() {
 
     // findUnique 대신 findFirst 사용
     const subscription = await prisma.subscription.findFirst({
-      where: { churchId: churchId },
+      where: { churchId: churchId, status: "ACTIVE" },
+      orderBy: { updatedAt: "desc" }, // 최신 데이터 보장
     });
     const usage = await prisma.usageLimit.findFirst({
       where: { churchId: churchId },

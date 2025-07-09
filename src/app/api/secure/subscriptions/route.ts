@@ -15,6 +15,7 @@ interface ResponseData {
   plan: "FREE" | "SMART" | "ENTERPRISE";
   status: "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID";
   currentPeriodEnd?: number;
+  stripeSubscriptionId: string | null;
 }
 
 export async function GET() {
@@ -68,6 +69,7 @@ export async function GET() {
     const responseData: ResponseData = {
       plan: subscription?.plan || "FREE",
       status: subscription?.status || "ACTIVE",
+      stripeSubscriptionId: subscription?.stripeSubscriptionId ?? null,
     };
 
     if (subscription?.stripeSubscriptionId) {
@@ -236,14 +238,14 @@ export async function POST(req: NextRequest) {
       incomplete: "ACTIVE",
       canceled: "CANCELED",
     };
-    const prismaStatus: "ACTIVE" | "CANCELED" =
-      statusMap[sessionCheckout.status ?? ""] || "ACTIVE";
+    const prismaStatus: "ACTIVE" | "CANCELED" | "UNPAID" =
+      statusMap[sessionCheckout.status ?? ""] || "UNPAID";
 
     await prisma.subscription.create({
       data: {
         churchId: church.id,
         stripeCustomerId: customer.id,
-        stripeSubscriptionId: sessionCheckout.id,
+        stripeCheckoutSessionId: sessionCheckout.id,
         plan,
         status: prismaStatus,
       },
@@ -351,7 +353,7 @@ export async function DELETE() {
     }
 
     const subscription = await prisma.subscription.findFirst({
-      where: { churchId: payload.churchId },
+      where: { churchId: payload.churchId, status: "ACTIVE" },
       orderBy: { updatedAt: "desc" }, // 최신 데이터 보장
     });
     console.log("DELETE - Subscription:", subscription);
@@ -370,81 +372,35 @@ export async function DELETE() {
     }
 
     // stripeSubscriptionId는 Checkout 세션 ID임
-    const checkoutSessionId = subscription.stripeSubscriptionId;
+    const subscriptionIdToCancel = subscription.stripeSubscriptionId;
     try {
-      const checkoutSession = await stripe.checkout.sessions.retrieve(
-        checkoutSessionId,
-        { expand: ["subscription"] }
+      const subscriptionCanceled = await stripe.subscriptions.cancel(
+        subscriptionIdToCancel
       );
-      console.log("DELETE - Checkout session:", checkoutSession);
 
-      if (checkoutSession.subscription) {
-        const stripeSubscription =
-          checkoutSession.subscription as Stripe.Subscription;
-        const subscriptionIdToCancel = stripeSubscription.id; // 실제 구독 ID
-        console.log("DELETE - Subscription canceled:", subscriptionIdToCancel);
+      console.log("DELETE - subscriptionCanceled:", subscriptionCanceled);
 
-        const subscriptionCanceled = await stripe.subscriptions.cancel(
-          subscriptionIdToCancel
-        );
-
-        console.log("DELETE - subscriptionCanceled:", subscriptionCanceled);
-
-        // Prisma의 stripeSubscriptionId를 실제 구독 ID로 업데이트
-        await prisma.subscription.update({
-          where: { id: subscription.id },
-          data: {
-            stripeSubscriptionId: subscriptionIdToCancel,
-            status: "CANCELED",
-            plan: "FREE",
-          },
-        });
-      } else {
-        console.warn(
-          "DELETE - No subscription found for checkout session:",
-          checkoutSessionId
-        );
-        // 결제가 완료되지 않은 경우, Prisma만 업데이트 (구독이 생성되지 않음)
-        await prisma.subscription.update({
-          where: { id: subscription.id },
-          data: { status: "CANCELED", plan: "FREE" },
-        });
-        console.log(
-          "DELETE - No subscription to cancel, updated Prisma:",
-          checkoutSessionId
-        );
-      }
+      // Prisma의 stripeSubscriptionId를 실제 구독 ID로 업데이트
+      await prisma.subscription.update({
+        where: { id: subscription.id },
+        data: {
+          stripeSubscriptionId: subscriptionIdToCancel,
+          status: "CANCELED",
+          plan: "FREE",
+        },
+      });
     } catch (error: unknown) {
-      if (
-        error instanceof Stripe.errors.StripeInvalidRequestError &&
-        error.message.includes("No such checkout.session")
-      ) {
-        console.warn(
-          "DELETE - Invalid or expired checkout session:",
-          checkoutSessionId
-        );
-        // 세션이 만료된 경우, 결제가 완료되지 않았으므로 Prisma만 업데이트
-        await prisma.subscription.update({
-          where: { id: subscription.id },
-          data: { status: "CANCELED", plan: "FREE" },
-        });
-        console.log(
-          "DELETE - Updated Prisma for expired session:",
-          checkoutSessionId
-        );
-      } else {
-        console.error("DELETE - Error retrieving checkout session:", error);
-        return NextResponse.json(
-          {
-            error:
-              locale === "ko"
-                ? "구독 취소 중 오류가 발생했습니다."
-                : "サブスクリプションキャンセル中にエラーが発生しました。",
-            details: error instanceof Error ? error.message : "Unknown error",
-          },
-          { status: 500 }
-        );
-      }
+      console.error("DELETE - Error retrieving checkout session:", error);
+      return NextResponse.json(
+        {
+          error:
+            locale === "ko"
+              ? "구독 취소 중 오류가 발생했습니다."
+              : "サブスクリプションキャンセル中にエラーが発生しました。",
+          details: error instanceof Error ? error.message : "Unknown error",
+        },
+        { status: 500 }
+      );
     }
 
     console.log(

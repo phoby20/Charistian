@@ -1,79 +1,131 @@
 // src/app/api/secure/stripe/webhook/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import prisma from "@/lib/prisma";
+import { getLocale } from "next-intl/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-06-30.basil", // 요청된 API 버전 유지
+  apiVersion: "2025-06-30.basil",
 });
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
+  console.log("Webhook - Start");
+  const locale = await getLocale();
   try {
-    const sig = req.headers.get("stripe-signature");
-    console.log("Webhook - Stripe signature:", sig); // 디버깅 로그
-    if (!sig) {
+    const body = await req.text();
+    const signature = req.headers.get("stripe-signature");
+    if (!signature) {
+      console.error("Webhook - Missing stripe-signature header");
       return NextResponse.json(
-        { error: "Stripe 서명이 없습니다." },
+        {
+          error:
+            locale === "ko"
+              ? "Stripe 서명이 누락되었습니다."
+              : "Stripe署名がありません。",
+        },
         { status: 400 }
       );
     }
 
-    const body = await req.text();
-    console.log("Webhook - Request body received"); // 디버깅 로그
     const event = stripe.webhooks.constructEvent(
       body,
-      sig,
+      signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-    console.log("Webhook - Event type:", event.type); // 디버깅 로그
 
-    if (
-      event.type === "customer.subscription.updated" ||
-      event.type === "customer.subscription.deleted"
-    ) {
-      const subscription = event.data.object as Stripe.Subscription;
-      console.log("Webhook - Subscription ID:", subscription.id); // 디버깅 로그
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const subscriptionId = session.subscription as string | null;
+      const checkoutSessionId = session.id;
+      const customerId =
+        typeof session.customer === "string"
+          ? session.customer
+          : session.customer?.id;
 
-      // stripeSubscriptionId로 레코드 조회
-      const subscriptionRecord = await prisma.subscription.findFirst({
-        where: { stripeSubscriptionId: subscription.id },
-      });
-      console.log("Webhook - Subscription record:", subscriptionRecord); // 디버깅 로그
-
-      if (!subscriptionRecord) {
-        console.error(
-          "Webhook - Subscription not found for stripeSubscriptionId:",
-          subscription.id
-        );
+      if (!subscriptionId || !customerId) {
+        console.warn("Webhook - Missing subscription or customer ID:", {
+          subscriptionId,
+          customerId,
+        });
         return NextResponse.json(
-          { error: "구독 정보를 찾을 수 없습니다." },
-          { status: 404 }
+          {
+            error:
+              locale === "ko"
+                ? "구독 또는 고객 ID가 누락되었습니다."
+                : "サブスクリプションまたは顧客IDがありません。",
+          },
+          { status: 400 }
         );
       }
 
-      // subscriptionRecord.id로 업데이트
-      await prisma.subscription.update({
-        where: { id: subscriptionRecord.id },
-        data: {
-          status: subscription.status.toUpperCase() as
-            | "ACTIVE"
-            | "CANCELED"
-            | "PAST_DUE"
-            | "UNPAID",
-          plan: subscription.status === "canceled" ? "FREE" : undefined,
-        },
+      const subscriptionRecord = await prisma.subscription.findFirst({
+        where: { stripeCheckoutSessionId: checkoutSessionId },
       });
-      console.log(
-        "Webhook - Subscription updated for ID:",
-        subscriptionRecord.id
-      );
+
+      if (subscriptionRecord) {
+        if (subscriptionRecord.stripeSubscriptionId) {
+          console.log("Webhook - Subscription already updated:", {
+            checkoutSessionId,
+            subscriptionId: subscriptionRecord.stripeSubscriptionId,
+          });
+          return NextResponse.json({ received: true });
+        }
+
+        const statusMap: Record<
+          string,
+          "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID"
+        > = {
+          active: "ACTIVE",
+          incomplete: "ACTIVE",
+          canceled: "CANCELED",
+          past_due: "PAST_DUE",
+          unpaid: "UNPAID",
+        };
+        const stripeSubscription =
+          await stripe.subscriptions.retrieve(subscriptionId);
+        const prismaStatus: "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID" =
+          statusMap[stripeSubscription.status] || "UNPAID";
+
+        await prisma.subscription.update({
+          where: { id: subscriptionRecord.id },
+          data: {
+            stripeSubscriptionId: subscriptionId,
+            status: prismaStatus,
+          },
+        });
+        console.log("Webhook - Updated subscription:", {
+          checkoutSessionId,
+          subscriptionId,
+          status: prismaStatus,
+        });
+      } else {
+        console.warn(
+          "Webhook - No subscription found for checkout session:",
+          checkoutSessionId
+        );
+        return NextResponse.json(
+          {
+            error:
+              locale === "ko"
+                ? "해당 세션에 대한 구독이 없습니다."
+                : "該当セッションに対するサブスクリプションがありません。",
+          },
+          { status: 404 }
+        );
+      }
     }
 
     return NextResponse.json({ received: true });
-  } catch (error) {
-    console.error("Webhook error:", error);
+  } catch (error: unknown) {
+    console.error("Webhook - Error:", error);
     return NextResponse.json(
-      { error: "웹훅 처리 중 오류가 발생했습니다." },
+      {
+        error:
+          locale === "ko"
+            ? "웹훅 처리 중 오류가 발생했습니다."
+            : "ウェブフック処理中にエラーが発生しました。",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

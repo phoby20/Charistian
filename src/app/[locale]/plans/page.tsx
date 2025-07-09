@@ -16,11 +16,6 @@ interface Subscription {
   stripeSubscriptionId: string | null;
 }
 
-// interface SubscriptionResponse {
-//   invoiceUrl: string;
-//   subscriptionId: string;
-// }
-
 export default function PlansPage() {
   const t = useTranslations("plans");
   const { user, isLoading } = useAuth();

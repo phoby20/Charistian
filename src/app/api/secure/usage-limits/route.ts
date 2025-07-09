@@ -94,18 +94,20 @@ export async function GET() {
       where: { churchId: churchId },
     });
 
+    const currentChurchUsers = await prisma.user.findMany({
+      where: { churchId: churchId },
+    });
+
     return NextResponse.json({
       plan,
       maxUsers: limits[plan].maxUsers,
-      remainingUsers: limits[plan].maxUsers - (currentUsage?.userCount || 0),
+      remainingUsers: currentChurchUsers.length,
       weeklySetlists: limits[plan].weeklySetlists,
-      remainingWeeklySetlists:
-        limits[plan].weeklySetlists - (currentUsage?.weeklySetlistCount || 0),
+      remainingWeeklySetlists: currentUsage?.weeklySetlistCount || 0,
       monthlySetlists: limits[plan].monthlySetlists,
-      remainingMonthlySetlists:
-        limits[plan].monthlySetlists - (currentUsage?.monthlySetlistCount || 0),
+      remainingMonthlySetlists: currentUsage?.monthlySetlistCount || 0,
       maxScores: limits[plan].maxScores,
-      remainingScores: limits[plan].maxScores - (currentUsage?.scoreCount || 0),
+      remainingScores: currentUsage?.scoreCount || 0,
     });
   } catch (error) {
     console.error("Usage limits fetch error:", error);

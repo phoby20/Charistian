@@ -727,13 +727,15 @@
     "planAndUsage": "プランと使用量",
     "plan": "プラン",
     "remainingUsers": "残りの信徒登録",
-    "weeklySetlists": "週次セットリスト",
-    "monthlySetlists": "月次セットリスト",
     "remainingScores": "残りの楽譜アップロード",
     "managePlan": "プラン管理",
     "limitExceededUsers": "信徒登録の制限を超えました。プランをアップグレードしてください。",
     "limitExceededSetlists": "セットリスト作成の制限を超えました。プランをアップグレードしてください。",
-    "limitExceededScores": "楽譜アップロードの制限を超えました。プランをアップグレードしてください。"
+    "limitExceededScores": "楽譜アップロードの制限を超えました。プランをアップグレードしてください。",
+    "registeredMembers": "登録された信徒数",
+    "weeklySetlists": "週間作成したコンテ数",
+    "monthlySetlists": "月間作成したコンテ数",
+    "scoreUploads": "残りの楽譜アップロード"
   },
   "checkout": {
     "title": "決済",

@@ -737,13 +737,15 @@
     "planAndUsage": "플랜 및 사용량",
     "plan": "플랜",
     "remainingUsers": "남은 성도 등록",
-    "weeklySetlists": "주간 세트리스트",
-    "monthlySetlists": "월간 세트리스트",
     "remainingScores": "남은 악보 업로드",
     "managePlan": "플랜 관리",
     "limitExceededUsers": "성도 등록 한도를 초과했습니다. 플랜을 업그레이드하세요.",
     "limitExceededSetlists": "세트리스트 생성 한도를 초과했습니다. 플랜을 업그레이드하세요.",
-    "limitExceededScores": "악보 업로드 한도를 초과했습니다. 플랜을 업그레이드하세요."
+    "limitExceededScores": "악보 업로드 한도를 초과했습니다. 플랜을 업그레이드하세요.",
+    "registeredMembers": "현재 등록 성도 수",
+    "weeklySetlists": "주간 작성한 콘티 수",
+    "monthlySetlists": "월간 작성한 콘티 수",
+    "scoreUploads": "남은 악보 업로드"
   },
   "checkout": {
     "title": "결제",

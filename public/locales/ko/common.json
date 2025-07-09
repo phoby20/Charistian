@@ -619,7 +619,9 @@
     "selecteReference": "참고음원 선택",
     "youtubeRestricted": "이 비디오는 재생이 제한되어 있습니다.",
     "unmute": "음소거 해제",
-    "mute": "음소거"
+    "mute": "음소거",
+    "upgradePlan": "플랜 업그레이드",
+    "noMakeSetlist": "주/월간 사용량 초과로 콘티를 작성할 수 없습니다. 플랜을 업그레이드하세요"
   },
   "scoreList": "악보리스트",
   "setlistList": "콘티리스트",

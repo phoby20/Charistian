@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, Upload } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { ApiErrorResponse, SelectedSong } from "@/types/score";
+import { ApiErrorResponse, SelectedSong, UsageLimits } from "@/types/score";
 import { GENRES } from "@/data/genre";
 import Loading from "@/components/Loading";
 import ScoreTable from "@/components/scores/ScoreTable";
@@ -13,18 +13,6 @@ import SearchFilters from "@/components/scores/SearchFilters";
 import PaginationControls from "@/components/scores/PaginationControls";
 import SelectedSongList from "@/components/scores/SelectedSongFlotingList";
 import { Score } from "@/types/score";
-
-interface UsageLimits {
-  plan: string;
-  maxUsers: number;
-  remainingUsers: number;
-  weeklySetlists: number;
-  remainingWeeklySetlists: number;
-  monthlySetlists: number;
-  remainingMonthlySetlists: number;
-  maxScores: number;
-  remainingScores: number;
-}
 
 export default function ScoreList() {
   const [scores, setScores] = useState<Score[]>([]);

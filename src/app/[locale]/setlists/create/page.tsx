@@ -13,7 +13,12 @@ import { format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import SelectedSongsList from "@/components/scores/SelectedSongsList";
-import { Group, SelectedSong, Team } from "@/types/score";
+import { Group, SelectedSong, Team, UsageLimits } from "@/types/score";
+import Link from "next/link";
+import {
+  isSetlistCreationDisabled,
+  shouldShowUpgradeButton,
+} from "@/utils/setlistUtils";
 
 export default function CreateSetlistPage() {
   const t = useTranslations("Setlist");
@@ -26,6 +31,7 @@ export default function CreateSetlistPage() {
   const [selectedSongs, setSelectedSongs] = useState<SelectedSong[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [usageLimits, setUsageLimits] = useState<UsageLimits | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -52,15 +58,17 @@ export default function CreateSetlistPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const [groupRes, teamRes] = await Promise.all([
+        const [groupRes, teamRes, usageRes] = await Promise.all([
           fetch(`/api/groups/public?churchId=${user.churchId}`),
           fetch(`/api/teams?churchId=${user.churchId}`),
+          fetch("/api/secure/usage-limits"),
         ]);
-        if (!groupRes.ok || !teamRes.ok) {
+        if (!groupRes.ok || !teamRes.ok || !usageRes.ok) {
           throw new Error(t("fetchError"));
         }
         const groupData = await groupRes.json();
         const teamData = await teamRes.json();
+        const usageData = await usageRes.json();
         if (
           !Array.isArray(groupData.groups) ||
           !Array.isArray(teamData.teams)
@@ -69,6 +77,7 @@ export default function CreateSetlistPage() {
         }
         setGroups(groupData.groups);
         setTeams(teamData.teams);
+        setUsageLimits(usageData);
       } catch (err: unknown) {
         setError(t("fetchError"));
         console.error("Error fetching shares:", err);
@@ -79,6 +88,17 @@ export default function CreateSetlistPage() {
     fetchShares();
   }, [user, t]);
 
+  // createSetlist 버튼 비활성화 조건
+  const isCreateDisabled: boolean = isSetlistCreationDisabled(
+    selectedSongs,
+    usageLimits
+  );
+
+  const isUpgrageDisabled = shouldShowUpgradeButton(
+    isCreateDisabled,
+    usageLimits
+  );
+
   // YouTube URL 선택 핸들러
   const handleUrlSelect = (songId: string, url: string) => {
     setSelectedUrls((prev) => ({ ...prev, [songId]: url }));
@@ -86,6 +106,9 @@ export default function CreateSetlistPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    // 사용량 초과일 경우 콘티 작성 버튼이 동작하지 않도록 한다.
+    if (isUpgrageDisabled) return;
+
     setIsLoading(true);
     if (!title || !date || !description || selectedSongs.length === 0) {
       setError(t("requiredFields"));
@@ -307,6 +330,13 @@ export default function CreateSetlistPage() {
                 </div>
               </div>
             </div>
+            {isCreateDisabled ? (
+              <span className="text-xs mt-4 text-red-600 whitespace-pre-wrap">
+                {t("noMakeSetlist")}
+              </span>
+            ) : (
+              ""
+            )}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -327,6 +357,7 @@ export default function CreateSetlistPage() {
                 !date ||
                 !description ||
                 !selectedGroup ||
+                isUpgrageDisabled ||
                 selectedTeams.length === 0
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
@@ -335,6 +366,17 @@ export default function CreateSetlistPage() {
               {isSubmitting ? t("submitting") : t("createSetlist")}
             </motion.button>
           </form>
+          {isUpgrageDisabled && (
+            <Link href={`/${locale}/plans`}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="cursor-pointer mt-2 w-full bg-green-500 text-white py-3 rounded-xl hover:bg-green-600 transition-colors text-sm"
+              >
+                {t("upgradePlan")}
+              </motion.button>
+            </Link>
+          )}
         </motion.div>
       </div>
     </div>

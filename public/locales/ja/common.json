@@ -681,32 +681,53 @@
     "month": "月",
     "free": {
       "title": "FREE",
-      "description": "最大50名の信徒登録、週2回/月8回のセットリスト、最大50曲の楽譜",
+      "description": "基本機能で始めましょう",
+      "features1": "最大50名の聖徒登録",
+      "features2": "最大週2回 / 月8回のコンテ作成",
+      "features3": "最大50曲の楽譜アップロード",
       "price": "無料",
       "currentPlan": "現在のプラン",
       "select": "選択"
     },
     "smart": {
       "title": "SMART",
-      "description": "最大150名の信徒登録、週10回/月50回のセットリスト、最大200曲の楽譜",
-      "price": "10,000ウォン",
+      "description": "中小規模の教会に最適",
+      "features1": "最大150名の聖徒登録",
+      "features2": "最大週10回 / 月50回のコンテ作成",
+      "features3": "最大200曲の楽譜アップロード",
+      "price": "9,900ウォン",
       "subscribe": "サブスクリプション開始"
     },
     "enterprise": {
       "title": "ENTERPRISE",
-      "description": "無制限の信徒登録、セットリスト、楽譜アップロード",
-      "price": "50,000ウォン",
+      "description": "大規模教会および高度な機能",
+      "features1": "聖徒登録無制限",
+      "features2": "コンテ作成無制限",
+      "features3": "楽譜アップロード無制限",
+      "price": "49,000ウォン",
       "subscribe": "サブスクリプション開始"
     },
     "cancel": {
       "title": "サブスクリプション取消",
-      "confirm": "サブスクリプション取消をしますか? サブスクリプションは{expirationDate}まで有効です。",
+      "confirm": "現在のサブスクリプションは、{expirationDate}まで有効です。 \nサブスクリプション取消をしますか? \n今サブスクリプションを取り消すと残余期間と関係なく直ちにキャンセルされます。",
       "submit": "구サブスクリプション取消",
       "cancel": "キャンセル",
       "processing": "処理中...",
+      "noExpirationDate": "満了日なし",
       "error": {
         "cancelFailed": "サブスクリプション取消に失敗しました"
       }
+    },
+    "currentPlan": "現在のプラン",
+    "expirationDate": "有効期限",
+    "error": {
+      "config": "Stripe設定を読み込めませんでした。",
+      "fetchPlan": "プラン情報を取得できませんでした。",
+      "cancelFailed": "サブスクリプションのキャンセルに失敗しました。",
+      "stripeNotLoaded": "Stripeの初期化に失敗しました。",
+      "alreadySubscribed": "すでにサブスクライブしています。",
+      "payment": "支払い処理中にエラーが発生しました。",
+      "clientSecret": "支払いセッションを作成できませんでした。"
     },
     "cancelSubscription": "サブスクリプション取消"
   },

@@ -12,7 +12,7 @@ import { useRouter } from "@/utils/useRouter";
 interface Subscription {
   plan: "FREE" | "SMART" | "ENTERPRISE";
   status: "ACTIVE" | "CANCELED" | "PAST_DUE" | "UNPAID";
-  currentPeriodEnd?: number; // Stripe의 current_period_end (Unix timestamp)
+  currentPeriodEnd?: number;
   stripeSubscriptionId: string | null;
 }
 
@@ -31,7 +31,6 @@ export default function PlansPage() {
   const [isSubscriptionId, setIsSubscriptionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Stripe 초기화
   const initializeStripe = useCallback(async () => {
     try {
       const response = await fetch("/api/secure/stripe/config", {
@@ -50,7 +49,7 @@ export default function PlansPage() {
   }, [t]);
 
   useEffect(() => {
-    if (isLoading || !user) return;
+    if (isAuthLoading || !user) return;
 
     initializeStripe();
 
@@ -59,9 +58,7 @@ export default function PlansPage() {
         const response = await fetch("/api/secure/subscriptions", {
           method: "GET",
           credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         });
         if (!response.ok) {
           throw new Error("Failed to fetch subscription");
@@ -79,7 +76,7 @@ export default function PlansPage() {
     };
 
     fetchPlan();
-  }, [user, isLoading, initializeStripe, t]);
+  }, [user, isAuthLoading, initializeStripe, t]);
 
   const handleCancelClick = () => {
     setIsModalOpen(true);
@@ -87,6 +84,7 @@ export default function PlansPage() {
 
   const handleConfirmCancel = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch("/api/secure/subscriptions", {
         method: "DELETE",
         credentials: "include",
@@ -97,14 +95,16 @@ export default function PlansPage() {
       }
       setCurrentPlan("FREE");
       setCurrentPeriodEnd(null);
+      setIsSubscriptionId(null);
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error canceling subscription:", error);
       setError(t("error.cancelFailed"));
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // 구독 상태 확인
   const checkSubscription = useCallback(async () => {
     try {
       const response = await fetch("/api/secure/subscriptions", {
@@ -119,9 +119,8 @@ export default function PlansPage() {
       console.error("Client - Failed to check subscription:", error);
       return false;
     }
-  }, []);
+  }, [isSubscriptionId]);
 
-  // 구독 생성 및 invoiceUrl 가져오기
   const handleSubmit = async (plan: "SMART" | "ENTERPRISE") => {
     if (!stripePromise || !user || user.role !== "SUPER_ADMIN") {
       setError(t("error.stripeNotLoaded"));
@@ -136,26 +135,22 @@ export default function PlansPage() {
 
     try {
       setIsLoading(true);
-      // 1. 구독 상태 확인
       const isSubscribed = await checkSubscription();
       if (isSubscribed) {
         setError(t("error.alreadySubscribed"));
         return;
       }
 
-      // 2. 구독 생성 요청
       const response = await fetch("/api/secure/subscriptions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          plan,
-        }),
+        body: JSON.stringify({ plan }),
         credentials: "include",
       });
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error("API 호출 에러");
+        throw new Error(data.error || t("error.payment"));
       }
 
       if (data.url) {
@@ -171,23 +166,21 @@ export default function PlansPage() {
     }
   };
 
-  if (isAuthLoading || planLoading || !user || isLoading) {
+  if (isAuthLoading || planLoading || !user) {
     return <Loading />;
   }
 
   const isSuperAdmin = user.role === "SUPER_ADMIN";
 
-  // 플랜 등급 정의
   const planHierarchy: { [key: string]: number } = {
     FREE: 0,
     SMART: 1,
     ENTERPRISE: 2,
   };
 
-  // 구독 만료일 포맷팅
   const formatExpirationDate = (timestamp: number | null): string => {
     if (!timestamp) return t("cancel.noExpirationDate");
-    const date = new Date(timestamp * 1000); // Unix timestamp to Date
+    const date = new Date(timestamp * 1000);
     return date.toLocaleDateString(locale, {
       year: "numeric",
       month: "long",
@@ -196,23 +189,39 @@ export default function PlansPage() {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-white to-gray-100">
-      <div className="max-w-5xl mx-auto">
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="text-3xl font-semibold text-gray-900 mb-8 text-center"
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="text-center mb-12"
         >
-          {t("title")}
-        </motion.h1>
-        {error && <div className="text-red-600 mb-6 text-center">{error}</div>}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
+            {t("title")}
+          </h1>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-4 text-red-600 bg-red-50 p-3 rounded-lg max-w-md mx-auto"
+            >
+              {error}
+            </motion.div>
+          )}
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <PlanCard
             title={t("free.title")}
             description={t("free.description")}
             price={t("free.price")}
-            month={""}
+            month=""
+            features={[
+              t("free.features1"),
+              t("free.features2"),
+              t("free.features3"),
+            ]}
             buttonText={
               currentPlan === "FREE" ? t("free.currentPlan") : t("free.select")
             }
@@ -220,17 +229,23 @@ export default function PlansPage() {
               !isSuperAdmin ||
               planHierarchy[currentPlan] > planHierarchy["FREE"]
             }
-            href="#"
             isSuperAdmin={isSuperAdmin}
+            currentPlan={currentPlan}
             isCurrentPlan={currentPlan === "FREE"}
             onCancel={handleCancelClick}
             onSubscribe={() => {}}
+            expirationDate={formatExpirationDate(currentPeriodEnd)}
           />
           <PlanCard
             title={t("smart.title")}
             description={t("smart.description")}
             price={t("smart.price")}
             month={t("month")}
+            features={[
+              t("smart.features1"),
+              t("smart.features2"),
+              t("smart.features3"),
+            ]}
             buttonText={
               currentPlan === "SMART" && isSuperAdmin && isSubscriptionId
                 ? t("cancelSubscription")
@@ -242,17 +257,24 @@ export default function PlansPage() {
               !isSuperAdmin ||
               planHierarchy[currentPlan] > planHierarchy["SMART"]
             }
-            href="#"
             isSuperAdmin={isSuperAdmin}
+            currentPlan={currentPlan}
             isCurrentPlan={currentPlan === "SMART"}
             onCancel={handleCancelClick}
             onSubscribe={() => handleSubmit("SMART")}
+            expirationDate={formatExpirationDate(currentPeriodEnd)}
+            isLoading={isLoading && currentPlan === "SMART"}
           />
           <PlanCard
             title={t("enterprise.title")}
             description={t("enterprise.description")}
             price={t("enterprise.price")}
             month={t("month")}
+            features={[
+              t("enterprise.features1"),
+              t("enterprise.features2"),
+              t("enterprise.features3"),
+            ]}
             buttonText={
               currentPlan === "ENTERPRISE" && isSuperAdmin && isSubscriptionId
                 ? t("cancelSubscription")
@@ -260,27 +282,31 @@ export default function PlansPage() {
                   ? t("enterprise.subscribe")
                   : t("superAdminRequired")
             }
-            disabled={false}
-            href="#"
+            disabled={!isSuperAdmin}
             isSuperAdmin={isSuperAdmin}
+            currentPlan={currentPlan}
             isCurrentPlan={currentPlan === "ENTERPRISE"}
             onCancel={handleCancelClick}
             onSubscribe={() => handleSubmit("ENTERPRISE")}
+            expirationDate={formatExpirationDate(currentPeriodEnd)}
+            isLoading={isLoading && currentPlan === "ENTERPRISE"}
           />
         </div>
+
+        {isModalOpen && (
+          <Modal
+            title={t("cancel.title")}
+            message={t("cancel.confirm", {
+              expirationDate: formatExpirationDate(currentPeriodEnd),
+            })}
+            onConfirm={handleConfirmCancel}
+            onClose={() => setIsModalOpen(false)}
+            confirmText={t("cancel.submit")}
+            cancelText={t("cancel.cancel")}
+            isLoading={isLoading}
+          />
+        )}
       </div>
-      {isModalOpen && (
-        <Modal
-          title={t("cancel.title")}
-          message={t("cancel.confirm", {
-            expirationDate: formatExpirationDate(currentPeriodEnd),
-          })}
-          onConfirm={handleConfirmCancel}
-          onClose={() => setIsModalOpen(false)}
-          confirmText={t("cancel.submit")}
-          cancelText={t("cancel.cancel")}
-        />
-      )}
     </div>
   );
 }
@@ -290,13 +316,16 @@ interface PlanCardProps {
   description: string;
   price: string;
   month: string;
+  features: string[];
   buttonText: string;
   disabled?: boolean;
-  href: string;
   isSuperAdmin: boolean;
+  currentPlan: string;
   isCurrentPlan: boolean;
   onCancel: () => void;
   onSubscribe: () => void;
+  expirationDate: string;
+  isLoading?: boolean;
 }
 
 function PlanCard({
@@ -304,53 +333,141 @@ function PlanCard({
   description,
   price,
   month,
+  features,
   buttonText,
   disabled,
   isSuperAdmin,
+  currentPlan,
   isCurrentPlan,
   onCancel,
   onSubscribe,
+  expirationDate,
+  isLoading,
 }: PlanCardProps) {
   const t = useTranslations("plans");
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-      className="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:scale-105 transition-transform duration-200"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{
+        scale: isCurrentPlan ? 1 : 1.03,
+        transition: { duration: 0.2 },
+      }}
+      className={`relative bg-white rounded-2xl shadow-lg p-6 border transition-all duration-300 ${
+        isCurrentPlan
+          ? "border-blue-500 ring-2 ring-blue-200"
+          : "border-gray-200"
+      }`}
     >
-      <h2 className="text-xl font-medium text-gray-900">{title}</h2>
-      <p className="text-gray-500 text-base mt-2 leading-relaxed">
-        {description}
-      </p>
-      <p className="text-gray-900 text-2xl font-semibold mt-4">
-        <span className="text-gray-600 text-lg mr-1">{month}</span>
-        {price}
-      </p>
+      {isCurrentPlan && (
+        <span className="absolute top-3 right-3 bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded-full">
+          {t("currentPlan")}
+        </span>
+      )}
+      <h2 className="text-2xl font-semibold text-gray-900">{title}</h2>
+      <p className="text-gray-600 text-sm mt-2">{description}</p>
+      <div className="mt-4 flex items-baseline">
+        <span className="text-3xl font-bold text-blue-700">{price}</span>
+        {month && <span className="ml-2 text-sm text-gray-500">{month}</span>}
+      </div>
+      <ul className="mt-4 space-y-2">
+        {features.map((feature, index) => (
+          <li key={index} className="flex items-center text-gray-600 text-sm">
+            <svg
+              className="h-5 w-5 text-green-500 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            {feature}
+          </li>
+        ))}
+      </ul>
+      {currentPlan !== "FREE" && (
+        <p className="mt-4 text-sm text-gray-500">
+          {t("expirationDate")}: {expirationDate}
+        </p>
+      )}
       {isSuperAdmin ? (
         isCurrentPlan && buttonText === t("cancelSubscription") ? (
           <button
             onClick={onCancel}
-            className="mt-6 w-full text-center py-2.5 px-4 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition-colors duration-200 cursor-pointer"
+            disabled={isLoading}
+            className={`mt-6 w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center ${
+              isLoading
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-red-500 text-white hover:bg-red-600"
+            }`}
+            aria-label={t("cancelSubscription")}
           >
+            {isLoading && (
+              <svg
+                className="animate-spin h-5 w-5 mr-2 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            )}
             {buttonText}
           </button>
         ) : (
           <button
             onClick={onSubscribe}
-            disabled={disabled}
-            className={`mt-6 w-full text-center py-2.5 px-4 rounded-lg font-medium transition-colors duration-200 cursor-pointer ${
-              disabled
-                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                : "bg-blue-500 text-white hover:bg-blue-600"
+            disabled={disabled || isLoading}
+            className={`mt-6 w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center ${
+              disabled || isLoading
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700"
             }`}
+            aria-label={buttonText}
           >
+            {isLoading && (
+              <svg
+                className="animate-spin h-5 w-5 mr-2 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            )}
             {buttonText}
           </button>
         )
       ) : (
-        <p className="mt-6 text-red-500 text-base font-medium">
+        <p className="mt-6 text-red-500 text-sm font-medium text-center">
           {t("superAdminRequired")}
         </p>
       )}
@@ -365,6 +482,7 @@ interface ModalProps {
   onClose: () => void;
   confirmText: string;
   cancelText: string;
+  isLoading: boolean;
 }
 
 function Modal({
@@ -374,35 +492,66 @@ function Modal({
   onClose,
   confirmText,
   cancelText,
+  isLoading,
 }: ModalProps) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
     >
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.2 }}
-        className="bg-white rounded-xl p-6 max-w-sm w-full border border-gray-100 shadow-md"
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl"
       >
-        <h2 className="text-xl font-medium text-gray-900 mb-3">{title}</h2>
-        <p className="text-gray-600 text-base mb-6 leading-relaxed">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">{title}</h2>
+        <p className="text-gray-600 text-sm mb-6 whitespace-pre-wrap">
           {message}
         </p>
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="py-2 px-4 rounded-lg bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
+            disabled={isLoading}
+            className="py-2 px-4 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors duration-200 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+            aria-label={cancelText}
           >
             {cancelText}
           </button>
           <button
             onClick={onConfirm}
-            className="py-2 px-4 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition-colors duration-200 cursor-pointer"
+            disabled={isLoading}
+            className={`py-2 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center ${
+              isLoading
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-red-500 text-white hover:bg-red-600"
+            }`}
+            aria-label={confirmText}
           >
+            {isLoading && (
+              <svg
+                className="animate-spin h-5 w-5 mr-2 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            )}
             {confirmText}
           </button>
         </div>

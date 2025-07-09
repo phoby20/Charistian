@@ -691,32 +691,53 @@
     "month": "월",
     "free": {
       "title": "FREE",
-      "description": "최대 50명 성도 등록, 주 2회/월 8회 세트리스트, 최대 50곡 악보",
+      "description": "기본 기능으로 시작하세요",
+      "features1": "최대 50명 성도 등록",
+      "features2": "최대 주 2회 / 월 8회 콘티작성",
+      "features3": "최대 50곡 악보",
       "price": "무료",
       "currentPlan": "현재 플랜",
       "select": "선택"
     },
     "smart": {
       "title": "SMART",
-      "description": "최대 150명 성도 등록, 주 10회/월 50회 세트리스트, 최대 200곡 악보",
-      "price": "10,000원",
+      "description": "중소규모 교회에 적합",
+      "features1": "최대 150명 성도 등록",
+      "features2": "최대 주 10회 / 월 50회 콘티작성",
+      "features3": "최대 200곡 악보",
+      "price": "9,900원",
       "subscribe": "구독 시작"
     },
     "enterprise": {
       "title": "ENTERPRISE",
-      "description": "무제한 성도 등록, 세트리스트, 악보 업로드",
-      "price": "50,000원",
+      "description": "대규모 교회 및 고급 기능",
+      "features1": "성도 등록 무제한",
+      "features2": "콘티작성 무제한",
+      "features3": "악보 업로드 무제한",
+      "price": "49,000원",
       "subscribe": "구독 시작"
     },
     "cancel": {
       "title": "구독 취소",
-      "confirm": "정말로 구독을 취소하시겠습니까? 현재 구독은 {expirationDate}까지 유효합니다.",
+      "confirm": "현재 구독은 {expirationDate}까지 유효합니다. \n정말로 구독을 취소하시겠습니까? \n지금 구독을 취소하면 잔여기간에 상관없이 즉시 취소가 됩니다.",
       "submit": "구독 취소",
       "cancel": "취소",
       "processing": "처리 중...",
+      "noExpirationDate": "만료일 없음",
       "error": {
         "cancelFailed": "구독 취소에 실패했습니다."
       }
+    },
+    "currentPlan": "현재 플랜",
+    "expirationDate": "만료일",
+    "error": {
+      "config": "Stripe 설정을 불러오지 못했습니다.",
+      "fetchPlan": "플랜 정보를 가져오지 못했습니다.",
+      "cancelFailed": "구독 취소에 실패했습니다.",
+      "stripeNotLoaded": "Stripe 초기화에 실패했습니다.",
+      "alreadySubscribed": "이미 구독 중입니다.",
+      "payment": "결제 처리 중 오류가 발생했습니다.",
+      "clientSecret": "결제 세션을 생성하지 못했습니다."
     },
     "cancelSubscription": "구독 취소"
   },

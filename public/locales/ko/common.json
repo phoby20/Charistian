@@ -782,7 +782,8 @@
     "processing": "처리 중...",
     "submit": "{plan} 플랜 결제",
     "goToManage": "구독 관리 페이지로 이동",
-    "successMessage": "구독이 성공적으로 완료되었습니다. \n이제 새로운 플랜의 모든 기능을 이용할 수 있습니다!",
+    "successMessage": "구독이 성공적으로 완료되었습니다. \n이제 새로운 플랜의 기능을 이용할 수 있습니다!",
+    "successTitle": "결제 완료",
     "goToDashboard": "대시보드로 이동"
   }
 }

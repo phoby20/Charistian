@@ -198,9 +198,9 @@ export default function PlansPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="text-center mb-12"
+          className="mb-12"
         >
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
             {t("title")}
           </h1>
           {error && (

@@ -6,6 +6,8 @@ import { mergeAndUploadPdf } from "@/utils/mergeAndUploadPdf";
 import { sendSetlistEmail } from "@/utils/sendSetlistEmail";
 import { handleApiError } from "@/utils/handleApiError";
 import { SetlistResponse } from "@/types/setList";
+import { subDays } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 interface CreateSetlistRequest {
   title: string;
@@ -164,6 +166,7 @@ export async function POST(
 
     const setlist = await prisma.$transaction(
       async (tx) => {
+        // 1. Setlist 생성
         const newSetlist = await tx.setlist.create({
           data: {
             title,
@@ -187,6 +190,60 @@ export async function POST(
             },
           },
         });
+
+        // 2. UsageLimit 업데이트 (KST 기준)
+        const nowKstString = formatInTimeZone(
+          new Date(),
+          "Asia/Seoul",
+          "yyyy-MM-dd'T'HH:mm:ssXXX"
+        );
+        const now = new Date(nowKstString);
+        const oneWeekAgo = subDays(now, 7);
+        const oneMonthAgo = subDays(now, 30);
+
+        // 주간 및 월간 Setlist 수 계산
+        const [weeklyCount, monthlyCount] = await Promise.all([
+          tx.setlist.count({
+            where: {
+              churchId: payload.churchId,
+              createdAt: { gte: oneWeekAgo },
+            },
+          }),
+          tx.setlist.count({
+            where: {
+              churchId: payload.churchId,
+              createdAt: { gte: oneMonthAgo },
+            },
+          }),
+        ]);
+
+        // UsageLimit 레코드 조회 또는 생성
+        const usageLimit = await tx.usageLimit.findFirst({
+          where: { churchId: payload.churchId },
+        });
+
+        if (usageLimit) {
+          await tx.usageLimit.update({
+            where: { id: usageLimit.id },
+            data: {
+              weeklySetlistCount: weeklyCount,
+              monthlySetlistCount: monthlyCount,
+              updatedAt: now,
+            },
+          });
+        } else {
+          await tx.usageLimit.create({
+            data: {
+              churchId: payload.churchId ?? "",
+              weeklySetlistCount: weeklyCount,
+              monthlySetlistCount: monthlyCount,
+              userCount: 0,
+              scoreCount: 0,
+              createdAt: now,
+              updatedAt: now,
+            },
+          });
+        }
 
         return newSetlist;
       },

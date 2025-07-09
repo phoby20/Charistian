@@ -1,3 +1,4 @@
+// src/components/scores/ScoreList.tsx
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -13,8 +14,21 @@ import PaginationControls from "@/components/scores/PaginationControls";
 import SelectedSongList from "@/components/scores/SelectedSongFlotingList";
 import { Score } from "@/types/score";
 
+interface UsageLimits {
+  plan: string;
+  maxUsers: number;
+  remainingUsers: number;
+  weeklySetlists: number;
+  remainingWeeklySetlists: number;
+  monthlySetlists: number;
+  remainingMonthlySetlists: number;
+  maxScores: number;
+  remainingScores: number;
+}
+
 export default function ScoreList() {
   const [scores, setScores] = useState<Score[]>([]);
+  const [usageLimits, setUsageLimits] = useState<UsageLimits | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
@@ -52,6 +66,44 @@ export default function ScoreList() {
       JSON.stringify(selectedSongList)
     );
   }, [selectedSongList]);
+
+  // 악보 및 사용량 데이터 가져오기
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // 악보 데이터 가져오기
+        const scoresResponse = await fetch("/api/scores");
+        if (!scoresResponse.ok) {
+          const errorData: ApiErrorResponse = await scoresResponse.json();
+          throw new Error(errorData.error || t("noScores"));
+        }
+        const scoresData = await scoresResponse.json();
+        setScores(scoresData);
+
+        // 사용량 데이터 가져오기
+        const usageResponse = await fetch("/api/secure/usage-limits");
+        if (!usageResponse.ok) {
+          const errorData: ApiErrorResponse = await usageResponse.json();
+          throw new Error(errorData.error || t("usageFetchError"));
+        }
+        const usageData = await usageResponse.json();
+        setUsageLimits(usageData);
+
+        setError(null);
+      } catch (error: unknown) {
+        let errorMessage = t("noScores");
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+        setError(errorMessage);
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [locale, t]);
 
   // 곡 추가 핸들러
   const handleAddSong = (score: SelectedSong) => {
@@ -201,32 +253,6 @@ export default function ScoreList() {
     setCurrentPage(1);
   };
 
-  useEffect(() => {
-    const fetchScores = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch("/api/scores");
-        if (!response.ok) {
-          const errorData: ApiErrorResponse = await response.json();
-          throw new Error(errorData.error || t("noScores"));
-        }
-        const data = await response.json();
-        setScores(data);
-        setError(null);
-      } catch (error: unknown) {
-        let errorMessage = t("noScores");
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-        setError(errorMessage);
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchScores();
-  }, [locale, t]);
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4">
       {isLoading && <Loading />}
@@ -332,6 +358,7 @@ export default function ScoreList() {
               locale={locale}
               isOpen={isSongListOpen}
               toggleOpen={() => setIsSongListOpen(!isSongListOpen)}
+              usageLimits={usageLimits}
             />
           </div>
         </div>

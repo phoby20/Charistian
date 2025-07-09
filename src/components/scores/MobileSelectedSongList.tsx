@@ -1,9 +1,26 @@
+// src/components/scores/MobileSelectedSongList.tsx
 "use client";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getDisplayTitle } from "@/utils/getDisplayTitle";
+import {
+  isSetlistCreationDisabled,
+  shouldShowUpgradeButton,
+} from "@/utils/setlistUtils";
+
+interface UsageLimits {
+  plan: string;
+  maxUsers: number;
+  remainingUsers: number;
+  weeklySetlists: number;
+  remainingWeeklySetlists: number;
+  monthlySetlists: number;
+  remainingMonthlySetlists: number;
+  maxScores: number;
+  remainingScores: number;
+}
 
 interface MobileSelectedSongListProps {
   selectedSongList: {
@@ -16,6 +33,7 @@ interface MobileSelectedSongListProps {
   locale: string;
   isOpen: boolean;
   toggleOpen: () => void;
+  usageLimits: UsageLimits | null;
 }
 
 const MobileSelectedSongList = ({
@@ -24,8 +42,15 @@ const MobileSelectedSongList = ({
   locale,
   isOpen,
   toggleOpen,
+  usageLimits,
 }: MobileSelectedSongListProps) => {
   const t = useTranslations("Score");
+
+  // createSetlist 버튼 비활성화 조건
+  const isCreateDisabled: boolean = isSetlistCreationDisabled(
+    selectedSongList,
+    usageLimits
+  );
 
   return (
     <div className="relative">
@@ -61,11 +86,9 @@ const MobileSelectedSongList = ({
             ) : (
               <ul className="space-y-2">
                 {selectedSongList.map((song, index) => {
-                  // 동일 id의 추가 횟수 계산
                   const count = selectedSongList
                     .slice(0, index + 1)
                     .filter((s) => s.id === song.id).length;
-                  // locale에 따라 표시할 제목 선택
                   const displayTitle = getDisplayTitle(
                     song.title,
                     song.titleEn,
@@ -99,14 +122,25 @@ const MobileSelectedSongList = ({
             )}
             <Link href={`/${locale}/setlists/create`}>
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 text-sm"
-                disabled={selectedSongList.length === 0}
+                whileHover={{ scale: isCreateDisabled ? 1 : 1.05 }}
+                whileTap={{ scale: isCreateDisabled ? 1 : 0.95 }}
+                className={`mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 text-sm ${isCreateDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+                disabled={isCreateDisabled}
               >
                 {t("createSetlist")}
               </motion.button>
             </Link>
+            {shouldShowUpgradeButton(isCreateDisabled, usageLimits) && (
+              <Link href={`/${locale}/plans`}>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="cursor-pointer mt-2 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors text-sm"
+                >
+                  {t("upgradePlan")}
+                </motion.button>
+              </Link>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

@@ -548,7 +548,10 @@
     "youtube": "YouTube",
     "play": "재생",
     "pause": "일시정지",
-    "seek": "재생 시간 이동"
+    "seek": "재생 시간 이동",
+    "usageFetchError": "사용량 정보를 가져오지 못했습니다.",
+    "upgradePlan": "플랜 업그레이드",
+    "noMakeSetlist": "주/월간 사용량 초과로 콘티를 작성할 수 없습니다. 플랜을 업그레이드하세요"
   },
   "Setlist": {
     "title": "콘티 제목",

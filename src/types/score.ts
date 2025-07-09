@@ -182,3 +182,15 @@ export interface SetlistResponse {
   }[];
   shares: Share[];
 }
+
+export interface UsageLimits {
+  plan: string;
+  maxUsers: number;
+  remainingUsers: number;
+  weeklySetlists: number;
+  remainingWeeklySetlists: number;
+  monthlySetlists: number;
+  remainingMonthlySetlists: number;
+  maxScores: number;
+  remainingScores: number;
+}

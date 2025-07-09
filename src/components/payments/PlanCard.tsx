@@ -127,7 +127,7 @@ export default function PlanCard({
           <button
             onClick={onSubscribe}
             disabled={disabled || isLoading}
-            className={`cursor-pointer mt-6 w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center ${
+            className={`mt-6 w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center ${
               disabled || isLoading
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700"

@@ -241,6 +241,16 @@ export default function ScoreList() {
     setCurrentPage(1);
   };
 
+  // 업로드 버튼 비활성화 여부 확인
+  const isUploadButtonDisabled = (usageLimits: UsageLimits | null): boolean => {
+    if (usageLimits?.plan === "ENTERPRISE") {
+      return false; // ENTERPRISE 플랜은 항상 활성화
+    }
+    return (
+      !!usageLimits && usageLimits.remainingScores >= usageLimits.maxScores
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4">
       {isLoading && <Loading />}
@@ -257,16 +267,38 @@ export default function ScoreList() {
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
                 {t("title")}
               </h1>
-              <Link href={`/${locale}/scores/upload`}>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 px-4 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+              <div className="flex flex-col justify-end text-right items-end-safe">
+                <Link
+                  href={
+                    isUploadButtonDisabled(usageLimits)
+                      ? "#"
+                      : `/${locale}/scores/upload`
+                  }
                 >
-                  <Upload className="w-5 h-5" />
-                  <span>{t("uploadScore")}</span>
-                </motion.button>
-              </Link>
+                  <motion.button
+                    whileHover={{
+                      scale: isUploadButtonDisabled(usageLimits) ? 1 : 1.05,
+                    }}
+                    whileTap={{
+                      scale: isUploadButtonDisabled(usageLimits) ? 1 : 0.95,
+                    }}
+                    disabled={isUploadButtonDisabled(usageLimits)}
+                    className={`flex items-center space-x-2 py-2 px-4 rounded-lg shadow-md text-white font-semibold text-sm transition-all duration-300 ${
+                      isUploadButtonDisabled(usageLimits)
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 cursor-pointer"
+                    }`}
+                  >
+                    <Upload className="w-5 h-5" />
+                    <span>{t("uploadScore")}</span>
+                  </motion.button>
+                </Link>
+                {isUploadButtonDisabled(usageLimits) ? (
+                  <span className="text-xs text-red-500 whitespace-pre-wrap mt-1">
+                    {t("noUploadScore")}
+                  </span>
+                ) : null}
+              </div>
             </motion.div>
 
             {/* 검색 및 필터링 */}

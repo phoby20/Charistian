@@ -14,6 +14,27 @@ interface JwtPayload {
   role: string;
 }
 
+const LIMITS = {
+  FREE: {
+    maxUsers: 50,
+    weeklySetlists: 2,
+    monthlySetlists: 8,
+    maxScores: 50,
+  },
+  SMART: {
+    maxUsers: 150,
+    weeklySetlists: 10,
+    monthlySetlists: 50,
+    maxScores: 200,
+  },
+  ENTERPRISE: {
+    maxUsers: Infinity,
+    weeklySetlists: Infinity,
+    monthlySetlists: Infinity,
+    maxScores: Infinity,
+  },
+} as const;
+
 export async function GET() {
   try {
     const cookieStore = await cookies();
@@ -51,26 +72,6 @@ export async function GET() {
     });
 
     const plan = subscription?.plan || "FREE";
-    const limits = {
-      FREE: {
-        maxUsers: 50,
-        weeklySetlists: 2,
-        monthlySetlists: 8,
-        maxScores: 50,
-      },
-      SMART: {
-        maxUsers: 150,
-        weeklySetlists: 10,
-        monthlySetlists: 50,
-        maxScores: 200,
-      },
-      ENTERPRISE: {
-        maxUsers: Infinity,
-        weeklySetlists: Infinity,
-        monthlySetlists: Infinity,
-        maxScores: Infinity,
-      },
-    };
 
     // 주간/월간 리셋
     const now = new Date();
@@ -103,13 +104,13 @@ export async function GET() {
 
     return NextResponse.json({
       plan,
-      maxUsers: limits[plan].maxUsers,
+      maxUsers: LIMITS[plan].maxUsers,
       remainingUsers: currentChurchUsers.length,
-      weeklySetlists: limits[plan].weeklySetlists,
+      weeklySetlists: LIMITS[plan].weeklySetlists,
       remainingWeeklySetlists: currentUsage?.weeklySetlistCount || 0,
-      monthlySetlists: limits[plan].monthlySetlists,
+      monthlySetlists: LIMITS[plan].monthlySetlists,
       remainingMonthlySetlists: currentUsage?.monthlySetlistCount || 0,
-      maxScores: limits[plan].maxScores,
+      maxScores: LIMITS[plan].maxScores,
       remainingScores: currentScores.length,
     });
   } catch (error) {
@@ -141,27 +142,6 @@ export async function POST(req: NextRequest) {
     });
     const plan = subscription?.plan || "FREE";
 
-    const limits = {
-      FREE: {
-        maxUsers: 50,
-        weeklySetlists: 2,
-        monthlySetlists: 8,
-        maxScores: 50,
-      },
-      SMART: {
-        maxUsers: 150,
-        weeklySetlists: 10,
-        monthlySetlists: 50,
-        maxScores: 200,
-      },
-      ENTERPRISE: {
-        maxUsers: Infinity,
-        weeklySetlists: Infinity,
-        monthlySetlists: Infinity,
-        maxScores: Infinity,
-      },
-    };
-
     const usage = await prisma.usageLimit.findFirst({
       where: { churchId: user.churchId },
     });
@@ -172,7 +152,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (type === "USER" && usage.userCount >= limits[plan].maxUsers) {
+    if (type === "USER" && usage.userCount >= LIMITS[plan].maxUsers) {
       return NextResponse.json(
         { error: "성도 등록 한도를 초과했습니다." },
         { status: 403 }
@@ -180,15 +160,15 @@ export async function POST(req: NextRequest) {
     }
     if (
       type === "SETLIST" &&
-      (usage.weeklySetlistCount >= limits[plan].weeklySetlists ||
-        usage.monthlySetlistCount >= limits[plan].monthlySetlists)
+      (usage.weeklySetlistCount >= LIMITS[plan].weeklySetlists ||
+        usage.monthlySetlistCount >= LIMITS[plan].monthlySetlists)
     ) {
       return NextResponse.json(
         { error: "세트리스트 생성 한도를 초과했습니다." },
         { status: 403 }
       );
     }
-    if (type === "SCORE" && usage.scoreCount >= limits[plan].maxScores) {
+    if (type === "SCORE" && usage.scoreCount >= LIMITS[plan].maxScores) {
       return NextResponse.json(
         { error: "악보 업로드 한도를 초과했습니다." },
         { status: 403 }

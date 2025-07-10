@@ -1,3 +1,5 @@
+import { Plan } from "@prisma/client";
+
 // src/types/score.ts
 export interface ScoreComment {
   id: string;
@@ -184,7 +186,7 @@ export interface SetlistResponse {
 }
 
 export interface UsageLimits {
-  plan: string;
+  plan: Plan;
   maxUsers: number;
   remainingUsers: number;
   weeklySetlists: number;

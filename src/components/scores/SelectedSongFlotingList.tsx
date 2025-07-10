@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import MobileSelectedSongList from "./MobileSelectedSongList";
 import DesktopSelectedSongList from "./DesktopSelectedSongList";
 import { SelectedSong } from "@/types/score";
+import { Plan } from "@prisma/client";
 
 interface UsageLimits {
-  plan: string;
+  plan: Plan;
   maxUsers: number;
   remainingUsers: number;
   weeklySetlists: number;

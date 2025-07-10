@@ -20,7 +20,6 @@ export async function GET() {
     const token = cookieStore.get("token")?.value;
 
     if (!token) {
-      console.error("No token found in cookies for /api/positions/[id]");
       return NextResponse.json({ error: "No token provided" }, { status: 401 });
     }
 

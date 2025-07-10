@@ -251,32 +251,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // UsageLimit 초기화
-    const existingUsageLimit = await prisma.usageLimit.findFirst({
-      where: { churchId: payload.churchId },
-    });
-    if (existingUsageLimit) {
-      await prisma.usageLimit.update({
-        where: { id: existingUsageLimit.id },
-        data: {
-          userCount: 0,
-          weeklySetlistCount: 0,
-          monthlySetlistCount: 0,
-          scoreCount: 0,
-        },
-      });
-    } else {
-      await prisma.usageLimit.create({
-        data: {
-          churchId: church.id,
-          userCount: 0,
-          weeklySetlistCount: 0,
-          monthlySetlistCount: 0,
-          scoreCount: 0,
-        },
-      });
-    }
-
     return NextResponse.json({
       url: sessionCheckout.url,
     });

@@ -89,7 +89,7 @@ const DesktopSelectedSongList = ({
             })}
           </ul>
         )}
-        {isCreateDisabled ? (
+        {shouldShowUpgradeButton(isCreateDisabled, usageLimits) ? (
           <span className="text-xs mt-4 text-red-600 whitespace-pre-wrap">
             {t("noMakeSetlist")}
           </span>

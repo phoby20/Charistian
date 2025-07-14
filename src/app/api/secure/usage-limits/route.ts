@@ -16,7 +16,7 @@ interface JwtPayload {
 
 const LIMITS = {
   FREE: {
-    maxUsers: 50,
+    maxUsers: 10,
     weeklySetlists: 2,
     monthlySetlists: 8,
     maxScores: 50,

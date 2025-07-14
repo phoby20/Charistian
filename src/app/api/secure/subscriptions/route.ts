@@ -62,7 +62,7 @@ export async function GET() {
     }
 
     const subscription = await prisma.subscription.findFirst({
-      where: { churchId: payload.churchId },
+      where: { churchId: payload.churchId, status: "ACTIVE" },
       orderBy: { updatedAt: "desc" }, // 최신 데이터 보장
     });
 

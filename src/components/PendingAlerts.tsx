@@ -27,7 +27,7 @@ export default function PendingAlerts({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-md cursor-pointer hover:bg-yellow-200 transition-colors"
+          className="mb-6 p-4 bg-yellow-400 text-yellow-900 rounded-md cursor-pointer hover:bg-yellow-600 transition-colors"
           onClick={() => router.push(`/pending-users`)}
           role="button"
           aria-label={t("pendingUsersWarning")}

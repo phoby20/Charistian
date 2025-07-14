@@ -67,7 +67,6 @@ async function seedChurch(
       region: churchData.region,
       country: churchData.country,
       phone: churchData.phone,
-      plan: churchData.plan,
       state: churchData.state,
     },
   });
@@ -144,11 +143,11 @@ async function seedChurch(
                 church: { connect: { id: church.id } },
               }))
             : districtGroupNames.includes(name)
-            ? churchData.districtSubGroups.map((subGroupName) => ({
-                name: subGroupName,
-                church: { connect: { id: church.id } },
-              }))
-            : [];
+              ? churchData.districtSubGroups.map((subGroupName) => ({
+                  name: subGroupName,
+                  church: { connect: { id: church.id } },
+                }))
+              : [];
 
           return {
             name,

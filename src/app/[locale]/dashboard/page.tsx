@@ -227,6 +227,12 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
+        <PendingAlerts
+          user={user}
+          pendingUsers={pendingUsers}
+          pendingChurches={pendingChurches}
+        />
+
         <UsageLimitCard user={user} usageLimit={usageLimit} />
 
         <MobileFilterDropdowns
@@ -257,12 +263,6 @@ export default function DashboardPage() {
           setSelectedGroups={setSelectedGroups}
           setSelectedSubGroups={setSelectedSubGroups}
           setSelectedTeams={setSelectedTeams}
-        />
-
-        <PendingAlerts
-          user={user}
-          pendingUsers={pendingUsers}
-          pendingChurches={pendingChurches}
         />
 
         <div className="grid grid-cols-1 gap-6">

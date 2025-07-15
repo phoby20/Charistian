@@ -8,7 +8,7 @@ import { useRouter } from "@/utils/useRouter";
 import Link from "next/link";
 
 export default function Footer() {
-  const t = useTranslations("Landing");
+  const t = useTranslations("footer");
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -57,17 +57,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h4 className="text-lg font-semibold mb-4">{t("brandName")}</h4>
-            <p className="text-gray-400">{t("footer.description")}</p>
+            <p className="text-gray-400">{t("description")}</p>
           </div>
           <div>
-            <h4 className="text-lg font-semibold mb-4">{t("footer.links")}</h4>
+            <h4 className="text-lg font-semibold mb-4">{t("links")}</h4>
 
             <div className="mt-4">
               <Link
                 href={`/${locale}/specified-commercial-transaction`}
                 className="text-gray-400 hover:text-white font-medium"
               >
-                {t("footer.specifiedCommercialTransaction") ||
+                {t("specifiedCommercialTransaction") ||
                   "特定商取引法に基づく表記"}
               </Link>
             </div>
@@ -76,7 +76,7 @@ export default function Footer() {
                 href={`/${locale}/privacy-policy`}
                 className="text-gray-400 hover:text-white font-medium"
               >
-                {t("footer.privacy") || "개인정보처리방침"}
+                {t("privacy") || "개인정보처리방침"}
               </Link>
             </div>
             <div className="mt-4">
@@ -84,19 +84,17 @@ export default function Footer() {
                 href={`/${locale}/terms-of-service`}
                 className="text-gray-400 hover:text-white font-medium"
               >
-                {t("footer.termsOfService") || "이용약관"}
+                {t("termsOfService") || "이용약관"}
               </Link>
             </div>
           </div>
           <div>
-            <h4 className="text-lg font-semibold mb-4">
-              {t("footer.contact")}
-            </h4>
+            <h4 className="text-lg font-semibold mb-4">{t("contact")}</h4>
             <Link
               href={`/${locale}/contact`}
               className="text-gray-400 hover:text-white font-medium"
             >
-              {t("footer.contactLink") || "문의하기"}
+              {t("contactLink") || "문의하기"}
             </Link>
           </div>
           <div>

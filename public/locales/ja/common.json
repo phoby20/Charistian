@@ -294,18 +294,18 @@
       "title": "教会を変革する準備はできていますか？",
       "description": "数千の教会が利用するプラットフォームに参加！",
       "button": "新規教会登録"
-    },
-    "footer": {
-      "description": "教会統合管理運営プラットフォーム。",
-      "links": "リンク",
-      "about": "私たちについて",
-      "contact": "お問い合わせ",
-      "contactLink": "お問い合わせ",
-      "privacy": "プライバシーポリシー",
-      "rights": "すべての権利を保有。",
-      "specifiedCommercialTransaction": "特定商取引法に基づく表記",
-      "termsOfService": "利用規約"
     }
+  },
+  "footer": {
+    "description": "教会統合管理運営プラットフォーム。",
+    "links": "リンク",
+    "about": "私たちについて",
+    "contact": "お問い合わせ",
+    "contactLink": "お問い合わせ",
+    "privacy": "プライバシーポリシー",
+    "rights": "すべての権利を保有。",
+    "specifiedCommercialTransaction": "特定商取引法に基づく表記",
+    "termsOfService": "利用規約"
   },
   "about": {
     "title": "会社情報",

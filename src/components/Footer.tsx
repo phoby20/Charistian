@@ -73,6 +73,14 @@ export default function Footer() {
             </div>
             <div className="mt-4">
               <Link
+                href={`/${locale}/privacy-policy`}
+                className="text-gray-400 hover:text-white font-medium"
+              >
+                {t("footer.privacy") || "개인정보처리방침"}
+              </Link>
+            </div>
+            <div className="mt-4">
+              <Link
                 href={`/${locale}/terms-of-service`}
                 className="text-gray-400 hover:text-white font-medium"
               >

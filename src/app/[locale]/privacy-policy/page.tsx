@@ -1,20 +1,21 @@
-// src/app/[locale]/terms-of-service/page.tsx
+// src/app/[locale]/privacy-policy/page.tsx
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/Button";
 
-export default function TermsOfServicePage() {
-  const t = useTranslations("TermsOfService");
+export default function PrivacyPolicyPage() {
+  const t = useTranslations("PrivacyPolicy");
+  const tLanding = useTranslations("Landing");
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const userType = searchParams.get("type"); // URL 파라미터에서 type 읽기
+  const userType = searchParams.get("type"); // TermsOfService와의 연계 유지
 
   const handleRegister = () => {
     if (!userType || !["church", "member"].includes(userType)) {
-      alert(t("selectUserType") || "사용자 유형을 선택하세요");
+      alert(tLanding("selectUserType") || "사용자 유형을 선택하세요");
       return;
     }
     const path = userType === "church" ? "/church-registration" : "/signup";
@@ -25,74 +26,75 @@ export default function TermsOfServicePage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center tracking-tight">
-          {t("title") || "이용약관"}
+          {t("title") || "개인정보처리방침"}
         </h1>
         <div className="space-y-8 text-gray-600">
-          {/* 제1조: 총칙 */}
+          {/* 제1조: 수집하는 정보 */}
           <section>
             <h2 className="text-xl font-semibold text-gray-800 mb-3">
-              {t("article1.title") || "제1조 (총칙)"}
-            </h2>
-            <ol className="list-decimal pl-5 space-y-2">
-              <li>{t("article1.item1")}</li>
-              <li>{t("article1.item2")}</li>
-              <li>{t("article1.item3")}</li>
-              <li>{t("article1.item4")}</li>
-            </ol>
-          </section>
-
-          {/* 제2조: 사용자 구분 및 권한 */}
-          <section>
-            <h2 className="text-xl font-semibold text-gray-800 mb-3">
-              {t("article2.title") || "제2조 (사용자 구분 및 권한)"}
-            </h2>
-            <ol className="list-decimal pl-5 space-y-2">
-              <li>{t("article2.item1")}</li>
-              <li>{t("article2.item2")}</li>
-              <li>{t("article2.item3")}</li>
-              <li>{t("article2.item4")}</li>
-            </ol>
-          </section>
-
-          {/* 제3조: 서비스 플랜 */}
-          <section>
-            <h2 className="text-xl font-semibold text-gray-800 mb-3">
-              {t("article3.title") || "제3조 (서비스 플랜)"}
+              {t("article1.title") || "제1조 (수집하는 정보)"}
             </h2>
             <ol className="list-decimal pl-5 space-y-2">
               <li>
-                {t("article3.item1")}
+                {t("article1.item1")}
                 <ul className="list-disc pl-5 mt-2">
-                  <li>{t("article3.freePlan")}</li>
-                  <li>{t("article3.smartPlan")}</li>
-                  <li>{t("article3.enterprisePlan")}</li>
+                  <li>{t("article1.subItems.item1")}</li>
+                  <li>{t("article1.subItems.item2")}</li>
+                  <li>{t("article1.subItems.item3")}</li>
+                  <li>{t("article1.subItems.item4")}</li>
                 </ul>
               </li>
+            </ol>
+          </section>
+
+          {/* 제2조: 개인정보의 이용 목적 */}
+          <section>
+            <h2 className="text-xl font-semibold text-gray-800 mb-3">
+              {t("article2.title") || "제2조 (개인정보의 이용 목적)"}
+            </h2>
+            <ol className="list-decimal pl-5 space-y-2">
+              <li>
+                {t("article2.item1")}
+                <ul className="list-disc pl-5 mt-2">
+                  <li>{t("article2.subItems.item1")}</li>
+                  <li>{t("article2.subItems.item2")}</li>
+                  <li>{t("article2.subItems.item3")}</li>
+                  <li>{t("article2.subItems.item4")}</li>
+                </ul>
+              </li>
+            </ol>
+          </section>
+
+          {/* 제3조: 개인정보의 제3자 제공 */}
+          <section>
+            <h2 className="text-xl font-semibold text-gray-800 mb-3">
+              {t("article3.title") || "제3조 (개인정보의 제3자 제공)"}
+            </h2>
+            <ol className="list-decimal pl-5 space-y-2">
+              <li>{t("article3.item1")}</li>
               <li>{t("article3.item2")}</li>
             </ol>
           </section>
 
-          {/* 제4조: 결제 및 구독 */}
+          {/* 제4조: 개인정보의 보호 */}
           <section>
             <h2 className="text-xl font-semibold text-gray-800 mb-3">
-              {t("article4.title") || "제4조 (결제 및 구독)"}
+              {t("article4.title") || "제4조 (개인정보의 보호)"}
             </h2>
             <ol className="list-decimal pl-5 space-y-2">
               <li>{t("article4.item1")}</li>
               <li>{t("article4.item2")}</li>
-              <li>{t("article4.item3")}</li>
             </ol>
           </section>
 
-          {/* 제5조: 환불 정책 */}
+          {/* 제5조: 사용자의 권리 */}
           <section>
             <h2 className="text-xl font-semibold text-gray-800 mb-3">
-              {t("article5.title") || "제5조 (환불 정책)"}
+              {t("article5.title") || "제5조 (사용자의 권리)"}
             </h2>
             <ol className="list-decimal pl-5 space-y-2">
               <li>{t("article5.item1")}</li>
               <li>{t("article5.item2")}</li>
-              <li>{t("article5.item3")}</li>
             </ol>
           </section>
 
@@ -103,20 +105,21 @@ export default function TermsOfServicePage() {
             </h2>
             <ol className="list-decimal pl-5 space-y-2">
               <li>
-                {t("article6.item1", { email: "support@integrity.com" }) ||
-                  "문의는 이메일(support@integrity.com)을 통해 가능합니다."}
+                {t("article6.item1", { email: "hearttercompany@gmail.com" }) ||
+                  "문의는 이메일(hearttercompany@gmail.com)을 통해 가능합니다."}
               </li>
+              <li>{t("article6.item2")}</li>
             </ol>
           </section>
 
-          {/* 동의 버튼 */}
+          {/* 동의 버튼 (TermsOfService와의 연계 유지) */}
           {userType && (
             <section className="mt-8">
               <Button
                 onClick={handleRegister}
-                className="cursor-pointer w-full py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="w-full py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
               >
-                {t("agreeAndRegister") || "동의하고 가입"}
+                {tLanding("agreeAndRegister") || "동의하고 가입"}
               </Button>
             </section>
           )}

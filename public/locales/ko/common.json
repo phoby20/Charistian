@@ -305,6 +305,7 @@
     }
   },
   "footer": {
+    "brandName": "카리스챤",
     "description": "교회 통합 관리 운영 플랫폼",
     "links": "링크",
     "about": "회사 소개",

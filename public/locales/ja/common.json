@@ -231,12 +231,11 @@
   "passwordResetSuccess": "パスワードが正常にリセットされました。",
   "invalidOrExpiredToken": "無効または期限切れのトークンです。",
   "Landing": {
-    "brandName": "Charistian(カリスチャン)",
     "login": "ログイン",
     "signup": "新規登録",
     "hero": {
-      "title": "教会運営と管理を簡単に",
-      "description": "賛美のコンテ作成・楽譜共有\n出席管理のためのオールインワンプラットフォームでコミュニティを強化",
+      "title": "コンテと楽譜共有が簡単",
+      "description": "もう賛美のコンテ作成に苦労は必要ない！\n簡単に曲を検索し素早く楽譜を共有できます",
       "cta": "聖徒登録"
     },
     "features": {
@@ -259,7 +258,7 @@
       "step": "ステップ {number}",
       "steps": [
         {
-          "title": "教会の新規登録",
+          "title": "教会の登録",
           "description": "サービスを利用する教会を登録します。"
         },
         {

@@ -80,10 +80,10 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-      <section className="relative bg-[url('/top_bg.png')] bg-cover bg-center text-white pt-24 pb-16">
-        <div className="py-30 max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="relative min-h-screen bg-[url('/top_bg_2.png')] bg-cover bg-center text-white pb-16">
+        <div className="py-30 px-4 sm:px-6 lg:px-8 text-center">
           <motion.h2
-            className="text-3xl md:text-4xl font-extrabold mb-3 text-gray-600"
+            className="text-3xl md:text-6xl font-extrabold mb-8 text-[#6e2001]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -91,7 +91,7 @@ export default function LandingPage() {
             {t("hero.title")}
           </motion.h2>
           <motion.p
-            className="text-lg md:text-xl mb-8 max-w-xl text-gray-600 whitespace-pre"
+            className="text-lg md:text-3xl mb-12 max-w-xl whitespace-pre mx-auto text-[#360f00]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -99,21 +99,21 @@ export default function LandingPage() {
             {t("hero.description")}
           </motion.p>
           <motion.div
-            className="flex gap-4 "
+            className="flex gap-4 justify-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
             <Button
               onClick={() => router.push("/terms-of-service?type=member")}
-              className="cursor-pointer bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full border"
+              className="text-white font-extrabold cursor-pointer hover:bg-[#ff66c4] text-lg px-8 py-3 rounded-full bg-[#fc089e] shadow-lg"
               aria-label={t("hero.cta")}
             >
               {t("hero.cta")}
             </Button>
             <Button
               onClick={() => router.push("/terms-of-service?type=church")}
-              className="cursor-pointer bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full border"
+              className="text-white font-extrabold cursor-pointer hover:bg-[#ff66c4] text-lg px-8 py-3 rounded-full bg-[#fc089e] shadow-lg"
               aria-label={t("usage.steps.0.title")}
             >
               {t("usage.steps.0.title")}

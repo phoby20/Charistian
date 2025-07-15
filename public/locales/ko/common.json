@@ -239,12 +239,11 @@
   "passwordResetSuccess": "비밀번호가 성공적으로 재설정되었습니다.",
   "invalidOrExpiredToken": "유효하지 않거나 만료된 토큰입니다.",
   "Landing": {
-    "brandName": "Charistian(카리스챤)",
     "login": "로그인",
     "signup": "회원가입",
     "hero": {
-      "title": "교회 운영과 관리를 간편하게",
-      "description": "찬양콘티 작성과 악보공유\n출석관리 등을 위한 올인원 플랫폼으로 공동체를 강화하세요",
+      "title": "찬양 콘티 악보공유를 쉽게",
+      "description": "이젠 콘티작성에 찬양집을 뒤질 필요가 없습니다\n쉽게 곡을 찾고 빠르게 콘티와 악보를 공유하세요",
       "cta": "성도등록"
     },
     "features": {

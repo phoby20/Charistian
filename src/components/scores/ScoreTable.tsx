@@ -47,53 +47,41 @@ export default function ScoreTable({
   getGenreLabel,
 }: ScoreTableProps) {
   const t = useTranslations("Score");
-  const [currentPlayingId, setCurrentPlayingId] = useState<string | null>(null);
+  const [currentPlayingId, setCurrentPlayingId] = useState<string>("");
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const playerRef = useRef<YouTubePlayer | null>(null);
+  const playerRefs = useRef<Record<string, YouTubePlayer>>({});
 
   const handlePlayPause = async (scoreId: string) => {
+    const player = playerRefs.current[scoreId];
+    if (!player) return;
+
     if (currentPlayingId === scoreId) {
-      if (playerRef.current) {
-        await playerRef.current.pauseVideo();
-        setCurrentPlayingId(null);
-      }
+      await player.pauseVideo();
+      setCurrentPlayingId("");
     } else {
-      if (playerRef.current && currentPlayingId) {
-        await playerRef.current.pauseVideo();
+      // Pause other playing video
+      if (currentPlayingId && playerRefs.current[currentPlayingId]) {
+        await playerRefs.current[currentPlayingId].pauseVideo();
       }
-      setCurrentPlayingId(scoreId);
-    }
-  };
-
-  const onPlayerReady = (event: { target: YouTubePlayer }) => {
-    playerRef.current = event.target;
-    setDuration(event.target.getDuration());
-    if (currentPlayingId) {
-      event.target.playVideo();
-    }
-  };
-
-  const onStateChange = (event: { target: YouTubePlayer; data: number }) => {
-    if (event.data === 1) {
-      setDuration(event.target.getDuration());
-    } else if (event.data === 2 || event.data === 0) {
-      setCurrentPlayingId(null);
+      await player.playVideo(); // 나머지는 onStateChange에서 처리
     }
   };
 
   const handleSeek = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(event.target.value);
-    if (playerRef.current) {
-      playerRef.current.seekTo(newTime, true);
+    const player = playerRefs.current[currentPlayingId ?? ""];
+    if (player) {
+      player.seekTo(newTime, true);
       setCurrentTime(newTime);
     }
   };
 
   useEffect(() => {
-    if (currentPlayingId && playerRef.current) {
+    if (currentPlayingId && playerRefs.current[currentPlayingId]) {
       const interval = setInterval(() => {
-        setCurrentTime(playerRef.current.getCurrentTime());
+        const time = playerRefs.current[currentPlayingId].getCurrentTime();
+        setCurrentTime(time);
       }, 1000);
       return () => clearInterval(interval);
     }
@@ -101,23 +89,40 @@ export default function ScoreTable({
 
   return (
     <div className="overflow-x-auto relative">
-      {currentPlayingId && (
-        <div className="hidden">
-          <YouTube
-            videoId={
-              getFirstYouTubeVideoId(
-                scores.find((s) => s.id === currentPlayingId)?.referenceUrls
-              )!
-            }
-            opts={{
-              playerVars: { autoplay: 0, controls: 0, showinfo: 0 },
-            }}
-            onReady={onPlayerReady}
-            onStateChange={onStateChange}
-            onError={(e) => console.error("YouTube 플레이어 오류:", e)}
-          />
-        </div>
-      )}
+      {/* YouTube Players */}
+      {scores.map((score) => {
+        const youtubeVideoId = getFirstYouTubeVideoId(score.referenceUrls);
+        if (!youtubeVideoId) return null;
+
+        return (
+          <div key={score.id} className="hidden">
+            <YouTube
+              videoId={youtubeVideoId}
+              opts={{
+                playerVars: { autoplay: 0, controls: 0, showinfo: 0 },
+              }}
+              onReady={(e) => {
+                playerRefs.current[score.id] = e.target;
+              }}
+              onStateChange={(e) => {
+                const state = e.data;
+                const player = e.target;
+
+                if (state === 1) {
+                  const duration = player.getDuration();
+                  setDuration(duration);
+                  setCurrentPlayingId(score.id);
+                } else if (state === 2 || state === 0) {
+                  setCurrentPlayingId("");
+                }
+              }}
+              onError={(e) =>
+                console.error(`YouTube error for ${score.id}:`, e)
+              }
+            />
+          </div>
+        );
+      })}
 
       <table className="w-full bg-white rounded-xl shadow-lg border border-gray-200 min-w-[600px] sm:min-w-[700px]">
         <thead className="bg-gray-100">
@@ -237,17 +242,14 @@ export default function ScoreTable({
                   {youtubeVideoId && (
                     <motion.button
                       whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => handlePlayPause(score.id)}
-                      className="text-red-500 hover:text-red-600 cursor-pointer p-2 sm:p-3"
-                      aria-label={
-                        currentPlayingId === score.id ? t("pause") : t("play")
-                      }
+                      className="cursor-pointer text-red-500 hover:text-red-600 p-2"
                     >
                       {currentPlayingId === score.id ? (
-                        <Pause className="w-4 sm:w-5 h-4 sm:h-5" />
+                        <Pause className="w-5 h-5" />
                       ) : (
-                        <Play className="w-4 sm:w-5 h-4 sm:h-5" />
+                        <Play className="w-5 h-5" />
                       )}
                     </motion.button>
                   )}
@@ -279,8 +281,8 @@ export default function ScoreTable({
       </table>
 
       {currentPlayingId && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 sm:p-4 flex items-center gap-2 sm:gap-4 z-50">
-          <span className="text-xs sm:text-sm text-gray-600">
+        <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 flex items-center gap-3 z-50">
+          <span className="text-xs text-gray-600">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
           <input
@@ -289,11 +291,8 @@ export default function ScoreTable({
             max={duration}
             value={currentTime}
             onChange={handleSeek}
-            className="flex-1 h-1 sm:h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            className="flex-1 h-2 bg-gray-200 rounded appearance-none cursor-pointer accent-blue-600"
             aria-label={t("seek")}
-            aria-valuenow={currentTime}
-            aria-valuemin={0}
-            aria-valuemax={duration}
           />
         </div>
       )}

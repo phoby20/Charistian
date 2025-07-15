@@ -31,7 +31,7 @@ interface DesktopNavProps {
   setIsSettingsMenuOpen: (open: boolean) => void;
   isMembersMenuOpen: boolean;
   setIsMembersMenuOpen: (open: boolean) => void;
-  setIsEventsMenuOpen: (open: boolean) => void; // 유지
+  setIsEventsMenuOpen: (open: boolean) => void;
   isScoresMenuOpen: boolean;
   setIsScoresMenuOpen: (open: boolean) => void;
   userMenuRef: React.RefObject<HTMLDivElement | null>;
@@ -53,7 +53,7 @@ export default function DesktopNav({
   setIsSettingsMenuOpen,
   isMembersMenuOpen,
   setIsMembersMenuOpen,
-  setIsEventsMenuOpen, // 유지
+  setIsEventsMenuOpen,
   isScoresMenuOpen,
   setIsScoresMenuOpen,
   userMenuRef,
@@ -65,7 +65,7 @@ export default function DesktopNav({
     setIsUserMenuOpen(false);
     setIsSettingsMenuOpen(false);
     setIsMembersMenuOpen(false);
-    setIsEventsMenuOpen(false); // MobileNav를 위해 유지
+    setIsEventsMenuOpen(false);
     setIsScoresMenuOpen(false);
   };
 
@@ -73,7 +73,7 @@ export default function DesktopNav({
     <nav className="hidden md:flex space-x-4 items-center">
       {!user && (
         <Link
-          href={getPathname({ locale, href: "/church-registration" })}
+          href={getPathname({ locale, href: "/terms-of-service?type=church" })}
           className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
         >
           {t("churchRegistration")}

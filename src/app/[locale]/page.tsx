@@ -105,15 +105,15 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.4 }}
           >
             <Button
-              onClick={() => router.push("/signup")}
-              className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full border"
+              onClick={() => router.push("/terms-of-service?type=member")}
+              className="cursor-pointer bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full border"
               aria-label={t("hero.cta")}
             >
               {t("hero.cta")}
             </Button>
             <Button
-              onClick={() => router.push("/church-registration")}
-              className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full border"
+              onClick={() => router.push("/terms-of-service?type=church")}
+              className="cursor-pointer bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full border"
               aria-label={t("usage.steps.0.title")}
             >
               {t("usage.steps.0.title")}
@@ -190,8 +190,8 @@ export default function LandingPage() {
                 <p className="text-gray-600">{step.description}</p>
                 {index === 0 && (
                   <Button
-                    onClick={() => router.push("/church-registration")}
-                    className="bg-white text-indigo-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
+                    onClick={() => router.push("/terms-of-service?type=church")}
+                    className="cursor-pointer bg-white text-indigo-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
                     aria-label={t("cta.button")}
                   >
                     {t("cta.button")}
@@ -199,8 +199,8 @@ export default function LandingPage() {
                 )}
                 {index === 4 && (
                   <Button
-                    onClick={() => router.push("/signup")}
-                    className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
+                    onClick={() => router.push("/terms-of-service?type=member")}
+                    className="cursor-pointer bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
                     aria-label={t("hero.cta")}
                   >
                     {t("hero.cta")}
@@ -245,8 +245,8 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <Button
-              onClick={() => router.push("/church-registration")}
-              className="bg-white text-green-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
+              onClick={() => router.push("/terms-of-service?type=church")}
+              className="cursor-pointer bg-white text-green-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
               aria-label={t("promotion.cta")}
             >
               {t("promotion.cta")}
@@ -286,8 +286,8 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <Button
-              onClick={() => router.push("/church-registration")}
-              className="bg-white text-indigo-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
+              onClick={() => router.push("/terms-of-service?type=church")}
+              className="cursor-pointer bg-white text-indigo-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
               aria-label={t("cta.button")}
             >
               {t("cta.button")}

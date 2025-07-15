@@ -1,4 +1,3 @@
-// src/app/[locale]/login/page.tsx
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
@@ -46,7 +45,6 @@ export default function LoginPage() {
     }
   };
 
-  const signUpUrl = `/${locale}/signup`;
   const resetPasswordUrl = `/${locale}/reset-password`;
 
   return (
@@ -97,7 +95,7 @@ export default function LoginPage() {
           <p className="mt-2">
             {t("noAccount")}{" "}
             <Link
-              href={signUpUrl}
+              href={`/${locale}/terms-of-service?type=member`}
               className="text-blue-600 hover:underline font-medium"
             >
               {t("signupTitle")}

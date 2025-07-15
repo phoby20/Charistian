@@ -252,19 +252,19 @@ export default function ScoreList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-8 px-4 pb-20 sm:px-6 lg:px-8">
       {isLoading && <Loading />}
-      <div className="container mx-auto max-w-5xl">
-        <div className="grid grid-cols-1 sm:grid-cols-[5fr_1fr] gap-4 sm:gap-4">
-          <div>
+      <div className="container mx-auto max-w-[90vw] sm:max-w-4xl lg:max-w-6xl">
+        <div className="w-auto max-w-5xl grid grid-cols-1 md:grid-cols-[3fr_1fr] lg:grid-cols-[3fr_1fr] gap-4 sm:gap-6">
+          <div className="">
             {/* 헤더 */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex justify-between items-center mb-4"
+              className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4"
             >
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
                 {t("title")}
               </h1>
               <div className="flex flex-col justify-end text-right items-end-safe">
@@ -346,7 +346,7 @@ export default function ScoreList() {
                   className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg flex items-center space-x-3"
                 >
                   <AlertCircle className="w-6 h-6 text-red-500" />
-                  <p className="text-red-700">{error}</p>
+                  <p className="text-red-700 text-sm">{error}</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -358,7 +358,7 @@ export default function ScoreList() {
                 animate={{ opacity: 1 }}
                 className="text-center text-gray-600 py-12"
               >
-                <p className="text-lg">{t("noScores")}</p>
+                <p className="text-base sm:text-lg">{t("noScores")}</p>
               </motion.div>
             ) : (
               <ScoreTable

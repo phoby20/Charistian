@@ -1,3 +1,4 @@
+// src/app/[locale]/signup/complete/page.tsx
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";

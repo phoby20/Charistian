@@ -114,7 +114,7 @@ export default function Header() {
           {/* 로고 및 사이트 제목 */}
           <div className="flex-shrink-0 flex items-center">
             <Link href={logoHref} className="flex items-center">
-              <span className="text-2xl font-bold text-blue-600">
+              <span className="text-2xl font-bold text-red-600">
                 {t("siteTitle", { defaultValue: "Charistian" })}
               </span>
             </Link>

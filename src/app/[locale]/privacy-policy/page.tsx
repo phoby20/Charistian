@@ -3,9 +3,11 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Button from "@/components/Button";
+import Loading from "@/components/Loading";
 
-export default function PrivacyPolicyPage() {
+function PrivacyPolicyContent() {
   const t = useTranslations("PrivacyPolicy");
   const tLanding = useTranslations("Landing");
   const locale = useLocale();
@@ -126,5 +128,13 @@ export default function PrivacyPolicyPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PrivacyPolicyPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <PrivacyPolicyContent />
+    </Suspense>
   );
 }

@@ -325,7 +325,6 @@ export async function POST(req: NextRequest) {
               country: application.country,
               phone: application.churchPhone,
               logo: application.logo,
-              plan: application.plan,
               state: "APPROVED",
             },
           });

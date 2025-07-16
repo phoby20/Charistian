@@ -8,11 +8,12 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe, Stripe, StripeElementsOptions } from "@stripe/stripe-js";
 import { useAuth } from "@/context/AuthContext";
 import Loading from "@/components/Loading";
+import { Suspense } from "react";
 
 import Link from "next/link";
 import CheckoutForm from "@/components/payments/CheckoutForm";
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const t = useTranslations();
   const locale = useLocale();
   const searchParams = useSearchParams();
@@ -103,5 +104,13 @@ export default function CheckoutPage() {
         </Elements>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <CheckoutContent />
+    </Suspense>
   );
 }

@@ -3,9 +3,11 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Button from "@/components/Button";
+import Loading from "@/components/Loading";
 
-export default function TermsOfServicePage() {
+function TermsOfServiceContent() {
   const t = useTranslations("TermsOfService");
   const locale = useLocale();
   const router = useRouter();
@@ -123,5 +125,13 @@ export default function TermsOfServicePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function TermsOfServicePage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <TermsOfServiceContent />
+    </Suspense>
   );
 }

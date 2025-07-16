@@ -9,9 +9,10 @@ import {
   isSetlistCreationDisabled,
   shouldShowUpgradeButton,
 } from "@/utils/setlistUtils";
+import { Plan } from "@prisma/client";
 
 interface UsageLimits {
-  plan: string;
+  plan: Plan;
   maxUsers: number;
   remainingUsers: number;
   weeklySetlists: number;

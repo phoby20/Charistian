@@ -70,7 +70,7 @@ export default function DesktopNav({
   };
 
   return (
-    <nav className="hidden md:flex space-x-4 items-center">
+    <nav className="hidden md:flex space-x-1 items-center">
       {!user && (
         <Link
           href={getPathname({ locale, href: "/terms-of-service?type=church" })}
@@ -210,7 +210,7 @@ export default function DesktopNav({
               closeAllDropdowns();
               setIsUserMenuOpen(!isUserMenuOpen);
             }}
-            className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+            className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium"
           >
             <UserIcon className="w-5 h-5 mr-1" />
             {user.name} ({t(toCamelCase(user.role))})

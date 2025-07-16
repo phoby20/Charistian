@@ -25,7 +25,7 @@ function PrivacyPolicyContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center tracking-tight">
           {t("title") || "개인정보처리방침"}

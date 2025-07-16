@@ -84,8 +84,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       "/signup/complete",
       "/reset-password",
       "/reset-password/confirm",
-      "/privacy-policy",
-      "/terms-of-service",
     ];
 
     if (!pathname || !locale) {

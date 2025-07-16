@@ -53,7 +53,7 @@ export default function ScoreUploadPage() {
   } = form;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 py-8">
       {isLoading && <Loading />}
       <div className="container mx-auto max-w-3xl p-6 bg-white rounded-2xl shadow-lg">
         <div className="flex items-center justify-between mb-8">

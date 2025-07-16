@@ -252,7 +252,7 @@ export default function ScoreList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-8 px-4 pb-20 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 py-8 px-4 pb-20 sm:px-6 lg:px-8">
       {isLoading && <Loading />}
       <div className="container mx-auto max-w-[90vw] sm:max-w-4xl lg:max-w-6xl">
         <div className="w-auto max-w-5xl grid grid-cols-1 md:grid-cols-[3fr_1fr] lg:grid-cols-[3fr_1fr] gap-4 sm:gap-6">

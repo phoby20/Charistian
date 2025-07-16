@@ -4,11 +4,12 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/utils/useRouter";
 import { motion } from "framer-motion";
 import Button from "@/components/Button";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { Gaegu } from "next/font/google";
 import FAQ from "@/components/landing/Faq";
+import Landing from "@/components/Loading";
 
 const gaegu = Gaegu({
   subsets: ["latin"],
@@ -19,10 +20,12 @@ export default function LandingPage() {
   const t = useTranslations("Landing");
   const router = useRouter();
   const pathname = usePathname();
+  const [isLanding, setIsLanding] = useState(false);
 
   useEffect(() => {
     const sendUserAgent = async () => {
       try {
+        setIsLanding(true);
         const userAgent = navigator.userAgent;
         const response = await fetch("/api/send-user-agent", {
           method: "POST",
@@ -35,6 +38,8 @@ export default function LandingPage() {
         }
       } catch (error) {
         console.error("Error sending user agent:", error);
+      } finally {
+        setIsLanding(false);
       }
     };
 
@@ -80,6 +85,10 @@ export default function LandingPage() {
       description: t("usage.steps.5.description"),
     },
   ];
+
+  if (isLanding) {
+    return <Landing />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">

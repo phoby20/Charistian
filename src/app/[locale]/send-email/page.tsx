@@ -67,14 +67,14 @@ export default function SendEmailPage() {
 
   if (user?.role !== "MASTER") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-purple-100">
         <p className="text-red-600 text-lg">{t("accessDenied")}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-blue-100 via-white to-purple-100">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 tracking-tight">

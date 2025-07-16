@@ -199,7 +199,7 @@ function MembersContent() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100"
+      className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100"
     >
       {/* 고정 헤더 */}
       <header className="sticky top-0 z-20 bg-white shadow-sm px-4 py-3 md:px-6">

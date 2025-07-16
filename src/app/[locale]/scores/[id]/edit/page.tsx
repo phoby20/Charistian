@@ -213,7 +213,7 @@ export default function ScoreEditPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -240,7 +240,7 @@ export default function ScoreEditPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 py-8">
       {isLoading && <Loading />}
       <div className="container mx-auto max-w-3xl p-6 bg-white rounded-2xl shadow-lg">
         <div className="flex items-center justify-between mb-8">

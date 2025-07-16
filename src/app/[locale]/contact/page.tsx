@@ -76,7 +76,7 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl w-full bg-white shadow-lg rounded-lg p-8">
         <h1 className="text-3xl font-bold text-gray-900 text-center mb-4">
           문의하기

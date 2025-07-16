@@ -64,7 +64,7 @@ export default function ResetPasswordForm({ locale }: { locale: string }) {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-purple-100">
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
           <p className="text-red-600 text-sm text-center">
             {t("invalidOrExpiredToken")}
@@ -75,7 +75,7 @@ export default function ResetPasswordForm({ locale }: { locale: string }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-purple-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md transform transition-all duration-300 hover:shadow-xl">
         <h1 className="text-3xl font-semibold text-gray-800 mb-6 text-center">
           {t("setNewPassword")}

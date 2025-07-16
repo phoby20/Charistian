@@ -69,7 +69,7 @@ function CheckoutContent() {
     !stripePromise
   ) {
     return (
-      <div className="min-h-screen p-6 bg-gradient-to-br from-gray-50 to-gray-200">
+      <div className="min-h-screen p-6 bg-gradient-to-br from-blue-100 via-white to-purple-100">
         <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm p-6">
           {error ? (
             <>
@@ -93,7 +93,7 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-50 to-gray-200">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-blue-100 via-white to-purple-100">
       <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
           {t("checkout.title")}

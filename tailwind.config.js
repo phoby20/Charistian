@@ -11,6 +11,10 @@ export default {
         primary: "#2563eb",
         accent: "#16a34a",
       },
+      screens: {
+        md: "768px",
+        lg: "1024px",
+      },
     },
   },
   plugins: [],

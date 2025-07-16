@@ -73,7 +73,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             isDisabled={isDisabled}
-            className={`w-full py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors ${
+            className={`w-full py-3 text-white rounded-md font-medium focus:outline-none focus:ring-2 bg-[#fc089e] hover:bg-[#ff66c4] shadow-lg font-extrabold cursor-pointer transition-colors ${
               isDisabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >

@@ -1,9 +1,5 @@
-// src/app/api/send-user-agent/route.ts
-import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
 import { createKoreaDate } from "@/utils/creatKoreaDate";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,18 +12,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const adminEmail = process.env.ADMIN_EMAIL;
-    if (!adminEmail) {
-      return NextResponse.json(
-        { error: "Admin email not configured" },
-        { status: 500 }
-      );
-    }
+    const slackBotToken = process.env.SLACK_BOT_TOKEN;
+    const slackChannelId = process.env.SLACK_CHANNEL_ID || "C0766MHSM0C";
 
-    const resendFrom = process.env.RESEND_FROM;
-    if (!resendFrom) {
+    if (!slackBotToken) {
       return NextResponse.json(
-        { error: "resend email not configured" },
+        { error: "Slack Bot Token not configured" },
         { status: 500 }
       );
     }
@@ -40,12 +30,11 @@ export async function POST(request: NextRequest) {
     // GeoIP 조회
     let geoInfo = { country: "Unknown", regionName: "Unknown" };
     try {
-      // IP 추출
       const clientIp =
         request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         request.headers.get("cf-connecting-ip") ||
         request.headers.get("x-real-ip") ||
-        (isLocal ? "203.0.113.1" : "127.0.0.1"); // 로컬 테스트용 공인 IP
+        (isLocal ? "203.0.113.1" : "127.0.0.1");
       console.log("Client IP:", clientIp);
 
       const geoResponse = await fetch(
@@ -55,9 +44,9 @@ export async function POST(request: NextRequest) {
         }
       );
 
-      console.log("GeoIP response status:", geoResponse.status); // 디버깅 로그
+      console.log("GeoIP response status:", geoResponse.status);
       const geoData = await geoResponse.json();
-      console.log("GeoIP response data:", geoData); // 디버깅 로그
+      console.log("GeoIP response data:", geoData);
 
       if (geoResponse.ok && geoData.status === "success") {
         geoInfo = {
@@ -72,41 +61,87 @@ export async function POST(request: NextRequest) {
     }
 
     const koreaDate = createKoreaDate();
-    const emailContent = `
-      <h2>New Page Access</h2>
-      <p><strong>Pathname:</strong> ${pathname}</p>
-      <p><strong>User Agent:</strong> ${userAgent}</p>
-      <p><strong>Country:</strong> ${geoInfo.country}</p>
-      <p><strong>Region:</strong> ${geoInfo.regionName}</p>
-      <p><strong>Time:</strong> ${koreaDate}</p>
-    `;
+    const slackMessage = {
+      channel: slackChannelId,
+      blocks: [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: `🌐 새 페이지 접속: ${pathname}`,
+            emoji: true,
+          },
+        },
+        {
+          type: "divider",
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*📍 경로*\n${pathname}`,
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*🌍 위치*\n국가: ${geoInfo.country}\n지역: ${geoInfo.regionName}`,
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*⏰ 시간*\n${koreaDate}`,
+          },
+        },
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*🖥️ 사용자 에이전트*\n${userAgent}`,
+          },
+        },
+        {
+          type: "context",
+          elements: [
+            {
+              type: "mrkdwn",
+              text: `${new Date().toISOString()}에 Charistian Bot이 생성`,
+            },
+          ],
+        },
+      ],
+    };
 
-    if (isLocal) {
-      // 로컬 환경에서는 이메일 전송 대신 콘솔 출력
-      console.log("Local environment detected. Email content (not sent):");
-      console.log(emailContent);
+    // 프로덕션 환경에서 Slack 메시지 전송
+    const response = await fetch("https://slack.com/api/chat.postMessage", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${slackBotToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(slackMessage),
+    });
+
+    const responseData = await response.json();
+    if (!response.ok || !responseData.ok) {
+      console.error("Slack API error:", responseData.error || responseData);
       return NextResponse.json(
-        { message: "Email not sent in local environment" },
-        { status: 200 }
+        { error: "Failed to send Slack message" },
+        { status: 500 }
       );
     }
 
-    // 프로덕션 환경에서 이메일 전송
-    await resend.emails.send({
-      from: "charistian 운영팀 <noreply@charistian.com>", // Resend 기본 도메인 사용
-      to: adminEmail,
-      subject: `New Page Access: ${pathname}`,
-      html: emailContent,
-    });
-
     return NextResponse.json(
-      { message: "Email sent successfully" },
+      { message: "Slack message sent successfully" },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error sending user agent email:", error);
+    console.error("Error sending Slack message:", error);
     return NextResponse.json(
-      { error: "Failed to send email" },
+      { error: "Failed to send Slack message" },
       { status: 500 }
     );
   }

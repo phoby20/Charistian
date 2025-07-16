@@ -153,13 +153,13 @@ export default function LandingPage() {
           <div className="bg-red-100 flex flex-col items-center justify-center pt-20 pb-20">
             <h4
               id={`feature-title`}
-              className="text-7xl font-semibold text-gray-900 mt-16 mb-16 text-center whitespace-pre-wrap"
+              className="text-5xl md:text-7xl font-semibold text-gray-900 mt-16 mb-30 text-center whitespace-pre-wrap"
             >
               {t("howToUse.title")}
             </h4>
             <h4
               id={`feature-title`}
-              className="text-4xl font-semibold text-gray-900 text-center whitespace-pre-wrap"
+              className="text-3xl md:text-4xl font-semibold text-gray-900 text-center whitespace-pre-wrap"
             >
               {t("howToUse.step0.subTitle")}
             </h4>
@@ -201,22 +201,22 @@ export default function LandingPage() {
           <div className="bg-white flex flex-col items-center justify-center pt-20 pb-20">
             <h4
               id={`feature-title`}
-              className="text-4xl font-semibold text-gray-900 text-center"
+              className="text-2xl md:text-4xl font-semibold text-gray-900 text-center"
             >
               {t("howToUse.step1.subTitle")}
             </h4>
             <h5
               id={`feature-title`}
-              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+              className="text-lg md:text-2xl font-semibold text-gray-500 text-center mt-4"
             >
               {t("howToUse.step1.description")}
             </h5>
-            <div className="relative mt-20">
+            <div className="relative mt-20 pl-10 pr-10">
               <Image
                 src="/images/landing/step1.png"
                 alt="conte_sample"
-                width={900}
-                height={900}
+                width={800}
+                height={800}
               />
             </div>
           </div>
@@ -234,22 +234,22 @@ export default function LandingPage() {
           <div className="bg-gray-100 flex flex-col items-center justify-center pt-20 pb-20">
             <h4
               id={`feature-title`}
-              className="text-4xl font-semibold text-gray-900 text-center"
+              className="text-2xl md:text-4xl font-semibold text-gray-900 text-center"
             >
               {t("howToUse.step2.subTitle")}
             </h4>
             <h5
               id={`feature-title`}
-              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+              className="text-lg md:text-2xl font-semibold text-gray-500 text-center mt-4"
             >
               {t("howToUse.step2.description")}
             </h5>
-            <div className="relative mt-20">
+            <div className="relative mt-20 pl-10 pr-10">
               <Image
                 src="/images/landing/step2.png"
                 alt="conte_sample"
-                width={900}
-                height={900}
+                width={800}
+                height={800}
               />
             </div>
           </div>
@@ -267,22 +267,22 @@ export default function LandingPage() {
           <div className="bg-white flex flex-col items-center justify-center pt-20 pb-20">
             <h4
               id={`feature-title`}
-              className="text-4xl font-semibold text-gray-900 text-center"
+              className="text-2xl md:text-4xl font-semibold text-gray-900 text-center"
             >
               {t("howToUse.step3.subTitle")}
             </h4>
             <h5
               id={`feature-title`}
-              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+              className="text-lg md:text-2xl font-semibold text-gray-500 text-center mt-4"
             >
               {t("howToUse.step3.description")}
             </h5>
-            <div className="relative mt-20">
+            <div className="relative mt-20 pl-10 pr-10">
               <Image
                 src="/images/landing/step3.png"
                 alt="conte_sample"
-                width={900}
-                height={900}
+                width={800}
+                height={800}
               />
             </div>
           </div>
@@ -300,22 +300,22 @@ export default function LandingPage() {
           <div className="bg-gray-100 flex flex-col items-center justify-center pt-20 pb-20">
             <h4
               id={`feature-title`}
-              className="text-4xl font-semibold text-gray-900 text-center"
+              className="text-2xl md:text-4xl font-semibold text-gray-900 text-center"
             >
               {t("howToUse.step4.subTitle")}
             </h4>
             <h5
               id={`feature-title`}
-              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+              className="text-lg md:text-2xl font-semibold text-gray-500 text-center mt-4"
             >
               {t("howToUse.step4.description")}
             </h5>
-            <div className="relative mt-20">
+            <div className="relative mt-20 pl-10 pr-10">
               <Image
                 src="/images/landing/step4.png"
                 alt="conte_sample"
-                width={900}
-                height={900}
+                width={800}
+                height={800}
               />
             </div>
           </div>
@@ -333,22 +333,22 @@ export default function LandingPage() {
           <div className="bg-white flex flex-col items-center justify-center pt-20 pb-20">
             <h4
               id={`feature-title`}
-              className="text-4xl font-semibold text-gray-900 text-center"
+              className="text-2xl md:text-4xl font-semibold text-gray-900 text-center"
             >
               {t("howToUse.step5.subTitle")}
             </h4>
             <h5
               id={`feature-title`}
-              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+              className="text-lg md:text-2xl font-semibold text-gray-500 text-center mt-4"
             >
               {t("howToUse.step5.description")}
             </h5>
-            <div className="relative mt-20">
+            <div className="relative mt-20 pl-10 pr-10">
               <Image
                 src="/images/landing/step5.png"
                 alt="conte_sample"
-                width={900}
-                height={900}
+                width={800}
+                height={800}
               />
             </div>
           </div>
@@ -366,22 +366,22 @@ export default function LandingPage() {
           <div className="bg-gray-100 flex flex-col items-center justify-center pt-20 pb-20">
             <h4
               id={`feature-title`}
-              className="text-4xl font-semibold text-gray-900 text-center"
+              className="text-2xl md:text-4xl font-semibold text-gray-900 text-center"
             >
               {t("howToUse.step6.subTitle")}
             </h4>
             <h5
               id={`feature-title`}
-              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+              className="text-lg md:text-2xl font-semibold text-gray-500 text-center mt-4"
             >
               {t("howToUse.step6.description")}
             </h5>
-            <div className="relative mt-20">
+            <div className="relative mt-20 pl-10 pr-10">
               <Image
                 src="/images/landing/step6.png"
                 alt="conte_sample"
-                width={900}
-                height={900}
+                width={800}
+                height={800}
               />
             </div>
           </div>
@@ -399,22 +399,22 @@ export default function LandingPage() {
           <div className="bg-white flex flex-col items-center justify-center pt-20 pb-20">
             <h4
               id={`feature-title`}
-              className="text-4xl font-semibold text-gray-900 text-center"
+              className="text-2xl md:text-4xl font-semibold text-gray-900 text-center"
             >
               {t("howToUse.step7.subTitle")}
             </h4>
             <h5
               id={`feature-title`}
-              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+              className="text-lg md:text-2xl font-semibold text-gray-500 text-center mt-4"
             >
               {t("howToUse.step7.description")}
             </h5>
-            <div className="relative mt-20">
+            <div className="relative mt-20 pl-10 pr-10">
               <Image
                 src="/images/landing/step7.png"
                 alt="conte_sample"
-                width={900}
-                height={900}
+                width={800}
+                height={800}
               />
             </div>
           </div>
@@ -448,7 +448,7 @@ export default function LandingPage() {
                 >
                   {feature.title}
                 </h4>
-                <p className="text-gray-600 text-xl whitespace-break-spaces">
+                <p className="text-gray-600 text-lg whitespace-break-spaces">
                   {feature.description}
                 </p>
               </motion.div>
@@ -464,7 +464,7 @@ export default function LandingPage() {
       })}
 
       <section
-        className="py-50 bg-gray-100"
+        className="py-50 bg-gradient-to-br from-blue-100 via-white to-purple-100"
         role="region"
         aria-labelledby="usage-title"
       >

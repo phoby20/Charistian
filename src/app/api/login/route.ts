@@ -29,6 +29,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
+    // 이메일 인증이 완료되지 않은 사용자는 로그인하지 못하도록 한다
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        { error: "Email not verified; 이메일 인증" },
+        { status: 403 }
+      );
+    }
+
     const token = generateToken({
       userId: user.id, // userId로 변경하여 /api/duties와 일치
       churchId: user.churchId, // churchId 추가

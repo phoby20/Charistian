@@ -160,7 +160,13 @@
   "signupComplete": {
     "title": "会員登録完了",
     "message": "会員登録が完了しました。\n承認までお待ちください",
+    "verifyEmailMessage": "emailに転送されました認証リンクをクリックしてアカウントを活性化してください。",
     "goHome": "ホームへ移動"
+  },
+  "verifyComplete": {
+    "title": "email認証成功",
+    "message": "email認証に成功しました。\nログインをしてサービスをご利用ください。",
+    "goHome": "ホームへ"
   },
   "invalidCredentials": "誤ったemailまたはパスワードです。",
   "members": "聖徒管理",
@@ -845,11 +851,23 @@
   },
   "SpecifiedCommercialTransaction": {
     "title": "特定商取引法に基づく表記",
-    "companyName": "販売業者（サービス名）",
+    "companyName": "販売業者",
     "representative": "運営責任者",
     "address": "所在地",
+    "phoneNumber": "電話番号",
+    "phoneNumberContent": "請求があったら遅滞なく開示します",
     "contact": "連絡先",
     "email": "{email}",
+    "additionalFees": "追加手数料",
+    "additionalFeesContent": "サービス利用に際して追加の手数料は発生しません。インターネット接続に必要な費用はお客様のご負担となります。",
+    "refundPolicy": "返品・返金について",
+    "refundPolicyContent": "＜お客様都合による返品・キャンセルの場合＞\nサービスの性質上、返品・返金およびキャンセルは承っておりません。サブスクリプションを解約した場合、残存期間に関わらずサービスは即時終了します。\n\n＜サービスに不備がある場合＞\nサービスに不備がある場合（例：システムエラーによる機能不全）、お問い合わせ先（hearttercompany@gmail.com）までご連絡ください。状況を確認後、必要に応じて代替サービスのご提供または返金対応をさせていただきます。",
+    "deliveryTime": "サービス提供時期",
+    "deliveryTimeContent": "決済完了後、直ちに該当プランのサービスをご利用いただけます。",
+    "paymentMethods": "支払い方法",
+    "paymentMethodsContent": "クレジットカード（Stripeを利用）",
+    "paymentTiming": "支払い時期",
+    "paymentTimingContent": "即時決済（サブスクリプション契約時に即時課金、以降自動更新）",
     "price": "販売価格",
     "priceFree": "無料",
     "priceSmart": "月額9,900ウォン",
@@ -863,14 +881,7 @@
     "sheetMusicLimitFree": "最大50曲楽譜登録",
     "sheetMusicLimitSmart": "最大200曲楽譜登録",
     "sheetMusicLimitEnterprise": "楽譜アップロード無制限",
-    "label_paymentMethod": "支払い方法",
-    "content_paymentMethod": "クレジットカード（Stripeを利用）",
-    "label_paymentTiming": "支払い時期",
-    "content_paymentTiming": "即時決済（サブスクリプション契約時に即時課金、以降自動更新）",
-    "label_serviceStart": "サービス開始時期",
-    "content_serviceStart": "決済完了後、直ちに該当プランのサービスをご利用いただけます。",
-    "label_refundPolicy": "返品・返金について",
-    "content_refundPolicy": "サービスの性質上、返品・返金およびキャンセルは承っておりません。サブスクリプションを解約した場合、残存期間に関わらずサービスは即時終了します。"
+    "goHome": "ホームに戻る"
   },
   "TermsOfService": {
     "title": "利用規約",

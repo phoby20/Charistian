@@ -1,13 +1,14 @@
-// src/app/[locale]/specified-commercial-transaction/page.tsx
 "use client";
-import { useTranslations } from "next-intl";
-import { CommercialTransactionInfo } from "@/types/specifiedCommercialTransaction";
 
-const commercialInfo: CommercialTransactionInfo = {
+import { useTranslations, useLocale } from "next-intl";
+import Link from "next/link";
+import Button from "@/components/Button";
+
+const commercialInfo = {
   companyName: "Integrity（Charistian）",
   representative: "篠崎 智恵 (Shinozaki Eiji)",
   address:
-    "〒174-0072 Room 101, Lehua Minami-Tokiwadai, 1-11-6 Minami-Tokiwadai, Itabashi-ku, Tokyo, Japan",
+    "Room 101, Lehua Minami-Tokiwadai, 1-11-6 Minami-Tokiwadai, Itabashi-ku, Tokyo 174-0072, Japan",
   contactEmail: "hearttercompany@gmail.com",
   plans: [
     {
@@ -36,11 +37,12 @@ const commercialInfo: CommercialTransactionInfo = {
 
 export default function SpecifiedCommercialTransactionPage() {
   const t = useTranslations("SpecifiedCommercialTransaction");
+  const locale = useLocale();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center tracking-tight">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-purple-100 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-8 md:p-10 animate-fade-in">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-8 text-center tracking-tight">
           {t("title")}
         </h1>
         <div className="space-y-6">
@@ -70,10 +72,56 @@ export default function SpecifiedCommercialTransactionPage() {
               </tr>
               <tr className="border-b border-gray-200">
                 <th className="bg-gray-100 text-left p-4 font-semibold text-gray-700">
+                  {t("phoneNumber")}
+                </th>
+                <td className="p-4 text-gray-600">{t("phoneNumberContent")}</td>
+              </tr>
+              <tr className="border-b border-gray-200">
+                <th className="bg-gray-100 text-left p-4 font-semibold text-gray-700">
                   {t("contact")}
                 </th>
                 <td className="p-4 text-gray-600">
                   {t("email", { email: commercialInfo.contactEmail })}
+                </td>
+              </tr>
+              <tr className="border-b border-gray-200">
+                <th className="bg-gray-100 text-left p-4 font-semibold text-gray-700">
+                  {t("additionalFees")}
+                </th>
+                <td className="p-4 text-gray-600 whitespace-pre-wrap">
+                  {t("additionalFeesContent")}
+                </td>
+              </tr>
+              <tr className="border-b border-gray-200">
+                <th className="bg-gray-100 text-left p-4 font-semibold text-gray-700">
+                  {t("refundPolicy")}
+                </th>
+                <td className="p-4 text-gray-600 whitespace-pre-wrap">
+                  {t("refundPolicyContent")}
+                </td>
+              </tr>
+              <tr className="border-b border-gray-200">
+                <th className="bg-gray-100 text-left p-4 font-semibold text-gray-700">
+                  {t("deliveryTime")}
+                </th>
+                <td className="p-4 text-gray-600">
+                  {t("deliveryTimeContent")}
+                </td>
+              </tr>
+              <tr className="border-b border-gray-200">
+                <th className="bg-gray-100 text-left p-4 font-semibold text-gray-700">
+                  {t("paymentMethods")}
+                </th>
+                <td className="p-4 text-gray-600">
+                  {t("paymentMethodsContent")}
+                </td>
+              </tr>
+              <tr className="border-b border-gray-200">
+                <th className="bg-gray-100 text-left p-4 font-semibold text-gray-700">
+                  {t("paymentTiming")}
+                </th>
+                <td className="p-4 text-gray-600">
+                  {t("paymentTimingContent")}
                 </td>
               </tr>
               <tr className="border-b border-gray-200">
@@ -92,40 +140,18 @@ export default function SpecifiedCommercialTransactionPage() {
                   </ul>
                 </td>
               </tr>
-              <tr className="border-b border-gray-200">
-                <th className="bg-gray-100 text-left p-4 font-semibold text-gray-700">
-                  {t("label_paymentMethod")}
-                </th>
-                <td className="p-4 text-gray-600">
-                  {t("content_paymentMethod")}
-                </td>
-              </tr>
-              <tr className="border-b border-gray-200">
-                <th className="bg-gray-100 text-left p-4 font-semibold text-gray-700">
-                  {t("label_paymentTiming")}
-                </th>
-                <td className="p-4 text-gray-600">
-                  {t("content_paymentTiming")}
-                </td>
-              </tr>
-              <tr className="border-b border-gray-200">
-                <th className="bg-gray-100 text-left p-4 font-semibold text-gray-700">
-                  {t("label_serviceStart")}
-                </th>
-                <td className="p-4 text-gray-600">
-                  {t("content_serviceStart")}
-                </td>
-              </tr>
-              <tr className="border-b border-gray-200">
-                <th className="bg-gray-100 text-left p-4 font-semibold text-gray-700">
-                  {t("label_refundPolicy")}
-                </th>
-                <td className="p-4 text-gray-600">
-                  {t("content_refundPolicy")}
-                </td>
-              </tr>
             </tbody>
           </table>
+        </div>
+        <div className="mt-8 flex justify-center">
+          <Link href={`/${locale}`}>
+            <Button
+              variant="primary"
+              className="cursor-pointer text-white w-full px-14 py-3 bg-gradient-to-r from-[#ff66c4] to-[#ffde59] rounded-xl font-semibold text-base hover:from-[#ffde59] hover:to-[#ff66c4] transition-all duration-300 shadow-md hover:shadow-lg"
+            >
+              {t("goHome")}
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

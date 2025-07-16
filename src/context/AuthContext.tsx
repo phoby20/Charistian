@@ -57,7 +57,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           pathname !== `/${locale}/reset-password` &&
           pathname !== `/${locale}/reset-password/confirm` &&
           pathname !== `/${locale}/privacy-policy` &&
-          pathname !== `/${locale}/terms-of-service`
+          pathname !== `/${locale}/terms-of-service` &&
+          pathname !== `/${locale}/verify/complete`
         ) {
           router.replace(`/login`);
         }

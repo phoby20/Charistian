@@ -3,6 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import * as bcrypt from "bcrypt";
 import { uploadFile } from "@/lib/vercelBlob";
+import { Resend } from "resend";
+import { v4 as uuidv4 } from "uuid";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   try {
@@ -67,7 +71,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const profileImage = (await formData.get("profileImage")) as File;
+    // 인증 토큰 생성
+    const verificationToken = uuidv4();
+
+    // 프로필 이미지 업로드
+    const profileImage = formData.get("profileImage") as File;
     if (profileImage && profileImage.size > 0) {
       data.profileImage = await uploadFile(
         profileImage,
@@ -76,7 +84,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await prisma.user.create({
+    // 사용자 생성
+    const user = await prisma.user.create({
       data: {
         email: data.email.toLowerCase(),
         password: data.password,
@@ -95,11 +104,30 @@ export async function POST(req: NextRequest) {
         position: data.position,
         role: "GENERAL",
         state: "PENDING",
+        emailVerificationToken: verificationToken,
+        emailVerified: false,
       },
     });
 
+    // Resend로 인증 이메일 전송
+    const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/verify-email?token=${verificationToken}`;
+    await resend.emails.send({
+      from: `${process.env.RESEND_FROM}`, // Resend 대시보드에서 설정한 도메인
+      to: data.email,
+      subject: "이메일 인증을 완료해 주세요",
+      html: `
+        <h1>이메일 인증</h1>
+        <p>아래 링크를 클릭하여 이메일 인증을 완료해 주세요:</p>
+        <a href="${verificationLink}">${verificationLink}</a>
+        <p>링크는 24시간 동안 유효합니다.</p>
+      `,
+    });
+
     return NextResponse.json(
-      { message: "User created successfully" },
+      {
+        message: "User created successfully. Please verify your email.",
+        userId: user.id,
+      },
       { status: 201 }
     );
   } catch (error) {

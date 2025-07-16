@@ -167,6 +167,12 @@
   "signupComplete": {
     "title": "회원가입 완료",
     "message": "회원가입이 완료되었습니다. \n가입 승인을 기다려 주세요.",
+    "verifyEmailMessage": "이메일로 전송된 인증 링크를 클릭하여\n계정을 활성화해 주세요.",
+    "goHome": "홈으로 이동"
+  },
+  "verifyComplete": {
+    "title": "이메일 인증 완료",
+    "message": "이메일 인증이 성공적으로 완료되었습니다.\n이제 계정을 사용할 수 있습니다.",
     "goHome": "홈으로 이동"
   },
   "invalidCredentials": "잘못된 이메일 또는 비밀번호입니다",
@@ -856,11 +862,23 @@
   },
   "SpecifiedCommercialTransaction": {
     "title": "특정상거래법에 따른 표기",
-    "companyName": "판매업체(서비스명)",
+    "companyName": "판매업체",
     "representative": "운영 책임자",
     "address": "소재지",
+    "phoneNumber": "전화번호",
+    "phoneNumberContent": "요청 시 지체 없이 공개합니다",
     "contact": "연락처",
     "email": "{email}",
+    "additionalFees": "추가 요금",
+    "additionalFeesContent": "서비스 이용에 따른 추가 수수료는 발생하지 않습니다. 인터넷 연결에 필요한 비용은 고객 부담입니다.",
+    "refundPolicy": "환불 및 반품",
+    "refundPolicyContent": "＜고객 사유에 의한 반품 및 취소＞\n서비스의 특성상 반품, 환불 및 취소는 불가능합니다. 구독 해지 시 잔여 기간과 관계없이 서비스는 즉시 종료됩니다.\n\n＜서비스에 하자가 있는 경우＞\n서비스에 하자가 있는 경우(예: 시스템 오류로 인한 기능 장애), 문의처(hearttercompany@gmail.com)로 연락 주시기 바랍니다. 상황을 확인 후 필요에 따라 대체 서비스 제공 또는 환불 처리를 진행합니다.",
+    "deliveryTime": "서비스 제공 시기",
+    "deliveryTimeContent": "결제 완료 후 즉시 해당 플랜의 서비스를 이용할 수 있습니다.",
+    "paymentMethods": "결제 방법",
+    "paymentMethodsContent": "신용카드(Stripe 이용)",
+    "paymentTiming": "결제 시기",
+    "paymentTimingContent": "즉시 결제(구독 계약 시 즉시 결제, 이후 자동 갱신)",
     "price": "판매 가격",
     "priceFree": "무료",
     "priceSmart": "월 9,900원",
@@ -874,14 +892,7 @@
     "sheetMusicLimitFree": "최대 50곡 악보 등록",
     "sheetMusicLimitSmart": "최대 200곡 악보 등록",
     "sheetMusicLimitEnterprise": "악보 업로드 무제한",
-    "label_paymentMethod": "결제 방법",
-    "content_paymentMethod": "신용카드(Stripe 이용)",
-    "label_paymentTiming": "결제 시기",
-    "content_paymentTiming": "즉시 결제(구독 계약 시 즉시 결제, 이후 자동 갱신)",
-    "label_serviceStart": "서비스 시작 시기",
-    "content_serviceStart": "결제 완료 후 즉시 해당 플랜의 서비스를 이용할 수 있습니다.",
-    "label_refundPolicy": "환불 및 반품",
-    "content_refundPolicy": "서비스의 특성상 환불, 반품 및 취소는 불가능합니다. 구독 해지 시 잔여 기간과 관계없이 서비스는 즉시 종료됩니다."
+    "goHome": "홈으로 이동"
   },
   "TermsOfService": {
     "title": "이용약관",

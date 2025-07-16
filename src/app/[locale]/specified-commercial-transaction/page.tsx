@@ -7,8 +7,7 @@ import Button from "@/components/Button";
 const commercialInfo = {
   companyName: "Integrity（Charistian）",
   representative: "篠崎 智恵 (Shinozaki Eiji)",
-  address:
-    "Room 101, Lehua Minami-Tokiwadai, 1-11-6 Minami-Tokiwadai, Itabashi-ku, Tokyo 174-0072, Japan",
+  address: "〒174-0072 東京都板橋区南常盤台1-11-6 レフア南常盤台101号室",
   contactEmail: "hearttercompany@gmail.com",
   plans: [
     {

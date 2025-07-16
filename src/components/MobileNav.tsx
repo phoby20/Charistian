@@ -54,10 +54,10 @@ export default function MobileNav({
   setIsUserMenuOpen,
   isSettingsMenuOpen,
   setIsSettingsMenuOpen,
-  isEventsMenuOpen,
-  setIsEventsMenuOpen,
   isMembersMenuOpen,
   setIsMembersMenuOpen,
+  isEventsMenuOpen,
+  setIsEventsMenuOpen,
   isScoresMenuOpen,
   setIsScoresMenuOpen,
   mobileMenuRef,
@@ -200,13 +200,18 @@ export default function MobileNav({
             )}
 
             {!user && (
-              <Link
-                href={getPathname({ locale, href: "/church-registration" })}
-                onClick={() => setIsMenuOpen(false)}
-                className="text-gray-600 hover:text-blue-600 px-4 py-4 rounded-md text-sm font-medium"
-              >
-                {t("churchRegistration")}
-              </Link>
+              <>
+                <Link
+                  href={getPathname({
+                    locale,
+                    href: "/terms-of-service?type=church",
+                  })}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-gray-600 hover:text-blue-600 px-4 py-4 rounded-md text-sm font-medium"
+                >
+                  {t("churchRegistration")}
+                </Link>
+              </>
             )}
             {user && user.role === "SUPER_ADMIN" && (
               <div className="px-3 py-2">

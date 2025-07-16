@@ -1,10 +1,11 @@
+// src/components/scores/ScoreList.tsx
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, Upload } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { ApiErrorResponse, SelectedSong } from "@/types/score";
+import { ApiErrorResponse, SelectedSong, UsageLimits } from "@/types/score";
 import { GENRES } from "@/data/genre";
 import Loading from "@/components/Loading";
 import ScoreTable from "@/components/scores/ScoreTable";
@@ -15,6 +16,7 @@ import { Score } from "@/types/score";
 
 export default function ScoreList() {
   const [scores, setScores] = useState<Score[]>([]);
+  const [usageLimits, setUsageLimits] = useState<UsageLimits | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
@@ -52,6 +54,44 @@ export default function ScoreList() {
       JSON.stringify(selectedSongList)
     );
   }, [selectedSongList]);
+
+  // 악보 및 사용량 데이터 가져오기
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // 악보 데이터 가져오기
+        const scoresResponse = await fetch("/api/scores");
+        if (!scoresResponse.ok) {
+          const errorData: ApiErrorResponse = await scoresResponse.json();
+          throw new Error(errorData.error || t("noScores"));
+        }
+        const scoresData = await scoresResponse.json();
+        setScores(scoresData);
+
+        // 사용량 데이터 가져오기
+        const usageResponse = await fetch("/api/secure/usage-limits");
+        if (!usageResponse.ok) {
+          const errorData: ApiErrorResponse = await usageResponse.json();
+          throw new Error(errorData.error || t("usageFetchError"));
+        }
+        const usageData = await usageResponse.json();
+        setUsageLimits(usageData);
+
+        setError(null);
+      } catch (error: unknown) {
+        let errorMessage = t("noScores");
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+        setError(errorMessage);
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [locale, t]);
 
   // 곡 추가 핸들러
   const handleAddSong = (score: SelectedSong) => {
@@ -201,58 +241,64 @@ export default function ScoreList() {
     setCurrentPage(1);
   };
 
-  useEffect(() => {
-    const fetchScores = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch("/api/scores");
-        if (!response.ok) {
-          const errorData: ApiErrorResponse = await response.json();
-          throw new Error(errorData.error || t("noScores"));
-        }
-        const data = await response.json();
-        setScores(data);
-        setError(null);
-      } catch (error: unknown) {
-        let errorMessage = t("noScores");
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-        setError(errorMessage);
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchScores();
-  }, [locale, t]);
+  // 업로드 버튼 비활성화 여부 확인
+  const isUploadButtonDisabled = (usageLimits: UsageLimits | null): boolean => {
+    if (usageLimits?.plan === "ENTERPRISE") {
+      return false; // ENTERPRISE 플랜은 항상 활성화
+    }
+    return (
+      !!usageLimits && usageLimits.remainingScores >= usageLimits.maxScores
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-8 px-4 pb-20 sm:px-6 lg:px-8">
       {isLoading && <Loading />}
-      <div className="container mx-auto max-w-5xl">
-        <div className="grid grid-cols-1 sm:grid-cols-[5fr_1fr] gap-4 sm:gap-4">
-          <div>
+      <div className="container mx-auto max-w-[90vw] sm:max-w-4xl lg:max-w-6xl">
+        <div className="w-auto max-w-5xl grid grid-cols-1 md:grid-cols-[3fr_1fr] lg:grid-cols-[3fr_1fr] gap-4 sm:gap-6">
+          <div className="">
             {/* 헤더 */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex justify-between items-center mb-4"
+              className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4"
             >
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
                 {t("title")}
               </h1>
-              <Link href={`/${locale}/scores/upload`}>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 px-4 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+              <div className="flex flex-col justify-end text-right items-end-safe">
+                <Link
+                  href={
+                    isUploadButtonDisabled(usageLimits)
+                      ? "#"
+                      : `/${locale}/scores/upload`
+                  }
                 >
-                  <Upload className="w-5 h-5" />
-                  <span>{t("uploadScore")}</span>
-                </motion.button>
-              </Link>
+                  <motion.button
+                    whileHover={{
+                      scale: isUploadButtonDisabled(usageLimits) ? 1 : 1.05,
+                    }}
+                    whileTap={{
+                      scale: isUploadButtonDisabled(usageLimits) ? 1 : 0.95,
+                    }}
+                    disabled={isUploadButtonDisabled(usageLimits)}
+                    className={`flex items-center space-x-2 py-2 px-4 rounded-lg shadow-md text-white font-semibold text-sm transition-all duration-300 ${
+                      isUploadButtonDisabled(usageLimits)
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 cursor-pointer"
+                    }`}
+                  >
+                    <Upload className="w-5 h-5" />
+                    <span>{t("uploadScore")}</span>
+                  </motion.button>
+                </Link>
+                {isUploadButtonDisabled(usageLimits) ? (
+                  <span className="text-xs text-red-500 whitespace-pre-wrap mt-1">
+                    {t("noUploadScore")}
+                  </span>
+                ) : null}
+              </div>
             </motion.div>
 
             {/* 검색 및 필터링 */}
@@ -300,7 +346,7 @@ export default function ScoreList() {
                   className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg flex items-center space-x-3"
                 >
                   <AlertCircle className="w-6 h-6 text-red-500" />
-                  <p className="text-red-700">{error}</p>
+                  <p className="text-red-700 text-sm">{error}</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -312,7 +358,7 @@ export default function ScoreList() {
                 animate={{ opacity: 1 }}
                 className="text-center text-gray-600 py-12"
               >
-                <p className="text-lg">{t("noScores")}</p>
+                <p className="text-base sm:text-lg">{t("noScores")}</p>
               </motion.div>
             ) : (
               <ScoreTable
@@ -332,6 +378,7 @@ export default function ScoreList() {
               locale={locale}
               isOpen={isSongListOpen}
               toggleOpen={() => setIsSongListOpen(!isSongListOpen)}
+              usageLimits={usageLimits}
             />
           </div>
         </div>

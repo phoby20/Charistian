@@ -1,3 +1,5 @@
+import { Plan } from "@prisma/client";
+
 // src/types/score.ts
 export interface ScoreComment {
   id: string;
@@ -181,4 +183,16 @@ export interface SetlistResponse {
     createdAt: string;
   }[];
   shares: Share[];
+}
+
+export interface UsageLimits {
+  plan: Plan;
+  maxUsers: number;
+  remainingUsers: number;
+  weeklySetlists: number;
+  remainingWeeklySetlists: number;
+  monthlySetlists: number;
+  remainingMonthlySetlists: number;
+  maxScores: number;
+  remainingScores: number;
 }

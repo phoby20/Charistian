@@ -58,7 +58,8 @@ model Church {
   address           String
   phone             String
   logo              String? // buildingImage에서 logo로 변경
-  plan              Plan      @default(FREE)
+  subscriptions     Subscription[]
+  usageLimits       UsageLimit[] // 추가: UsageLimit과의 관계
   state             ChurchState @default(PENDING)
   users             User[]
   groups            Group[]
@@ -339,6 +340,39 @@ model PasswordResetToken {
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model Subscription {
+  id                           String       @id @default(uuid())
+  churchId                     String
+  church                       Church       @relation(fields: [churchId], references: [id])
+  stripeCustomerId             String?   // Stripe 고객 ID
+  stripeCheckoutSessionId      String? // Checkout 세션 ID
+  stripeSubscriptionId         String? // 실제 구독 ID
+  plan                         Plan         @default(FREE)
+  status                       SubscriptionStatus @default(ACTIVE) // 구독 상태
+  createdAt                    DateTime     @default(now())
+  updatedAt                    DateTime     @updatedAt
+}
+
+model UsageLimit {
+  id            String       @id @default(uuid())
+  churchId      String
+  church        Church       @relation(fields: [churchId], references: [id])
+  userCount     Int          @default(0) // 등록된 성도 수
+  weeklySetlistCount Int     @default(0) // 주간 세트리스트 생성 횟수
+  monthlySetlistCount Int    @default(0) // 월간 세트리스트 생성 횟수
+  scoreCount    Int          @default(0) // 업로드된 악보 수
+  resetAt       DateTime?    // 주간/월간 리셋 시각
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
 }
 
 enum EventStatus {

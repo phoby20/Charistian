@@ -1,10 +1,9 @@
 {
   "dashboard": "대시보드",
   "pendingChurches": "신규 교회 등록 신청",
-  "pendingUsers": "신규 성도 등록 신청",
-  "approve": "허가",
-  "reject": "각하",
-  "rejectionReason": "각하 사유",
+  "approve": "성도등록",
+  "reject": "비승인",
+  "rejectionReason": "비승인 이유",
   "confirm": "확인",
   "serverError": "서버 오류가 발생했습니다",
   "name": "이름",
@@ -23,8 +22,17 @@
   "position": "직분",
   "noChurch": "소속 교회 없음",
   "contactBirthDate": "담당자 생년월일",
+  "pendingUsers": "승인 대기 사용자",
+  "managePendingUsersDescription": "승인 대기 중인 사용자를 검토하고 관리합니다.",
+  "fetchError": "대기 중인 사용자 목록을 가져오지 못했습니다.",
+  "approveError": "사용자 승인에 실패했습니다.",
+  "rejectError": "사용자 거절에 실패했습니다.",
+  "userLimitExceededTitle": "성도 등록 한도 초과",
+  "userLimitExceededMessage": "현재 플랜의 최대 사용자 등록 한도를 초과했습니다. 더 많은 사용자를 추가하려면 플랜을 업그레이드하세요.",
+  "upgradePlan": "플랜 업그레이드",
   "plan": "플랜",
   "free": "무료",
+  "infinity": "무제한",
   "smart": "스마트",
   "enterprise": "엔터프라이즈",
   "registrationFailed": "교회 등록에 실패했습니다",
@@ -231,23 +239,79 @@
   "passwordResetSuccess": "비밀번호가 성공적으로 재설정되었습니다.",
   "invalidOrExpiredToken": "유효하지 않거나 만료된 토큰입니다.",
   "Landing": {
-    "brandName": "Charistian(카리스챤)",
     "login": "로그인",
     "signup": "회원가입",
     "hero": {
-      "title": "교회 운영과 관리를 간편하게",
-      "description": "찬양콘티 작성과 악보공유\n출석관리 등을 위한 올인원 플랫폼으로 공동체를 강화하세요",
+      "title": "찬양 콘티 악보공유를 쉽게",
+      "description": "이제 찬양 콘티를 준비하는 과정에서\n번거롭게 찬양집을 찾아볼 필요가 없습니다\n쉽게 곡을 검색하고\n빠르게 콘티와 악보를 공유하세요",
       "cta": "성도등록"
     },
+    "howToUse": {
+      "title": "찬양콘티와\n악보를 공유하는 법",
+      "step0": {
+        "subTitle": "콘티 정하고 악보 준비하고\n팀원들에게 공유하기\n힘드셨죠?",
+        "description": "카리스챤이면 한방에 해결할 수 있어요",
+        "subDescription": {
+          "1": "찬양콘티 리스트업",
+          "2": "개별 악보 통합",
+          "3": "멤버들에게 공유"
+        }
+      },
+      "step1": {
+        "subTitle": "① 악보 리스트 페이지로 이동",
+        "description": "교회에서 사용중인 악보를 업로드하면\n이곳에서 확인 할 수 있습니다"
+      },
+      "step2": {
+        "subTitle": "② 원하는 곡을 검색",
+        "description": "교회에서 사용중인 악보를 업로드하면\n이곳에서 검색/확인 할 수 있습니다"
+      },
+      "step3": {
+        "subTitle": "③ 원하는 곡을\n선곡리스트에 담고\n『콘티 작성』을 클릭",
+        "description": "플레이 버튼을 눌러서\n해당 곡의 음원을 들을 수도 있어요\n(참고음원 등록이 필요합니다)"
+      },
+      "step4": {
+        "subTitle": "④ 콘티 작성에\n필요한 내용을 입력",
+        "description": "콘디 제목과 사용 날짜, 상세 설명으로\n팀원들에게 지시사항을\n공유할 수 있어요"
+      },
+      "step5": {
+        "subTitle": "⑤ 선곡 리스트를 확인",
+        "description": "드래그 앤 드롭으로\n순서를 변경할 수 있고\n선택한 참고음원을 공유할 수 있어요"
+      },
+      "step6": {
+        "subTitle": "⑥ 공유 대상 선택 후\n『콘티 작성』을 클릭!",
+        "description": "공유 대상을 설정하면\n해당 부서의 해당 팀에 소속 되어 있는\n모든 멤버들에게 메일로\n콘티의 개요와 『악보』가 공유되요!"
+      },
+      "step7": {
+        "subTitle": "⑦ 도착한 메일로\n콘티 리스트와\n통합악보를 확인",
+        "description": "『PDF를 다운로드』 버튼을 클릭하면\n콘티리스트의 악보를\n『하나의 PDF파일』로 확인할 수 있어요"
+      }
+    },
+    "faq": {
+      "title": "자주 묻는 질문",
+      "items": [
+        {
+          "question": "이 서비스는 무엇인가요?",
+          "answer": "저희 서비스는 찬양팀이 악보를 업로드하고, 콘티를 작성하며, 팀원들과 작성한 콘티와 악보를 공유하고, 일정과 출석을 관리할 수 있도록 도와줍니다."
+        },
+        {
+          "question": "어떻게 가입하나요?",
+          "answer": "교회는 팀 관리를 위해 등록할 수 있으며, 성도는 공유된 리소스에 접근하기 위해 가입할 수 있습니다."
+        },
+        {
+          "question": "모바일 친화적인가요?",
+          "answer": "네, 저희 플랫폼은 완전히 반응형으로 모바일 기기에서도 원활하게 작동합니다."
+        },
+        {
+          "question": "다국어를 지원하나요?",
+          "answer": "네, 한국어와 일본어를 지원하며, 곧 더 많은 언어가 추가될 예정입니다."
+        }
+      ]
+    },
     "features": {
-      "title": "주요 기능",
+      "title": "그 외의 기능",
       "attendance": {
         "title": "출석 관리",
         "description": "스마트폰의 QR코드로 출석 체크를 하고\n실시간 인사이트로 성도님들을 위해 \n더 기도하는 기회를 가질수 있습니다"
-      },
-      "members": {
-        "title": "성도 관리",
-        "description": "성도님의 권한/소속/교구/부서/팀 설정으로\n교회 전반을 가시화해서 운영해보세요\n성도님의 권한은 관리자, 리더, 성도별로 \n접근 권한을 맞춤 설정을 할 수 있습니다"
       },
       "schedule": {
         "title": "교회일정공유",
@@ -284,26 +348,23 @@
         }
       ]
     },
-    "promotion": {
-      "title": "모든 기능을 무료 이용",
-      "description": "기간 한정으로 Charistian의 모든 서비스를 무료 이용 가능!",
-      "cta": "신규교회등록",
-      "limitedOffer": "기간 한정 혜택"
-    },
     "cta": {
       "title": "교회를 변화할 준비 되셨나요?",
       "description": "수천 개의 교회가 사용하는 플랫폼에 합류하세요!",
       "button": "신규교회등록"
-    },
-    "footer": {
-      "description": "교회 통합 관리 운영 플랫폼",
-      "links": "링크",
-      "about": "회사 소개",
-      "contact": "문의",
-      "contactLink": "문의하기",
-      "privacy": "개인정보처리방침",
-      "rights": "모든 권리 보유."
     }
+  },
+  "footer": {
+    "brandName": "카리스챤",
+    "description": "교회 통합 관리 운영 플랫폼",
+    "links": "링크",
+    "about": "회사 소개",
+    "contact": "문의",
+    "contactLink": "문의하기",
+    "privacy": "개인정보처리방침",
+    "rights": "모든 권리 보유.",
+    "specifiedCommercialTransaction": "특정상거래법에 따른 표기",
+    "termsOfService": "이용약관"
   },
   "about": {
     "title": "회사 정보",
@@ -400,10 +461,10 @@
     "prevMonth": "이전 달"
   },
   "seo": {
-    "title": "charistian | 교회운영 올인원 플랫폼",
-    "description": "효율적인 교회 관리를 위한 올인원 플랫폼",
-    "keywords": "교회 관리, 기독교, 플랫폼, 출석, 일정",
-    "ogImageAlt": "charistian 플랫폼 미리보기"
+    "title": "카리스챤 | 찬양 콘티/악보 공유 플랫폼",
+    "description": "효율적인 찬양 콘티/악보 공유 플랫폼",
+    "keywords": "악보공유, 콘티공유, 콘티, 기독교, 플랫폼, 출석, 일정",
+    "ogImageAlt": "카리스챤 플랫폼 미리보기"
   },
   "MyPage": {
     "title": "마이페이지",
@@ -547,7 +608,11 @@
     "youtube": "YouTube",
     "play": "재생",
     "pause": "일시정지",
-    "seek": "재생 시간 이동"
+    "seek": "재생 시간 이동",
+    "usageFetchError": "사용량 정보를 가져오지 못했습니다.",
+    "upgradePlan": "플랜 업그레이드",
+    "noMakeSetlist": "주/월간 사용량 초과로 콘티를 작성할 수 없습니다.\n플랜을 업그레이드하세요",
+    "noUploadScore": "악보 업로드 제한수를 넘었습니다.\n플랜을 업그레이드하세요"
   },
   "Setlist": {
     "title": "콘티 제목",
@@ -615,7 +680,10 @@
     "selecteReference": "참고음원 선택",
     "youtubeRestricted": "이 비디오는 재생이 제한되어 있습니다.",
     "unmute": "음소거 해제",
-    "mute": "음소거"
+    "mute": "음소거",
+    "upgradePlan": "플랜 업그레이드",
+    "noMakeSetlist": "주/월간 사용량 초과로 콘티를 작성할 수 없습니다.플랜을 업그레이드하세요",
+    "noComments": "댓글이 없습니다"
   },
   "scoreList": "악보리스트",
   "setlistList": "콘티리스트",
@@ -684,5 +752,222 @@
     "confirmSendEmailDescription": "이메일 전송을 확인해 주세요.",
     "emailSentSuccess": "이메일이 성공적으로 전송되었습니다.",
     "serverError": "서버 오류가 발생했습니다."
+  },
+  "plans": {
+    "title": "플랜 선택",
+    "superAdminRequired": "SuperAdmin 권한이 필요합니다.",
+    "month": "월",
+    "free": {
+      "title": "FREE",
+      "description": "기본 기능으로 시작하세요",
+      "features1": "최대 10명 성도 등록",
+      "features2": "최대 주 2회 / 월 8회 콘티작성",
+      "features3": "최대 50곡 악보",
+      "price": "무료",
+      "currentPlan": "현재 플랜",
+      "select": "선택"
+    },
+    "smart": {
+      "title": "SMART",
+      "description": "중소규모 교회에 적합",
+      "features1": "최대 150명 성도 등록",
+      "features2": "최대 주 10회 / 월 50회 콘티작성",
+      "features3": "최대 200곡 악보",
+      "price": "9,900원",
+      "subscribe": "구독 시작"
+    },
+    "enterprise": {
+      "title": "ENTERPRISE",
+      "description": "대규모 교회 및 고급 기능",
+      "features1": "성도 등록 무제한",
+      "features2": "콘티작성 무제한",
+      "features3": "악보 업로드 무제한",
+      "price": "49,000원",
+      "subscribe": "구독 시작"
+    },
+    "cancel": {
+      "title": "구독 취소",
+      "confirm": "현재 구독은 {expirationDate}까지 유효합니다. \n정말로 구독을 취소하시겠습니까? \n지금 구독을 취소하면 잔여기간에 상관없이 즉시 취소가 됩니다.",
+      "submit": "구독 취소",
+      "cancel": "취소",
+      "processing": "처리 중...",
+      "noExpirationDate": "만료일 없음",
+      "error": {
+        "cancelFailed": "구독 취소에 실패했습니다."
+      }
+    },
+    "currentPlan": "현재 플랜",
+    "expirationDate": "만료일",
+    "error": {
+      "config": "Stripe 설정을 불러오지 못했습니다.",
+      "fetchPlan": "플랜 정보를 가져오지 못했습니다.",
+      "cancelFailed": "구독 취소에 실패했습니다.",
+      "stripeNotLoaded": "Stripe 초기화에 실패했습니다.",
+      "alreadySubscribed": "이미 구독 중입니다.",
+      "payment": "결제 처리 중 오류가 발생했습니다.",
+      "clientSecret": "결제 세션을 생성하지 못했습니다."
+    },
+    "cancelSubscription": "구독 취소"
+  },
+  "success": {
+    "title": "결제 완료",
+    "message": "구독이 성공적으로 완료되었습니다. 이제 새로운 플랜의 모든 기능을 이용할 수 있습니다!",
+    "goToDashboard": "대시보드로 이동"
+  },
+  "manage": {
+    "title": "구독 관리",
+    "currentPlan": "현재 플랜",
+    "status": "상태",
+    "cancelSubscription": "구독 취소",
+    "changePlan": "플랜 변경",
+    "superAdminRequired": "SuperAdmin만 구독을 관리할 수 있습니다."
+  },
+  "dashboard": {
+    "title": "대시보드",
+    "planAndUsage": "플랜 및 사용량",
+    "plan": "플랜",
+    "remainingUsers": "남은 성도 등록",
+    "remainingScores": "남은 악보 업로드",
+    "managePlan": "플랜 관리",
+    "limitExceededUsers": "성도 등록 한도를 초과했습니다. 플랜을 업그레이드하세요.",
+    "limitExceededSetlists": "세트리스트 생성 한도를 초과했습니다. 플랜을 업그레이드하세요.",
+    "limitExceededScores": "악보 업로드 한도를 초과했습니다. 플랜을 업그레이드하세요.",
+    "registeredMembers": "현재 등록 성도 수",
+    "weeklySetlists": "주간 작성한 콘티 수",
+    "monthlySetlists": "월간 작성한 콘티 수",
+    "scoreUploads": "남은 악보 업로드"
+  },
+  "checkout": {
+    "title": "결제",
+    "limitExceeded": "한도를 초과했습니다. 플랜을 업그레이드하세요.",
+    "error": {
+      "config": "Stripe 설정을 불러오지 못했습니다.",
+      "alreadySubscribed": "이미 구독 중입니다. 구독 관리 페이지에서 변경하세요.",
+      "server": "서버 오류가 발생했습니다.",
+      "clientSecret": "결제 정보를 가져오지 못했습니다.",
+      "payment": "결제 처리 중 오류가 발생했습니다."
+    },
+    "processing": "처리 중...",
+    "submit": "{plan} 플랜 결제",
+    "goToManage": "구독 관리 페이지로 이동",
+    "successMessage": "구독이 성공적으로 완료되었습니다. \n이제 새로운 플랜의 기능을 이용할 수 있습니다!",
+    "successTitle": "결제 완료",
+    "goToDashboard": "대시보드로 이동"
+  },
+  "SpecifiedCommercialTransaction": {
+    "title": "특정상거래법에 따른 표기",
+    "companyName": "판매업체(서비스명)",
+    "representative": "운영 책임자",
+    "address": "소재지",
+    "contact": "연락처",
+    "email": "{email}",
+    "price": "판매 가격",
+    "priceFree": "무료",
+    "priceSmart": "월 9,900원",
+    "priceEnterprise": "월 49,000원",
+    "memberLimitFree": "최대 10명 성도 등록",
+    "memberLimitSmart": "최대 150명 성도 등록",
+    "memberLimitEnterprise": "성도 등록 무제한",
+    "scheduleLimitFree": "주 2회/월 8회 콘티 작성",
+    "scheduleLimitSmart": "주 10회/월 50회 콘티 작성",
+    "scheduleLimitEnterprise": "콘티 작성 무제한",
+    "sheetMusicLimitFree": "최대 50곡 악보 등록",
+    "sheetMusicLimitSmart": "최대 200곡 악보 등록",
+    "sheetMusicLimitEnterprise": "악보 업로드 무제한",
+    "label_paymentMethod": "결제 방법",
+    "content_paymentMethod": "신용카드(Stripe 이용)",
+    "label_paymentTiming": "결제 시기",
+    "content_paymentTiming": "즉시 결제(구독 계약 시 즉시 결제, 이후 자동 갱신)",
+    "label_serviceStart": "서비스 시작 시기",
+    "content_serviceStart": "결제 완료 후 즉시 해당 플랜의 서비스를 이용할 수 있습니다.",
+    "label_refundPolicy": "환불 및 반품",
+    "content_refundPolicy": "서비스의 특성상 환불, 반품 및 취소는 불가능합니다. 구독 해지 시 잔여 기간과 관계없이 서비스는 즉시 종료됩니다."
+  },
+  "TermsOfService": {
+    "title": "이용약관",
+    "description": "Integrity의 서비스 이용약관입니다. 교회(단체) 및 성도의 이용 조건을 규정합니다.",
+    "article1": {
+      "title": "제1조 (총칙)",
+      "item1": "본 이용약관(이하 '본 약관')은 Integrity(이하 '회사')가 제공하는 서비스(이하 '본 서비스')의 이용 조건 및 절차를 규정합니다.",
+      "item2": "본 서비스의 사용자는 교회(단체)와 성도로 구분됩니다. 교회(단체)는 본 서비스의 계약 및 결제 주체이며, 성도는 교회(단체)의 관리 하에 본 서비스를 이용합니다.",
+      "item3": "사용자는 본 서비스를 이용함으로써 본 약관에 동의한 것으로 간주됩니다.",
+      "item4": "회사는 필요에 따라 본 약관을 수정할 수 있으며, 수정 내용은 본 서비스의 웹사이트를 통해 공지됩니다."
+    },
+    "article2": {
+      "title": "제2조 (사용자 구분 및 권한)",
+      "item1": "교회(단체)는 본 서비스의 유료 또는 무료 플랜을 계약하며, 성도를 관리할 권한을 가집니다.",
+      "item2": "성도는 교회(단체)가 계약한 플랜의 범위 내에서 본 서비스를 이용할 수 있습니다. 성도는 직접 결제를 수행하지 않습니다.",
+      "item3": "성도가 이용 가능한 서비스에는 교회(단체)가 허용한 범위 내에서의 콘티열람과 작성, 악보열람과 작성, 및 기타 관련 기능이 포함됩니다.",
+      "item4": "본 서비스 이용에는 인터넷 연결 및 호환 가능한 디바이스가 필요합니다."
+    },
+    "article3": {
+      "title": "제3조 (서비스 플랜)",
+      "item1": "회사는 다음과 같은 플랜을 제공합니다:",
+      "freePlan": "FREE 플랜: 최대 10명 성도 등록, 주 2회/월 8회 콘티 작성, 최대 50곡 악보 등록",
+      "smartPlan": "SMART 플랜: 월 9,900원, 최대 150명 성도 등록, 주 10회/월 50회 콘티 작성, 최대 200곡 악보 등록",
+      "enterprisePlan": "ENTERPRISE 플랜: 월 49,000원, 성도 등록 무제한, 콘티 작성 무제한, 악보 업로드 무제한",
+      "item2": "교회(단체)는 선택한 플랜의 제한 내에서 성도의 서비스 이용을 관리합니다."
+    },
+    "article4": {
+      "title": "제4조 (결제 및 구독)",
+      "item1": "본 서비스의 유료 플랜은 교회(단체)가 신용카드(Stripe 이용)를 통해 즉시 결제해야 합니다.",
+      "item2": "구독은 자동 갱신되며, 교회(단체)가 해지 절차를 수행할 때까지 지속됩니다.",
+      "item3": "결제 완료 후 교회(단체) 및 그 관리 하의 성도는 즉시 해당 플랜의 서비스를 이용할 수 있습니다."
+    },
+    "article5": {
+      "title": "제5조 (환불 정책)",
+      "item1": "서비스의 특성상 환불, 반품, 취소는 불가능합니다.",
+      "item2": "교회(단체)는 구독을 신중히 선택해야 합니다.",
+      "item3": "구독 해지 시 잔여 기간과 관계없이 서비스는 즉시 종료되며, 성도의 이용도 중단됩니다."
+    },
+    "article6": {
+      "title": "제6조 (문의)",
+      "item1": "문의는 이메일({email})을 통해 가능합니다."
+    },
+    "agreeAndRegister": "동의하고 가입"
+  },
+  "PrivacyPolicy": {
+    "title": "개인정보처리방침",
+    "description": "Integrity의 개인정보처리방침입니다. 사용자의 개인정보 수집, 이용, 보호에 관한 내용을 규정합니다.",
+    "article1": {
+      "title": "제1조 (수집하는 정보)",
+      "item1": "당사는 사용자가 본 서비스를 이용할 때 다음의 개인정보를 수집할 수 있습니다:",
+      "subItems": {
+        "item1": "성명, 이메일 주소, 전화번호 등 연락처 정보.",
+        "item2": "교회(단체) 명칭, 소재지, 직책 등 단체 관련 정보.",
+        "item3": "서비스 이용 기록, IP 주소, 쿠키 정보 등 이용 데이터.",
+        "item4": "기타 사용자가 자발적으로 제공하는 정보."
+      }
+    },
+    "article2": {
+      "title": "제2조 (개인정보의 이용 목적)",
+      "item1": "수집된 개인정보는 다음의 목적으로 이용됩니다:",
+      "subItems": {
+        "item1": "본 서비스의 제공 및 운영.",
+        "item2": "사용자 지원 및 문의 대응.",
+        "item3": "서비스 개선을 위한 분석 및 통계.",
+        "item4": "법령 준수 및 법적 요청 대응."
+      }
+    },
+    "article3": {
+      "title": "제3조 (개인정보의 제3자 제공)",
+      "item1": "당사는 법령에서 허용하는 경우를 제외하고, 사용자의 동의 없이 개인정보를 제3자에게 제공하지 않습니다.",
+      "item2": "제3자에게 제공할 경우, 제공 목적 및 범위를 명확히 고지합니다."
+    },
+    "article4": {
+      "title": "제4조 (개인정보의 보호)",
+      "item1": "당사는 개인정보를 적절히 관리하며, 무단 접근, 분실, 변조, 유출 등을 방지하기 위한 합리적인 조치를 취합니다.",
+      "item2": "개인정보는 이용 목적 달성에 필요한 기간 동안만 보관하며, 이후 적절히 삭제합니다."
+    },
+    "article5": {
+      "title": "제5조 (사용자의 권리)",
+      "item1": "사용자는 자신의 개인정보의 열람, 정정, 삭제, 이용 중지를 당사에 요청할 수 있습니다.",
+      "item2": "요청 방법은 제6조에 정한 문의처를 통해 진행됩니다."
+    },
+    "article6": {
+      "title": "제6조 (문의)",
+      "item1": "개인정보 관련 문의는 다음 이메일 주소를 통해 접수합니다: {email}",
+      "item2": "당사는 문의에 대해 신속히 대응합니다."
+    }
   }
 }

@@ -1,9 +1,15 @@
+// src/components/scores/DesktopSelectedSongList.tsx
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getDisplayTitle } from "@/utils/getDisplayTitle";
+import {
+  isSetlistCreationDisabled,
+  shouldShowUpgradeButton,
+} from "@/utils/setlistUtils";
+import { UsageLimits } from "@/types/score";
 
 interface DesktopSelectedSongListProps {
   selectedSongList: {
@@ -14,14 +20,22 @@ interface DesktopSelectedSongListProps {
   }[];
   handleRemoveSong: (id: string, index: number) => void;
   locale: string;
+  usageLimits: UsageLimits | null;
 }
 
 const DesktopSelectedSongList = ({
   selectedSongList,
   handleRemoveSong,
   locale,
+  usageLimits,
 }: DesktopSelectedSongListProps) => {
   const t = useTranslations("Score");
+
+  // createSetlist 버튼 비활성화 조건
+  const isCreateDisabled: boolean = isSetlistCreationDisabled(
+    selectedSongList,
+    usageLimits
+  );
 
   return (
     <div className="relative">
@@ -31,7 +45,7 @@ const DesktopSelectedSongList = ({
         animate={{ height: "auto", opacity: 1 }}
         exit={{ height: 0, opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="fixed top-20 min-w-60 bg-white rounded-xl shadow-lg p-6 border border-gray-200 max-h-[80vh] overflow-y-auto z-40"
+        className="fixed w-auto max-w-2xs top-20 min-w-60 bg-white rounded-xl shadow-lg p-6 border border-gray-200 max-h-[80vh] overflow-y-auto z-40"
       >
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
           {t("selectedSongs")}
@@ -41,11 +55,9 @@ const DesktopSelectedSongList = ({
         ) : (
           <ul className="space-y-2">
             {selectedSongList.map((song, index) => {
-              // 동일 id의 추가 횟수 계산
               const count = selectedSongList
                 .slice(0, index + 1)
                 .filter((s) => s.id === song.id).length;
-              // locale에 따라 표시할 제목 선택
               const displayTitle = getDisplayTitle(
                 song.title,
                 song.titleEn,
@@ -77,16 +89,34 @@ const DesktopSelectedSongList = ({
             })}
           </ul>
         )}
+        {shouldShowUpgradeButton(isCreateDisabled, usageLimits) ? (
+          <span className="text-xs mt-4 text-red-600 whitespace-pre-wrap">
+            {t("noMakeSetlist")}
+          </span>
+        ) : (
+          ""
+        )}
         <Link href={`/${locale}/setlists/create`}>
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 text-sm"
-            disabled={selectedSongList.length === 0}
+            whileHover={{ scale: isCreateDisabled ? 1 : 1.05 }}
+            whileTap={{ scale: isCreateDisabled ? 1 : 0.95 }}
+            className={`mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 text-sm ${isCreateDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+            disabled={isCreateDisabled}
           >
             {t("createSetlist")}
           </motion.button>
         </Link>
+        {shouldShowUpgradeButton(isCreateDisabled, usageLimits) && (
+          <Link href={`/${locale}/plans`}>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="cursor-pointer mt-2 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors text-sm"
+            >
+              {t("upgradePlan")}
+            </motion.button>
+          </Link>
+        )}
       </motion.div>
     </div>
   );

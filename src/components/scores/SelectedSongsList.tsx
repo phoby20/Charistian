@@ -20,6 +20,8 @@ import { SelectedSong } from "@/types/score";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { motion } from "framer-motion";
 import { debounce } from "lodash";
+import { toast } from "react-toastify";
+import { Volume2, VolumeX } from "lucide-react";
 
 interface SelectedSongsListProps {
   selectedSongs: SelectedSong[];
@@ -35,14 +37,6 @@ interface YouTubeVideo {
   title: string;
   videoId: string;
 }
-
-const getYouTubeVideoId = (url?: string): string | undefined => {
-  if (!url) return undefined;
-  const regex =
-    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-  const match = url.match(regex);
-  return match ? match[1] : undefined;
-};
 
 const getYouTubeUrls = (urls?: string[]): string[] => {
   if (!urls || urls.length === 0) return [];
@@ -67,13 +61,204 @@ export default function SelectedSongsList({
 }: SelectedSongsListProps) {
   const [overIndex, setOverIndex] = useState<number | null>(null);
   const [isDraggingAny, setIsDraggingAny] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentPlayingId, setCurrentPlayingId] = useState<string | null>(null);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+  const [isPlayerReady, setIsPlayerReady] = useState<boolean>(false);
+  const [pendingPlay, setPendingPlay] = useState<string | null>(null);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
   const [videoTitles, setVideoTitles] = useState<{
     [songId: string]: YouTubeVideo[];
   }>({});
   const playerRef = useRef<YouTubePlayer | null>(null);
+
+  // iOS 디바이스 감지
+  const isIOS = useCallback((): boolean => {
+    const userAgent: string = navigator.userAgent || "";
+    const vendor: string = navigator.vendor || "";
+    return /iPad|iPhone|iPod/.test(userAgent) && vendor.includes("Apple");
+  }, []);
+
+  useEffect(() => {
+    console.log("Is iOS device:", isIOS());
+  }, [isIOS]);
+
+  const getYouTubeVideoId = (url?: string): string | undefined => {
+    if (!url) return undefined;
+    const regex =
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : undefined;
+  };
+
+  const getFirstYouTubeVideoId = (urls?: string[]): string | undefined => {
+    if (!urls || urls.length === 0) return undefined;
+    for (const url of urls) {
+      const videoId = getYouTubeVideoId(url);
+      if (videoId) return videoId;
+    }
+    return undefined;
+  };
+
+  const handlePlayPause = useCallback(
+    debounce(async (scoreId: string) => {
+      // 플레이어 준비 상태와 playerRef 확인
+      if (!playerRef.current || !isPlayerReady) {
+        console.warn("Player is not ready yet, adding to pending play");
+        setPendingPlay(scoreId);
+        return;
+      }
+
+      try {
+        if (currentPlayingId === scoreId) {
+          // 현재 재생 중인 비디오 일시정지
+          await playerRef.current.pauseVideo();
+          setCurrentPlayingId(null);
+          setPendingPlay(null);
+          setIsMuted(false);
+        } else {
+          // 새로운 비디오 재생
+          if (currentPlayingId) {
+            await playerRef.current.pauseVideo();
+          }
+          setCurrentPlayingId(scoreId);
+          const score = selectedSongs.find((s) => s.id === scoreId);
+          const videoId = score?.referenceUrls[0]
+            ? getYouTubeVideoId(score?.referenceUrls[0])
+            : getFirstYouTubeVideoId(score?.referenceUrls);
+          if (videoId) {
+            await playerRef.current.loadVideoById(videoId);
+            await playerRef.current.playVideo();
+            setIsMuted(isIOS());
+            if (isIOS()) {
+              try {
+                await playerRef.current.unMute();
+                setIsMuted(false);
+              } catch (unmuteErr: unknown) {
+                console.warn("Failed to unmute video on iOS:", unmuteErr);
+                setIsMuted(true);
+                toast.warn(t("unmuteWarning"), {
+                  position: "top-right",
+                  autoClose: 3000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  theme: "light",
+                });
+              }
+            }
+          } else {
+            throw new Error("No valid YouTube URL found");
+          }
+        }
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : t("youtubeError");
+        console.error("Error loading/playing video:", err);
+        setError(errorMessage);
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+        });
+        setCurrentPlayingId(null);
+        setPendingPlay(null);
+        setIsMuted(false);
+      }
+    }, 300),
+    [currentPlayingId, isPlayerReady, t, isIOS]
+  );
+
+  const onPlayerReady = (event: { target: YouTubePlayer }) => {
+    playerRef.current = event.target;
+    setIsPlayerReady(true);
+    setDuration(event.target.getDuration());
+    setIsMuted(isIOS());
+    if (pendingPlay) {
+      handlePlayPause(pendingPlay);
+    } else if (currentPlayingId) {
+      const score = selectedSongs.find((s) => s.id === currentPlayingId);
+      const videoId = score?.referenceUrls[0]
+        ? getYouTubeVideoId(score?.referenceUrls[0])
+        : getFirstYouTubeVideoId(score?.referenceUrls);
+      if (videoId) {
+        event.target.loadVideoById(videoId);
+        event.target.playVideo();
+      }
+    }
+  };
+
+  const onStateChange = (event: { target: YouTubePlayer; data: number }) => {
+    if (event.data === 1) {
+      setDuration(event.target.getDuration());
+      setIsMuted(event.target.isMuted());
+    } else if (event.data === 2 || event.data === 0) {
+      setCurrentPlayingId(null);
+      setPendingPlay(null);
+      setIsMuted(false);
+    }
+  };
+
+  const onError = (event: { data: number }) => {
+    console.error("YouTube player error code:", event.data);
+    let errorMessage = t("youtubeError");
+    if (event.data === 150 || event.data === 101) {
+      errorMessage = t("youtubeRestricted");
+    }
+    setError(errorMessage);
+    toast.error(errorMessage, {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "light",
+    });
+    setCurrentPlayingId(null);
+    setPendingPlay(null);
+    setIsMuted(false);
+  };
+
+  const handleSeek = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newTime = parseFloat(event.target.value);
+    if (playerRef.current && isPlayerReady) {
+      playerRef.current.seekTo(newTime, true);
+      setCurrentTime(newTime);
+    }
+  };
+
+  const handleToggleMute = () => {
+    if (!playerRef.current || !isPlayerReady) {
+      toast.warn(t("playerNotReady"), {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "light",
+      });
+      return;
+    }
+    try {
+      if (isMuted) {
+        playerRef.current.unMute();
+        setIsMuted(false);
+      } else {
+        playerRef.current.mute();
+        setIsMuted(true);
+      }
+    } catch (err: unknown) {
+      console.warn("Failed to toggle mute:", err);
+    }
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -167,90 +352,30 @@ export default function SelectedSongsList({
     }
   };
 
-  const handlePlayPause = useCallback(
-    debounce(async (songId: string, videoId?: string) => {
-      if (currentPlayingId === songId) {
-        if (playerRef.current) {
-          try {
-            await playerRef.current.pauseVideo();
-            setCurrentPlayingId(null);
-          } catch (err) {
-            console.error("Error pausing video:", err);
-          }
-        }
-      } else {
-        if (playerRef.current && currentPlayingId) {
-          try {
-            await playerRef.current.pauseVideo();
-          } catch (err) {
-            console.error("Error pausing current video:", err);
-          }
-        }
-        setCurrentPlayingId(songId);
-        const selectedUrl = videoId
-          ? videoId
-          : getYouTubeVideoId(selectedUrls[songId]) ||
-            getYouTubeVideoId(
-              getYouTubeUrls(
-                selectedSongs.find((s) => s.id === songId)?.referenceUrls
-              )[0]
-            );
-        if (selectedUrl && playerRef.current) {
-          try {
-            await playerRef.current.loadVideoById(selectedUrl);
-          } catch (err) {
-            console.error("Error loading new video:", err);
-          }
-        }
-      }
-    }, 300),
-    [currentPlayingId, selectedSongs, selectedUrls]
-  );
-
   const handleUrlSelect = (songId: string, url: string) => {
     onUrlSelect(songId, url);
     const videoId = getYouTubeVideoId(url);
     if (videoId) {
-      handlePlayPause(songId, videoId); // 선택 시 즉시 재생
-    }
-  };
-
-  const onPlayerReady = (event: { target: YouTubePlayer }) => {
-    playerRef.current = event.target;
-    setDuration(event.target.getDuration());
-    if (currentPlayingId) {
-      event.target.playVideo();
-    }
-  };
-
-  const onStateChange = (event: { target: YouTubePlayer; data: number }) => {
-    if (event.data === 1) {
-      setDuration(event.target.getDuration());
-    } else if (event.data === 2 || event.data === 0) {
-      setCurrentPlayingId(null);
-    }
-  };
-
-  const handleSeek = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newTime = parseFloat(event.target.value);
-    if (playerRef.current) {
-      playerRef.current.seekTo(newTime, true);
-      setCurrentTime(newTime);
+      handlePlayPause(songId); // 선택 시 즉시 재생
     }
   };
 
   useEffect(() => {
-    if (currentPlayingId && playerRef.current) {
+    if (currentPlayingId && playerRef.current && isPlayerReady) {
       const interval = setInterval(() => {
         setCurrentTime(playerRef.current!.getCurrentTime());
+        setIsMuted(playerRef.current!.isMuted());
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [currentPlayingId]);
+  }, [currentPlayingId, isPlayerReady]);
 
   useEffect(() => {
     return () => {
       playerRef.current = null;
+      setIsPlayerReady(false);
+      setPendingPlay(null);
+      setIsMuted(false);
     };
   }, []);
 
@@ -272,22 +397,24 @@ export default function SelectedSongsList({
         <p className="text-sm text-gray-500">{t("noSelectedSongs")}</p>
       ) : (
         <>
-          {currentPlayingId && currentVideoId && (
-            <div className="hidden">
-              <YouTube
-                key={currentVideoId}
-                videoId={currentVideoId}
-                opts={{
-                  width: 0,
-                  height: 0,
-                  playerVars: { autoplay: 0, controls: 0, showinfo: 0 },
-                }}
-                onReady={onPlayerReady}
-                onStateChange={onStateChange}
-                onError={(e) => console.error("YouTube 플레이어 오류:", e)}
-              />
-            </div>
-          )}
+          <YouTube
+            key={currentVideoId || "default"}
+            videoId={currentVideoId}
+            opts={{
+              width: 1,
+              height: 1,
+              playerVars: {
+                autoplay: 0,
+                controls: 1,
+                mute: isIOS() ? 1 : 0,
+                playsinline: 1,
+              },
+            }}
+            onReady={onPlayerReady}
+            onStateChange={onStateChange}
+            onError={onError}
+          />
+          {error && <div>test</div>}
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -338,7 +465,7 @@ export default function SelectedSongsList({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="mt-4 bg-white shadow-lg p-4 flex items-center gap-4 rounded-lg"
+              className="mt-4 bg-white shadow-lg p-4 flex items-center gap-4 rounded-lg mb-8"
             >
               <span className="text-sm text-gray-600">
                 {formatTime(currentTime)} / {formatTime(duration)}
@@ -355,6 +482,20 @@ export default function SelectedSongsList({
                 aria-valuemin={0}
                 aria-valuemax={duration}
               />
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleToggleMute}
+                className="text-gray-600 hover:text-gray-800 p-2"
+                aria-label={isMuted ? t("unmute") : t("mute")}
+              >
+                {isMuted ? (
+                  <VolumeX className="w-5 h-5" aria-label={t("mute")} />
+                ) : (
+                  <Volume2 className="w-5 h-5" aria-label={t("unmute")} />
+                )}
+              </motion.button>
             </motion.div>
           )}
         </>

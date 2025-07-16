@@ -1,3 +1,4 @@
+// src/context/AuthContext.tsx
 "use client";
 
 import {
@@ -54,7 +55,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           pathname !== `/${locale}/signup` &&
           pathname !== `/${locale}/church-registration` &&
           pathname !== `/${locale}/reset-password` &&
-          pathname !== `/${locale}/reset-password/confirm`
+          pathname !== `/${locale}/reset-password/confirm` &&
+          pathname !== `/${locale}/privacy-policy` &&
+          pathname !== `/${locale}/terms-of-service`
         ) {
           router.replace(`/login`);
         }
@@ -80,6 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       "/signup/complete",
       "/reset-password",
       "/reset-password/confirm",
+      "/privacy-policy",
+      "/terms-of-service",
     ];
 
     if (!pathname || !locale) {

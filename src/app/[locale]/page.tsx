@@ -6,6 +6,14 @@ import { motion } from "framer-motion";
 import Button from "@/components/Button";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { Gaegu } from "next/font/google";
+import FAQ from "@/components/landing/Faq";
+
+const gaegu = Gaegu({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 export default function LandingPage() {
   const t = useTranslations("Landing");
@@ -37,12 +45,7 @@ export default function LandingPage() {
     {
       title: t("features.attendance.title"),
       description: t("features.attendance.description"),
-      img: "attendance",
-    },
-    {
-      title: t("features.members.title"),
-      description: t("features.members.description"),
-      img: "members",
+      img: "id_card",
     },
     {
       title: t("features.schedule.title"),
@@ -80,8 +83,8 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-      <section className="relative min-h-screen bg-[url('/top_bg_2.png')] bg-cover bg-center text-white pb-16">
-        <div className="py-30 px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative min-h-screen flex items-center justify-center border-transparent bg-gradient-to-r from-[#ffde59] to-[#ff66c4] bg-clip-border">
+        <div className="py-20 px-4 sm:px-6 lg:px-8 text-center">
           <motion.h2
             className="text-3xl md:text-6xl font-extrabold mb-8 text-[#6e2001]"
             initial={{ opacity: 0, y: 20 }}
@@ -91,7 +94,7 @@ export default function LandingPage() {
             {t("hero.title")}
           </motion.h2>
           <motion.p
-            className="text-lg md:text-3xl mb-12 max-w-xl whitespace-pre mx-auto text-[#360f00]"
+            className="text-lg md:text-3xl max-w-xl whitespace-pre mx-auto text-[#360f00]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -99,7 +102,7 @@ export default function LandingPage() {
             {t("hero.description")}
           </motion.p>
           <motion.div
-            className="flex gap-4 justify-center"
+            className="flex gap-4 justify-center mt-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -119,21 +122,309 @@ export default function LandingPage() {
               {t("usage.steps.0.title")}
             </Button>
           </motion.div>
+          <div className="flex justify-center mt-10">
+            <Image
+              src="/images/landing/conte_sample_ko.png"
+              alt="conte_sample"
+              width={800}
+              height={800}
+            />
+          </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-wave bg-cover opacity-20"></div>
       </section>
+
+      {/* Step0 */}
+      <section className={gaegu.className}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1 * 0.2 }}
+          viewport={{ once: true }}
+        >
+          <div className="bg-red-100 flex flex-col items-center justify-center mt-20 pt-20 pb-20">
+            <h4
+              id={`feature-title`}
+              className="text-7xl font-semibold text-gray-900 mt-16 mb-16 text-center whitespace-pre-wrap md:whitespace-normal"
+            >
+              {t("howToUse.title")}
+            </h4>
+            <h4
+              id={`feature-title`}
+              className="text-4xl font-semibold text-gray-900 text-center whitespace-pre-wrap"
+            >
+              {t("howToUse.step0.subTitle")}
+            </h4>
+            <h5
+              id={`feature-title`}
+              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+            >
+              {t("howToUse.step0.description")}
+            </h5>
+            <div className="relative mt-20">
+              <Image
+                src="/images/landing/work_illustrator.png"
+                alt="conte_sample"
+                width={200}
+                height={200}
+              />
+              <p className="absolute top-20 left-[-80] -rotate-25">
+                {t("howToUse.step0.subDescription.1")}
+              </p>
+              <p className="absolute top-0 left-[90] rotate-15">
+                {t("howToUse.step0.subDescription.2")}
+              </p>
+              <p className="absolute top-20 right-[-80] rotate-15">
+                {t("howToUse.step0.subDescription.3")}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Step1 */}
+      <section className={`whitespace-pre-wrap`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1 * 0.2 }}
+          viewport={{ once: true }}
+        >
+          <div className="bg-white flex flex-col items-center justify-center pt-20 pb-20">
+            <h4
+              id={`feature-title`}
+              className="text-4xl font-semibold text-gray-900 text-center"
+            >
+              {t("howToUse.step1.subTitle")}
+            </h4>
+            <h5
+              id={`feature-title`}
+              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+            >
+              {t("howToUse.step1.description")}
+            </h5>
+            <div className="relative mt-20">
+              <Image
+                src="/images/landing/step1.png"
+                alt="conte_sample"
+                width={900}
+                height={900}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Step2 */}
+      <section className={`whitespace-pre-wrap`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1 * 0.2 }}
+          viewport={{ once: true }}
+        >
+          <div className="bg-gray-100 flex flex-col items-center justify-center pt-20 pb-20">
+            <h4
+              id={`feature-title`}
+              className="text-4xl font-semibold text-gray-900 text-center"
+            >
+              {t("howToUse.step2.subTitle")}
+            </h4>
+            <h5
+              id={`feature-title`}
+              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+            >
+              {t("howToUse.step2.description")}
+            </h5>
+            <div className="relative mt-20">
+              <Image
+                src="/images/landing/step2.png"
+                alt="conte_sample"
+                width={900}
+                height={900}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Step3 */}
+      <section className={`whitespace-pre-wrap`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1 * 0.2 }}
+          viewport={{ once: true }}
+        >
+          <div className="bg-white flex flex-col items-center justify-center pt-20 pb-20">
+            <h4
+              id={`feature-title`}
+              className="text-4xl font-semibold text-gray-900 text-center"
+            >
+              {t("howToUse.step3.subTitle")}
+            </h4>
+            <h5
+              id={`feature-title`}
+              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+            >
+              {t("howToUse.step3.description")}
+            </h5>
+            <div className="relative mt-20">
+              <Image
+                src="/images/landing/step3.png"
+                alt="conte_sample"
+                width={900}
+                height={900}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Step4 */}
+      <section className={`whitespace-pre-wrap`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1 * 0.2 }}
+          viewport={{ once: true }}
+        >
+          <div className="bg-gray-100 flex flex-col items-center justify-center pt-20 pb-20">
+            <h4
+              id={`feature-title`}
+              className="text-4xl font-semibold text-gray-900 text-center"
+            >
+              {t("howToUse.step4.subTitle")}
+            </h4>
+            <h5
+              id={`feature-title`}
+              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+            >
+              {t("howToUse.step4.description")}
+            </h5>
+            <div className="relative mt-20">
+              <Image
+                src="/images/landing/step4.png"
+                alt="conte_sample"
+                width={900}
+                height={900}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Step5 */}
+      <section className={`whitespace-pre-wrap`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1 * 0.2 }}
+          viewport={{ once: true }}
+        >
+          <div className="bg-white flex flex-col items-center justify-center pt-20 pb-20">
+            <h4
+              id={`feature-title`}
+              className="text-4xl font-semibold text-gray-900 text-center"
+            >
+              {t("howToUse.step5.subTitle")}
+            </h4>
+            <h5
+              id={`feature-title`}
+              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+            >
+              {t("howToUse.step5.description")}
+            </h5>
+            <div className="relative mt-20">
+              <Image
+                src="/images/landing/step5.png"
+                alt="conte_sample"
+                width={900}
+                height={900}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Step6 */}
+      <section className={`whitespace-pre-wrap`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1 * 0.2 }}
+          viewport={{ once: true }}
+        >
+          <div className="bg-gray-100 flex flex-col items-center justify-center pt-20 pb-20">
+            <h4
+              id={`feature-title`}
+              className="text-4xl font-semibold text-gray-900 text-center"
+            >
+              {t("howToUse.step6.subTitle")}
+            </h4>
+            <h5
+              id={`feature-title`}
+              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+            >
+              {t("howToUse.step6.description")}
+            </h5>
+            <div className="relative mt-20">
+              <Image
+                src="/images/landing/step6.png"
+                alt="conte_sample"
+                width={900}
+                height={900}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Step7 */}
+      <section className={`whitespace-pre-wrap`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1 * 0.2 }}
+          viewport={{ once: true }}
+        >
+          <div className="bg-white flex flex-col items-center justify-center pt-20 pb-20">
+            <h4
+              id={`feature-title`}
+              className="text-4xl font-semibold text-gray-900 text-center"
+            >
+              {t("howToUse.step7.subTitle")}
+            </h4>
+            <h5
+              id={`feature-title`}
+              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+            >
+              {t("howToUse.step7.description")}
+            </h5>
+            <div className="relative mt-20">
+              <Image
+                src="/images/landing/step7.png"
+                alt="conte_sample"
+                width={900}
+                height={900}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      <FAQ />
+
+      <div className="bg-white text-center pt-30 text-3xl md:text-4xl font-bold text-primary text-center ">
+        {t("features.title")}
+      </div>
       {features.map((feature, index) => {
         return (
           <section
             key={feature.title}
-            className="py-16 bg-cover bg-center relative min-h-[640px] flex "
-            style={{
-              backgroundImage: `url('/images/features_${feature.img}.png')`,
-            }}
+            className="py-16 min-h-[640px] flex bg-white flex flex-col md:flex-row items-center justify-center"
             role="region"
             aria-labelledby={`feature-title-${index}`}
           >
-            <div className="absolute inset-0 "></div>
             <div className="relative px-4 sm:px-6 lg:px-20 flex items-center">
               <motion.div
                 className="p-6"
@@ -144,7 +435,7 @@ export default function LandingPage() {
               >
                 <h4
                   id={`feature-title-${index}`}
-                  className="text-5xl font-semibold text-gray-900 mb-4"
+                  className="text-2xl font-semibold text-gray-900 mb-4"
                 >
                   {feature.title}
                 </h4>
@@ -153,9 +444,16 @@ export default function LandingPage() {
                 </p>
               </motion.div>
             </div>
+            <Image
+              src={`/images/landing/${feature.img}.png`}
+              width={200}
+              height={200}
+              alt="feature_img"
+            />
           </section>
         );
       })}
+
       <section
         className="py-50 bg-gray-100"
         role="region"
@@ -211,55 +509,12 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-      <section className="py-50 bg-gradient-to-r from-green-500 to-teal-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            className="inline-flex items-center bg-yellow-400 text-gray-900 text-sm font-semibold px-3 py-1 rounded-full mb-6"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            {t("promotion.limitedOffer")}
-          </motion.div>
-          <motion.h3
-            className="text-xl font-bold mb-6"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            {t("promotion.title")}
-          </motion.h3>
-          <motion.p
-            className="text-lg mb-8 max-w-xl mx-auto"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            {t("promotion.description")}
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            viewport={{ once: true }}
-          >
-            <Button
-              onClick={() => router.push("/terms-of-service?type=church")}
-              className="cursor-pointer bg-white text-green-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"
-              aria-label={t("promotion.cta")}
-            >
-              {t("promotion.cta")}
-            </Button>
-          </motion.div>
-        </div>
-      </section>
+
       <section
-        className="py-50 bg-cover bg-center text-white relative"
+        className="py-50 bg-gradient-to-r from-green-500 to-teal-600 text-white"
         role="region"
         aria-labelledby="cta-title"
       >
-        <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h3
             id="cta-title"

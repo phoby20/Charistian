@@ -49,21 +49,22 @@ type NormalizedTwitterImage = string;
 
 // 로케일별 메타데이터 생성 함수
 const getMetadata = (locale: Locale, messages: Messages): Metadata => ({
-  title: messages.seo?.title || "charistian | 교회운영 올인원 플랫폼",
+  title: messages.seo?.title || "charistian | 찬양 콘티/악보 공유 플랫폼",
   description:
-    messages.seo?.description || "효율적인 교회 관리를 위한 올인원 플랫폼",
-  keywords: messages.seo?.keywords || "교회 관리, 기독교, 플랫폼, 출석, 일정",
+    messages.seo?.description || "효율적인 찬양 콘티/악보 공유 플랫폼",
+  keywords:
+    messages.seo?.keywords ||
+    "악보공유, 콘티공유, 콘티, 기독교, 플랫폼, 출석, 일정",
   robots: { index: true, follow: true },
   openGraph: {
-    title: messages.seo?.title || "charistian | 교회운영 올인원 플랫폼",
-    description:
-      messages.seo?.description || "효율적인 교회 관리를 위한 올인원 플랫폼",
+    title: messages.seo?.title || "charistian | 찬양 콘티/악보 공유 플랫폼",
+    description: messages.seo?.description || "찬양 콘티/악보 공유 플랫폼",
     url: `https://www.charistian.com//${locale}`,
     siteName: "charistian",
     locale: locale === "ko" ? "ko_KR" : "ja_JP",
     images: [
       {
-        url: "https://www.charistian.com//images/og-image.jpg",
+        url: "https://www.charistian.com/images/sns_img.png",
         width: 1200,
         height: 630,
         alt: messages.seo?.ogImageAlt || "charistian 플랫폼 미리보기",
@@ -71,10 +72,10 @@ const getMetadata = (locale: Locale, messages: Messages): Metadata => ({
     ],
   },
   twitter: {
-    title: messages.seo?.title || "charistian | 교회운영 올인원 플랫폼",
+    title: messages.seo?.title || "charistian | 찬양 콘티/악보 공유 플랫폼",
     description:
-      messages.seo?.description || "효율적인 교회 관리를 위한 올인원 플랫폼",
-    images: ["https://www.charistian.com//images/twitter-image.jpg"],
+      messages.seo?.description || "효율적인 찬양 콘티/악보 공유 플랫폼",
+    images: ["https://www.charistian.com/images/twitter-img.png"],
   },
 });
 

@@ -141,10 +141,10 @@ export default function LandingPage() {
           transition={{ duration: 0.5, delay: 1 * 0.2 }}
           viewport={{ once: true }}
         >
-          <div className="bg-red-100 flex flex-col items-center justify-center mt-20 pt-20 pb-20">
+          <div className="bg-red-100 flex flex-col items-center justify-center pt-20 pb-20">
             <h4
               id={`feature-title`}
-              className="text-7xl font-semibold text-gray-900 mt-16 mb-16 text-center whitespace-pre-wrap md:whitespace-normal"
+              className="text-7xl font-semibold text-gray-900 mt-16 mb-16 text-center whitespace-pre-wrap"
             >
               {t("howToUse.title")}
             </h4>

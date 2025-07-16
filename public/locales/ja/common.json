@@ -160,7 +160,13 @@
   "signupComplete": {
     "title": "会員登録完了",
     "message": "会員登録が完了しました。\n承認までお待ちください",
+    "verifyEmailMessage": "emailに転送されました認証リンクをクリックしてアカウントを活性化してください。",
     "goHome": "ホームへ移動"
+  },
+  "verifyComplete": {
+    "title": "email認証成功",
+    "message": "email認証に成功しました。\nログインをしてサービスをご利用ください。",
+    "goHome": "ホームへ"
   },
   "invalidCredentials": "誤ったemailまたはパスワードです。",
   "members": "聖徒管理",

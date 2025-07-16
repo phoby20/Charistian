@@ -167,6 +167,12 @@
   "signupComplete": {
     "title": "회원가입 완료",
     "message": "회원가입이 완료되었습니다. \n가입 승인을 기다려 주세요.",
+    "verifyEmailMessage": "이메일로 전송된 인증 링크를 클릭하여\n계정을 활성화해 주세요.",
+    "goHome": "홈으로 이동"
+  },
+  "verifyComplete": {
+    "title": "이메일 인증 완료",
+    "message": "이메일 인증이 성공적으로 완료되었습니다.\n이제 계정을 사용할 수 있습니다.",
     "goHome": "홈으로 이동"
   },
   "invalidCredentials": "잘못된 이메일 또는 비밀번호입니다",

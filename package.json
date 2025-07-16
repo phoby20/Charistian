@@ -52,6 +52,7 @@
     "resend": "^4.5.2",
     "sharp": "^0.34.2",
     "stripe": "^18.3.0",
+    "uuid": "^11.1.0",
     "zod": "^3.25.34"
   },
   "devDependencies": {

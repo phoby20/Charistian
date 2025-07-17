@@ -357,7 +357,7 @@ export default function ChurchRegistrationPage() {
       <div className="flex justify-end">
         <Button
           type="submit"
-          className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md"
+          className="cursor-pointer px-6 py-2 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md"
         >
           {t("next")}
         </Button>
@@ -472,7 +472,7 @@ export default function ChurchRegistrationPage() {
             <span className="truncate">{formData.contactImage.name}</span>
             <button
               type="button"
-              className="ml-2 text-red-600 hover:text-red-800 transition-colors"
+              className="cursor-pointer ml-2 text-red-600 hover:text-red-800 transition-colors"
               onClick={() => handleFileReset("contactImage")}
             >
               <X size={16} />
@@ -484,14 +484,14 @@ export default function ChurchRegistrationPage() {
         <Button
           type="button"
           onClick={() => setStep(1)}
-          className="px-6 py-2 bg-gray-600 text-white rounded-full font-medium text-sm hover:bg-gray-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md"
+          className="cursor-pointer px-6 py-2 bg-gray-600 text-white rounded-full font-medium text-sm hover:bg-gray-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md"
         >
           {t("back")}
         </Button>
         <Button
           type="submit"
           disabled={isLoading}
-          className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 disabled:bg-gray-400 disabled:hover:scale-100 disabled:hover:bg-gray-400 transition-all duration-200 shadow-sm hover:shadow-md"
+          className="cursor-pointer px-6 py-2 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 disabled:bg-gray-400 disabled:hover:scale-100 disabled:hover:bg-gray-400 transition-all duration-200 shadow-sm hover:shadow-md"
         >
           {isLoading ? <Loading /> : t("churchRegistration")}
         </Button>
@@ -543,7 +543,7 @@ export default function ChurchRegistrationPage() {
                 <p className="text-gray-800 text-sm mb-4">{error}</p>
                 <Button
                   onClick={() => setError(null)}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 transition-all duration-200"
+                  className="cursor-pointer w-full px-4 py-2 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 transition-all duration-200"
                 >
                   {t("confirm")}
                 </Button>

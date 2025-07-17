@@ -321,7 +321,7 @@
       },
       "schedule": {
         "title": "교회일정공유",
-        "description": "교회 활동과 일정을 성도님에게 공유할 수 있습니다\n이제는 수련회나 회의날짜를 미리미리 공지해서 \n참셕율를 높여보세요"
+        "description": "교회 일정을 성도님에게 공유할 수 있습니다\n이제는 수련회나 회의날짜를 미리미리 공지해서 참셕율를 높여보세요"
       }
     },
     "usage": {
@@ -761,6 +761,7 @@
   },
   "plans": {
     "title": "플랜 선택",
+    "description": "지금 바로 우리 교회에 딱 맞는 플랜을 선택하고, 찬양 사역을 스마트하게 시작해보세요!",
     "superAdminRequired": "SuperAdmin 권한이 필요합니다.",
     "month": "월",
     "free": {
@@ -831,7 +832,7 @@
   "dashboard": {
     "title": "대시보드",
     "planAndUsage": "플랜 및 사용량",
-    "plan": "플랜",
+    "plan": "현재 플랜",
     "remainingUsers": "남은 성도 등록",
     "remainingScores": "남은 악보 업로드",
     "managePlan": "플랜 관리",

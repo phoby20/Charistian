@@ -96,6 +96,8 @@ export default function DashboardPage() {
       );
       setCachedData(data);
 
+      setIsLoading(true);
+
       const uniqueGroups = Array.from(
         new Set(data.members.flatMap((m) => m.groups.map((g) => g.name)))
       ).sort();
@@ -116,6 +118,7 @@ export default function DashboardPage() {
       });
       const usageData = await response.json();
       setUsageLimit(usageData);
+      setIsLoading(false);
     };
 
     fetchInitialData();

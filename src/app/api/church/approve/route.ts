@@ -87,130 +87,174 @@ async function sendApprovalEmail(
 ) {
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  await resend.emails.send({
-    from: "charistian 운영팀 <noreply@charistian.com>",
-    to: superAdminEmail,
-    subject: `${churchName} 교회 등록 완료 안내`,
-    html: `
-      <!DOCTYPE html>
-      <html lang="ko">
-      <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${churchName} 교회 등록 완료</title>
-          <style>
-              body {
-                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-                  background-color: #f9fafb;
-                  color: #333333;
-                  margin: 0;
-                  padding: 20px;
-                  line-height: 1.5;
-              }
-              .container {
-                  max-width: 600px;
-                  margin: 0 auto;
-                  background-color: #ffffff;
-                  border-radius: 6px;
-                  padding: 30px;
-                  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-              }
-              h1 {
-                  font-size: 24px;
-                  font-weight: 600;
-                  color: #1f2937;
-                  margin: 0 0 15px;
-                  text-align: center;
-              }
-              h2 {
-                  font-size: 20px;
-                  font-weight: 600;
-                  color: #1f2937;
-                  margin: 25px 0 10px;
-              }
-              h3 {
-                  font-size: 18px;
-                  font-weight: 500;
-                  color: #374151;
-                  margin: 20px 0 10px;
-              }
-              p {
-                  font-size: 16px;
-                  color: #374151;
-                  margin: 8px 0;
-              }
-              ul, ol {
-                  font-size: 16px;
-                  color: #374151;
-                  padding-left: 20px;
-                  margin: 8px 0 15px;
-              }
-              li {
-                  margin-bottom: 8px;
-              }
-              a {
-                  color: #3b82f6;
-                  text-decoration: none;
-              }
-              a:hover {
-                  text-decoration: underline;
-              }
-              strong {
-                  font-weight: 600;
-                  color: #1f2937;
-              }
-              .section {
-                  border-top: 1px solid #e5e7eb;
-                  padding-top: 20px;
-                  margin-top: 20px;
-              }
-              .button {
-                  display: inline-block;
-                  padding: 12px 24px;
-                  background-color: #3b82f6;
-                  color: #ffffff;
-                  text-decoration: none;
-                  border-radius: 6px;
-                  font-size: 16px;
-                  font-weight: 500;
-                  text-align: center;
-                  transition: background-color 0.2s ease;
-                  margin: 20px 0;
-              }
-              .button:hover {
-                  background-color: #2563eb;
-              }
-              .footer {
-                  text-align: center;
-                  padding-top: 20px;
-                  border-top: 1px solid #e5e7eb;
-                  margin-top: 20px;
-              }
-              .footer p {
-                  font-size: 14px;
-                  color: #6b7280;
-                  margin: 5px 0;
-              }
-          </style>
-      </head>
-      <body>
-          <div class="container">
-              <!-- 헤더 섹션 -->
-              <h1>${churchName} 교회 등록 완료</h1>
-              <p>안녕하세요, ${churchName} 교회의 등록이 성공적으로 완료되었습니다.</p>
+  const emailText = `
+    ${churchName} 교회 등록 완료
 
-              <!-- CHECKER 유저 정보 섹션 -->
-              <div class="section">
-                  <p>QR 코드 스캔을 위한 계정(CHECKER 유저)이 아래와 같이 생성되었습니다.</p>
-                  <ul>
-                      <li><strong>이메일</strong>: ${checkerEmail}</li>
-                      <li><strong>비밀번호</strong>: ${checkerPassword}</li>
-                  </ul>
-              </div>
+    안녕하세요, ${churchName} 교회의 등록이 성공적으로 완료되었습니다.
 
-              <!-- 서비스 이용 안내 섹션 -->
-              <div class="section">
-                  <h2>서비스 이용 안내</h2>
+    [찬양 콘티 작성 및 공유 방법]
+    1. [악보관련] > [악보 리스트] 페이지에서 악보를 등록하세요. (최대 50건, 누구나 가능)
+    2. 등록된 악보를 선택하여 찬양 콘티를 작성합니다.
+    3. 공유 대상자를 설정하고 [콘티 작성] 버튼을 눌러 메일로 콘티와 악보를 공유합니다.
+    - 무료 플랜: 성도 10명 등록, 월 8건/주 2건 콘티 작성 가능.
+    - 플랜은 언제든지 Smart 또는 Enterprise로 변경 가능.
+
+    [CHECKER 계정 정보]
+    - 이메일: ${checkerEmail}
+    - 비밀번호: ${checkerPassword}
+
+    [수퍼 어드민의 역할]
+    1. 로그인 후 [설정] > [마스터 설정]에서 직분, 소속, 직책, 팀을 설정하세요.
+    2. 성도 가입 신청을 승인/거부하고, [성도관리] > [성도리스트]에서 소속, 직책, 팀, 권한을 설정하세요.
+    3. 예배/이벤트 날에 CHECKER 계정으로 QR 코드를 스캔하여 출석 체크하세요.
+
+    [성도의 역할]
+    1. 로그인 후 [성도증] 버튼을 눌러 QR 코드를 표시하세요.
+    2. 누구나 악보를 등록하고, 찬양 콘티를 작성/열람할 수 있습니다.
+
+    [주의사항]
+    - 무료 플랜은 제한이 있으며, 추후 유료화될 수 있습니다.
+    - 권한: 수퍼 어드민, 어드민, 서브 어드민, 일반, 방문자.
+    - 직분/소속/직책/팀 설정과 출석 체크는 권한에 따라 제한됩니다.
+
+    Charistian 방문하기: https://www.charistian.com/
+    구독 취소: https://www.charistian.com/unsubscribe?email=${encodeURIComponent(superAdminEmail)}
+  `;
+
+  const emailHtml = `
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${churchName} 교회 등록 완료</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                background-color: #f9fafb;
+                color: #333333;
+                margin: 0;
+                padding: 20px;
+                line-height: 1.5;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                border-radius: 6px;
+                padding: 30px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            h1 {
+                font-size: 24px;
+                font-weight: 600;
+                color: #1f2937;
+                margin: 0 0 15px;
+                text-align: center;
+            }
+            h2 {
+                font-size: 20px;
+                font-weight: 600;
+                color: #1f2937;
+                margin: 25px 0 10px;
+            }
+            h3 {
+                font-size: 18px;
+                font-weight: 500;
+                color: #374151;
+                margin: 20px 0 10px;
+            }
+            p {
+                font-size: 16px;
+                color: #374151;
+                margin: 8px 0;
+            }
+            ul, ol {
+                font-size: 16px;
+                color: #374151;
+                padding-left: 20px;
+                margin: 8px 0 15px;
+            }
+            li {
+                margin-bottom: 8px;
+            }
+            a {
+                color: #3b82f6;
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+            strong {
+                font-weight: 600;
+                color: #1f2937;
+            }
+            .section {
+                border-top: 1px solid #e5e7eb;
+                padding-top: 20px;
+                margin-top: 20px;
+            }
+            .button {
+                display: inline-block;
+                padding: 12px 24px;
+                background-color: #3b82f6;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 6px;
+                font-size: 16px;
+                font-weight: 500;
+                text-align: center;
+                transition: background-color 0.2s ease;
+                margin: 20px 0;
+            }
+            .button:hover {
+                background-color: #2563eb;
+            }
+            .footer {
+                text-align: center;
+                padding-top: 20px;
+                border-top: 1px solid #e5e7eb;
+                margin-top: 20px;
+            }
+            .footer p {
+                font-size: 14px;
+                color: #6b7280;
+                margin: 5px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- 헤더 섹션 -->
+            <h1>${churchName} 교회 등록 완료</h1>
+            <p>안녕하세요, ${churchName} 교회의 등록이 성공적으로 완료되었습니다.</p>
+
+            <!-- 찬양 콘티 작성 및 공유 방법 -->
+            <div class="section">
+                <h2>찬양 콘티 작성 및 공유 방법</h2>
+                <p>Charistian에서 찬양 콘티를 작성하고 공유하는 방법은 다음과 같습니다:</p>
+                <ol>
+                    <li><strong>악보 등록</strong>: [악보관련] > [악보 리스트] 페이지에서 악보를 등록하세요. 모든 성도가 악보를 등록할 수 있으며, 등록된 악보만 콘티 작성에 사용됩니다. (무료 플랜: 최대 50건)</li>
+                    <li><strong>콘티 작성</strong>: 등록된 악보를 선택하여 찬양 콘티를 작성합니다.</li>
+                    <li><strong>콘티 공유</strong>: 공유 대상자를 설정한 후 [콘티 작성] 버튼을 눌러 콘티와 악보를 메일로 공유합니다.</li>
+                </ol>
+                <p><strong>무료 플랜 제한</strong>: 성도 10명 등록, 월 8건/주 2건의 찬양 콘티 작성 가능.</p>
+                <p><strong>플랜 변경</strong>: 언제든지 Smart 또는 Enterprise 플랜으로 업그레이드하여 더 많은 기능을 이용할 수 있습니다.</p>
+            </div>
+
+            <!-- CHECKER 계정 정보 -->
+            <div class="section">
+                <h2>CHECKER 계정 정보</h2>
+                <p>QR 코드 스캔을 위한 CHECKER 계정이 생성되었습니다:</p>
+                <ul>
+                    <li><strong>이메일</strong>: ${checkerEmail}</li>
+                    <li><strong>비밀번호</strong>: ${checkerPassword}</li>
+                </ul>
+            </div>
+
+            <!-- 수퍼 어드민 및 성도 역할 -->
+            <div class="section">
+                <h2>서비스 이용 안내</h2>
 
                   <!-- 교회가 할 일 -->
                   <h3>교회가 할 일</h3>
@@ -223,36 +267,40 @@ async function sendApprovalEmail(
                       <li>QR 코드가 없는 성도는 화면 상단 메뉴에서 <strong>[성도관리] > [출석체크]</strong>로 이동하여 소속된 회원을 찾아 클릭하면 출석체크가 완료됩니다.</li>
                   </ol>
 
-                  <!-- 성도가 할 일 -->
-                  <h3>성도가 할 일</h3>
-                  <ol>
-                      <li>QR코드를 표시하기 위해서는 로그인 후 <strong>성도증</strong> 버튼을 클릭하세요.</li>
-                      <li>교회에서 준비한 QR 스캐너에 QR 코드를 스캔하세요.</li>
-                      <li>또한 악보를 업로드하고 찬양 콘티를 작성하고 악보를 공유할 수 있습니다.</li>
-                  </ol>
+                <h3>성도의 역할</h3>
+                <ol>
+                    <li>로그인 후 <strong>[성도증]</strong> 버튼을 눌러 QR 코드를 표시하여 출석 체크하세요.</li>
+                    <li>누구나 [악보관련] > [악보 리스트]에서 악보를 등록하고, 찬양 콘티를 작성 및 열람할 수 있습니다.</li>
+                </ol>
 
-                  <h3>주의사항</h3>
-                  <ol>
-                    <li>현재 무료 서비스 진행중이며 추후 유료로 진행될 수 있습니다.</li>
-                    <li>권한은 총 5개로 나누어지며, 수퍼 어드민, 어드민, 서브 어드민, 일반, 방문자로 나뉩니다.</li>
-                    <li>수퍼 어드민은 교회등록시 입력한 아이디이며, 이후 등록되는 성도들은 "일반" 권한으로 자동등록이 됩니다.</li>
-                    <li>"직분설정", "소속설정", "직책설정", "팀 설정"은 수퍼 어드민만 할 수 있고 출석 체크는 수퍼 어드민, 어드민, 서브 어드민만 할 수 있습니다.</li>
-                  </ol>
-              </div>
+                <h3>주의사항</h3>
+                <ol>
+                    <li>현재 무료 플랜으로 제공되며, 추후 유료화될 수 있습니다.</li>
+                    <li>권한은 수퍼 어드민, 어드민, 서브 어드민, 일반, 방문자로 나뉩니다.</li>
+                    <li>직분/소속/직책/팀 설정은 수퍼 어드민만 가능하며, 출석 체크는 수퍼 어드민, 어드민, 서브 어드민만 가능합니다.</li>
+                </ol>
+            </div>
 
-              <!-- 버튼 섹션 -->
-              <div style="text-align: center;">
-                  <a href="https://www.charistian.com/" class="button">Charistian 방문하기</a>
-              </div>
+            <!-- 버튼 섹션 -->
+            <div style="text-align: center;">
+                <a href="https://www.charistian.com/" class="button">Charistian 방문하기</a>
+            </div>
 
-              <!-- 푸터 섹션 -->
-              <div class="footer">
-                  <p>이 이메일은 Charistian에서 자동 발송되었습니다.</p>
-              </div>
-          </div>
-      </body>
-      </html>
-    `,
+            <!-- 푸터 섹션 -->
+            <div class="footer">
+                <p>이 이메일은 Charistian에서 자동 발송되었습니다.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+
+  await resend.emails.send({
+    from: "charistian 운영팀 <noreply@charistian.com>",
+    to: superAdminEmail,
+    subject: `${churchName} 교회 등록 완료 안내`,
+    html: emailHtml,
+    text: emailText, // 텍스트 버전 추가
   });
 }
 

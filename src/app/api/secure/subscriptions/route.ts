@@ -226,6 +226,7 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
+      allow_promotion_codes: true, // 프로모션 코드 입력 활성화
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/${locale}/plans/success`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/${locale}/plans`,
     });

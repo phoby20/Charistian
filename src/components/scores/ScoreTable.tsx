@@ -2,7 +2,7 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Heart, MessageCircle, Plus, Play, Pause } from "lucide-react";
+import { Plus, Play, Pause } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Score, SelectedSong } from "@/types/score";
 import YouTube, { YouTubePlayer } from "react-youtube";
@@ -14,8 +14,6 @@ interface ScoreTableProps {
   locale: string;
   getGenreLabel: (genreValue: string) => string;
 }
-
-const THUMBNAIL_SIZE = "10"; // Tailwind 단위 (40px at base, scales down for smaller screens)
 
 const getYouTubeVideoId = (url?: string): string | null => {
   if (!url) return null;
@@ -124,28 +122,22 @@ export default function ScoreTable({
         );
       })}
 
-      <table className="w-full bg-white rounded-xl shadow-lg border border-gray-200 min-w-[600px] sm:min-w-[700px]">
+      <table className="w-full bg-white rounded-xl shadow-lg border border-gray-200">
         <thead className="bg-gray-100">
           <tr>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 w-12 sm:w-16">
-              {/* {t("thumbnail")} */}
-            </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[120px] sm:min-w-[180px]">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[100px] sm:min-w-[150px]">
               {t("titleHeader")} / {t("creator")}
             </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[80px] sm:min-w-[100px]">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[70px] sm:min-w-[90px]">
               {t("genre")} / {t("tempo")}
             </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[60px] sm:min-w-[80px]">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[50px] sm:min-w-[70px]">
               {t("key")}
             </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[80px] sm:min-w-[100px]">
-              {t("likes")} / {t("comments")}
-            </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm font-semibold text-gray-700 w-12 sm:w-16">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm font-semibold text-gray-700 w-12">
               {t("youtube")}
             </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm font-semibold text-gray-700 w-12 sm:w-16">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm font-semibold text-gray-700 w-12">
               {t("action")}
             </th>
           </tr>
@@ -161,21 +153,6 @@ export default function ScoreTable({
                 transition={{ duration: 0.4, delay: index * 0.1 }}
                 className="border-t border-gray-200 hover:bg-gray-50"
               >
-                <td className="py-2 sm:py-3 px-2 sm:px-4">
-                  {score.thumbnailUrl ? (
-                    <img
-                      src={score.thumbnailUrl}
-                      alt={score.title}
-                      className={`w-${THUMBNAIL_SIZE} h-${THUMBNAIL_SIZE} sm:w-12 sm:h-12 object-cover rounded`}
-                    />
-                  ) : (
-                    <div
-                      className={`w-${THUMBNAIL_SIZE} h-${THUMBNAIL_SIZE} sm:w-12 sm:h-12 bg-gray-200 flex items-center justify-center text-[8px] sm:text-[10px] text-gray-500 rounded`}
-                    >
-                      {t("none")}
-                    </div>
-                  )}
-                </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4">
                   <Link
                     href={`/${locale}/scores/${score.id}`}
@@ -225,18 +202,6 @@ export default function ScoreTable({
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-xs sm:text-sm truncate">
                   {score.key || t("none")}
-                </td>
-                <td className="py-2 sm:py-3 px-2 sm:px-4 text-center text-gray-600 text-xs sm:text-sm">
-                  <div className="flex gap-2 sm:gap-3 justify-center">
-                    <div className="flex items-center justify-center space-x-1">
-                      <Heart className="w-3 sm:w-4 h-3 sm:h-4 text-red-500" />
-                      <span>{score._count.likes}</span>
-                    </div>
-                    <div className="flex items-center justify-center space-x-1">
-                      <MessageCircle className="w-3 sm:w-4 h-3 sm:h-4 text-blue-500" />
-                      <span>{score._count.comments}</span>
-                    </div>
-                  </div>
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-center">
                   {youtubeVideoId && (

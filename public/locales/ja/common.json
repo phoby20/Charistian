@@ -751,6 +751,7 @@
   },
   "plans": {
     "title": "プラン選択",
+    "description": "今すぐ教会にぴったりのプランを選んで、賛美ミニストリーをスマートに始めましょう！",
     "superAdminRequired": "SuperAdmin権限が必要です。",
     "month": "月",
     "free": {
@@ -821,7 +822,7 @@
   "dashboard": {
     "title": "ダッシュボード",
     "planAndUsage": "プランと使用量",
-    "plan": "プラン",
+    "plan": "現在のプラン",
     "remainingUsers": "残りの信徒登録",
     "remainingScores": "残りの楽譜アップロード",
     "managePlan": "プラン管理",

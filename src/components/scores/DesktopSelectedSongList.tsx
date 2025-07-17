@@ -38,14 +38,14 @@ const DesktopSelectedSongList = ({
   );
 
   return (
-    <div className="relative">
+    <div className="relative overflow-visible">
       {/* 선곡 리스트 패널 (고정 패널) */}
       <motion.div
         initial={{ height: 0, opacity: 0 }}
         animate={{ height: "auto", opacity: 1 }}
         exit={{ height: 0, opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="fixed w-auto max-w-2xs top-20 min-w-60 bg-white rounded-xl shadow-lg p-6 border border-gray-200 max-h-[80vh] overflow-y-auto z-40"
+        className="fixed w-auto max-w-xs top-20 min-w-60 bg-white rounded-xl shadow-lg p-6 border border-gray-200 max-h-[80vh] overflow-y-auto z-40"
       >
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
           {t("selectedSongs")}

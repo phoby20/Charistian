@@ -39,7 +39,18 @@ export default function UsageLimitCard({
       animate={{ opacity: 1 }}
       className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200"
     >
-      <h2 className="text-lg font-semibold mb-4">{t("planAndUsage")}</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold">{t("planAndUsage")}</h2>
+        {/* 플랜 관리 링크 */}
+        {(user.role === "SUPER_ADMIN" || user.role === "ADMIN") && (
+          <Link
+            href={`/${locale}/plans`}
+            className="px-4 py-2 text-white font-bold rounded-lg bg-gradient-to-r from-[#ff66c4] to-[#ffde59] hover:from-[#ffde59] hover:to-[#ff66c4] shadow-sm text-gray-900"
+          >
+            {t("managePlan")}
+          </Link>
+        )}
+      </div>
       <div className="space-y-4">
         {/* 성도 수 */}
         <ProgressBar
@@ -73,15 +84,6 @@ export default function UsageLimitCard({
         <p className="text-sm font-medium text-gray-700">
           {t("plan")}: {usageLimit.plan}
         </p>
-        {/* 플랜 관리 링크 */}
-        {user.role === "SUPER_ADMIN" && (
-          <Link
-            href={`/${locale}/plans`}
-            className="text-blue-600 hover:underline"
-          >
-            {t("managePlan")}
-          </Link>
-        )}
       </div>
     </motion.div>
   );

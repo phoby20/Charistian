@@ -2,8 +2,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { ImageOff, ChevronDown, ChevronUp, Eye } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, ChevronUp, FileMusic } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ScoreResponse } from "@/types/score";
 import { User } from "@prisma/client";
@@ -12,18 +12,10 @@ import Button from "@/components/Button";
 interface ScoreInfoProps {
   user: User | null;
   score: ScoreResponse;
-  imageError: string[];
   appUrl: string;
-  setImageError: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export default function ScoreInfo({
-  user,
-  score,
-  imageError,
-  appUrl,
-  setImageError,
-}: ScoreInfoProps) {
+export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
   const t = useTranslations("ScoreDetail");
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
@@ -47,198 +39,165 @@ export default function ScoreInfo({
       : "#";
 
   return (
-    <div className="flex flex-col max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
-      {/* Thumbnail Section */}
-      {score.thumbnailUrl && !imageError.includes("main") ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="relative group"
-        >
-          <img
-            src={score.thumbnailUrl}
-            alt={score.title}
-            className="w-full h-64 object-cover rounded-t-2xl border-b border-gray-200 shadow-md transition-transform duration-300 group-hover:scale-105"
-            onError={() => setImageError((prev) => [...prev, "main"])}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-2xl"></div>
-        </motion.div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="flex items-center justify-center w-full h-64 bg-gray-100 rounded-t-2xl border-b border-gray-200"
-        >
-          <div className="text-center text-gray-500">
-            <ImageOff className="w-10 h-10 mx-auto mb-2" />
-            <p className="text-sm">{t("noThumbnail")}</p>
-          </div>
-        </motion.div>
-      )}
-
+    <div className="mx-auto">
       {/* Info Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="p-8 space-y-6"
+        transition={{ duration: 0.5 }}
+        className="space-y-6 bg-white"
       >
-        <h2 className="text-3xl font-bold text-gray-800">{t("info")}</h2>
-        <div className="space-y-4 text-gray-600">
-          {/* Description */}
-          {score.description && (
-            <div className="flex flex-col">
-              <span className="font-medium text-gray-900">
-                {t("description")}
-              </span>
+        {/* Description */}
+        {score.description && (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <button
+              onClick={toggleDescription}
+              className="flex w-full items-center justify-between text-lg font-semibold text-gray-900"
+              aria-expanded={isDescriptionOpen}
+            >
+              <span>{t("description")}</span>
+              {score.description.length > 100 && (
+                <motion.span
+                  animate={{ rotate: isDescriptionOpen ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {isDescriptionOpen ? (
+                    <ChevronUp className="h-5 w-5 text-blue-600" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-blue-600" />
+                  )}
+                </motion.span>
+              )}
+            </button>
+            <AnimatePresence>
               <motion.p
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="text-sm mt-4 whitespace-pre-wrap"
-                style={{
-                  maxHeight: isDescriptionOpen ? "none" : "4rem",
-                  overflow: "hidden",
-                  transition: "max-height 0.3s ease",
+                initial={{ height: 0, opacity: 0 }}
+                animate={{
+                  height: isDescriptionOpen ? "auto" : "4rem",
+                  opacity: 1,
                 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mt-3 overflow-hidden text-gray-700"
+                style={{ whiteSpace: "pre-wrap" }}
               >
                 {score.description}
               </motion.p>
-              {score.description.length > 100 && (
-                <motion.button
-                  onClick={toggleDescription}
-                  className="mt-2 text-blue-600 text-sm font-medium flex items-center space-x-1 cursor-pointer w-fit"
-                  aria-expanded={isDescriptionOpen}
-                >
-                  <span>
-                    {isDescriptionOpen ? t("showLess") : t("showMore")}
-                  </span>
-                  {isDescriptionOpen ? (
-                    <ChevronUp className="w-4 h-4" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4" />
-                  )}
-                </motion.button>
-              )}
-            </div>
-          )}
+            </AnimatePresence>
+          </div>
+        )}
 
-          {/* Lyrics */}
-          {(score.lyrics || score.lyricsEn || score.lyricsJa) && (
-            <div className="flex flex-col">
-              <span className="font-medium text-gray-900">{t("lyrics")}</span>
-              <div className="flex space-x-4 mt-2">
+        {/* Lyrics */}
+        {(score.lyrics || score.lyricsEn || score.lyricsJa) && (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <button
+              onClick={toggleLyrics}
+              className="cursor-pointer flex w-full items-center justify-between text-lg font-semibold text-gray-900"
+              aria-expanded={isLyricsOpen}
+            >
+              <span>{t("lyrics")}</span>
+              {lyricsContent[activeLyricsTab].length > 100 && (
+                <motion.span
+                  animate={{ rotate: isLyricsOpen ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {isLyricsOpen ? (
+                    <ChevronUp className="h-5 w-5 text-blue-600" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-blue-600" />
+                  )}
+                </motion.span>
+              )}
+            </button>
+            <div className="mt-3 flex space-x-2 rounded-md bg-gray-100 p-1">
+              {["ko", "en", "ja"].map((lang) => (
                 <button
-                  onClick={() => setActiveLyricsTab("ko")}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeLyricsTab === "ko"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  key={lang}
+                  onClick={() => setActiveLyricsTab(lang as "ko" | "en" | "ja")}
+                  className={`cursor-pointer flex-1 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                    activeLyricsTab === lang
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "text-gray-600 hover:bg-gray-200"
                   }`}
                 >
-                  한국어
+                  {lang === "ko"
+                    ? "한국어"
+                    : lang === "en"
+                      ? "English"
+                      : "日本語"}
                 </button>
-                <button
-                  onClick={() => setActiveLyricsTab("en")}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeLyricsTab === "en"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                >
-                  English
-                </button>
-                <button
-                  onClick={() => setActiveLyricsTab("ja")}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeLyricsTab === "ja"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                >
-                  日本語
-                </button>
-              </div>
+              ))}
+            </div>
+            <AnimatePresence mode="wait">
               <motion.p
                 key={activeLyricsTab}
                 initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="text-sm mt-4 whitespace-pre-wrap"
-                style={{
-                  maxHeight: isLyricsOpen ? "none" : "4rem",
-                  overflow: "hidden",
-                  transition: "max-height 0.3s ease",
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  height: isLyricsOpen ? "auto" : "4rem",
                 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="mt-3 overflow-hidden text-gray-700"
+                style={{ whiteSpace: "pre-wrap" }}
               >
                 {lyricsContent[activeLyricsTab]}
               </motion.p>
-              {lyricsContent[activeLyricsTab].length > 100 && (
-                <motion.button
-                  onClick={toggleLyrics}
-                  className="mt-2 text-blue-600 text-sm font-medium"
-                  aria-expanded={isLyricsOpen}
-                >
-                  <div className="flex items-center cursor-pointer w-fit">
-                    <span>{isLyricsOpen ? t("showLess") : t("showMore")}</span>
-                    {isLyricsOpen ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </div>
-                </motion.button>
-              )}
-            </div>
-          )}
+            </AnimatePresence>
+          </div>
+        )}
 
+        {/* Other Info */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Composer */}
           {score.composer && (
-            <div className="flex items-start gap-4">
-              <span className="font-medium text-gray-900 w-28">
+            <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-3">
+              <span className="w-28 font-medium text-gray-900">
                 {t("composer")}
               </span>
-              <p className="text-sm flex-1">{score.composer}</p>
+              <p className="flex-1 text-gray-700">{score.composer}</p>
             </div>
           )}
 
           {/* Lyricist */}
           {score.lyricist && (
-            <div className="flex items-start gap-4">
-              <span className="font-medium text-gray-900 w-28">
+            <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-3">
+              <span className="w-28 font-medium text-gray-900">
                 {t("lyricist")}
               </span>
-              <p className="text-sm flex-1">{score.lyricist}</p>
+              <p className="flex-1 text-gray-700">{score.lyricist}</p>
             </div>
           )}
 
           {/* Is Original */}
-          <div className="flex items-start gap-4">
-            <span className="font-medium text-gray-900 w-28">
+          <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <span className="w-28 font-medium text-gray-900">
               {t("isOriginal")}
             </span>
-            <p className="text-sm flex-1">
+            <p className="flex-1 text-gray-700">
               {score.isOriginal ? t("isOriginalTrue") : t("isOriginalFalse")}
             </p>
           </div>
 
           {/* Price */}
           {score.price && (
-            <div className="flex items-start gap-4">
-              <span className="font-medium text-gray-900 w-28">
+            <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-3">
+              <span className="w-28 font-medium text-gray-900">
                 {t("price")}
               </span>
-              <p className="text-sm flex-1">₩{score.price.toLocaleString()}</p>
+              <p className="flex-1 text-gray-700">
+                ₩{score.price.toLocaleString()}
+              </p>
             </div>
           )}
 
           {/* Is Open */}
-          <div className="flex items-start gap-4">
-            <span className="font-medium text-gray-900 w-28">
+          <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <span className="w-28 font-medium text-gray-900">
               {t("isOpen")}
             </span>
-            <p className="text-sm flex-1">
+            <p className="flex-1 text-gray-700">
               {score.isOpen ? t("open") : t("closed")}
             </p>
           </div>
@@ -248,8 +207,8 @@ export default function ScoreInfo({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="flex flex-col sm:flex-row gap-4 mt-6"
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex flex-col gap-4 sm:flex-row"
         >
           {user?.churchId === score.churchId && score.fileUrl && (
             <a
@@ -258,21 +217,23 @@ export default function ScoreInfo({
               rel="noopener noreferrer"
               className="flex-1"
             >
-              <Button variant="outline" aria-label={t("viewPdf")}>
-                <Eye className="w-5 h-5" />
+              <Button
+                variant="outline"
+                className="shadow-lg cursor-pointer w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#ff66c4] to-[#ffde59] hover:from-[#ffde59] hover:to-[#ff66c4] py-3"
+                aria-label={t("viewPdf")}
+              >
+                <FileMusic className="h-5 w-5" />
                 <span>{t("viewPdf")}</span>
               </Button>
             </a>
           )}
           {score.isForSale && score.price && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex-1 py-3 px-6 bg-green-600 text-white rounded-xl shadow-md hover:bg-green-700 transition-all duration-300"
+            <Button
+              className="cursor-pointer w-full flex-1 rounded-lg bg-green-600 py-3 text-white hover:bg-green-700"
               aria-label={t("purchase")}
             >
               {t("purchase")} (₩{score.price.toLocaleString()})
-            </motion.button>
+            </Button>
           )}
         </motion.div>
       </motion.div>

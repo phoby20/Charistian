@@ -527,6 +527,24 @@
     "keyPlaceholder": "키를 선택하세요",
     "keyRequired": "키를 선택해야 합니다."
   },
+  "MasterScoreUpload": {
+    "titleForMaster": "마스터 악보 업로드",
+    "selectChurch": "교회 검색",
+    "country": "국가",
+    "city": "도시",
+    "region": "지역",
+    "church": "교회이름",
+    "title": "악보 업로드",
+    "backToList": "목록으로 돌아가기",
+    "uploadButton": "업로드",
+    "genreLabel": "장르",
+    "genrePlaceholder": "장르를 선택하세요",
+    "genreRequired": "장르를 선택해야 합니다.",
+    "fileRequired": "악보 파일은 필수입니다.",
+    "keyLabel": "키",
+    "keyPlaceholder": "키를 선택하세요",
+    "keyRequired": "키를 선택해야 합니다."
+  },
   "ScoreDetail": {
     "error": "악보를 불러오는 중 오류가 발생했습니다.",
     "shareText": "이 악보를 확인해보세요!",

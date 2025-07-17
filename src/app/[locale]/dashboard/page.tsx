@@ -218,12 +218,20 @@ export default function DashboardPage() {
           </h1>
           <div className="flex space-x-2">
             {user.role === "MASTER" && (
-              <Link
-                href={`/${locale}/send-email/`}
-                className="p-2 bg-blue-600 text-white cursor-pointer"
-              >
-                유저에게 Email 보내기
-              </Link>
+              <div className="flex gap-4">
+                <Link
+                  href={`/${locale}/scores/upload/master`}
+                  className="p-2 bg-green-600 text-white cursor-pointer"
+                >
+                  楽譜アップロード
+                </Link>
+                <Link
+                  href={`/${locale}/send-email/`}
+                  className="p-2 bg-blue-600 text-white cursor-pointer"
+                >
+                  유저에게 Email 보내기
+                </Link>
+              </div>
             )}
             <MyQRCode user={user} scanMessage={scanMessage} />
             <QRScanner user={user} onMessage={setScanMessage} />

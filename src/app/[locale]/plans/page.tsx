@@ -125,7 +125,11 @@ export default function PlansPage() {
   }, [isSubscriptionId]);
 
   const handleSubmit = async (plan: "SMART" | "ENTERPRISE") => {
-    if (!stripePromise || !user || user.role !== "SUPER_ADMIN") {
+    if (
+      !stripePromise ||
+      !user ||
+      (user.role !== "SUPER_ADMIN" && user.role !== "ADMIN")
+    ) {
       setError(t("error.stripeNotLoaded"));
       return;
     }

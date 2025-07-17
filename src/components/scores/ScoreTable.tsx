@@ -126,7 +126,7 @@ export default function ScoreTable({
         <thead className="bg-gray-100">
           <tr>
             <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[100px] sm:min-w-[150px]">
-              {t("titleHeader")} / {t("creator")}
+              {t("titleHeader")}
             </th>
             <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[70px] sm:min-w-[90px]">
               {t("genre")} / {t("tempo")}

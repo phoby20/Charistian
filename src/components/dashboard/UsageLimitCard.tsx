@@ -45,7 +45,7 @@ export default function UsageLimitCard({
         {(user.role === "SUPER_ADMIN" || user.role === "ADMIN") && (
           <Link
             href={`/${locale}/plans`}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#ff66c4] to-[#ffde59] hover:from-[#ffde59] hover:to-[#ff66c4] shadow-sm text-gray-900"
+            className="px-4 py-2 text-white font-bold rounded-lg bg-gradient-to-r from-[#ff66c4] to-[#ffde59] hover:from-[#ffde59] hover:to-[#ff66c4] shadow-sm text-gray-900"
           >
             {t("managePlan")}
           </Link>

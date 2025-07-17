@@ -94,7 +94,7 @@ export default function MobileFilterDropdowns({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-30 overflow-hidden"
+              className="absolute mt-2 w-40 bg-white rounded-lg shadow-lg z-30 overflow-hidden"
             >
               {groups.map((group) => (
                 <button

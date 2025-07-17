@@ -103,7 +103,7 @@ export default function Footer() {
               <button
                 ref={langButtonRef}
                 onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
-                className="flex items-center text-gray-400 hover:text-white font-medium"
+                className="cursor-pointer flex items-center text-gray-400 hover:text-white font-medium"
                 aria-expanded={isLangMenuOpen}
                 aria-haspopup="true"
               >
@@ -118,7 +118,7 @@ export default function Footer() {
                   <li>
                     <button
                       onClick={() => changeLanguage("ko")}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      className="cursor-pointer block w-full text-left px-4 py-2 hover:bg-gray-100"
                       role="menuitem"
                     >
                       한국어
@@ -127,7 +127,7 @@ export default function Footer() {
                   <li>
                     <button
                       onClick={() => changeLanguage("ja")}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      className="cursor-pointer block w-full text-left px-4 py-2 hover:bg-gray-100"
                       role="menuitem"
                     >
                       日本語

@@ -4,7 +4,6 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import {
-  User as UserIcon,
   LogOut,
   ChevronDown,
   Settings,
@@ -17,6 +16,7 @@ import Button from "./Button";
 import { User } from "@prisma/client";
 import { getPathname } from "@/utils/useRouter";
 import { toCamelCase } from "@/utils/toCamelCase";
+import Image from "next/image";
 
 interface DesktopNavProps {
   user: User | null;
@@ -190,7 +190,7 @@ export default function DesktopNav({
             <ChevronDown className="w-4 h-4 ml-1" />
           </button>
           {isSettingsMenuOpen && (
-            <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1 w-25">
+            <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1 w-30">
               <Link
                 href={getPathname({ locale, href: "/master-management" })}
                 onClick={closeSettingsMenu}
@@ -212,11 +212,17 @@ export default function DesktopNav({
             }}
             className="cursor-pointer flex items-center text-gray-600 hover:text-red-600 py-2 rounded-md text-sm font-medium"
           >
-            <UserIcon className="w-5 h-5 mr-1" />
+            <Image
+              src="/header_user_img.png"
+              alt="header_user_img"
+              width={36}
+              height={36}
+              className="rounded-full"
+            />
           </button>
           {isUserMenuOpen && (
             <div className="absolute right-0 z-50 bg-white shadow-lg rounded-md mt-1 w-fill min-w-46">
-              <p className="px-4 py-2 text-center mb-2">
+              <p className="text-sm px-4 py-2 text-center mb-2">
                 {user.name} ({t(toCamelCase(user.role))})
               </p>
               <Link

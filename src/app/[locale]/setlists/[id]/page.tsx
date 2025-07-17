@@ -9,7 +9,7 @@ import {
   AlertCircle,
   ArrowLeft,
   Edit,
-  Eye,
+  FileMusic,
   Play,
   Pause,
   Volume2,
@@ -485,7 +485,7 @@ export default function SetlistDetailPage() {
                         className="text-blue-600 hover:text-blue-700 transition-colors"
                         aria-label={`View ${score.creation.title}`}
                       >
-                        <Eye className="w-5 h-5" />
+                        <FileMusic className="w-5 h-5" />
                       </a>
                     </div>
                   </motion.li>
@@ -571,7 +571,7 @@ export default function SetlistDetailPage() {
                 className="flex items-center justify-center space-x-2 bg-blue-600 text-white py-4 px-4 rounded-xl shadow-sm hover:bg-blue-700 transition-colors"
                 aria-label={t("viewPdf")}
               >
-                <Eye className="w-5 h-5" />
+                <FileMusic className="w-5 h-5" />
                 <span className="text-sm font-medium">{t("viewPdf")}</span>
               </a>
             </motion.div>

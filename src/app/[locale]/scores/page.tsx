@@ -262,7 +262,7 @@ export default function ScoreList() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4"
+              className="flex sm:flex-row justify-between mb-4 sm:mb-6 gap-4"
             >
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
                 {t("title")}

@@ -92,7 +92,7 @@ export interface Score {
   referenceUrls?: string[];
   creator: { name: string };
   composer?: string;
-  lyricist?: string;
+  lyrics?: string;
   lyricsEn?: string;
   lyricsJa?: string;
   _count: { likes: number; comments: number };

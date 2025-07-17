@@ -175,7 +175,7 @@ export default function ScoreList() {
       (score.description?.toLowerCase().includes(searchLower) ?? false) ||
       score.creator.name.toLowerCase().includes(searchLower) ||
       (score.composer?.toLowerCase().includes(searchLower) ?? false) ||
-      (score.lyricist?.toLowerCase().includes(searchLower) ?? false) ||
+      (score.lyrics?.toLowerCase().includes(searchLower) ?? false) ||
       (score.lyricsEn?.toLowerCase().includes(searchLower) ?? false) ||
       (score.lyricsJa?.toLowerCase().includes(searchLower) ?? false);
     const matchesGenre =

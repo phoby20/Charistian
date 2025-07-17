@@ -173,7 +173,7 @@ export default function PlansPage() {
     return <Loading />;
   }
 
-  const isSuperAdmin = user.role === "SUPER_ADMIN";
+  const isSuperAdmin = user.role === "SUPER_ADMIN" || user.role === "ADMIN";
 
   const planHierarchy: { [key: string]: number } = {
     FREE: 0,

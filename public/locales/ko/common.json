@@ -832,7 +832,7 @@
   "dashboard": {
     "title": "대시보드",
     "planAndUsage": "플랜 및 사용량",
-    "plan": "플랜",
+    "plan": "현재 플랜",
     "remainingUsers": "남은 성도 등록",
     "remainingScores": "남은 악보 업로드",
     "managePlan": "플랜 관리",

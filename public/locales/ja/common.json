@@ -822,7 +822,7 @@
   "dashboard": {
     "title": "ダッシュボード",
     "planAndUsage": "プランと使用量",
-    "plan": "プラン",
+    "plan": "現在のプラン",
     "remainingUsers": "残りの信徒登録",
     "remainingScores": "残りの楽譜アップロード",
     "managePlan": "プラン管理",

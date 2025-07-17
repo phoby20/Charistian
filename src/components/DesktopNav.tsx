@@ -88,7 +88,7 @@ export default function DesktopNav({
                 closeAllDropdowns();
                 setIsMembersMenuOpen(!isMembersMenuOpen);
               }}
-              className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+              className="cursor-pointer flex items-center text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium"
             >
               <UsersRound className="w-5 h-5 mr-1" />
               {t("members")}
@@ -133,7 +133,7 @@ export default function DesktopNav({
               closeAllDropdowns();
               setIsScoresMenuOpen(!isScoresMenuOpen);
             }}
-            className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+            className="cursor-pointer flex items-center text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium"
           >
             <FileMusic className="w-5 h-5 mr-1" />
             {t("scores")}
@@ -166,7 +166,7 @@ export default function DesktopNav({
       ) && (
         <Link
           href={getPathname({ locale, href: "/calendar" })}
-          className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+          className="text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium"
         >
           <div className="flex">
             <Calendar className="w-5 h-5 mr-1" />
@@ -183,7 +183,7 @@ export default function DesktopNav({
               closeAllDropdowns();
               setIsSettingsMenuOpen(!isSettingsMenuOpen);
             }}
-            className="flex items-center text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+            className="cursor-pointer flex items-center text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium"
           >
             <Settings className="w-5 h-5 mr-1" />
             {t("settings")}
@@ -210,14 +210,15 @@ export default function DesktopNav({
               closeAllDropdowns();
               setIsUserMenuOpen(!isUserMenuOpen);
             }}
-            className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium"
+            className="cursor-pointer flex items-center text-gray-600 hover:text-red-600 py-2 rounded-md text-sm font-medium"
           >
             <UserIcon className="w-5 h-5 mr-1" />
-            {user.name} ({t(toCamelCase(user.role))})
-            <ChevronDown className="w-4 h-4 ml-1" />
           </button>
           {isUserMenuOpen && (
-            <div className="absolute right-0 z-50 bg-white shadow-lg rounded-md mt-1">
+            <div className="absolute right-0 z-50 bg-white shadow-lg rounded-md mt-1 w-fill min-w-46">
+              <p className="px-4 py-2 text-center mb-2">
+                {user.name} ({t(toCamelCase(user.role))})
+              </p>
               <Link
                 href={getPathname({ locale, href: "/mypage" })}
                 onClick={() => closeAllDropdowns()}

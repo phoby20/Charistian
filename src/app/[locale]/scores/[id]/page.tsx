@@ -238,16 +238,14 @@ export default function ScoreDetailPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLike}
                   disabled={isLiking}
-                  className={`flex items-center space-x-2 px-5 py-3 rounded-full shadow-md transition-all cursor-pointer ${
+                  className={`flex items-center space-x-2 px-5 py-2 rounded-full shadow-md transition-all cursor-pointer ${
                     isLiked
                       ? "bg-red-500 text-white hover:bg-red-600"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   } ${isLiking ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  <Heart className={`w-6 h-6 ${isLiked ? "fill-white" : ""}`} />
-                  <span className="text-base font-medium">
-                    {t("like")} ({likeCount})
-                  </span>
+                  <Heart className={`w-4 h-4 ${isLiked ? "fill-white" : ""}`} />
+                  <span className="text-base font-medium">{likeCount}</span>
                 </motion.button>
                 {canEdit && (
                   <>
@@ -257,13 +255,10 @@ export default function ScoreDetailPage() {
                       onClick={() =>
                         (window.location.href = `/${locale}/scores/${id}/edit`)
                       }
-                      className="flex items-center space-x-2 px-5 py-3 rounded-full shadow-md bg-gray-200 text-gray-700 hover:bg-blue-500 hover:text-white transition-all cursor-pointer"
+                      className="flex items-center space-x-2 px-5 py-2 rounded-full shadow-md bg-gray-200 text-gray-700 hover:bg-blue-500 hover:text-white transition-all cursor-pointer"
                       aria-label={t("editScore")}
                     >
-                      <Edit2 className="w-6 h-6" />
-                      <span className="text-base font-medium">
-                        {t("editScore")}
-                      </span>
+                      <Edit2 className="w-4 h-4" />
                     </motion.button>
                   </>
                 )}
@@ -273,23 +268,19 @@ export default function ScoreDetailPage() {
                     whileTap={{ scale: 0.95 }}
                     onClick={handleClose}
                     disabled={isClosing}
-                    className={`flex items-center space-x-2 px-5 py-3 rounded-full shadow-md bg-gray-200 text-gray-700 hover:bg-red-500 hover:text-white transition-all cursor-pointer ${
+                    className={`flex items-center space-x-2 px-5 py-2 rounded-full shadow-md bg-gray-200 text-gray-700 hover:bg-red-500 hover:text-white transition-all cursor-pointer ${
                       isClosing ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                     aria-label={t("deleteScore")}
                   >
-                    <Trash2 className="w-6 h-6" />
+                    <Trash2 className="w-4 h-4" />
                   </motion.button>
                 )}
               </div>
             </div>
-            <ScoreInfo
-              user={user}
-              score={score}
-              imageError={imageError}
-              appUrl={appUrl}
-              setImageError={setImageError}
-            />
+
+            <ScoreInfo user={user} score={score} appUrl={appUrl} />
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

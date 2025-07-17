@@ -584,7 +584,7 @@
   "Score": {
     "title": "악보 목록",
     "uploadScore": "악보 업로드",
-    "searchPlaceholder": "타이틀, 설명, 작성자, 작곡가, 작사자로 검색",
+    "searchPlaceholder": "타이틀, 설명, 가사, 작성자, 작곡가, 작사자로 검색",
     "genreFilter": "장르 필터",
     "keyFilter": "키 필터",
     "sharpFilter": "샤프 필터",

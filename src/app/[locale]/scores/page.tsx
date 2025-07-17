@@ -175,7 +175,7 @@ export default function ScoreList() {
       (score.description?.toLowerCase().includes(searchLower) ?? false) ||
       score.creator.name.toLowerCase().includes(searchLower) ||
       (score.composer?.toLowerCase().includes(searchLower) ?? false) ||
-      (score.lyricist?.toLowerCase().includes(searchLower) ?? false) ||
+      (score.lyrics?.toLowerCase().includes(searchLower) ?? false) ||
       (score.lyricsEn?.toLowerCase().includes(searchLower) ?? false) ||
       (score.lyricsJa?.toLowerCase().includes(searchLower) ?? false);
     const matchesGenre =
@@ -262,7 +262,7 @@ export default function ScoreList() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4"
+              className="flex sm:flex-row justify-between mb-4 sm:mb-6 gap-4"
             >
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
                 {t("title")}

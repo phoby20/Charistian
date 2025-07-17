@@ -575,7 +575,7 @@
   "Score": {
     "title": "楽譜一覧",
     "uploadScore": "楽譜アップロード",
-    "searchPlaceholder": "タイトル、説明、作成者、作曲者、作詞者で検索",
+    "searchPlaceholder": "タイトル、説明、歌詞、作成者、作曲者、作詞者で検索",
     "genreFilter": "ジャンルフィルター",
     "keyFilter": "キーフィルター",
     "sharpFilter": "シャープの有無",

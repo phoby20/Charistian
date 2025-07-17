@@ -751,6 +751,7 @@
   },
   "plans": {
     "title": "プラン選択",
+    "description": "今すぐ教会にぴったりのプランを選んで、賛美ミニストリーをスマートに始めましょう！",
     "superAdminRequired": "SuperAdmin権限が必要です。",
     "month": "月",
     "free": {

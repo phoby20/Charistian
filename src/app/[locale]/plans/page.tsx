@@ -200,9 +200,10 @@ export default function PlansPage() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="mb-12"
         >
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight text-center">
             {t("title")}
           </h1>
+          <p className="mt-4 mb-20 text-center">{t("description")}</p>
           {error && (
             <motion.div
               initial={{ opacity: 0 }}

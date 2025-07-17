@@ -761,6 +761,7 @@
   },
   "plans": {
     "title": "플랜 선택",
+    "description": "지금 바로 우리 교회에 딱 맞는 플랜을 선택하고, 찬양 사역을 스마트하게 시작해보세요!",
     "superAdminRequired": "SuperAdmin 권한이 필요합니다.",
     "month": "월",
     "free": {

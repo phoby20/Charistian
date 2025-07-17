@@ -518,6 +518,24 @@
     "keyPlaceholder": "キーを選択してください",
     "keyRequired": "キーを選択する必要があります。"
   },
+  "MasterScoreUpload": {
+    "titleForMaster": "マスター楽譜アップロード",
+    "selectChurch": "教会検索",
+    "country": "国",
+    "city": "都市",
+    "region": "地域",
+    "church": "教会名",
+    "title": "楽譜アップロード",
+    "backToList": "一覧に戻る",
+    "uploadButton": "アップロード",
+    "genreLabel": "ジャンル",
+    "genrePlaceholder": "ジャンルを選択してください",
+    "genreRequired": "ジャンルを選択する必要があります。",
+    "fileRequired": "楽譜ファイルは必須です。",
+    "keyLabel": "キー",
+    "keyPlaceholder": "キーを選択してください",
+    "keyRequired": "キーを選択する必要があります。"
+  },
   "ScoreDetail": {
     "error": "楽譜の読み込み中にエラーが発生しました。",
     "shareText": "この楽譜をチェックしてください！",

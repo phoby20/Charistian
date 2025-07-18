@@ -105,8 +105,8 @@ function TermsOfServiceContent() {
             </h2>
             <ol className="list-decimal pl-5 space-y-2">
               <li>
-                {t("article6.item1", { email: "support@integrity.com" }) ||
-                  "문의는 이메일(support@integrity.com)을 통해 가능합니다."}
+                {t("article6.item1", { email: "charistian.co@gmail.com" }) ||
+                  "문의는 이메일(charistian.co@gmail.com)을 통해 가능합니다."}
               </li>
             </ol>
           </section>

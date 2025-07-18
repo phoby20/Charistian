@@ -17,9 +17,15 @@ import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
+import { constants } from "@/constants/intex";
 
-const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const TONES = ["Major", "Minor"];
+const { KEYS, TONES } = constants;
+
+// 타입 가드를 위한 유틸리티 함수
+const isValidKey = (value: string): value is (typeof KEYS)[number] =>
+  KEYS.includes(value as (typeof KEYS)[number]);
+const isValidTone = (value: string): value is (typeof TONES)[number] =>
+  TONES.includes(value as (typeof TONES)[number]);
 
 export default function ScoreUploadPage() {
   const t = useTranslations("ScoreUpload");
@@ -123,10 +129,10 @@ export default function ScoreUploadPage() {
                     validate: (value) => {
                       if (!value) return t("keyRequired");
                       const [key, tone] = value.split(" ");
-                      return (
-                        (KEYS.includes(key) && TONES.includes(tone)) ||
-                        t("keyRequired")
-                      );
+                      if (!isValidKey(key) || !isValidTone(tone)) {
+                        return t("keyRequired");
+                      }
+                      return true;
                     },
                   })}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"

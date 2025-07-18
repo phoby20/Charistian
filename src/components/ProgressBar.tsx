@@ -36,9 +36,9 @@ export default function ProgressBar({
   })();
 
   return (
-    <div>
-      <p className="text-sm font-medium text-gray-700 mb-1">
-        {label} ({remaining} / {max ?? t("infinity")})
+    <div className="flex justify-center flex-col">
+      <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1">
+        {label} ({remaining}/{max ?? t("infinity")})
       </p>
       <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
         <motion.div

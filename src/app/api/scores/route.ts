@@ -6,10 +6,15 @@ import prisma from "@/lib/prisma";
 import { CreationType, Genre } from "@prisma/client";
 import { allowedRoles } from "./allowedRoles";
 import { createKoreaDate } from "@/utils/creatKoreaDate";
+import { constants } from "@/constants/intex";
 
-// 코드 키와 조 상수 정의
-const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const TONES = ["Major", "Minor"];
+const { KEYS, TONES } = constants;
+
+// 타입 가드를 위한 유틸리티 함수
+const isValidKey = (value: string): value is (typeof KEYS)[number] =>
+  KEYS.includes(value as (typeof KEYS)[number]);
+const isValidTone = (value: string): value is (typeof TONES)[number] =>
+  TONES.includes(value as (typeof TONES)[number]);
 
 export async function GET(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
@@ -111,7 +116,7 @@ export async function POST(req: NextRequest) {
   }
   // 코드 키 유효성 검증
   const [keyNote, tone] = key.split(" ");
-  if (!KEYS.includes(keyNote) || !TONES.includes(tone)) {
+  if (!isValidKey(keyNote) || !isValidTone(tone)) {
     return NextResponse.json(
       { error: "유효하지 않은 코드 키입니다." },
       { status: 400 }

@@ -49,7 +49,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
       >
         {/* Description */}
         {score.description && (
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <div className="rounded-lg border border-gray-200 p-4">
             <button
               onClick={toggleDescription}
               className="flex w-full items-center justify-between text-lg font-semibold text-gray-900"
@@ -89,7 +89,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
 
         {/* Lyrics */}
         {(score.lyrics || score.lyricsEn || score.lyricsJa) && (
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <div className="rounded-lg border border-gray-200  p-4">
             <button
               onClick={toggleLyrics}
               className="cursor-pointer flex w-full items-center justify-between text-lg font-semibold text-gray-900"
@@ -152,7 +152,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Composer */}
           {score.composer && (
-            <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <div className="flex items-center rounded-lg border border-gray-200  p-3">
               <span className="w-28 font-medium text-gray-900">
                 {t("composer")}
               </span>
@@ -162,7 +162,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
 
           {/* Lyricist */}
           {score.lyricist && (
-            <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <div className="flex items-center rounded-lg border border-gray-200  p-3">
               <span className="w-28 font-medium text-gray-900">
                 {t("lyricist")}
               </span>
@@ -171,7 +171,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
           )}
 
           {/* Is Original */}
-          <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-3">
+          <div className="flex items-center rounded-lg border border-gray-200  p-3">
             <span className="w-28 font-medium text-gray-900">
               {t("isOriginal")}
             </span>
@@ -182,7 +182,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
 
           {/* Price */}
           {score.price && (
-            <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <div className="flex items-center rounded-lg border border-gray-200  p-3">
               <span className="w-28 font-medium text-gray-900">
                 {t("price")}
               </span>
@@ -193,7 +193,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
           )}
 
           {/* Is Open */}
-          <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 p-3">
+          <div className="flex items-center rounded-lg border border-gray-200  p-3">
             <span className="w-28 font-medium text-gray-900">
               {t("isOpen")}
             </span>

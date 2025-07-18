@@ -128,11 +128,9 @@ export default function AttendanceStats({
           {selectedGroups.length > 0
             ? `${t("groupLabel")}: ${selectedGroups.join(", ")}`
             : t("noGroups")}
-          {", "}
           {selectedSubGroups.length > 0
             ? `${t("subGroupLabel")}: ${selectedSubGroups.join(", ")}`
             : t("noSubGroups")}
-          {", "}
           {selectedTeams.length > 0
             ? `${t("teamLabel")}: ${selectedTeams.join(", ")}`
             : t("noTeams")}

@@ -180,13 +180,13 @@
   "group": "所属",
   "noGroup": "無所属",
   "subGroup": "小グループ",
-  "noSubGroup": "所属している小グループ無し",
+  "noSubGroup": "",
   "teams": "チーム",
-  "noTeams": "所属しているチーム無し",
+  "noTeams": "",
   "duties": "職務",
   "noDuties": "職務無し",
   "noPosition": "職分無し",
-  "noSubGroups": "小グループ無し",
+  "noSubGroups": "",
   "noMembers": "登録済みの聖徒がありません",
   "attended": "出席済み",
   "notAttended": "未出席",
@@ -354,7 +354,7 @@
   },
   "footer": {
     "brandName": "カリスチャン",
-    "description": "教会統合管理運営プラットフォーム。",
+    "description": "賛美コンテ作成・共有プラットフォーム",
     "links": "リンク",
     "about": "私たちについて",
     "contact": "お問い合わせ",
@@ -721,12 +721,12 @@
   },
   "filterByTeam": "チームでフィルタリング",
   "noTeam": "チームなし",
-  "selectSubGroups": "小グループ選択",
-  "selectTeams": "チーム選択",
-  "noGroups": "グループなし",
+  "selectSubGroups": "小グループ",
+  "selectTeams": "チーム",
+  "noGroups": "",
   "filter": "フィルター",
   "filtersApplied": "適用されたフィルター",
-  "selectGroups": "部署選択",
+  "selectGroups": "部署",
   "groupLabel": "グループ",
   "subGroupLabel": "サブグループ",
   "teamLabel": "チーム",
@@ -847,10 +847,10 @@
     "limitExceededUsers": "信徒登録の制限を超えました。プランをアップグレードしてください。",
     "limitExceededSetlists": "コンテ作成の制限を超えました。プランをアップグレードしてください。",
     "limitExceededScores": "楽譜アップロードの制限を超えました。プランをアップグレードしてください。",
-    "registeredMembers": "登録された信徒数",
-    "weeklySetlists": "週間作成したコンテ数",
-    "monthlySetlists": "月間作成したコンテ数",
-    "scoreUploads": "残りの楽譜アップロード"
+    "registeredMembers": "登録済み信徒",
+    "weeklySetlists": "週間作成コンテ",
+    "monthlySetlists": "月間作成コンテ",
+    "scoreUploads": "楽譜アップロード"
   },
   "checkout": {
     "title": "決済",
@@ -988,5 +988,27 @@
       "item1": "個人情報に関する問い合わせは、以下のメールアドレスにて受け付けます：{email}",
       "item2": "当社は、問い合わせに対して速やかに対応します。"
     }
+  },
+  "EventModal": {
+    "title": "楽譜アップロード代行イベント",
+    "description": "楽譜のアップロードが面倒ですか？\n今、イベント期間中に楽譜ファイルを送っていただければ、運営が代わりにアップロードします！\n楽譜登録は最大２０件までで、PDFまたはJPGファイルのみアップロードしてください。\n申請者が多い場合、アップロードに遅れが発生する恐れがあります。",
+    "dontShowAgain": "次回から表示しない",
+    "contactUs": "メールでファイルを送る",
+    "close": "閉じる"
+  },
+  "ScoreAgencyUpload": {
+    "title": "楽譜ファイルアップロード",
+    "description": "PDFまたはJPGファイルのみアップロードできます。",
+    "fileLabel": "楽譜ファイル",
+    "addFile": "ファイルを追加",
+    "selectedFiles": "選択されたファイル",
+    "removeFile": "ファイル削除",
+    "fileRequired": "少なくとも1つのファイルを選択する必要があります。",
+    "invalidFileType": "PDFまたはJPGファイルのみアップロード可能です。",
+    "fileSizeExceeds": "ファイルサイズは10MBを超えることはできません。",
+    "uploadButton": "ファイルアップロード",
+    "uploading": "アップロード中...",
+    "uploadFailed": "アップロードに失敗しました。",
+    "unauthorized": "ログインが必要です。"
   }
 }

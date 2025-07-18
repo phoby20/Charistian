@@ -37,7 +37,7 @@ export default function UsageLimitCard({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200"
+      className="bg-white rounded-xl shadow-sm p-4 mb-6 border border-gray-200"
     >
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">{t("planAndUsage")}</h2>
@@ -52,34 +52,40 @@ export default function UsageLimitCard({
         )}
       </div>
       <div className="space-y-4">
-        {/* 성도 수 */}
-        <ProgressBar
-          label={t("registeredMembers")}
-          remaining={usageLimit.remainingUsers}
-          max={usageLimit.maxUsers}
-          color="bg-blue-500"
-        />
-        {/* 주간 콘티 수 */}
-        <ProgressBar
-          label={t("weeklySetlists")}
-          remaining={usageLimit.remainingWeeklySetlists}
-          max={usageLimit.weeklySetlists}
-          color="bg-green-500"
-        />
-        {/* 월간 콘티 수 */}
-        <ProgressBar
-          label={t("monthlySetlists")}
-          remaining={usageLimit.remainingMonthlySetlists}
-          max={usageLimit.monthlySetlists}
-          color="bg-orange-500"
-        />
-        {/* 악보 업로드 수 */}
-        <ProgressBar
-          label={t("scoreUploads")}
-          remaining={usageLimit.remainingScores}
-          max={usageLimit.maxScores}
-          color="bg-purple-500"
-        />
+        <div className="flex gap-4">
+          <div className="w-full space-y-4">
+            {/* 성도 수 */}
+            <ProgressBar
+              label={t("registeredMembers")}
+              remaining={usageLimit.remainingUsers}
+              max={usageLimit.maxUsers}
+              color="bg-blue-500"
+            />
+            {/* 주간 콘티 수 */}
+            <ProgressBar
+              label={t("weeklySetlists")}
+              remaining={usageLimit.remainingWeeklySetlists}
+              max={usageLimit.weeklySetlists}
+              color="bg-green-500"
+            />
+          </div>
+          <div className="w-full space-y-4">
+            {/* 월간 콘티 수 */}
+            <ProgressBar
+              label={t("monthlySetlists")}
+              remaining={usageLimit.remainingMonthlySetlists}
+              max={usageLimit.monthlySetlists}
+              color="bg-orange-500"
+            />
+            {/* 악보 업로드 수 */}
+            <ProgressBar
+              label={t("scoreUploads")}
+              remaining={usageLimit.remainingScores}
+              max={usageLimit.maxScores}
+              color="bg-purple-500"
+            />
+          </div>
+        </div>
         {/* 플랜 */}
         <p className="text-sm font-medium text-gray-700">
           {t("plan")}: {usageLimit.plan}

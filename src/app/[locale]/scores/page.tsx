@@ -1,4 +1,3 @@
-// src/components/scores/ScoreList.tsx
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -34,6 +33,12 @@ export default function ScoreList() {
   const [isSongListOpen, setIsSongListOpen] = useState(true);
   const locale = useLocale();
   const t = useTranslations("Score");
+
+  // 키 정규화 함수
+  const normalizeKey = (key: string): string => {
+    // 샤프(#) 또는 플랫(b)을 제거하고 기본 음계만 반환
+    return key.split(" ")[0].replace(/[#b]/, "");
+  };
 
   // 세션 스토리지에서 선곡 리스트 불러오기
   useEffect(() => {
@@ -182,9 +187,13 @@ export default function ScoreList() {
       score.tempo !== undefined &&
       score.tempo >= minAvailableTempo &&
       score.tempo <= maxAvailableTempo;
+
+    // 키 필터링: 샤프/플랫을 제거한 기본 음계로 비교
     const matchesKey =
       selectedKeys.length === 0 ||
-      (score.key && selectedKeys.includes(score.key.split(" ")[0]));
+      (score.key && selectedKeys.includes(normalizeKey(score.key)));
+
+    // 샤프/플랫/내추럴 필터링
     const matchesSharp =
       selectedSharp === "all" ||
       (score.key &&
@@ -193,8 +202,11 @@ export default function ScoreList() {
           : selectedSharp === "flat"
             ? score.key.includes("b")
             : !score.key.includes("#") && !score.key.includes("b")));
+
+    // 조 필터링
     const matchesTone =
       selectedTone === "" || (score.key && score.key.endsWith(selectedTone));
+
     return (
       matchesSearch &&
       matchesGenre &&

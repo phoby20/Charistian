@@ -988,5 +988,27 @@
       "item1": "個人情報に関する問い合わせは、以下のメールアドレスにて受け付けます：{email}",
       "item2": "当社は、問い合わせに対して速やかに対応します。"
     }
+  },
+  "EventModal": {
+    "title": "楽譜アップロード代行イベント",
+    "description": "楽譜のアップロードが面倒ですか？\n今、イベント期間中に楽譜ファイルを送っていただければ、運営が代わりにアップロードします！\n楽譜登録は最大２０件までで、PDFまたはJPGファイルのみアップロードしてください。\n申請者が多い場合、アップロードに遅れが発生する恐れがあります。",
+    "dontShowAgain": "次回から表示しない",
+    "contactUs": "メールでファイルを送る",
+    "close": "閉じる"
+  },
+  "ScoreAgencyUpload": {
+    "title": "楽譜ファイルアップロード",
+    "description": "PDFまたはJPGファイルのみアップロードできます。",
+    "fileLabel": "楽譜ファイル",
+    "addFile": "ファイルを追加",
+    "selectedFiles": "選択されたファイル",
+    "removeFile": "ファイル削除",
+    "fileRequired": "少なくとも1つのファイルを選択する必要があります。",
+    "invalidFileType": "PDFまたはJPGファイルのみアップロード可能です。",
+    "fileSizeExceeds": "ファイルサイズは10MBを超えることはできません。",
+    "uploadButton": "ファイルアップロード",
+    "uploading": "アップロード中...",
+    "uploadFailed": "アップロードに失敗しました。",
+    "unauthorized": "ログインが必要です。"
   }
 }

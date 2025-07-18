@@ -47,7 +47,7 @@ export default function SearchFilters({
   const locale = useLocale();
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 space-y-2 mb-10">
+    <div className="bg-white rounded-xl shadow p-4 space-y-2 mb-6">
       {/* Search */}
       <input
         type="text"

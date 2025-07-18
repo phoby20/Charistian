@@ -338,14 +338,6 @@ export default function ScoreList() {
               />
             </motion.div>
 
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              onItemsPerPageChange={handleItemsPerPageChange}
-              onPageChange={setCurrentPage}
-            />
-
             <AnimatePresence>
               {error && (
                 <motion.div
@@ -376,6 +368,14 @@ export default function ScoreList() {
                 getGenreLabel={getGenreLabel}
               />
             )}
+
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              onItemsPerPageChange={handleItemsPerPageChange}
+              onPageChange={setCurrentPage}
+            />
           </div>
 
           <div className="sm:block">

@@ -86,7 +86,7 @@ export default function ScoreTable({
   }, [currentPlayingId]);
 
   return (
-    <div className="overflow-x-auto relative">
+    <div className="overflow-x-auto relative mb-4">
       {/* YouTube Players */}
       {scores.map((score) => {
         const youtubeVideoId = getFirstYouTubeVideoId(score.referenceUrls);

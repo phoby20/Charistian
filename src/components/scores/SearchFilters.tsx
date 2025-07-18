@@ -58,11 +58,11 @@ export default function SearchFilters({
       />
 
       {/* Genre */}
-      <div className="bg-gray-50 p-3 border border-gray-200 rounded-lg">
-        <label className="text-sm font-semibold text-gray-700 mb-2 block">
+      <div className="bg-gray-50 p-3 border border-gray-200 rounded-lg flex items-center">
+        <label className="w-[70px] sm:w-[30px] text-sm font-semibold text-gray-700 block">
           {t("genreFilter")}
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1 ml-4">
           {GENRES.map((genre) => {
             const label = locale === "ja" ? genre.ja : genre.ko;
             const selected = selectedGenres.includes(genre.value);

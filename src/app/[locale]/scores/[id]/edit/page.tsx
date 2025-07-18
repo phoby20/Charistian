@@ -353,7 +353,7 @@ export default function ScoreEditPage() {
             disabled={isLoading || !isFormValid()}
             whileHover={isFormValid() ? { scale: 1.05 } : {}}
             whileTap={isFormValid() ? { scale: 0.95 } : {}}
-            className={`w-full p-3 rounded-md text-white transition-colors ${
+            className={`cursor-pointer w-full p-3 rounded-md text-white transition-colors ${
               isFormValid()
                 ? "bg-blue-600 hover:bg-blue-700"
                 : "bg-gray-400 cursor-not-allowed"

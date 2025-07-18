@@ -206,7 +206,7 @@ export default function ScoreDetailPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => router.push(`/${locale}/scores`)}
-              className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors mb-8 font-semibold"
+              className="cursor-pointer flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors mb-8 font-semibold"
               aria-label={t("backToList")}
             >
               <ArrowLeft className="w-6 h-6" />

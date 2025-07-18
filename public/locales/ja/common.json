@@ -698,15 +698,6 @@
     "fileTooLarge": "ファイルサイズは10MBを超えることはできません。",
     "fileReadError": "ファイルの読み込み中にエラーが発生しました。"
   },
-  "ThumbnailUploadSection": {
-    "label": "サムネイル画像 (JPG, PNG)",
-    "required": "サムネイル画像は必須です。",
-    "selectOrDrag": "サムネイルを選択またはドラッグしてください",
-    "fileSelected": "選択されたファイル: {fileName}",
-    "invalidImage": "有効なJPGまたはPNGファイルではありません。",
-    "fileTooLarge": "ファイルサイズは5MBを超えることはできません。",
-    "fileReadError": "ファイルの読み込み中にエラーが発生しました。"
-  },
   "filterByTeam": "チームでフィルタリング",
   "noTeam": "チームなし",
   "selectSubGroups": "小グループ",
@@ -1029,7 +1020,7 @@
     "tempoLabel": "テンポ",
     "tempoPlaceholder": "BPM（例：120）",
     "tempoRequired": "テンポは必須です。",
-    "lyricsLabel": "歌詞（日本語）",
+    "lyricsLabel": "歌詞（韓国語）",
     "lyricsPlaceholder": "韓国語の歌詞を入力してください（ない場合は「なし」と記載）",
     "lyricsRequired": "歌詞は必須です。",
     "lyricsEnLabel": "歌詞（英語）",

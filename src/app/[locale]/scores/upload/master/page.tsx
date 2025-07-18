@@ -8,7 +8,6 @@ import { LyricsSection } from "@/components/scores/LyricsSection";
 import { OptionsSection } from "@/components/scores/OptionsSection";
 import { ReferenceUrlsSection } from "@/components/scores/ReferenceUrlsSection";
 import { TempoSection } from "@/components/scores/TempoSection";
-import { ThumbnailUploadSection } from "@/components/scores/ThumbnailUploadSection";
 import { TitleSection } from "@/components/scores/TitleSection";
 import { GENRES } from "@/data/genre";
 import { citiesByCountry } from "@/data/cities";
@@ -105,7 +104,6 @@ export default function ScoreUploadPageForMaster() {
     churchId: "",
   });
   const [fileError, setFileError] = useState<string | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [pdfPreview, setPdfPreview] = useState<string | null>(null);
 
   // File handling
@@ -129,21 +127,6 @@ export default function ScoreUploadPageForMaster() {
     setPdfPreview(null);
     setFileError(t("fileRequired"));
     setValue("file", null);
-  };
-
-  const handleThumbnailChange = (file: File | null) => {
-    if (file) {
-      setThumbnailPreview(URL.createObjectURL(file));
-      setValue("thumbnail", file); // Update form state
-    } else {
-      setThumbnailPreview(null);
-      setValue("thumbnail", null);
-    }
-  };
-
-  const removeThumbnail = () => {
-    setThumbnailPreview(null);
-    setValue("thumbnail", null);
   };
 
   // Initialize default values for country, city, region
@@ -501,13 +484,6 @@ export default function ScoreUploadPageForMaster() {
               </div>
             </div>
           </div>
-          <ThumbnailUploadSection
-            thumbnailPreview={thumbnailPreview}
-            handleThumbnailChange={handleThumbnailChange}
-            removeThumbnail={removeThumbnail}
-            errors={errors}
-            control={control}
-          />
           <TitleSection register={register} errors={errors} />
           <TempoSection register={register} errors={errors} />
           <ReferenceUrlsSection

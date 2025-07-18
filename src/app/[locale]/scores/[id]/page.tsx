@@ -290,8 +290,11 @@ export default function ScoreDetailPage() {
               <h2 className="text-2xl font-semibold text-gray-800 mb-6">
                 {t("referenceUrls")}
               </h2>
+
               <div className="text-gray-600">
-                {score.referenceUrls && score.referenceUrls.length > 0 ? (
+                {score.referenceUrls &&
+                score.referenceUrls.length > 0 &&
+                score.referenceUrls[0] !== "" ? (
                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {score.referenceUrls.map((ref, index) => {
                       const videoId = getYouTubeVideoId(ref);
@@ -330,18 +333,7 @@ export default function ScoreDetailPage() {
                                 <p className="text-xs">{t("noThumbnail")}</p>
                               </div>
                             </div>
-                          ) : (
-                            <a
-                              href={ref}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block p-4"
-                            >
-                              <p className="text-sm text-blue-600 truncate">
-                                {ref}
-                              </p>
-                            </a>
-                          )}
+                          ) : null}
                         </motion.div>
                       );
                     })}

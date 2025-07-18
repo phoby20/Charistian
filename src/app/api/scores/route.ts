@@ -81,7 +81,6 @@ export async function POST(req: NextRequest) {
 
   const formData = await req.formData();
   const file = formData.get("file") as File;
-  const thumbnail = formData.get("thumbnail") as File | null;
   const title = formData.get("title") as string;
   const isPublic = formData.get("isPublic") === "true";
   const isForSale = formData.get("isForSale") === "true";
@@ -132,15 +131,6 @@ export async function POST(req: NextRequest) {
     { access: "public", contentType: file.type }
   );
 
-  let thumbnailBlob: { url: string } | undefined;
-  if (thumbnail) {
-    thumbnailBlob = await put(
-      `thumbnails/${payload.churchId}/${payload.userId}/${koreaDate}-${thumbnail.name}`,
-      thumbnail,
-      { access: "public", contentType: thumbnail.type }
-    );
-  }
-
   // Prisma에 데이터 저장
   const score = await prisma.creation.create({
     data: {
@@ -150,7 +140,6 @@ export async function POST(req: NextRequest) {
       description: formData.get("description") as string,
       type: isOriginal ? CreationType.ORIGINAL_SCORE : CreationType.SCORE,
       fileUrl: fileBlob.url,
-      thumbnailUrl: thumbnailBlob?.url,
       price: isForSale
         ? parseFloat(formData.get("price") as string)
         : undefined,

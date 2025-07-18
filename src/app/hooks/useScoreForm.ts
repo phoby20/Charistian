@@ -22,14 +22,11 @@ interface UseScoreFormReturn {
   remove: UseFieldArrayRemove;
   fileError: string | null;
   setFileError: (error: string | null) => void;
-  thumbnailPreview: string | null;
   pdfPreview: string | null;
   saleStartDate: Date | null;
   saleEndDate: Date | null;
   locale: string;
   isFormValid: () => boolean;
-  handleThumbnailChange: (file: File | null) => void;
-  removeThumbnail: () => void;
   handleFileChange: (file: File | null) => void;
   removePdfPreview: () => void;
   handleDateChange: (
@@ -49,7 +46,6 @@ export const useScoreForm = (): UseScoreFormReturn => {
       isForSale: false,
       isOriginal: false,
       file: null,
-      thumbnail: null,
       title: "",
       tempo: "",
       lyrics: "",
@@ -65,7 +61,6 @@ export const useScoreForm = (): UseScoreFormReturn => {
   });
 
   const [fileError, setFileError] = useState<string | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [pdfPreview, setPdfPreview] = useState<string | null>(null);
   const [saleStartDate, setSaleStartDate] = useState<Date | null>(null);
   const [saleEndDate, setSaleEndDate] = useState<Date | null>(null);
@@ -75,7 +70,6 @@ export const useScoreForm = (): UseScoreFormReturn => {
 
   const {
     file,
-    thumbnail,
     title,
     tempo,
     lyrics,
@@ -89,14 +83,12 @@ export const useScoreForm = (): UseScoreFormReturn => {
     const { errors } = form.formState;
     const requiredFieldsFilled =
       !!file &&
-      !!thumbnail &&
       !!title &&
       !!tempo &&
       !!lyrics &&
       !!description &&
       !!key && // 추가
       !errors.file &&
-      !errors.thumbnail &&
       !errors.title &&
       !errors.tempo &&
       !errors.lyrics &&
@@ -115,26 +107,6 @@ export const useScoreForm = (): UseScoreFormReturn => {
       setSaleEndDate(null);
     }
   }, [isForSale, form]);
-
-  useEffect(() => {
-    return () => {
-      if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
-    };
-  }, [thumbnailPreview]);
-
-  const handleThumbnailChange = (file: File | null): void => {
-    if (file && ["image/jpeg", "image/png"].includes(file.type)) {
-      const previewUrl = URL.createObjectURL(file);
-      setThumbnailPreview(previewUrl);
-    } else {
-      setThumbnailPreview(null);
-    }
-  };
-
-  const removeThumbnail = (): void => {
-    setThumbnailPreview(null);
-    form.setValue("thumbnail", null, { shouldValidate: true });
-  };
 
   const handleFileChange = (file: File | null): void => {
     setPdfPreview(file ? file.name : null);
@@ -219,14 +191,11 @@ export const useScoreForm = (): UseScoreFormReturn => {
     remove,
     fileError,
     setFileError,
-    thumbnailPreview,
     pdfPreview,
     saleStartDate,
     saleEndDate,
     locale: locale as string,
     isFormValid,
-    handleThumbnailChange,
-    removeThumbnail,
     handleFileChange,
     removePdfPreview,
     handleDateChange,

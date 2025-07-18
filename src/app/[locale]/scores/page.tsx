@@ -1,4 +1,3 @@
-// src/components/scores/ScoreList.tsx
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -22,7 +21,7 @@ export default function ScoreList() {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [selectedSharp, setSelectedSharp] = useState<
-    "all" | "sharp" | "natural"
+    "all" | "sharp" | "natural" | "flat"
   >("all");
   const [selectedTone, setSelectedTone] = useState<"Major" | "Minor" | "">("");
   const [minAvailableTempo, setMinAvailableTempo] = useState(0);
@@ -34,6 +33,12 @@ export default function ScoreList() {
   const [isSongListOpen, setIsSongListOpen] = useState(true);
   const locale = useLocale();
   const t = useTranslations("Score");
+
+  // 키 정규화 함수
+  const normalizeKey = (key: string): string => {
+    // 샤프(#) 또는 플랫(b)을 제거하고 기본 음계만 반환
+    return key.split(" ")[0].replace(/[#b]/, "");
+  };
 
   // 세션 스토리지에서 선곡 리스트 불러오기
   useEffect(() => {
@@ -60,7 +65,6 @@ export default function ScoreList() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // 악보 데이터 가져오기
         const scoresResponse = await fetch("/api/scores");
         if (!scoresResponse.ok) {
           const errorData: ApiErrorResponse = await scoresResponse.json();
@@ -69,7 +73,6 @@ export default function ScoreList() {
         const scoresData = await scoresResponse.json();
         setScores(scoresData);
 
-        // 사용량 데이터 가져오기
         const usageResponse = await fetch("/api/secure/usage-limits");
         if (!usageResponse.ok) {
           const errorData: ApiErrorResponse = await usageResponse.json();
@@ -153,8 +156,8 @@ export default function ScoreList() {
     setCurrentPage(1);
   };
 
-  // 샤프 라디오 버튼 핸들러
-  const handleSharpChange = (sharp: "all" | "sharp" | "natural") => {
+  // 샤프/플랫/내추럴 라디오 버튼 핸들러
+  const handleSharpChange = (sharp: "all" | "sharp" | "natural" | "flat") => {
     setSelectedSharp(sharp);
     setCurrentPage(1);
   };
@@ -184,17 +187,26 @@ export default function ScoreList() {
       score.tempo !== undefined &&
       score.tempo >= minAvailableTempo &&
       score.tempo <= maxAvailableTempo;
+
+    // 키 필터링: 샤프/플랫을 제거한 기본 음계로 비교
     const matchesKey =
       selectedKeys.length === 0 ||
-      (score.key && selectedKeys.includes(score.key.split(" ")[0]));
+      (score.key && selectedKeys.includes(normalizeKey(score.key)));
+
+    // 샤프/플랫/내추럴 필터링
     const matchesSharp =
       selectedSharp === "all" ||
       (score.key &&
         (selectedSharp === "sharp"
-          ? score.key.split(" ")[0].includes("#")
-          : !score.key.split(" ")[0].includes("#")));
+          ? score.key.includes("#")
+          : selectedSharp === "flat"
+            ? score.key.includes("b")
+            : !score.key.includes("#") && !score.key.includes("b")));
+
+    // 조 필터링
     const matchesTone =
       selectedTone === "" || (score.key && score.key.endsWith(selectedTone));
+
     return (
       matchesSearch &&
       matchesGenre &&
@@ -244,7 +256,7 @@ export default function ScoreList() {
   // 업로드 버튼 비활성화 여부 확인
   const isUploadButtonDisabled = (usageLimits: UsageLimits | null): boolean => {
     if (usageLimits?.plan === "ENTERPRISE") {
-      return false; // ENTERPRISE 플랜은 항상 활성화
+      return false;
     }
     return (
       !!usageLimits && usageLimits.remainingScores >= usageLimits.maxScores
@@ -257,7 +269,6 @@ export default function ScoreList() {
       <div className="container mx-auto max-w-[95vw] sm:max-w-[90vw] md:max-w-5xl lg:max-w-6xl">
         <div className="w-auto max-w-5xl grid grid-cols-1 md:grid-cols-[3fr_1fr] lg:grid-cols-[3fr_1fr] gap-4">
           <div className="">
-            {/* 헤더 */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -288,6 +299,7 @@ export default function ScoreList() {
                         ? "bg-gray-400 cursor-not-allowed"
                         : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 cursor-pointer"
                     }`}
+                    aria-label={t("uploadScore")}
                   >
                     <Upload className="w-5 h-5" />
                     <span>{t("uploadScore")}</span>
@@ -301,7 +313,6 @@ export default function ScoreList() {
               </div>
             </motion.div>
 
-            {/* 검색 및 필터링 */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -327,16 +338,6 @@ export default function ScoreList() {
               />
             </motion.div>
 
-            {/* 페이징 컨트롤 */}
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              onItemsPerPageChange={handleItemsPerPageChange}
-              onPageChange={setCurrentPage}
-            />
-
-            {/* 에러 메시지 */}
             <AnimatePresence>
               {error && (
                 <motion.div
@@ -351,7 +352,6 @@ export default function ScoreList() {
               )}
             </AnimatePresence>
 
-            {/* 악보 목록 */}
             {paginatedScores.length === 0 && !error && !isLoading ? (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -368,9 +368,16 @@ export default function ScoreList() {
                 getGenreLabel={getGenreLabel}
               />
             )}
+
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              onItemsPerPageChange={handleItemsPerPageChange}
+              onPageChange={setCurrentPage}
+            />
           </div>
 
-          {/* 오른쪽: 선곡 리스트 */}
           <div className="sm:block">
             <SelectedSongList
               selectedSongList={selectedSongList}

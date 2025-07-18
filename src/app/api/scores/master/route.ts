@@ -47,7 +47,6 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const thumbnail = formData.get("thumbnail") as File | null;
     const title = formData.get("title") as string;
     const titleEn = formData.get("titleEn") as string | null;
     const titleJa = formData.get("titleJa") as string | null;
@@ -123,15 +122,6 @@ export async function POST(request: NextRequest) {
       { access: "public", contentType: file.type }
     );
 
-    let thumbnailBlob: { url: string } | undefined;
-    if (thumbnail) {
-      thumbnailBlob = await put(
-        `thumbnails/${churchId}/${payload.userId}/${koreaDate}-${thumbnail.name}`,
-        thumbnail,
-        { access: "public", contentType: thumbnail.type }
-      );
-    }
-
     // referenceUrls 파싱
     let referenceUrls: { url: string }[] = [];
     try {
@@ -152,7 +142,6 @@ export async function POST(request: NextRequest) {
         description: description || undefined,
         type: isOriginal ? CreationType.ORIGINAL_SCORE : CreationType.SCORE,
         fileUrl: fileBlob.url,
-        thumbnailUrl: thumbnailBlob?.url || undefined,
         price: price ? parseFloat(price) : undefined,
         tempo: tempo ? parseInt(tempo) : undefined,
         key,

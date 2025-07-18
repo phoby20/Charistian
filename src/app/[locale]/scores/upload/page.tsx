@@ -9,7 +9,6 @@ import { OptionsSection } from "@/components/scores/OptionsSection";
 import { ReferenceUrlsSection } from "@/components/scores/ReferenceUrlsSection";
 import { SaleDetailsSection } from "@/components/scores/SaleDetailsSection";
 import { TempoSection } from "@/components/scores/TempoSection";
-import { ThumbnailUploadSection } from "@/components/scores/ThumbnailUploadSection";
 import { TitleSection } from "@/components/scores/TitleSection";
 import { GENRES } from "@/data/genre";
 import { motion } from "framer-motion";
@@ -35,13 +34,10 @@ export default function ScoreUploadPage() {
     append,
     remove,
     fileError,
-    thumbnailPreview,
     pdfPreview,
     saleStartDate,
     saleEndDate,
     isFormValid,
-    handleThumbnailChange,
-    removeThumbnail,
     handleFileChange,
     removePdfPreview,
     handleDateChange,
@@ -156,13 +152,6 @@ export default function ScoreUploadPage() {
             </div>
           </div>
 
-          <ThumbnailUploadSection
-            thumbnailPreview={thumbnailPreview}
-            handleThumbnailChange={handleThumbnailChange}
-            removeThumbnail={removeThumbnail}
-            errors={errors}
-            control={control}
-          />
           <TitleSection register={register} errors={errors} />
           <TempoSection register={register} errors={errors} />
           <ReferenceUrlsSection
@@ -188,7 +177,7 @@ export default function ScoreUploadPage() {
             disabled={isLoading || !isFormValid()}
             whileHover={isFormValid() ? { scale: 1.05 } : {}}
             whileTap={isFormValid() ? { scale: 0.95 } : {}}
-            className={`w-full p-3 rounded-md text-white transition-colors ${
+            className={`cursor-pointer w-full p-3 rounded-md text-white transition-colors ${
               isFormValid()
                 ? "bg-blue-600 hover:bg-blue-700"
                 : "bg-gray-400 cursor-not-allowed"

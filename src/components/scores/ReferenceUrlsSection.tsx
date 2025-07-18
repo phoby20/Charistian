@@ -7,6 +7,7 @@ import {
   UseFieldArrayAppend,
   UseFieldArrayRemove,
 } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { ScoreFormData } from "@/types/score";
 
 interface ReferenceUrlsSectionProps {
@@ -22,10 +23,12 @@ export const ReferenceUrlsSection: React.FC<ReferenceUrlsSectionProps> = ({
   remove,
   register,
 }) => {
+  const t = useTranslations("ScoreUpload");
+
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
-        참고 URL
+        {t("referenceUrlsLabel")}
       </label>
       <AnimatePresence>
         {fields.map((field, index) => (
@@ -34,31 +37,39 @@ export const ReferenceUrlsSection: React.FC<ReferenceUrlsSectionProps> = ({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
             className="flex items-center mb-2"
           >
             <input
               {...register(`referenceUrls.${index}.url` as const)}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="URL 입력 (예: https://youtube.com)"
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+              placeholder={t("referenceUrlsPlaceholder")}
+              aria-label={t("referenceUrlsLabel")}
             />
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="button"
               onClick={() => remove(index)}
-              className="ml-2 p-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+              className="cursor-pointer ml-2 p-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+              aria-label={t("removeUrl")}
             >
               <Minus className="w-5 h-5" />
-            </button>
+            </motion.button>
           </motion.div>
         ))}
       </AnimatePresence>
-      <button
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         type="button"
         onClick={() => append({ url: "" })}
-        className="flex items-center mt-2 text-blue-600 hover:text-blue-800"
+        className="cursor-pointer flex items-center mt-2 text-indigo-600 hover:text-indigo-800"
+        aria-label={t("addUrl")}
       >
         <Plus className="w-5 h-5 mr-1" />
-        URL 추가
-      </button>
+        {t("addUrl")}
+      </motion.button>
     </div>
   );
 };

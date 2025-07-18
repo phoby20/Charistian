@@ -23,45 +23,41 @@ export const CheckboxGroup = <T extends { id: string; name: string }>({
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-800 mb-3">
+      <label className="block text-sm font-medium text-gray-800 mb-3">
         {label}
       </label>
+
       {items.length === 0 ? (
         <p className="text-sm text-gray-500">{emptyMessage}</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
           {items.map((item) => {
-            const isChecked = selectedIds.includes(item.id);
+            const selected = selectedIds.includes(item.id);
             return (
-              <motion.div
+              <motion.label
                 key={item.id}
-                initial={{ opacity: 0, y: 5 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}
-                className="flex items-center group"
+                htmlFor={`checkbox-${item.id}`}
+                className={`cursor-pointer px-2.5 py-1.5 rounded-md text-sm font-medium border transition
+                  ${
+                    selected
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                  }`}
               >
-                <div className="relative flex items-center">
+                <div className="flex items-center gap-2 justify-center">
                   <input
                     type="checkbox"
                     id={`checkbox-${item.id}`}
-                    checked={isChecked}
+                    checked={selected}
                     onChange={() => handleToggle(item.id)}
-                    className="peer appearance-none h-5 w-5 border-2 border-gray-300 rounded-md cursor-pointer checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-all duration-200"
-                    aria-label={item.name}
+                    className="hidden"
                   />
-                  <motion.span
-                    className="absolute left-1 top-1 w-3 h-3 bg-blue-600 rounded-sm opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
-                    animate={{ scale: isChecked ? 1 : 0 }}
-                    transition={{ duration: 0.2 }}
-                  />
+                  <span className="truncate">{item.name}</span>
                 </div>
-                <label
-                  htmlFor={`checkbox-${item.id}`}
-                  className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 cursor-pointer truncate transition-colors duration-200"
-                >
-                  {item.name}
-                </label>
-              </motion.div>
+              </motion.label>
             );
           })}
         </div>

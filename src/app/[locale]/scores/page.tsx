@@ -275,9 +275,7 @@ export default function ScoreList() {
               transition={{ duration: 0.5 }}
               className="flex sm:flex-row justify-between mb-4 sm:mb-6 gap-4"
             >
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-                {t("title")}
-              </h1>
+              <h1 className="text-xl font-bold text-gray-900">{t("title")}</h1>
               <div className="flex flex-col justify-end text-right items-end-safe">
                 <Link
                   href={

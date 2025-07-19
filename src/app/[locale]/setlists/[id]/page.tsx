@@ -396,10 +396,10 @@ export default function SetlistDetailPage() {
               </Link>
             )}
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-xl font-bold text-gray-900 mb-2">
             {setlist.title}
           </h1>
-          <p className="text-gray-600 mb-4 text-sm">
+          <p className="text-gray-600 mb-8 text-sm">
             {t("date")}:{" "}
             {format(new Date(setlist.date), "yyyy-MM-dd", {
               locale: dateLocale,
@@ -411,16 +411,14 @@ export default function SetlistDetailPage() {
             transition={{ duration: 0.4, delay: 0.1 }}
             className="mb-8"
           >
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+            <h2 className="font-semibold text-gray-800 mb-2">
               {t("description")}
             </h2>
             <p className="text-gray-600 bg-gray-50 p-4 rounded-xl">
               {setlist.description || t("noDescription")}
             </p>
           </motion.div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            {t("songs")}
-          </h2>
+          <h2 className="font-semibold text-gray-800 mb-4">{t("songs")}</h2>
           <ul className="space-y-3 mb-8">
             {setlist.scores
               .sort((a, b) => a.order - b.order)
@@ -536,7 +534,7 @@ export default function SetlistDetailPage() {
             transition={{ duration: 0.4, delay: 0.2 }}
             className="mb-8"
           >
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            <h2 className="font-semibold text-gray-800 mb-4">
               {t("shareWith")}
             </h2>
             <div className="flex flex-wrap gap-2" role="list">

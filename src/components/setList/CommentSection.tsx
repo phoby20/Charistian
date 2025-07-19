@@ -89,7 +89,7 @@ export default function CommentSection({
 
   return (
     <div className="mt-10">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6 tracking-tight">
+      <h2 className="font-semibold text-gray-900 mb-6 tracking-tight">
         {t("comments")}
       </h2>
       <form onSubmit={handleCommentSubmit} className="mb-8">

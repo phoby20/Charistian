@@ -390,9 +390,7 @@ export default function SelectedSongsList({
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">
-        {t("selectedSongs")}
-      </h2>
+      <h2 className="font-semibold text-gray-800 mb-3">{t("selectedSongs")}</h2>
       {selectedSongs.length === 0 ? (
         <p className="text-sm text-gray-500">{t("noSelectedSongs")}</p>
       ) : (

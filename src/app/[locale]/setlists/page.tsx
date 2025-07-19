@@ -87,7 +87,7 @@ export default function SetlistListPage() {
           transition={{ duration: 0.5 }}
           className="flex justify-between items-center mb-6"
         >
-          <h1 className="text-3xl font-bold text-gray-900">{t("setlist")}</h1>
+          <h1 className="text-xl font-bold text-gray-900">{t("setlist")}</h1>
         </motion.div>
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4">

@@ -205,7 +205,7 @@
   "groupManagement": "소속 설정",
   "dutyManagement": "직책설정",
   "teamManagement": "팀설정",
-  "enterPositionName": "등록할 직분을 입력해 주세요",
+  "enterPositionName": "직분을 선택하세요",
   "enterGroupName": "등록할 소속을 입력해 주세요",
   "enterSubGroupName": "등록할 소그룹을 입력해 주세요",
   "enterDutyName": "등록할 직책을 입력해 주세요",
@@ -411,7 +411,7 @@
     "dismissError": "에러 메시지 닫기",
     "submitting": "제출 중..."
   },
-  "selectGender": "성별을 선택해 주세요",
+  "selectGender": "성별을 선택하세요",
   "myQRCode": "나의 QR 코드",
   "membershipCard": "성도증",
   "generatingQR": "QR 코드 생성 중...",

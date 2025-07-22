@@ -205,20 +205,22 @@ export default function SignupDetailsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl p-8 sm:p-10"
+          className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8 sm:p-10"
         >
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 text-center">
+          <div className="relative mb-8 py-1">
+            <h1 className="text-xl font-bold text-gray-900 text-center">
               {t("signup.signupTitle")} (2/2)
             </h1>
-            <Button
-              type="button"
-              onClick={handleBack}
-              className="flex items-center px-4 py-2 bg-gray-200 text-gray-900 rounded-xl font-semibold text-sm hover:bg-gray-300 hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg"
-            >
-              <ArrowLeft size={18} className="mr-2" />
-              {t("back")}
-            </Button>
+            <div className="absolute top-0 left-0">
+              <Button
+                type="button"
+                onClick={handleBack}
+                className="cursor-pointer flex items-center px-4 py-2 bg-gray-200 text-gray-900 rounded-xl font-semibold text-sm hover:bg-gray-300 hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg"
+              >
+                <ArrowLeft size={18} className="mr-2" />
+                {t("back")}
+              </Button>
+            </div>
           </div>
           <AnimatePresence>
             {error && (

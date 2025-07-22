@@ -286,7 +286,7 @@ export default function SetlistEditPage() {
               </motion.button>
             </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
+          <h1 className="text-xl font-bold text-gray-900 mb-8">
             {t("editSetlist")}
           </h1>
           <AnimatePresence>
@@ -395,7 +395,7 @@ export default function SetlistEditPage() {
               />
             </motion.div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-3">
+              <h2 className="font-semibold text-gray-800 mb-3">
                 {t("shareWith")}
               </h2>
               <div className="space-y-6">
@@ -404,9 +404,7 @@ export default function SetlistEditPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.4 }}
                 >
-                  <h3 className="text-sm font-semibold text-gray-800 mb-2">
-                    {t("groups")}
-                  </h3>
+                  <h3 className="text-sm text-gray-800 mb-2">{t("groups")}</h3>
                   {groups.length === 0 ? (
                     <p className="text-sm text-gray-500">{t("noGroups")}</p>
                   ) : (

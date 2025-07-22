@@ -200,7 +200,7 @@ export default function SignupPage() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8 sm:p-10"
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          <h1 className="text-xl font-bold text-gray-900 mb-8 text-center">
             {t("signup.signupTitle")} (1/2)
           </h1>
           <AnimatePresence>

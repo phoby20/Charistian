@@ -62,7 +62,7 @@ export default function ScoreUploadPage() {
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold text-gray-800"
+            className="text-xl font-bold text-gray-800"
           >
             {t("title")}
             {/* "악보 업로드" */}
@@ -71,7 +71,7 @@ export default function ScoreUploadPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push(`/${locale}/scores`)}
-            className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
+            className="cursor-pointer flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="text-sm font-medium">{t("backToList")}</span>

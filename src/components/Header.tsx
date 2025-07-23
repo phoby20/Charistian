@@ -9,6 +9,7 @@ import MobileNav from "./MobileNav";
 import { useAuth } from "@/context/AuthContext";
 import { Menu, X } from "lucide-react";
 import { useRouter } from "@/utils/useRouter";
+import Image from "next/image";
 
 export default function Header() {
   const t = useTranslations();
@@ -122,9 +123,12 @@ export default function Header() {
           {/* 로고 및 사이트 제목 */}
           <div className="flex-shrink-0 flex items-center">
             <Link href={logoHref} className="flex items-center">
-              <span className="text-2xl font-bold text-red-600">
-                {t("siteTitle", { defaultValue: "Charistian" })}
-              </span>
+              <Image
+                src="/logo_title.png"
+                alt="logo"
+                width={150}
+                height={40}
+              ></Image>
             </Link>
           </div>
 

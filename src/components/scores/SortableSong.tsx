@@ -1,12 +1,12 @@
 "use client";
-import { Trash2, Play, Pause, ChevronDown } from "lucide-react";
+import { Trash2, Play, Pause, ChevronDown, GripVertical } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { getDisplayTitle } from "@/utils/getDisplayTitle";
 import { useLocale, useTranslations } from "next-intl";
 import { SelectedSong } from "@/types/score";
 import { motion } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Chip from "../Chip";
 
 interface YouTubeVideo {
@@ -44,7 +44,7 @@ const getFirstYouTubeVideoId = (urls?: string[]): string | null => {
   if (!urls || urls.length === 0) return null;
   for (const url of urls) {
     const videoId = getYouTubeVideoId(url);
-    if (videoId) return videoId; // 첫 번째 유효한 YouTube URL 반환
+    if (videoId) return videoId;
   }
   return null;
 };
@@ -75,6 +75,7 @@ export function SortableSong({
   const locale = useLocale();
   const t = useTranslations("Setlist");
   const selectRef = useRef<HTMLSelectElement>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -91,28 +92,22 @@ export function SortableSong({
   };
 
   const firstYoutubeVideoId = getFirstYouTubeVideoId(song.referenceUrls);
-
-  // locale에 따라 표시할 제목 선택
   const displayTitle = getDisplayTitle(
     song.title,
     song.titleEn,
     song.titleJa,
     locale
   );
-
-  // YouTube 비디오 ID는 selectedUrls[song.id]에서 가져옴
   const youtubeVideoId = getYouTubeVideoId(selectedUrls[song.id]);
 
-  // 드롭다운 활성화 함수
-  const handleDropdownClick = (
-    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
-  ) => {
+  // 드롭다운 토글 함수
+  const handleDropdownToggle = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
-    if (selectRef.current && !isDragging) {
-      selectRef.current.focus();
-      // 모바일에서 드롭다운을 강제로 열기 위해 change 이벤트 트리거
-      const event = new Event("change", { bubbles: true });
-      selectRef.current.dispatchEvent(event);
+    if (!isDragging) {
+      setIsDropdownOpen((prev) => !prev);
+      if (!isDropdownOpen && selectRef.current) {
+        selectRef.current.focus();
+      }
     }
   };
 
@@ -128,106 +123,87 @@ export function SortableSong({
       <div className="flex sm:flex-row flex-col items-center gap-5 sm:gap-1">
         <motion.button
           type="button"
+          className="cursor-pointer"
           whileHover={{ scale: isDragging ? 1 : 1.1 }}
           whileTap={{ scale: isDragging ? 1 : 0.9 }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemoveSong(index);
-          }}
-          className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors mr-4 h-8"
-          aria-label={t("remove")}
+          onClick={handleDropdownToggle}
+          onTouchStart={handleDropdownToggle}
+          {...attributes}
+          {...listeners}
         >
-          <Trash2 className="w-4 h-4" />
+          <GripVertical className="w-4 h-4" />
         </motion.button>
         <div className="w-full">
-          {/* 상단: 곡 정보 및 플레이 버튼 */}
-          <div className="flex items-center justify-between border border-gray-200 p-5 cursor-grab rounded-full">
-            <div
-              className="flex items-center gap-3 grow"
-              {...attributes}
-              {...listeners}
-            >
-              <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+          {/* 상단: 곡 정보 및 버튼 */}
+          <div className="flex justify-between p-3 sm:flex-row flex-col">
+            <div className="flex items-center gap-3 grow">
+              <div className="flex flex-row gap-2 items-center">
                 <Chip label={song.key} color="yellow" />
                 <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[300px]">
                   {displayTitle} {count > 1 ? `(${count})` : ""}
                 </span>
               </div>
             </div>
-
-            {/* 참고 URL에 youtube URL이 2개 이상이면 아래 코드가 실행 됨 */}
-            {youtubeVideoId ? (
+            <div className="flex items-center gap-2 mt-4 sm:mt-0 justify-end">
               <motion.button
                 type="button"
                 whileHover={{ scale: isDragging ? 1 : 1.1 }}
                 whileTap={{ scale: isDragging ? 1 : 0.9 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onPlayPause(song.id);
+                  onRemoveSong(index);
                 }}
-                className={`p-2 rounded-full ${
-                  currentPlayingId === song.id
-                    ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                } transition-colors`}
-                aria-label={
-                  currentPlayingId === song.id ? t("pause") : t("play")
-                }
-                disabled={isDragging}
+                className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors h-8"
+                aria-label={t("remove")}
               >
-                {currentPlayingId === song.id ? (
-                  <Pause className="w-5 h-5" />
-                ) : (
-                  <Play className="w-5 h-5" />
-                )}
+                <Trash2 className="w-4 h-4" />
               </motion.button>
-            ) : firstYoutubeVideoId ? (
-              // // 참고 URL에 youtube URL이 1개라면 아래 코드가 실행 됨 1개라면 아래 코드가 실행 됨
-              <motion.button
-                type="button"
-                whileHover={{ scale: isDragging ? 1 : 1.1 }}
-                whileTap={{ scale: isDragging ? 1 : 0.9 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onPlayPause(song.id);
-                }}
-                className={`p-2 rounded-full ${
-                  currentPlayingId === song.id
-                    ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                } transition-colors`}
-                aria-label={
-                  currentPlayingId === song.id ? t("pause") : t("play")
-                }
-                disabled={isDragging}
-              >
-                {currentPlayingId === song.id ? (
-                  <Pause className="w-5 h-5" />
-                ) : (
+              {youtubeVideoId || firstYoutubeVideoId ? (
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: isDragging ? 1 : 1.1 }}
+                  whileTap={{ scale: isDragging ? 1 : 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPlayPause(song.id);
+                  }}
+                  className={`p-2 rounded-full ${
+                    currentPlayingId === song.id
+                      ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  } transition-colors`}
+                  aria-label={
+                    currentPlayingId === song.id ? t("pause") : t("play")
+                  }
+                  disabled={isDragging}
+                >
+                  {currentPlayingId === song.id ? (
+                    <Pause className="w-5 h-5" />
+                  ) : (
+                    <Play className="w-5 h-5" />
+                  )}
+                </motion.button>
+              ) : (
+                <span
+                  className="p-2 rounded-full bg-gray-100 text-gray-400 cursor-not-allowed"
+                  aria-label={t("noSelectedUrl")}
+                >
                   <Play className="w-5 h-5" />
-                )}
-              </motion.button>
-            ) : (
-              // 참고 URL에 youtube URL이 없다면 아래 코드가 실행 됨
-              <span
-                className="p-2 rounded-full bg-gray-100 text-gray-400 cursor-not-allowed"
-                aria-label={t("noSelectedUrl")}
-              >
-                <Play className="w-5 h-5" />
-                !!
-              </span>
-            )}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* 하단: YouTube 드롭다운 */}
-          <div className="flex items-center justify-end gap-2 mt-1">
-            {youtubeUrls.length > 1 ? (
-              <div
-                className="relative flex-1 max-w-[250px] cursor-pointer"
-                onClick={handleDropdownClick}
-                onTouchStart={handleDropdownClick} // 모바일 터치 이벤트 추가
-                style={{ pointerEvents: isDragging ? "none" : "auto" }} // 드래그 중 클릭 방지
-              >
+          {youtubeUrls.length > 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center justify-end gap-2 mt-2"
+            >
+              <div className="relative flex-1 max-w-[250px]">
                 <div className="flex items-center">
                   <span className="text-sm w-36 text-gray-500">
                     {t("selecteReference")}:
@@ -237,6 +213,7 @@ export function SortableSong({
                     value={selectedUrls[song.id] || ""}
                     onChange={(e) => {
                       handleUrlSelect(song.id, e.target.value);
+                      setIsDropdownOpen(false); // 선택 후 드롭다운 닫기
                     }}
                     className="w-full rounded-lg border-gray-200 bg-gray-50 text-gray-800 text-sm py-2 pl-3 pr-8 appearance-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition-all hover:bg-gray-100 truncate"
                     disabled={isDragging}
@@ -252,10 +229,8 @@ export function SortableSong({
                 </div>
                 <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
               </div>
-            ) : (
-              <div className="flex-1" />
-            )}
-          </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </div>

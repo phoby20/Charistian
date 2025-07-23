@@ -296,7 +296,6 @@ export default function CreateSetlistPage() {
                     items={teams}
                     selectedIds={selectedTeams}
                     setSelectedIds={setSelectedTeams}
-                    label={t("teams")}
                     emptyMessage={t("noTeams")}
                   />
                 </div>

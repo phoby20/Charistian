@@ -4,7 +4,6 @@ interface CheckboxGroupProps<T extends { id: string; name: string }> {
   items: T[];
   selectedIds: string[];
   setSelectedIds: React.Dispatch<React.SetStateAction<string[]>>;
-  label: string;
   emptyMessage: string;
 }
 
@@ -12,7 +11,6 @@ export const CheckboxGroup = <T extends { id: string; name: string }>({
   items,
   selectedIds,
   setSelectedIds,
-  label,
   emptyMessage,
 }: CheckboxGroupProps<T>) => {
   const handleToggle = (id: string) => {
@@ -23,10 +21,6 @@ export const CheckboxGroup = <T extends { id: string; name: string }>({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-800 mb-3">
-        {label}
-      </label>
-
       {items.length === 0 ? (
         <p className="text-sm text-gray-500">{emptyMessage}</p>
       ) : (

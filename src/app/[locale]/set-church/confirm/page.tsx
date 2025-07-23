@@ -113,7 +113,7 @@ function SetChurchConfirm() {
   };
 
   const handleBack = () => {
-    router.push(`/${locale}/set-church`);
+    router.push(`/set-church`);
   };
 
   const clearError = () => setError(null);
@@ -126,7 +126,7 @@ function SetChurchConfirm() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 sm:p-6"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-purple-100 p-4 sm:p-6"
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}

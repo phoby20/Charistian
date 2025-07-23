@@ -85,7 +85,7 @@ export function SortableSong({
       ? "0 8px 24px rgba(0, 0, 0, 0.15)"
       : "0 2px 8px rgba(0, 0, 0, 0.1)",
     borderRadius: "12px",
-    marginBottom: isOver && isDraggingAny && !isDragging ? "16px" : "8px",
+    marginBottom: isOver && isDraggingAny && !isDragging ? "16px" : "16px",
     zIndex: isDragging ? 10 : 1,
     touchAction: "none",
     backgroundColor: currentPlayingId === song.id ? "#e6f0ff" : "#ffffff",
@@ -115,9 +115,9 @@ export function SortableSong({
     <div
       ref={setNodeRef}
       style={style}
-      className="p-4 w-full flex flex-col touch-manipulation relative"
+      className="p-4 w-full flex flex-col touch-manipulation relative border border-gray-200"
     >
-      <span className="text-gray-600 text-xs w-5 h-5 border rounded-full text-center font-black absolute">
+      <span className="text-xs w-5 h-5 border rounded-full text-center text-white bg-[#ff66c4] absolute">
         {index + 1}
       </span>
       <div className="flex sm:flex-row flex-col items-center gap-5 sm:gap-1">

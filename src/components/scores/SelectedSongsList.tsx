@@ -412,7 +412,7 @@ export default function SelectedSongsList({
             onStateChange={onStateChange}
             onError={onError}
           />
-          {error && <div>test</div>}
+          {error && <div>{error}</div>}
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -432,12 +432,7 @@ export default function SelectedSongsList({
                   const youtubeUrls = getYouTubeUrls(song.referenceUrls);
                   const titles = videoTitles[song.id] || [];
                   return (
-                    <div
-                      key={`${song.id}-${index}`}
-                      className={`flex items-center justify-between bg-gray-50 rounded-xl p-4 shadow-sm ${
-                        overIndex === index ? "bg-blue-100" : ""
-                      }`}
-                    >
+                    <div key={`${song.id}-${index}`}>
                       <SortableSong
                         song={song}
                         index={index}

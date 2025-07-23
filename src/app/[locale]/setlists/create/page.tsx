@@ -43,10 +43,7 @@ export default function CreateSetlistPage() {
   const dateLocale = locale === "ko" ? ko : ja;
 
   useEffect(() => {
-    if (!user) {
-      router.push(`/login`);
-      return;
-    }
+    if (!user) return;
     if (!user.churchId) {
       router.push(`/dashboard`);
       return;

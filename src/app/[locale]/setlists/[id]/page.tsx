@@ -373,7 +373,7 @@ export default function SetlistDetailPage() {
                   type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center space-x-2 bg-gray-200 text-gray-700 py-2 px-4 rounded-xl shadow-sm hover:bg-gray-300 transition-colors"
+                  className="cursor-pointer flex items-center space-x-2 bg-gray-200 text-gray-700 py-2 px-4 rounded-xl shadow-sm hover:bg-gray-300 transition-colors"
                   aria-label={t("backToList")}
                 >
                   <ArrowLeft className="w-5 h-5" />
@@ -387,7 +387,7 @@ export default function SetlistDetailPage() {
                   type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center space-x-2 bg-blue-600 text-white py-2 px-4 rounded-xl shadow-sm hover:bg-blue-700 transition-colors"
+                  className="cursor-pointer flex items-center space-x-2 bg-blue-600 text-white py-2 px-4 rounded-xl shadow-sm hover:bg-blue-700 transition-colors"
                   aria-label={t("edit")}
                 >
                   <Edit className="w-5 h-5" />

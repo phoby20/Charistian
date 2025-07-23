@@ -260,7 +260,7 @@ export default function SetlistEditPage() {
                   type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center space-x-2 bg-gray-200 text-gray-700 py-2 px-4 rounded-xl shadow-sm hover:bg-gray-300 transition-colors"
+                  className="cursor-pointer flex items-center space-x-2 bg-gray-200 text-gray-700 py-2 px-4 rounded-xl shadow-sm hover:bg-gray-300 transition-colors"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   <span className="text-sm font-medium">
@@ -275,7 +275,7 @@ export default function SetlistEditPage() {
                 disabled={isDeleting}
                 whileHover={{ scale: isDeleting ? 1 : 1.05 }}
                 whileTap={{ scale: isDeleting ? 1 : 0.95 }}
-                className={`flex items-center space-x-2 ${
+                className={`cursor-pointer flex items-center space-x-2 ${
                   isDeleting
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-red-600 hover:bg-red-700"

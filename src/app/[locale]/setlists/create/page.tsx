@@ -4,7 +4,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
-import { AlertCircle, ChevronDown } from "lucide-react";
+import { AlertCircle, Share2 } from "lucide-react";
 import Loading from "@/components/Loading";
 import { CheckboxGroup } from "@/components/CheckboxGroup";
 import { useRouter } from "@/utils/useRouter";
@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import SelectedSongsList from "@/components/scores/SelectedSongsList";
-import { Group, SelectedSong, Team, UsageLimits } from "@/types/score";
+import { SelectedSong, Team, UsageLimits } from "@/types/score";
 import Link from "next/link";
 import {
   isSetlistCreationDisabled,
@@ -29,10 +29,8 @@ export default function CreateSetlistPage() {
   const [date, setDate] = useState<Date | null>(null);
   const [description, setDescription] = useState<string>("");
   const [selectedSongs, setSelectedSongs] = useState<SelectedSong[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [usageLimits, setUsageLimits] = useState<UsageLimits | null>(null);
-  const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -45,10 +43,7 @@ export default function CreateSetlistPage() {
   const dateLocale = locale === "ko" ? ko : ja;
 
   useEffect(() => {
-    if (!user) {
-      router.push(`/login`);
-      return;
-    }
+    if (!user) return;
     if (!user.churchId) {
       router.push(`/dashboard`);
       return;
@@ -82,7 +77,7 @@ export default function CreateSetlistPage() {
         ) {
           throw new Error("Invalid response format");
         }
-        setGroups(groupData.groups);
+        // setGroups(groupData.groups);
         setTeams(teamData.teams);
         setUsageLimits(usageData);
       } catch (err: unknown) {
@@ -122,7 +117,7 @@ export default function CreateSetlistPage() {
       setIsLoading(false);
       return;
     }
-    if (!selectedGroup && selectedTeams.length === 0) {
+    if (selectedTeams.length === 0) {
       setError(t("requiredShares"));
       setIsLoading(false);
       return;
@@ -151,10 +146,7 @@ export default function CreateSetlistPage() {
                 (url) => url.includes("youtube.com") || url.includes("youtu.be")
               ),
           })),
-          shares: [
-            ...(selectedGroup ? [{ groupId: selectedGroup }] : []),
-            ...selectedTeams.map((teamId) => ({ teamId })),
-          ],
+          shares: [...selectedTeams.map((teamId) => ({ teamId }))],
         }),
       });
       if (!response.ok) {
@@ -195,8 +187,8 @@ export default function CreateSetlistPage() {
           transition={{ duration: 0.6 }}
           className="bg-white rounded-2xl shadow-xl p-6 sm:p-8"
         >
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
-            {t("createSetlist")}
+          <h1 className="text-xl font-bold text-gray-900 mb-6">
+            {t("pageTitle")}
           </h1>
           <AnimatePresence>
             {error && (
@@ -296,42 +288,11 @@ export default function CreateSetlistPage() {
                 {t("shareWith")}
               </h2>
               <div className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.3 }}
-                >
-                  <h3 className="text-sm font-semibold text-gray-800 mb-2">
-                    {t("groups")}
-                  </h3>
-                  {groups.length === 0 ? (
-                    <p className="text-sm text-gray-500">{t("noGroups")}</p>
-                  ) : (
-                    <div className="relative">
-                      <select
-                        id="group"
-                        value={selectedGroup}
-                        onChange={(e) => setSelectedGroup(e.target.value)}
-                        className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 pr-10 appearance-none transition-all duration-200 hover:bg-gray-50"
-                        aria-label={t("groups")}
-                      >
-                        <option value="">{t("selectGroup")}</option>
-                        {groups.map((group) => (
-                          <option key={group.id} value={group.id}>
-                            {group.name}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
-                    </div>
-                  )}
-                </motion.div>
                 <div>
                   <CheckboxGroup
                     items={teams}
                     selectedIds={selectedTeams}
                     setSelectedIds={setSelectedTeams}
-                    label={t("teams")}
                     emptyMessage={t("noTeams")}
                   />
                 </div>
@@ -354,7 +315,6 @@ export default function CreateSetlistPage() {
                 !title ||
                 !date ||
                 !description ||
-                !selectedGroup ||
                 selectedTeams.length === 0
               }
               className={`w-full py-3 rounded-xl text-white font-semibold text-sm ${
@@ -363,14 +323,16 @@ export default function CreateSetlistPage() {
                 !title ||
                 !date ||
                 !description ||
-                !selectedGroup ||
                 isUpgrageDisabled ||
                 selectedTeams.length === 0
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
+                  : "cursor-pointer bg-[#fc089e] hover:bg-[#ff66c4]"
               } transition-colors duration-200 shadow-sm`}
             >
-              {isSubmitting ? t("submitting") : t("createSetlist")}
+              <div className="flex items-center justify-center gap-3">
+                <Share2 className="w-5 h-5" />
+                {isSubmitting ? t("submitting") : t("createSetlist")}
+              </div>
             </motion.button>
           </form>
           {isUpgrageDisabled && (

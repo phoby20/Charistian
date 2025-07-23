@@ -5,14 +5,14 @@ import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, AlertCircle, ChevronDown, Trash2 } from "lucide-react"; // Trash2 아이콘 추가
+import { ArrowLeft, AlertCircle, Trash2 } from "lucide-react"; // Trash2 아이콘 추가
 import Loading from "@/components/Loading";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parseISO, format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
 import { CheckboxGroup } from "@/components/CheckboxGroup";
-import { Group, SelectedSong, SetlistResponse, Team } from "@/types/score";
+import { SelectedSong, SetlistResponse, Team } from "@/types/score";
 import { useRouter } from "@/utils/useRouter";
 import SelectedSongsList from "@/components/scores/SelectedSongsList";
 
@@ -26,9 +26,7 @@ export default function SetlistEditPage() {
   const [date, setDate] = useState<Date | null>(null);
   const [description, setDescription] = useState<string>("");
   const [selectedSongs, setSelectedSongs] = useState<SelectedSong[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -49,10 +47,9 @@ export default function SetlistEditPage() {
       !date ||
       !description.trim() ||
       selectedSongs.length === 0 ||
-      !selectedGroup ||
       selectedTeams.length === 0;
     setIsFormInvalid(isInvalid);
-  }, [title, date, description, selectedSongs, selectedGroup, selectedTeams]);
+  }, [title, date, description, selectedSongs, selectedTeams]);
 
   useEffect(() => {
     if (!user || !user.churchId) {
@@ -133,16 +130,12 @@ export default function SetlistEditPage() {
         ) {
           throw new Error(t("invalidResponseFormat"));
         }
-        setGroups(groupData.groups);
         setTeams(teamData.teams);
-        const groupShare = setlist.shares?.find(
-          (s: { group?: Group }) => s.group
-        )?.group?.id;
+
         const teamShares =
           setlist.shares
             ?.filter((s: { team?: Team }) => s.team)
             .map((s) => s.team?.id ?? "") || [];
-        setSelectedGroup(groupShare || "");
         setSelectedTeams(teamShares);
       } catch (err) {
         setError(err instanceof Error ? err.message : t("fetchError"));
@@ -208,10 +201,7 @@ export default function SetlistEditPage() {
                 (url) => url.includes("youtube.com") || url.includes("youtu.be")
               ),
           })),
-          shares: [
-            ...(selectedGroup ? [{ groupId: selectedGroup }] : []),
-            ...selectedTeams.map((teamId) => ({ teamId })),
-          ],
+          shares: [...selectedTeams.map((teamId) => ({ teamId }))],
         }),
       });
       if (!response.ok) {
@@ -260,7 +250,7 @@ export default function SetlistEditPage() {
                   type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center space-x-2 bg-gray-200 text-gray-700 py-2 px-4 rounded-xl shadow-sm hover:bg-gray-300 transition-colors"
+                  className="cursor-pointer flex items-center space-x-2 bg-gray-200 text-gray-700 py-2 px-4 rounded-xl shadow-sm hover:bg-gray-300 transition-colors"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   <span className="text-sm font-medium">
@@ -275,7 +265,7 @@ export default function SetlistEditPage() {
                 disabled={isDeleting}
                 whileHover={{ scale: isDeleting ? 1 : 1.05 }}
                 whileTap={{ scale: isDeleting ? 1 : 0.95 }}
-                className={`flex items-center space-x-2 ${
+                className={`cursor-pointer flex items-center space-x-2 ${
                   isDeleting
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-red-600 hover:bg-red-700"
@@ -399,44 +389,11 @@ export default function SetlistEditPage() {
                 {t("shareWith")}
               </h2>
               <div className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.4 }}
-                >
-                  <h3 className="text-sm text-gray-800 mb-2">{t("groups")}</h3>
-                  {groups.length === 0 ? (
-                    <p className="text-sm text-gray-500">{t("noGroups")}</p>
-                  ) : (
-                    <div className="relative">
-                      <select
-                        id="group"
-                        value={selectedGroup}
-                        onChange={(e) => setSelectedGroup(e.target.value)}
-                        className={`block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-3 px-4 pr-10 appearance-none transition-all duration-200 hover:bg-gray-50 ${
-                          error && !selectedGroup && selectedTeams.length === 0
-                            ? "border-red-500"
-                            : ""
-                        }`}
-                        aria-label={t("groups")}
-                      >
-                        <option value="">{t("selectGroup")}</option>
-                        {groups.map((group) => (
-                          <option key={group.id} value={group.id}>
-                            {group.name}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
-                    </div>
-                  )}
-                </motion.div>
                 <div>
                   <CheckboxGroup
                     items={teams}
                     selectedIds={selectedTeams}
                     setSelectedIds={setSelectedTeams}
-                    label={t("teams")}
                     emptyMessage={t("noTeams")}
                   />
                 </div>
@@ -447,7 +404,7 @@ export default function SetlistEditPage() {
               whileHover={{ scale: isFormInvalid || isSubmitting ? 1 : 1.05 }}
               whileTap={{ scale: isFormInvalid || isSubmitting ? 1 : 0.95 }}
               disabled={isSubmitting || isFormInvalid}
-              className={`w-full py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center ${
+              className={`cursor-pointer w-full py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center ${
                 isSubmitting || isFormInvalid
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"

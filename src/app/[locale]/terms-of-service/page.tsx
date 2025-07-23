@@ -23,14 +23,19 @@ function TermsOfServiceContent() {
     router.push(`/${locale}${path}`);
   };
 
+  // 카카오 로그인 버튼 클릭 핸들러
+  const handleKakaoLogin = () => {
+    window.location.href = process.env.NEXT_PUBLIC_KAKAO_AUTH_URL!;
+  };
+
   return (
     <div className="min-h-[80vh] bg-gradient-to-br from-blue-100 via-white to-purple-100 py-12 px-4 sm:px-6 lg:px-8 flex flex-col">
-      <div className="max-w-3xl max-h-[calc(70vh-150px)] mx-auto bg-white rounded-2xl shadow-xl p-8 flex-grow">
+      <div className="max-w-lg max-h-[calc(60vh-150px)] mx-auto bg-white rounded-2xl shadow-xl p-8 flex-grow">
         <h1 className="text-2xl font-bold text-gray-900 mb-8 text-center tracking-tight">
           {t("title") || "이용약관"}
         </h1>
         {/* 스크롤 가능한 텍스트 영역 */}
-        <div className="max-h-[calc(70vh-300px)] overflow-y-auto space-y-8 text-gray-600 pr-4">
+        <div className="max-h-[calc(60vh-300px)] overflow-y-auto space-y-8 text-gray-600 pr-4">
           {/* 제1조: 총칙 */}
           <section>
             <h2 className="text-gray-800 mb-3">
@@ -114,12 +119,30 @@ function TermsOfServiceContent() {
         </div>
         {/* 동의 버튼 */}
         {userType && (
-          <section className="mt-30">
+          <section className="mt-20">
+            <hr className="border mb-8 border-gray-100" />
+            <Button onClick={handleRegister}>
+              <div className="flex justify-center items-center gap-3">
+                <img
+                  src="/charistian_logo_white.png"
+                  alt={t("agreeAndkakaoRegister")}
+                  className="h-6"
+                />
+                <p>{t("agreeAndEmailRegister")}</p>
+              </div>
+            </Button>
+
             <Button
-              onClick={handleRegister}
-              className="cursor-pointer w-full py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              type="button"
+              onClick={handleKakaoLogin}
+              className="cursor-pointer flex justify-center gap-3 w-full py-3 mt-4 text-black rounded-md font-medium focus:outline-none focus:ring-2 bg-[#FEE500] hover:bg-[#F7DC00] transition-colors"
             >
-              {t("agreeAndRegister") || "동의하고 가입"}
+              <img
+                src="/kakao_login_medium_narrow.png"
+                alt={t("agreeAndkakaoRegister")}
+                className="h-6"
+              />
+              <p>{t("agreeAndkakaoRegister")}</p>
             </Button>
           </section>
         )}

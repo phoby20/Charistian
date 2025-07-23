@@ -253,7 +253,9 @@ export default function DesktopNav({
         </div>
       ) : (
         <Link href={getPathname({ locale, href: "/login" })}>
-          <Button variant="outline">{t("login.title")}</Button>
+          <Button className="cursor-pointer px-4 py-2 rounded-md font-medium transition-colors duration-200 w-full flex items-center justify-center space-x-2 border border-[#ff66c4] text-[#ff66c4] hover:bg-[#ff59bf] hover:text-white">
+            {t("login.title")}
+          </Button>
         </Link>
       )}
     </nav>

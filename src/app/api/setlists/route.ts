@@ -19,7 +19,6 @@ interface CreateSetlistRequest {
     selectedReferenceUrl: string | null;
   }>;
   shares: Array<{
-    groupId?: string | null;
     teamId?: string | null;
     userId?: string | null;
   }>;
@@ -65,15 +64,17 @@ export async function GET(req: NextRequest) {
             },
           },
         },
+        orderBy: {
+          date: "desc", // date 기준으로 정렬
+        },
       });
     } else {
-      const userGroupIds = await getUserGroupIds(payload.userId);
       const userTeamIds = await getUserTeamIds(payload.userId);
 
       setlists = await prisma.setlist.findMany({
         where: {
           AND: [
-            { shares: { some: { groupId: { in: userGroupIds } } } },
+            // { shares: { some: { groupId: { in: userGroupIds } } } },
             { shares: { some: { teamId: { in: userTeamIds } } } },
           ],
         },
@@ -186,7 +187,6 @@ export async function POST(
             },
             shares: {
               create: shares.map((share) => ({
-                groupId: share.groupId ?? null,
                 teamId: share.teamId ?? null,
                 userId: share.userId ?? null,
               })),
@@ -304,14 +304,6 @@ export async function POST(
   } catch (error) {
     return handleApiError(error, "세트리스트 생성");
   }
-}
-
-async function getUserGroupIds(userId: string): Promise<string[]> {
-  const groups = await prisma.group.findMany({
-    where: { users: { some: { id: userId } } },
-    select: { id: true },
-  });
-  return groups.map((g) => g.id);
 }
 
 async function getUserTeamIds(userId: string): Promise<string[]> {

@@ -38,12 +38,15 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const isAdmin = ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(
-      payload.role
-    );
+    const accessAble = [
+      "SUPER_ADMIN",
+      "ADMIN",
+      "SUB_ADMIN",
+      "GENERAL",
+    ].includes(payload.role);
     let setlists;
 
-    if (isAdmin) {
+    if (accessAble) {
       setlists = await prisma.setlist.findMany({
         where: { churchId: payload.churchId },
         include: {

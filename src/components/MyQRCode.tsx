@@ -74,7 +74,7 @@ export default function MyQRCode({ user, scanMessage }: MyQRCodeProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 text-sm"
+        className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 text-sm"
       >
         {t("membershipCard")}
       </button>
@@ -84,7 +84,7 @@ export default function MyQRCode({ user, scanMessage }: MyQRCodeProps) {
             {/* "X" 버튼 */}
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 w-8 h-8 bg-gray-200 text-gray-800 rounded-full flex items-center justify-center hover:bg-gray-300 transition duration-200"
+              className="cursor-pointer absolute top-4 right-4 w-8 h-8 bg-gray-200 text-gray-800 rounded-full flex items-center justify-center hover:bg-gray-300 transition duration-200"
             >
               X
             </button>

@@ -1,6 +1,7 @@
+// src/app/[locale]/mypage/page.tsx
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Input from "@/components/Input";
 import Select from "@/components/Select";
@@ -31,6 +32,7 @@ interface ExtendedUser extends PrismaUser {
 export default function MyPage() {
   const t = useTranslations("MyPage");
   const router = useRouter();
+  const locale = useLocale();
   const { user, isLoading: authLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +57,14 @@ export default function MyPage() {
   // >([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null); // 미리보기 URL 상태
   const fileInputRef = useRef<HTMLInputElement>(null); // 파일 입력 참조
+
+  // churchId가 없는 경우 /set-church로 리다이렉트
+  useEffect(() => {
+    if (!authLoading && user && !user.churchId) {
+      console.log("No churchId found, redirecting to /set-church");
+      router.push(`/set-church`);
+    }
+  }, [authLoading, user, router, locale]);
 
   // 사용자 정보 초기화 및 직분 조회
   useEffect(() => {
@@ -371,7 +381,7 @@ export default function MyPage() {
             className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
             placeholder={t("phone")}
           />
-          <Input
+          {/* <Input
             label={t("kakaoId")}
             name="kakaoId"
             value={formData.kakaoId}
@@ -386,7 +396,7 @@ export default function MyPage() {
             onChange={handleInputChange}
             className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-200"
             placeholder={t("lineId")}
-          />
+          /> */}
           <Select
             label={t("gender")}
             name="gender"

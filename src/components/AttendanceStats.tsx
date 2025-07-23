@@ -111,7 +111,7 @@ export default function AttendanceStats({
     },
   };
 
-  if (!user || !["SUPER_ADMIN", "ADMIN"].includes(user.role)) {
+  if (!user || !["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role)) {
     return null;
   }
 

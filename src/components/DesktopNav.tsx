@@ -38,6 +38,7 @@ interface DesktopNavProps {
   settingsMenuRef: React.RefObject<HTMLDivElement | null>;
   membersMenuRef: React.RefObject<HTMLDivElement | null>;
   scoresMenuRef: React.RefObject<HTMLDivElement | null>;
+  isKakaoEmail: boolean;
 }
 
 export default function DesktopNav({
@@ -60,6 +61,7 @@ export default function DesktopNav({
   settingsMenuRef,
   membersMenuRef,
   scoresMenuRef,
+  isKakaoEmail,
 }: DesktopNavProps) {
   const closeAllDropdowns = () => {
     setIsUserMenuOpen(false);
@@ -126,54 +128,58 @@ export default function DesktopNav({
       {/* Scores Dropdown */}
       {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "GENERAL"].includes(
         user?.role || ""
-      ) && (
-        <div className="relative" ref={scoresMenuRef}>
-          <button
-            onClick={() => {
-              closeAllDropdowns();
-              setIsScoresMenuOpen(!isScoresMenuOpen);
-            }}
-            className="cursor-pointer flex items-center text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium"
-          >
-            <FileMusic className="w-5 h-5 mr-1" />
-            {t("scores")}
-            <ChevronDown className="w-4 h-4 ml-1" />
-          </button>
-          {isScoresMenuOpen && (
-            <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
-              <Link
-                href={getPathname({ locale, href: "/scores" })}
-                onClick={closeAllDropdowns}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                {t("scoreList")}
-              </Link>
-              <Link
-                href={getPathname({ locale, href: "/setlists" })}
-                onClick={closeAllDropdowns}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                {t("setlistList")}
-              </Link>
-            </div>
-          )}
-        </div>
-      )}
+      ) &&
+        user?.churchId &&
+        !isKakaoEmail && (
+          <div className="relative" ref={scoresMenuRef}>
+            <button
+              onClick={() => {
+                closeAllDropdowns();
+                setIsScoresMenuOpen(!isScoresMenuOpen);
+              }}
+              className="cursor-pointer flex items-center text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              <FileMusic className="w-5 h-5 mr-1" />
+              {t("scores")}
+              <ChevronDown className="w-4 h-4 ml-1" />
+            </button>
+            {isScoresMenuOpen && (
+              <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
+                <Link
+                  href={getPathname({ locale, href: "/scores" })}
+                  onClick={closeAllDropdowns}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  {t("scoreList")}
+                </Link>
+                <Link
+                  href={getPathname({ locale, href: "/setlists" })}
+                  onClick={closeAllDropdowns}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  {t("setlistList")}
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
 
       {/* Calendar Menu */}
       {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "GENERAL"].includes(
         user?.role || ""
-      ) && (
-        <Link
-          href={getPathname({ locale, href: "/calendar" })}
-          className="text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium"
-        >
-          <div className="flex">
-            <Calendar className="w-5 h-5 mr-1" />
-            {t("calendar")}
-          </div>
-        </Link>
-      )}
+      ) &&
+        user?.churchId &&
+        !isKakaoEmail && (
+          <Link
+            href={getPathname({ locale, href: "/calendar" })}
+            className="text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium"
+          >
+            <div className="flex">
+              <Calendar className="w-5 h-5 mr-1" />
+              {t("calendar")}
+            </div>
+          </Link>
+        )}
 
       {/* Settings Menu */}
       {user && user.role === "SUPER_ADMIN" && (
@@ -213,7 +219,7 @@ export default function DesktopNav({
             className="cursor-pointer flex items-center text-gray-600 hover:text-red-600 py-2 rounded-md text-sm font-medium"
           >
             <Image
-              src="/header_user_img.png"
+              src={user?.profileImage || "/header_user_img.png"}
               alt="header_user_img"
               width={36}
               height={36}
@@ -225,14 +231,16 @@ export default function DesktopNav({
               <p className="text-sm px-4 py-2 text-center mb-2">
                 {user.name} ({t(toCamelCase(user.role))})
               </p>
-              <Link
-                href={getPathname({ locale, href: "/mypage" })}
-                onClick={() => closeAllDropdowns()}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-              >
-                <User2 className="w-4 h-4 mr-2" />
-                {t("MyPage.title")}
-              </Link>
+              {user.churchId && !isKakaoEmail && (
+                <Link
+                  href={getPathname({ locale, href: "/mypage" })}
+                  onClick={() => closeAllDropdowns()}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                >
+                  <User2 className="w-4 h-4 mr-2" />
+                  {t("MyPage.title")}
+                </Link>
+              )}
               <button
                 onClick={logout}
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
@@ -245,7 +253,7 @@ export default function DesktopNav({
         </div>
       ) : (
         <Link href={getPathname({ locale, href: "/login" })}>
-          <Button variant="outline">{t("login")}</Button>
+          <Button variant="outline">{t("login.title")}</Button>
         </Link>
       )}
     </nav>

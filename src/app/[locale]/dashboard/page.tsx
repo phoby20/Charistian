@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { ChurchApplication, User } from "@prisma/client";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/utils/useRouter";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { format, subDays } from "date-fns";
 import AttendanceStats from "@/components/AttendanceStats";
 import MemberStats from "@/components/MemberStats";
@@ -22,6 +22,7 @@ import MobileFilterDropdowns from "@/components/dashboard/MobileFilterDropdowns"
 import DesktopFilterTabs from "@/components/dashboard/DesktopFilterTabs";
 import Link from "next/link";
 import UsageLimitCard from "@/components/dashboard/UsageLimitCard";
+import { X } from "lucide-react";
 
 interface AttendanceRecord {
   userId: string;
@@ -74,8 +75,11 @@ export default function DashboardPage() {
   const [selectedSubGroups, setSelectedSubGroups] = useState<string[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [isGroupMenuOpen, setIsGroupMenuOpen] = useState<boolean>(false);
+  const [showChurchAlert, setShowChurchAlert] = useState<boolean>(true);
+  const [showEmailAlert, setShowEmailAlert] = useState<boolean>(true); // 이메일 알림 상태 추가
   const [isSubGroupMenuOpen, setIsSubGroupMenuOpen] = useState<boolean>(false);
   const [isTeamMenuOpen, setIsTeamMenuOpen] = useState<boolean>(false);
+  const [isKakaoEmail, setIsKakaoEmail] = useState<boolean>(false);
   const [cachedData, setCachedData] = useState<{
     members: UserWithRelations[];
     attendances: AttendanceRecord[];
@@ -112,12 +116,18 @@ export default function DashboardPage() {
       setSubGroups(uniqueSubGroups);
       setTeams(uniqueTeams);
 
-      // 사용량 제한 데이터 가져오기
-      const response = await fetch("/api/secure/usage-limits", {
-        credentials: "include",
-      });
-      const usageData = await response.json();
-      setUsageLimit(usageData);
+      // 이메일이 @kakao.com인지 확인
+      const hasKakaoEmail = user.email?.endsWith("@kakao.com");
+      setIsKakaoEmail(hasKakaoEmail);
+
+      if (user.churchId && !hasKakaoEmail) {
+        const response = await fetch("/api/secure/usage-limits", {
+          credentials: "include",
+        });
+        const usageData = await response.json();
+        setUsageLimit(usageData);
+      }
+
       setIsLoading(false);
     };
 
@@ -233,10 +243,65 @@ export default function DashboardPage() {
                 </Link>
               </div>
             )}
-            <MyQRCode user={user} scanMessage={scanMessage} />
+            {user.churchId && !isKakaoEmail && (
+              <>
+                <MyQRCode user={user} scanMessage={scanMessage} />
+              </>
+            )}
             <QRScanner user={user} onMessage={setScanMessage} />
           </div>
         </motion.div>
+
+        <AnimatePresence>
+          {!user.churchId && showChurchAlert && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="mb-6 flex items-center justify-between bg-red-100 text-red-700 p-4 rounded-xl text-sm font-medium cursor-pointer"
+              onClick={() => router.push(`/set-church`)}
+            >
+              <span className="whitespace-pre-wrap">
+                {t("dashboard.setChurchAlert")}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowChurchAlert(false);
+                }}
+                className="hover:text-red-900 transition-colors duration-200"
+              >
+                <X size={18} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {isKakaoEmail && showEmailAlert && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="mb-6 flex items-center justify-between bg-red-100 text-red-700 p-4 rounded-xl text-sm font-medium cursor-pointer"
+              onClick={() => router.push(`/verify-email`)}
+            >
+              <span className="whitespace-pre-wrap">
+                {t("dashboard.verifyEmailAlert")}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEmailAlert(false);
+                }}
+                className="hover:text-red-900 transition-colors duration-200"
+              >
+                <X size={18} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <PendingAlerts
           user={user}
@@ -246,35 +311,41 @@ export default function DashboardPage() {
 
         <UsageLimitCard user={user} usageLimit={usageLimit} />
 
-        <MobileFilterDropdowns
-          groups={groups}
-          subGroups={subGroups}
-          teams={teams}
-          selectedGroups={selectedGroups}
-          selectedSubGroups={selectedSubGroups}
-          selectedTeams={selectedTeams}
-          setSelectedGroups={setSelectedGroups}
-          setSelectedSubGroups={setSelectedSubGroups}
-          setSelectedTeams={setSelectedTeams}
-          isGroupMenuOpen={isGroupMenuOpen}
-          isSubGroupMenuOpen={isSubGroupMenuOpen}
-          isTeamMenuOpen={isTeamMenuOpen}
-          setIsGroupMenuOpen={setIsGroupMenuOpen}
-          setIsSubGroupMenuOpen={setIsSubGroupMenuOpen}
-          setIsTeamMenuOpen={setIsTeamMenuOpen}
-        />
+        {user.churchId &&
+          !isKakaoEmail &&
+          ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role) && (
+            <>
+              <MobileFilterDropdowns
+                groups={groups}
+                subGroups={subGroups}
+                teams={teams}
+                selectedGroups={selectedGroups}
+                selectedSubGroups={selectedSubGroups}
+                selectedTeams={selectedTeams}
+                setSelectedGroups={setSelectedGroups}
+                setSelectedSubGroups={setSelectedSubGroups}
+                setSelectedTeams={setSelectedTeams}
+                isGroupMenuOpen={isGroupMenuOpen}
+                isSubGroupMenuOpen={isSubGroupMenuOpen}
+                isTeamMenuOpen={isTeamMenuOpen}
+                setIsGroupMenuOpen={setIsGroupMenuOpen}
+                setIsSubGroupMenuOpen={setIsSubGroupMenuOpen}
+                setIsTeamMenuOpen={setIsTeamMenuOpen}
+              />
 
-        <DesktopFilterTabs
-          groups={groups}
-          subGroups={subGroups}
-          teams={teams}
-          selectedGroups={selectedGroups}
-          selectedSubGroups={selectedSubGroups}
-          selectedTeams={selectedTeams}
-          setSelectedGroups={setSelectedGroups}
-          setSelectedSubGroups={setSelectedSubGroups}
-          setSelectedTeams={setSelectedTeams}
-        />
+              <DesktopFilterTabs
+                groups={groups}
+                subGroups={subGroups}
+                teams={teams}
+                selectedGroups={selectedGroups}
+                selectedSubGroups={selectedSubGroups}
+                selectedTeams={selectedTeams}
+                setSelectedGroups={setSelectedGroups}
+                setSelectedSubGroups={setSelectedSubGroups}
+                setSelectedTeams={setSelectedTeams}
+              />
+            </>
+          )}
 
         <div className="grid grid-cols-1 gap-6">
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6 w-full">

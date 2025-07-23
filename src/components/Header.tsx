@@ -23,6 +23,7 @@ export default function Header() {
   const [isMembersMenuOpen, setIsMembersMenuOpen] = useState(false);
   const [isEventsMenuOpen, setIsEventsMenuOpen] = useState(false);
   const [isScoresMenuOpen, setIsScoresMenuOpen] = useState(false);
+  const [isKakaoEmail, setIsKakaoEmail] = useState<boolean>(false);
 
   // 참조 관리
   const langMenuRef = useRef<HTMLDivElement>(null);
@@ -42,6 +43,13 @@ export default function Header() {
     setIsEventsMenuOpen(false);
     setIsScoresMenuOpen(false);
   };
+
+  useEffect(() => {
+    if (!user) return;
+
+    // 이메일이 @kakao.com인지 확인
+    setIsKakaoEmail(user.email?.endsWith("@kakao.com"));
+  }, [user]);
 
   // 외부 클릭으로 드롭다운 및 모바일 메뉴 닫기
   useEffect(() => {
@@ -141,6 +149,7 @@ export default function Header() {
             settingsMenuRef={settingsMenuRef}
             membersMenuRef={membersMenuRef}
             scoresMenuRef={scoresMenuRef}
+            isKakaoEmail={isKakaoEmail}
           />
 
           {/* 모바일 메뉴 버튼 */}
@@ -183,6 +192,7 @@ export default function Header() {
         mobileMenuRef={mobileMenuRef}
         eventsMenuRef={eventsMenuRef}
         scoresMenuRef={scoresMenuRef}
+        isKakaoEmail={isKakaoEmail}
       />
     </header>
   );

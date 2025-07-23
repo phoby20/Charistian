@@ -1,12 +1,25 @@
 // src/app/api/members/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/jwt";
 
 export async function GET() {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token || !token.sub) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const payload = verifyToken(token);
+
+    console.log("Payload:", payload);
+
     const members = await prisma.user.findMany({
       where: {
         state: { not: "PENDING" },
+        churchId: payload.churchId ?? "",
       },
       select: {
         id: true,

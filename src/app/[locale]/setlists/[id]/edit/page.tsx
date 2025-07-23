@@ -394,7 +394,6 @@ export default function SetlistEditPage() {
                     items={teams}
                     selectedIds={selectedTeams}
                     setSelectedIds={setSelectedTeams}
-                    label={t("teams")}
                     emptyMessage={t("noTeams")}
                   />
                 </div>

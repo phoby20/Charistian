@@ -64,6 +64,9 @@ export async function GET(req: NextRequest) {
             },
           },
         },
+        orderBy: {
+          date: "desc", // date 기준으로 정렬
+        },
       });
     } else {
       const userTeamIds = await getUserTeamIds(payload.userId);

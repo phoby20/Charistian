@@ -627,9 +627,10 @@
     "noUploadScore": "악보 업로드 제한수를 넘었습니다.\n플랜을 업그레이드하세요"
   },
   "Setlist": {
+    "pageTitle": "콘티 작성",
     "title": "콘티 제목",
     "setlist": "콘티 리스트",
-    "createSetlist": "콘티 작성",
+    "createSetlist": "콘티 & 악보 공유",
     "date": "사용 날짜",
     "description": "상세 설명",
     "selectedSongs": "선곡 리스트",

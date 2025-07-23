@@ -30,7 +30,7 @@ export const CheckboxGroup = <T extends { id: string; name: string }>({
       {items.length === 0 ? (
         <p className="text-sm text-gray-500">{emptyMessage}</p>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {items.map((item) => {
             const selected = selectedIds.includes(item.id);
             return (
@@ -43,8 +43,8 @@ export const CheckboxGroup = <T extends { id: string; name: string }>({
                 className={`cursor-pointer px-2.5 py-1.5 rounded-md text-sm font-medium border transition
                   ${
                     selected
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                      ? "bg-[#fc089e] hover:bg-[#ff66c4] text-white"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-red-50"
                   }`}
               >
                 <div className="flex items-center gap-2 justify-center">

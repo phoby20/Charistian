@@ -618,9 +618,10 @@
     "noUploadScore": "楽譜アップロード制限に達しました。\nプランをアップグレードしてください。"
   },
   "Setlist": {
+    "pageTitle": "コンテ作成",
     "title": "コンテタイトル",
     "setlist": "コンテリスト",
-    "createSetlist": "コンテ作成",
+    "createSetlist": "コンテ・楽譜共有",
     "noSelectedSongs": "選曲された曲がありません。",
     "date": "使用日",
     "description": "詳細説明",

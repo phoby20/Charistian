@@ -4,7 +4,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Share2 } from "lucide-react";
 import Loading from "@/components/Loading";
 import { CheckboxGroup } from "@/components/CheckboxGroup";
 import { useRouter } from "@/utils/useRouter";
@@ -190,8 +190,8 @@ export default function CreateSetlistPage() {
           transition={{ duration: 0.6 }}
           className="bg-white rounded-2xl shadow-xl p-6 sm:p-8"
         >
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
-            {t("createSetlist")}
+          <h1 className="text-xl font-bold text-gray-900 mb-6">
+            {t("pageTitle")}
           </h1>
           <AnimatePresence>
             {error && (
@@ -321,7 +321,7 @@ export default function CreateSetlistPage() {
                 !description ||
                 selectedTeams.length === 0
               }
-              className={`cursor-pointer w-full py-3 rounded-xl text-white font-semibold text-sm ${
+              className={`w-full py-3 rounded-xl text-white font-semibold text-sm ${
                 isSubmitting ||
                 selectedSongs.length === 0 ||
                 !title ||
@@ -330,10 +330,13 @@ export default function CreateSetlistPage() {
                 isUpgrageDisabled ||
                 selectedTeams.length === 0
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
+                  : "cursor-pointer bg-[#fc089e] hover:bg-[#ff66c4]"
               } transition-colors duration-200 shadow-sm`}
             >
-              {isSubmitting ? t("submitting") : t("createSetlist")}
+              <div className="flex items-center justify-center gap-3">
+                <Share2 className="w-5 h-5" />
+                {isSubmitting ? t("submitting") : t("createSetlist")}
+              </div>
             </motion.button>
           </form>
           {isUpgrageDisabled && (

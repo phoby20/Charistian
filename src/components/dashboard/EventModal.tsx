@@ -90,7 +90,7 @@ export default function EventModal() {
             whileHover={{ scale: 1.1, rotate: 90 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleClose}
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors"
+            className="cursor-pointer absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors"
           >
             <X className="w-6 h-6" />
           </motion.button>

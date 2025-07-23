@@ -924,7 +924,8 @@
       "title": "第6条（お問い合わせ）",
       "item1": "お問い合わせは、メール（{email}）にて受け付けております。"
     },
-    "agreeAndRegister": "同意して登録"
+    "agreeAndEmailRegister": "同意してEmailで登録",
+    "agreeAndkakaoRegister": "同意してカカオトークで登録"
   },
   "PrivacyPolicy": {
     "title": "プライバシーポリシー",
@@ -1067,7 +1068,8 @@
     "church": "登録教会名",
     "position": "職分",
     "member": "一般会員",
-    "submit": "登録",
+    "submit": "次へ",
+    "submitting": "送信中...",
     "noCitiesAvailable": "選択した国に都市がありません。",
     "noRegionsAvailable": "選択した都市に地域がありません。",
     "noChurchesFound": "選択した地域に登録された教会がありません。",
@@ -1078,6 +1080,21 @@
     "pleaseFillChurchFields": "教会を選択してください。",
     "pleaseFillPositionFields": "役割を選択してください。",
     "serverError": "サーバーエラーが発生しました。もう一度お試しください。",
+    "dismissError": "エラーを閉じる"
+  },
+  "setChurchConfirm": {
+    "title": "教会設定確認",
+    "country": "国",
+    "city": "都市",
+    "region": "地域",
+    "church": "教会",
+    "position": "役割",
+    "confirm": "登録",
+    "back": "戻る",
+    "submitting": "登録中...",
+    "missingFields": "必須情報が欠けています。",
+    "churchNotFound": "選択した教会が見つかりません。",
+    "serverError": "サーバーエラーが発生しました。",
     "dismissError": "エラーを閉じる"
   },
   "verifyEmail": {

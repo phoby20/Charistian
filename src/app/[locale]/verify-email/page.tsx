@@ -124,7 +124,7 @@ export default function VerifyEmailPage() {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full px-6 py-3 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 disabled:bg-gray-400 disabled:hover:bg-scale-100 disabled:hover:bg-gray-400 transition-all duration-200 shadow-sm hover:shadow-md"
+            className="cursor-pointer w-full px-6 py-3 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 disabled:bg-gray-400 disabled:hover:bg-scale-100 disabled:hover:bg-gray-400 transition-all duration-200 shadow-sm hover:shadow-md"
           >
             {isSubmitting ? (
               <span className="flex items-center">

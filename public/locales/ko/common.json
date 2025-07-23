@@ -935,7 +935,8 @@
       "title": "제6조 (문의)",
       "item1": "문의는 이메일({email})을 통해 가능합니다."
     },
-    "agreeAndRegister": "동의하고 가입"
+    "agreeAndEmailRegister": "동의하고 이메일로 가입",
+    "agreeAndkakaoRegister": "동의하고 카카오로 가입"
   },
   "PrivacyPolicy": {
     "title": "개인정보처리방침",
@@ -1078,7 +1079,8 @@
     "church": "등록 교회 이름",
     "position": "직분",
     "member": "일반 회원",
-    "submit": "등록",
+    "next": "다음",
+    "submitting": "제출 중...",
     "noCitiesAvailable": "선택한 국가에 도시가 없습니다.",
     "noRegionsAvailable": "선택한 도시에 지역이 없습니다.",
     "noChurchesFound": "선택한 지역에 등록된 교회가 없습니다.",
@@ -1089,6 +1091,21 @@
     "pleaseFillChurchFields": "교회를 선택해주세요.",
     "pleaseFillPositionFields": "직분을 선택해주세요.",
     "serverError": "서버 오류가 발생했습니다. 다시 시도해주세요.",
+    "dismissError": "에러 닫기"
+  },
+  "setChurchConfirm": {
+    "title": "교회 설정 확인",
+    "country": "국가",
+    "city": "도시",
+    "region": "지역",
+    "church": "교회",
+    "position": "직분",
+    "confirm": "등록",
+    "back": "뒤로",
+    "submitting": "등록 중...",
+    "missingFields": "필수 정보가 누락되었습니다.",
+    "churchNotFound": "선택한 교회를 찾을 수 없습니다.",
+    "serverError": "서버 오류가 발생했습니다.",
     "dismissError": "에러 닫기"
   },
   "verifyEmail": {

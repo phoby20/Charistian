@@ -1,4 +1,3 @@
-// src/app/[locale]/set-church/page.tsx
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
@@ -65,7 +64,6 @@ export default function SetChurchPage() {
     if (isAuthLoading || !user) return;
 
     if (user.churchId) {
-      // 이미 churchId가 있으면 대시보드로 리다이렉트
       router.push(`/${locale}/dashboard`);
       return;
     }
@@ -233,6 +231,7 @@ export default function SetChurchPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
     // 유효성 검사
     if (!formData.country) {
@@ -261,31 +260,16 @@ export default function SetChurchPage() {
       return;
     }
 
-    try {
-      const response = await fetch("/api/set-church", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          userId: user?.id,
-          churchId: formData.churchId,
-          position: formData.position,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.error || t("serverError"));
-        setIsSubmitting(false);
-        return;
-      }
-
-      window.location.href = `/${locale}/dashboard`;
-    } catch (err) {
-      console.error("Error updating church and position:", err);
-      setError(t("serverError"));
-      setIsSubmitting(false);
-    }
+    // /set-church/confirm 페이지로 리다이렉트
+    const queryParams = new URLSearchParams({
+      country: formData.country,
+      city: formData.city,
+      region: formData.region,
+      churchId: formData.churchId,
+      position: formData.position,
+    }).toString();
+    router.push(`/set-church/confirm?${queryParams}`);
+    setIsSubmitting(false);
   };
 
   const clearError = () => setError(null);
@@ -432,7 +416,7 @@ export default function SetChurchPage() {
                     {t("submitting")}
                   </span>
                 ) : (
-                  t("submit")
+                  t("next") // "다음"으로 변경
                 )}
               </Button>
             </div>

@@ -25,7 +25,7 @@ function TermsOfServiceContent() {
 
   return (
     <div className="min-h-[80vh] bg-gradient-to-br from-blue-100 via-white to-purple-100 py-12 px-4 sm:px-6 lg:px-8 flex flex-col">
-      <div className="max-w-3xl max-h-[calc(70vh-150px)] mx-auto bg-white rounded-2xl shadow-xl p-8 flex-grow">
+      <div className="max-w-lg max-h-[calc(70vh-150px)] mx-auto bg-white rounded-2xl shadow-xl p-8 flex-grow">
         <h1 className="text-2xl font-bold text-gray-900 mb-8 text-center tracking-tight">
           {t("title") || "이용약관"}
         </h1>

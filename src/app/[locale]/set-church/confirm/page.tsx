@@ -180,10 +180,7 @@ function SetChurchConfirm() {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
-          <Button
-            onClick={handleBack}
-            className="w-full py-2.5 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-800 rounded-md font-medium text-sm hover:from-gray-300 hover:to-gray-400 hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center"
-          >
+          <Button onClick={handleBack} variant="outline">
             {t("back")}
           </Button>
           <Button onClick={handleConfirm} isDisabled={isSubmitting}>

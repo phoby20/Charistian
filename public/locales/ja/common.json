@@ -366,14 +366,14 @@
     "companyInfo": "会社情報",
     "companyName": "販売業者の名称: Integrity",
     "location": "所在地: 〒174-0072 東京都板橋区南常盤台1-11-6 レフア南常盤台101号室",
-    "email": "メールアドレス: hearttercompany@gmail.com",
+    "email": "メールアドレス: charistian.co@gmail.com",
     "phone": "電話番号: 請求があれば遅滞なく開示します。",
-    "manager": "運営統括責任者: 朴管城",
+    "manager": "運営統括責任者: Shinozaki Eiji",
     "pricing": {
       "title": "販売価格",
       "free": "FREE会員: 無料",
-      "smart": "SMART会員: 月20,000ウォン（サブスクリプション）",
-      "enterprise": "ENTERPRISE会員: 月80,000ウォン（サブスクリプション）"
+      "smart": "SMART会員: 月9,900ウォン（サブスクリプション）",
+      "enterprise": "ENTERPRISE会員: 月49,000ウォン（サブスクリプション）"
     },
     "additionalFees": "追加手数料: なし",
     "paymentMethod": "支払い方法: クレジットカード",
@@ -862,7 +862,7 @@
     "additionalFees": "追加手数料",
     "additionalFeesContent": "サービス利用に際して追加の手数料は発生しません。インターネット接続に必要な費用はお客様のご負担となります。",
     "refundPolicy": "返品・返金について",
-    "refundPolicyContent": "＜お客様都合による返品・キャンセルの場合＞\nサービスの性質上、返品・返金およびキャンセルは承っておりません。サブスクリプションを解約した場合、残存期間に関わらずサービスは即時終了します。\n\n＜サービスに不備がある場合＞\nサービスに不備がある場合（例：システムエラーによる機能不全）、お問い合わせ先（hearttercompany@gmail.com）までご連絡ください。状況を確認後、必要に応じて代替サービスのご提供または返金対応をさせていただきます。",
+    "refundPolicyContent": "＜お客様都合による返品・キャンセルの場合＞\nサービスの性質上、返品・返金およびキャンセルは承っておりません。サブスクリプションを解約した場合、残存期間に関わらずサービスは即時終了します。\n\n＜サービスに不備がある場合＞\nサービスに不備がある場合（例：システムエラーによる機能不全）、お問い合わせ先（charistian.co@gmail.com）までご連絡ください。状況を確認後、必要に応じて代替サービスのご提供または返金対応をさせていただきます。",
     "deliveryTime": "サービス提供時期",
     "deliveryTimeContent": "決済完了後、直ちに該当プランのサービスをご利用いただけます。",
     "paymentMethods": "支払い方法",

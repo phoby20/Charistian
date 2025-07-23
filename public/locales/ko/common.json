@@ -374,14 +374,14 @@
     "companyInfo": "회사 정보",
     "companyName": "판매업체 명칭: Integrity",
     "location": "위치: 〒174-0072東京都板橋区南常盤台1-11-6 レフア南常盤台101호",
-    "email": "이메일: hearttercompany@gmail.com",
+    "email": "이메일: charistian.co@gmail.com",
     "phone": "전화번호: 요청 시 즉시 공개",
-    "manager": "운영 책임자: 박관성",
+    "manager": "운영 책임자: Shinozaki Eiji",
     "pricing": {
       "title": "판매 가격",
       "free": "FREE 회원: 무료",
-      "smart": "SMART 회원: 월 20,000원 (구독)",
-      "enterprise": "ENTERPRISE 회원: 월 80,000원 (구독)"
+      "smart": "SMART 회원: 월 9,900원 (구독)",
+      "enterprise": "ENTERPRISE 회원: 월 49,000원 (구독)"
     },
     "additionalFees": "추가 수수료: 없음",
     "paymentMethod": "결제 방법: 신용카드",
@@ -873,7 +873,7 @@
     "additionalFees": "추가 요금",
     "additionalFeesContent": "서비스 이용에 따른 추가 수수료는 발생하지 않습니다. 인터넷 연결에 필요한 비용은 고객 부담입니다.",
     "refundPolicy": "환불 및 반품",
-    "refundPolicyContent": "＜고객 사유에 의한 반품 및 취소＞\n서비스의 특성상 반품, 환불 및 취소는 불가능합니다. 구독 해지 시 잔여 기간과 관계없이 서비스는 즉시 종료됩니다.\n\n＜서비스에 하자가 있는 경우＞\n서비스에 하자가 있는 경우(예: 시스템 오류로 인한 기능 장애), 문의처(hearttercompany@gmail.com)로 연락 주시기 바랍니다. 상황을 확인 후 필요에 따라 대체 서비스 제공 또는 환불 처리를 진행합니다.",
+    "refundPolicyContent": "＜고객 사유에 의한 반품 및 취소＞\n서비스의 특성상 반품, 환불 및 취소는 불가능합니다. 구독 해지 시 잔여 기간과 관계없이 서비스는 즉시 종료됩니다.\n\n＜서비스에 하자가 있는 경우＞\n서비스에 하자가 있는 경우(예: 시스템 오류로 인한 기능 장애), 문의처(charistian.co@gmail.com)로 연락 주시기 바랍니다. 상황을 확인 후 필요에 따라 대체 서비스 제공 또는 환불 처리를 진행합니다.",
     "deliveryTime": "서비스 제공 시기",
     "deliveryTimeContent": "결제 완료 후 즉시 해당 플랜의 서비스를 이용할 수 있습니다.",
     "paymentMethods": "결제 방법",

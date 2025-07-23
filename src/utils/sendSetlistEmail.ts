@@ -38,6 +38,7 @@ export async function sendSetlistEmail(
         { groups: { some: { id: { in: groupIds } } } },
         { teams: { some: { id: { in: teamIds } } } },
         { email: { not: "" } },
+        { emailVerified: true },
       ],
     },
     select: { email: true, name: true },

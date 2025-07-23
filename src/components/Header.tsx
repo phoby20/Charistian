@@ -9,6 +9,7 @@ import MobileNav from "./MobileNav";
 import { useAuth } from "@/context/AuthContext";
 import { Menu, X } from "lucide-react";
 import { useRouter } from "@/utils/useRouter";
+import Image from "next/image";
 
 export default function Header() {
   const t = useTranslations();
@@ -23,6 +24,7 @@ export default function Header() {
   const [isMembersMenuOpen, setIsMembersMenuOpen] = useState(false);
   const [isEventsMenuOpen, setIsEventsMenuOpen] = useState(false);
   const [isScoresMenuOpen, setIsScoresMenuOpen] = useState(false);
+  const [isKakaoEmail, setIsKakaoEmail] = useState<boolean>(false);
 
   // 참조 관리
   const langMenuRef = useRef<HTMLDivElement>(null);
@@ -42,6 +44,13 @@ export default function Header() {
     setIsEventsMenuOpen(false);
     setIsScoresMenuOpen(false);
   };
+
+  useEffect(() => {
+    if (!user) return;
+
+    // 이메일이 @kakao.com인지 확인
+    setIsKakaoEmail(user.email?.endsWith("@kakao.com"));
+  }, [user]);
 
   // 외부 클릭으로 드롭다운 및 모바일 메뉴 닫기
   useEffect(() => {
@@ -114,9 +123,12 @@ export default function Header() {
           {/* 로고 및 사이트 제목 */}
           <div className="flex-shrink-0 flex items-center">
             <Link href={logoHref} className="flex items-center">
-              <span className="text-2xl font-bold text-red-600">
-                {t("siteTitle", { defaultValue: "Charistian" })}
-              </span>
+              <Image
+                src="/logo_title.png"
+                alt="logo"
+                width={150}
+                height={40}
+              ></Image>
             </Link>
           </div>
 
@@ -141,6 +153,7 @@ export default function Header() {
             settingsMenuRef={settingsMenuRef}
             membersMenuRef={membersMenuRef}
             scoresMenuRef={scoresMenuRef}
+            isKakaoEmail={isKakaoEmail}
           />
 
           {/* 모바일 메뉴 버튼 */}
@@ -183,6 +196,7 @@ export default function Header() {
         mobileMenuRef={mobileMenuRef}
         eventsMenuRef={eventsMenuRef}
         scoresMenuRef={scoresMenuRef}
+        isKakaoEmail={isKakaoEmail}
       />
     </header>
   );

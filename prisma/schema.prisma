@@ -14,8 +14,8 @@ model User {
   name          String
   birthDate     DateTime
   phone         String?
-  kakaoId       String?
-  lineId        String?
+  kakaoId       String?    @unique
+  lineId        String?    @unique
   address       String?
   country       String?
   region        String?

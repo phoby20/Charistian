@@ -45,7 +45,14 @@ export default function CreateSetlistPage() {
   const dateLocale = locale === "ko" ? ko : ja;
 
   useEffect(() => {
-    if (!user || !user.churchId) return;
+    if (!user) {
+      router.push(`/login`);
+      return;
+    }
+    if (!user.churchId) {
+      router.push(`/dashboard`);
+      return;
+    }
     const stored = sessionStorage.getItem("selectedSongList");
     if (stored) {
       try {

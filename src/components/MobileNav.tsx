@@ -39,6 +39,7 @@ interface MobileNavProps {
   mobileMenuRef: React.RefObject<HTMLDivElement | null>;
   eventsMenuRef: React.RefObject<HTMLDivElement | null>;
   scoresMenuRef: React.RefObject<HTMLDivElement | null>;
+  isKakaoEmail: boolean;
 }
 
 export default function MobileNav({
@@ -63,6 +64,7 @@ export default function MobileNav({
   mobileMenuRef,
   eventsMenuRef,
   scoresMenuRef,
+  isKakaoEmail,
 }: MobileNavProps) {
   const closeAllDropdowns = () => {
     setIsUserMenuOpen(false);
@@ -129,75 +131,77 @@ export default function MobileNav({
             {/* Scores Menu */}
             {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "GENERAL"].includes(
               user?.role || ""
-            ) && (
-              <div className="px-3 py-2" ref={scoresMenuRef}>
-                <button
-                  onClick={() => {
-                    closeAllDropdowns();
-                    setIsScoresMenuOpen(!isScoresMenuOpen);
-                  }}
-                  className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
-                >
-                  <FileMusic className="w-5 h-5 mr-2" />
-                  {t("scores")}
-                  <ChevronDown className="w-4 h-4 ml-2" />
-                </button>
-                {isScoresMenuOpen && (
-                  <div className="mt-2 pl-4">
-                    <Link
-                      href={getPathname({ locale, href: "/scores" })}
-                      onClick={() => {
-                        closeAllDropdowns();
-                        setIsMenuOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      {t("scoreList")}
-                    </Link>
-                    <Link
-                      href={getPathname({ locale, href: "/setlists" })}
-                      onClick={() => {
-                        closeAllDropdowns();
-                        setIsMenuOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      {t("setlistList")}
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
+            ) &&
+              !isKakaoEmail && (
+                <div className="px-3 py-2" ref={scoresMenuRef}>
+                  <button
+                    onClick={() => {
+                      closeAllDropdowns();
+                      setIsScoresMenuOpen(!isScoresMenuOpen);
+                    }}
+                    className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
+                  >
+                    <FileMusic className="w-5 h-5 mr-2" />
+                    {t("scores")}
+                    <ChevronDown className="w-4 h-4 ml-2" />
+                  </button>
+                  {isScoresMenuOpen && (
+                    <div className="mt-2 pl-4">
+                      <Link
+                        href={getPathname({ locale, href: "/scores" })}
+                        onClick={() => {
+                          closeAllDropdowns();
+                          setIsMenuOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {t("scoreList")}
+                      </Link>
+                      <Link
+                        href={getPathname({ locale, href: "/setlists" })}
+                        onClick={() => {
+                          closeAllDropdowns();
+                          setIsMenuOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {t("setlistList")}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
 
             {/* Calendar Menu */}
             {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN", "GENERAL"].includes(
               user?.role || ""
-            ) && (
-              <div className="px-3 py-2" ref={eventsMenuRef}>
-                <button
-                  onClick={() => {
-                    closeAllDropdowns();
-                    setIsEventsMenuOpen(!isEventsMenuOpen);
-                  }}
-                  className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
-                >
-                  <Calendar className="w-5 h-5 mr-1" />
-                  {t("calendar")}
-                  <ChevronDown className="w-4 h-4 ml-1" />
-                </button>
-                {isEventsMenuOpen && (
-                  <div className="mt-2 pl-4">
-                    <Link
-                      href={getPathname({ locale, href: "/calendar" })}
-                      onClick={() => closeMembersMenu("/calendar")}
-                      className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      {t("calendar")}
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
+            ) &&
+              !isKakaoEmail && (
+                <div className="px-3 py-2" ref={eventsMenuRef}>
+                  <button
+                    onClick={() => {
+                      closeAllDropdowns();
+                      setIsEventsMenuOpen(!isEventsMenuOpen);
+                    }}
+                    className="flex items-center text-gray-600 hover:text-blue-600 py-2 rounded-md text-sm font-medium w-full"
+                  >
+                    <Calendar className="w-5 h-5 mr-1" />
+                    {t("calendar")}
+                    <ChevronDown className="w-4 h-4 ml-1" />
+                  </button>
+                  {isEventsMenuOpen && (
+                    <div className="mt-2 pl-4">
+                      <Link
+                        href={getPathname({ locale, href: "/calendar" })}
+                        onClick={() => closeMembersMenu("/calendar")}
+                        className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {t("calendar")}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
 
             {!user && (
               <>
@@ -255,17 +259,20 @@ export default function MobileNav({
                 </button>
                 {isUserMenuOpen && (
                   <div className="mt-2 pl-4">
-                    <Link
-                      href={getPathname({ locale, href: "/mypage" })}
-                      onClick={() => {
-                        closeAllDropdowns();
-                        setIsMenuOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                    >
-                      <User2 className="w-4 h-4 mr-2" />
-                      {t("MyPage.title")}
-                    </Link>
+                    {user.churchId && !isKakaoEmail && (
+                      <Link
+                        href={getPathname({ locale, href: "/mypage" })}
+                        onClick={() => {
+                          closeAllDropdowns();
+                          setIsMenuOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      >
+                        <User2 className="w-4 h-4 mr-2" />
+                        {t("MyPage.title")}
+                      </Link>
+                    )}
+
                     <button
                       onClick={() => {
                         logout();

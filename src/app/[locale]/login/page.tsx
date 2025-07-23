@@ -1,3 +1,4 @@
+// src/app/[locale]/login/page.tsx
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
@@ -7,7 +8,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const t = useTranslations();
+  const t = useTranslations("login");
   const [error, setError] = useState<string | null>(null);
   const locale = useLocale();
   const [isDisabled, setIsDisabled] = useState(false);
@@ -32,9 +33,7 @@ export default function LoginPage() {
         return;
       }
 
-      if (typeof window !== "undefined") {
-        window.location.href = `/${locale}/dashboard`;
-      }
+      window.location.href = `/${locale}/dashboard`;
     } catch (err) {
       setIsDisabled(false);
       setError(
@@ -45,13 +44,18 @@ export default function LoginPage() {
     }
   };
 
+  // 카카오 로그인 버튼 클릭 핸들러
+  const handleKakaoLogin = () => {
+    window.location.href = process.env.NEXT_PUBLIC_KAKAO_AUTH_URL!;
+  };
+
   const resetPasswordUrl = `/${locale}/reset-password`;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-purple-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md transform transition-all duration-300 hover:shadow-xl">
         <h1 className="text-3xl font-semibold text-gray-800 mb-6 text-center">
-          {t("login")}
+          {t("title")}
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <Input
@@ -77,9 +81,24 @@ export default function LoginPage() {
               isDisabled ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
-            {t("login")}
+            {t("loginButton")}
           </Button>
         </form>
+        {/* 카카오 로그인 버튼 추가 */}
+        <hr className="border mt-10 mb-8 border-gray-100" />
+        <Button
+          type="button"
+          isDisabled={isDisabled}
+          onClick={handleKakaoLogin}
+          className="cursor-pointer flex justify-center gap-3 w-full py-3 mt-4 text-black rounded-md font-medium focus:outline-none focus:ring-2 bg-[#FEE500] hover:bg-[#F7DC00] transition-colors"
+        >
+          <img
+            src="/kakao_login_medium_narrow.png"
+            alt={t("signupTitle")}
+            className="h-6"
+          />
+          <p>{t("kakaoLogin")}</p>
+        </Button>
         {error && (
           <div className="mt-4 text-red-600 text-sm text-center">{error}</div>
         )}

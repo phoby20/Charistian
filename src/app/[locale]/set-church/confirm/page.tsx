@@ -3,12 +3,13 @@
 import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import Loading from "@/components/Loading";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "@/utils/useRouter";
 import { useAuth } from "@/context/AuthContext";
 import Button from "@/components/Button";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import Loading from "@/components/Loading";
 
 interface FormData {
   country: string;
@@ -16,11 +17,11 @@ interface FormData {
   region: string;
   churchId: string;
   position: string;
-  churchName?: string; // 교회 이름 표시용
-  positionName?: string; // 교회 이름 표시용
+  churchName?: string;
+  positionName?: string;
 }
 
-export default function SetChurchConfirmPage() {
+function SetChurchConfirm() {
   const t = useTranslations("setChurchConfirm");
   const router = useRouter();
   const locale = useLocale();
@@ -30,7 +31,6 @@ export default function SetChurchConfirmPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 쿼리 파라미터로 데이터 가져오기 및 교회 이름 조회
   useEffect(() => {
     if (isAuthLoading || !user) return;
 
@@ -45,21 +45,17 @@ export default function SetChurchConfirmPage() {
       return;
     }
 
-    // 교회 이름 조회
     const fetchChurchName = async () => {
       try {
-        const churchResponse = await fetch(
-          `/api/church/${encodeURIComponent(churchId)}`,
-          {
+        const [churchResponse, positionResponse] = await Promise.all([
+          fetch(`/api/church/${encodeURIComponent(churchId)}`, {
             credentials: "include",
-          }
-        );
-        const positionResponse = await fetch(
-          `/api/position/${encodeURIComponent(position)}`,
-          {
+          }),
+          fetch(`/api/position/${encodeURIComponent(position)}`, {
             credentials: "include",
-          }
-        );
+          }),
+        ]);
+
         if (churchResponse.ok && positionResponse.ok) {
           const church = await churchResponse.json();
           const positionName = await positionResponse.json();
@@ -117,28 +113,28 @@ export default function SetChurchConfirmPage() {
   };
 
   const handleBack = () => {
-    router.push(`/set-church`);
+    router.push(`/${locale}/set-church`);
   };
 
   const clearError = () => setError(null);
 
   if (isAuthLoading || !user || !formData) {
-    return <Loading />;
+    return null; // Suspense의 fallback이 로딩 UI를 처리함
   }
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-purple-100 p-4 sm:p-6"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 sm:p-6"
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8 sm:p-10"
+        className="w-full max-w-md bg-white rounded-3xl shadow-xl p-6 sm:p-8 ring-1 ring-gray-100/50"
       >
-        <h1 className="text-xl font-bold text-gray-900 mb-8 text-center">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-6 text-center tracking-tight">
           {t("title")}
         </h1>
         <AnimatePresence>
@@ -148,59 +144,53 @@ export default function SetChurchConfirmPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
-              className="mb-6 flex items-center justify-between bg-red-100 text-red-700 p-4 rounded-xl text-sm font-medium"
+              className="mb-6 flex items-center justify-between bg-red-50 text-red-600 p-3 rounded-lg text-sm shadow-sm border border-red-100"
             >
               <span>{error}</span>
               <button
                 onClick={clearError}
-                className="hover:text-red-900 transition-colors duration-200"
+                className="hover:text-red-800 transition-colors duration-200"
                 aria-label={t("dismissError")}
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div className="space-y-4">
-          <div className="flex gap-4 items-center">
-            <p className="font-bold text-gray-700">{t("country")}</p>
-            <p className="text-base text-gray-900">{formData.country}</p>
-          </div>
-          <div className="flex gap-4 items-center">
-            <p className="font-bold text-gray-700">{t("city")}</p>
-            <p className="text-base text-gray-900">{formData.city}</p>
-          </div>
-          <div className="flex gap-4 items-center">
-            <p className="font-bold text-gray-700">{t("region")}</p>
-            <p className="text-base text-gray-900">{formData.region}</p>
-          </div>
-          <div className="flex gap-4 items-center">
-            <p className="font-bold text-gray-700">{t("church")}</p>
-            <p className="text-base text-gray-900">{formData.churchName}</p>
-          </div>
-          <div className="flex gap-4 items-center">
-            <p className="font-bold text-gray-700">{t("position")}</p>
-            <p className="text-base text-gray-900">{formData.positionName}</p>
-          </div>
+        <div className="space-y-4 bg-gray-50 p-4 rounded-xl shadow-inner">
+          {[
+            { label: t("country"), value: formData.country, icon: "🌍" },
+            { label: t("city"), value: formData.city, icon: "🏙️" },
+            { label: t("region"), value: formData.region, icon: "🗺️" },
+            { label: t("church"), value: formData.churchName, icon: "⛪" },
+            { label: t("position"), value: formData.positionName, icon: "👤" },
+          ].map((item, index) => (
+            <div key={index} className="flex items-start gap-3">
+              <div className="flex-1">
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  {item.label}
+                </p>
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {item.value || "N/A"}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div className="flex justify-between mt-8">
+        <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
           <Button
             onClick={handleBack}
-            className="cursor-pointer w-full sm:w-1/2 mr-2 px-6 py-3 bg-gray-500 text-white rounded-xl font-semibold text-base hover:bg-gray-600 hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg"
+            className="w-full py-2.5 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-800 rounded-md font-medium text-sm hover:from-gray-300 hover:to-gray-400 hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center"
           >
             {t("back")}
           </Button>
-          <Button
-            onClick={handleConfirm}
-            isDisabled={isSubmitting}
-            className="cursor-pointer w-full sm:w-1/2 ml-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold text-base hover:bg-indigo-700 hover:scale-105 disabled:bg-gray-300 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg"
-          >
+          <Button onClick={handleConfirm} isDisabled={isSubmitting}>
             {isSubmitting ? (
-              <span className="flex items-center justify-center">
+              <span className="flex items-center">
                 <svg
-                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  className="animate-spin h-4 w-4 mr-2 text-white"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -222,11 +212,19 @@ export default function SetChurchConfirmPage() {
                 {t("submitting")}
               </span>
             ) : (
-              t("confirm")
+              <>{t("confirm")}</>
             )}
           </Button>
         </div>
       </motion.div>
     </motion.div>
+  );
+}
+
+export default function SetChurchConfirmPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <SetChurchConfirm />
+    </Suspense>
   );
 }

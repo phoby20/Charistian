@@ -121,7 +121,7 @@ export default function CommentsSection({
       transition={{ duration: 0.5, delay: 0.5 }}
       className="mt-8"
     >
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">
         {t("comments")} ({score._count?.comments || 0})
       </h2>
       <form onSubmit={handleCommentSubmit} className="mb-6">

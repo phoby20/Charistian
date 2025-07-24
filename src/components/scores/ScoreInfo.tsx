@@ -49,7 +49,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
       >
         {/* Description */}
         {score.description && (
-          <div className="rounded-lg border border-gray-200 p-4">
+          <div>
             <button
               onClick={toggleDescription}
               className="flex w-full items-center justify-between text-lg font-semibold text-gray-900"
@@ -78,7 +78,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
                 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="mt-3 overflow-hidden text-gray-700"
+                className="mt-3 overflow-hidden text-gray-700 rounded-lg border border-gray-200 p-3"
                 style={{ whiteSpace: "pre-wrap" }}
               >
                 {score.description}
@@ -89,7 +89,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
 
         {/* Lyrics */}
         {(score.lyrics || score.lyricsEn || score.lyricsJa) && (
-          <div className="rounded-lg border border-gray-200  p-4">
+          <div>
             <button
               onClick={toggleLyrics}
               className="cursor-pointer flex w-full items-center justify-between text-lg font-semibold text-gray-900"
@@ -139,7 +139,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
                 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
-                className="mt-3 overflow-hidden text-gray-700"
+                className="mt-3 overflow-hidden text-gray-700 rounded-lg border border-gray-200  p-3"
                 style={{ whiteSpace: "pre-wrap" }}
               >
                 {lyricsContent[activeLyricsTab]}
@@ -208,7 +208,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex flex-col gap-4 sm:flex-row"
+          className="flex flex-col gap-4 sm:flex-row mt-20"
         >
           {user?.churchId === score.churchId && score.fileUrl && (
             <a
@@ -217,11 +217,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
               rel="noopener noreferrer"
               className="flex-1"
             >
-              <Button
-                variant="outline"
-                className="shadow-lg cursor-pointer w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#ff66c4] to-[#ffde59] hover:from-[#ffde59] hover:to-[#ff66c4] py-3"
-                aria-label={t("viewPdf")}
-              >
+              <Button aria-label={t("viewPdf")}>
                 <FileMusic className="h-5 w-5" />
                 <span>{t("viewPdf")}</span>
               </Button>

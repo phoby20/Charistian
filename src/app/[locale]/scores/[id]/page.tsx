@@ -200,22 +200,24 @@ export default function ScoreDetailPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="bg-white rounded-3xl shadow-xl p-8 md:p-12"
+            className="bg-white rounded-lg shadow-xl p-5"
           >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => router.push(`/${locale}/scores`)}
-              className="cursor-pointer flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors mb-8 font-semibold"
-              aria-label={t("backToList")}
-            >
-              <ArrowLeft className="w-6 h-6" />
-              <span className="text-base">{t("backToList")}</span>
-            </motion.button>
-            <div className="flex flex-wrap mb-6">
-              <Chip label={score.key ?? ""} color="red" />
-              <Chip label={(score.tempo ?? "") + " BPM"} color="yellow" />
-              <Chip label={getGenreLabel(score.genre) ?? ""} />
+            <div className="flex items-center justify-between mb-10">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push(`/${locale}/scores`)}
+                className="cursor-pointer flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors font-semibold"
+                aria-label={t("backToList")}
+              >
+                <ArrowLeft className="w-6 h-6" />
+                <span className="text-base">{t("backToList")}</span>
+              </motion.button>
+              <div className="flex flex-wrap gap-1">
+                <Chip label={score.key ?? ""} color="red" />
+                <Chip label={(score.tempo ?? "") + " BPM"} color="yellow" />
+                <Chip label={getGenreLabel(score.genre) ?? ""} />
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6">
@@ -287,7 +289,7 @@ export default function ScoreDetailPage() {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="mt-12"
             >
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-6">
                 {t("referenceUrls")}
               </h2>
 

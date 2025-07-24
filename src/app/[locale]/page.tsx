@@ -155,19 +155,19 @@ export default function LandingPage() {
           <div className="bg-red-100 flex flex-col items-center justify-center pt-20 pb-20">
             <h4
               id={`feature-title`}
-              className="text-5xl md:text-7xl font-semibold text-gray-900 mt-16 mb-30 text-center whitespace-pre-wrap"
+              className="text-3xl md:text-7xl font-semibold text-gray-900 mt-16 mb-30 text-center whitespace-pre-wrap"
             >
               {t("howToUse.title")}
             </h4>
             <h4
               id={`feature-title`}
-              className="text-3xl md:text-4xl font-semibold text-gray-900 text-center whitespace-pre-wrap"
+              className="text-2xl md:text-4xl font-semibold text-gray-900 text-center whitespace-pre-wrap"
             >
               {t("howToUse.step0.subTitle")}
             </h4>
             <h5
               id={`feature-title`}
-              className="text-2xl font-semibold text-gray-500 text-center mt-4"
+              className="text-xl font-semibold text-gray-500 text-center mt-4"
             >
               {t("howToUse.step0.description")}
             </h5>
@@ -178,13 +178,13 @@ export default function LandingPage() {
                 width={200}
                 height={200}
               />
-              <p className="absolute top-20 left-[-80] -rotate-25">
+              <p className="absolute top-20 left-[-80] -rotate-25 text-xs">
                 {t("howToUse.step0.subDescription.1")}
               </p>
-              <p className="absolute top-0 left-[90] rotate-15">
+              <p className="absolute top-0 left-[90] rotate-15 text-xs">
                 {t("howToUse.step0.subDescription.2")}
               </p>
-              <p className="absolute top-20 right-[-80] rotate-15">
+              <p className="absolute top-20 right-[-80] rotate-15 text-xs">
                 {t("howToUse.step0.subDescription.3")}
               </p>
             </div>
@@ -529,7 +529,7 @@ export default function LandingPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h3
             id="cta-title"
-            className="text-xl font-bold mb-6"
+            className="text-xl font-bold mb-6 whitespace-pre-wrap"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -537,7 +537,7 @@ export default function LandingPage() {
             {t("cta.title")}
           </motion.h3>
           <motion.p
-            className="text-lg mb-8 max-w-xl mx-auto"
+            className="text-lg mb-8 max-w-xl mx-auto whitespace-pre-wrap"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ delay: 0.2 }}

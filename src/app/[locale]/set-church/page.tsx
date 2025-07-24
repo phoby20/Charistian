@@ -389,7 +389,6 @@ export default function SetChurchPage() {
                 isDisabled={
                   isSubmitting || !selectedChurch || !selectedPosition
                 }
-                className="cursor-pointer w-full sm:w-1/2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold text-base hover:bg-indigo-700 hover:scale-105 disabled:bg-gray-300 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">

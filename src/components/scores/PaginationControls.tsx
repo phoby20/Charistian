@@ -44,7 +44,7 @@ export default function PaginationControls({
         <select
           value={itemsPerPage}
           onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-          className="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+          className="cursor-pointer p-2 border border-gray-300 rounded-lg focus:ring-[#ff66c4] focus:border-[#ff66c4]"
         >
           <option value={10}>10</option>
           <option value={20}>20</option>
@@ -57,10 +57,10 @@ export default function PaginationControls({
           whileTap={{ scale: 0.95 }}
           onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
           disabled={currentPage === 1}
-          className={`p-2 rounded-lg ${
+          className={`cursor-pointer p-2 rounded-lg ${
             currentPage === 1
               ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-blue-500 text-white hover:bg-blue-600"
+              : "bg-[#ff66c4] text-white hover:bg-[#ff59bf]"
           }`}
         >
           <ChevronLeft className="w-5 h-5" />
@@ -71,9 +71,9 @@ export default function PaginationControls({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onPageChange(page)}
-            className={`px-4 py-2 rounded-lg text-sm ${
+            className={`cursor-pointer px-4 py-2 rounded-lg text-sm ${
               currentPage === page
-                ? "bg-blue-500 text-white"
+                ? "bg-[#ff66c4] text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
             }`}
           >
@@ -85,10 +85,10 @@ export default function PaginationControls({
           whileTap={{ scale: 0.95 }}
           onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className={`p-2 rounded-lg ${
+          className={`cursor-pointer p-2 rounded-lg ${
             currentPage === totalPages
               ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-blue-500 text-white hover:bg-blue-600"
+              : "bg-[#ff66c4] text-white hover:bg-[#ff59bf]"
           }`}
         >
           <ChevronRight className="w-5 h-5" />

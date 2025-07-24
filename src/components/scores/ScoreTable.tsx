@@ -125,19 +125,20 @@ export default function ScoreTable({
       <table className="w-full bg-white rounded-xl shadow-lg border border-gray-200">
         <thead className="bg-gray-100">
           <tr>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[100px] sm:min-w-[150px]">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-sm  font-semibold text-gray-700 min-w-[100px] sm:min-w-[150px]">
               {t("titleHeader")}
             </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[70px] sm:min-w-[90px]">
-              {t("genre")} / {t("tempo")}
+            <th className="flex flex-col py-2 sm:py-3 px-2 sm:px-4 text-left text-sm  font-semibold text-gray-700 min-w-[70px] sm:min-w-[90px]">
+              <span>{t("genre")} / </span>
+              <span>{t("tempo")}</span>
             </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-xs sm:text-sm font-semibold text-gray-700 min-w-[50px] sm:min-w-[70px]">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-sm  font-semibold text-gray-700 min-w-[50px] sm:min-w-[70px]">
               {t("key")}
             </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm font-semibold text-gray-700 w-12">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-sm  font-semibold text-gray-700 w-12">
               {t("youtube")}
             </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm font-semibold text-gray-700 w-12">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-sm  font-semibold text-gray-700 w-12">
               {t("action")}
             </th>
           </tr>
@@ -160,39 +161,45 @@ export default function ScoreTable({
                   >
                     {locale === "ko" ? (
                       <>
-                        <span className="block max-w-[100px] sm:max-w-[200px] text-xs sm:text-sm truncate">
+                        <span className="block max-w-[100px] sm:max-w-[200px] text-sm truncate">
                           {score.title}
                         </span>
-                        <span className="text-gray-600 text-[10px] sm:text-sm truncate">
+                        <span className="flex flex-col text-gray-600 text-[10px] truncate">
                           {score.titleJa}{" "}
-                          {score.titleJa && score.titleEn && "/"}{" "}
-                          {score.titleEn}
+                          <span>{score.titleJa && score.titleEn && "/"} </span>
+                          <span>{score.titleEn}</span>
                         </span>
                       </>
                     ) : locale === "ja" ? (
                       <>
-                        <span className="block max-w-[100px] sm:max-w-[200px] text-xs sm:text-sm truncate">
+                        <span className="block max-w-[100px] sm:max-w-[200px] text-sm truncate">
                           {score.titleJa}
                         </span>
-                        <span className="text-gray-600 text-[10px] sm:text-sm truncate">
-                          {score.title} {score.title && score.titleEn && "/"}{" "}
-                          {score.titleEn}
+                        <span className="flex flex-col text-gray-600 text-[10px] truncate">
+                          <span>
+                            {score.title}{" "}
+                            {score.title && score.titleEn && "/"}{" "}
+                          </span>
+                          <span>{score.titleEn}</span>
                         </span>
                       </>
                     ) : (
                       <>
-                        <span className="block max-w-[100px] sm:max-w-[200px] text-xs sm:text-sm truncate">
+                        <span className="block max-w-[100px] sm:max-w-[200px] text-sm truncate">
                           {score.titleEn}
                         </span>
-                        <span className="text-gray-600 text-[10px] sm:text-sm truncate">
-                          {score.title} {score.title && score.titleJa && "/"}{" "}
-                          {score.titleJa}
+                        <span className="flex flex-col text-gray-600 text-[10px] truncate">
+                          <span>
+                            {score.title}{" "}
+                            {score.title && score.titleJa && "/"}{" "}
+                          </span>
+                          <span>{score.titleJa}</span>
                         </span>
                       </>
                     )}
                   </Link>
                 </td>
-                <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-xs sm:text-sm truncate">
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-sm truncate">
                   <div className="flex flex-col gap-1">
                     <span>
                       {score.genre ? getGenreLabel(score.genre) : t("none")}
@@ -200,7 +207,7 @@ export default function ScoreTable({
                     <span>{score.tempo ? `${score.tempo}` : t("none")}</span>
                   </div>
                 </td>
-                <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-xs sm:text-sm truncate">
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-sm truncate">
                   {score.key || t("none")}
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-center">
@@ -234,7 +241,7 @@ export default function ScoreTable({
                         fileUrl: score.fileUrl,
                       })
                     }
-                    className="text-blue-500 hover:text-blue-600 cursor-pointer p-2 sm:p-3"
+                    className="text-[#ff66c4] hover:text-[#ff59bf] cursor-pointer p-2 sm:p-3"
                   >
                     <Plus className="w-4 sm:w-5 h-4 sm:h-5" />
                   </motion.button>
@@ -247,7 +254,7 @@ export default function ScoreTable({
 
       {currentPlayingId && (
         <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 flex items-center gap-3 z-50">
-          <span className="text-xs text-gray-600">
+          <span className="text-sm text-gray-600">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
           <input

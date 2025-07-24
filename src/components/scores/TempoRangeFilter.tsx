@@ -41,7 +41,7 @@ export default function TempoRangeFilter({
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          background: #3b82f6;
+          background: #fc089e;
           cursor: pointer;
           -webkit-appearance: none;
           z-index: 10;
@@ -62,7 +62,7 @@ export default function TempoRangeFilter({
           position: absolute;
           top: 6px;
           height: 4px;
-          background: #3b82f6;
+          background: #ff59bf;
           z-index: 2;
         }
       `}</style>

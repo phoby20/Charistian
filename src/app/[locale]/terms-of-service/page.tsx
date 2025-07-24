@@ -125,25 +125,27 @@ function TermsOfServiceContent() {
               <div className="flex justify-center items-center gap-3">
                 <img
                   src="/charistian_logo_white.png"
-                  alt={t("agreeAndkakaoRegister")}
+                  alt={t("agreeAndEmailRegister")}
                   className="h-6"
                 />
                 <p>{t("agreeAndEmailRegister")}</p>
               </div>
             </Button>
 
-            <Button
-              type="button"
-              onClick={handleKakaoLogin}
-              className="cursor-pointer flex justify-center gap-3 w-full py-3 mt-4 text-black rounded-md font-medium focus:outline-none focus:ring-2 bg-[#FEE500] hover:bg-[#F7DC00] transition-colors"
-            >
-              <img
-                src="/kakao_login_medium_narrow.png"
-                alt={t("agreeAndkakaoRegister")}
-                className="h-6"
-              />
-              <p>{t("agreeAndkakaoRegister")}</p>
-            </Button>
+            {userType === "member" && (
+              <Button
+                type="button"
+                onClick={handleKakaoLogin}
+                className="cursor-pointer flex justify-center gap-3 w-full py-3 mt-4 text-black rounded-md font-medium focus:outline-none focus:ring-2 bg-[#FEE500] hover:bg-[#F7DC00] transition-colors"
+              >
+                <img
+                  src="/kakao_login_medium_narrow.png"
+                  alt={t("agreeAndkakaoRegister")}
+                  className="h-6"
+                />
+                <p>{t("agreeAndkakaoRegister")}</p>
+              </Button>
+            )}
           </section>
         )}
       </div>

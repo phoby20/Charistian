@@ -116,7 +116,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
                   onClick={() => setActiveLyricsTab(lang as "ko" | "en" | "ja")}
                   className={`cursor-pointer flex-1 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
                     activeLyricsTab === lang
-                      ? "bg-blue-600 text-white shadow-sm"
+                      ? "bg-[#fc089e] text-white shadow-sm"
                       : "text-gray-600 hover:bg-gray-200"
                   }`}
                 >

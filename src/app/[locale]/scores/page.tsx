@@ -12,6 +12,7 @@ import SearchFilters from "@/components/scores/SearchFilters";
 import PaginationControls from "@/components/scores/PaginationControls";
 import SelectedSongList from "@/components/scores/SelectedSongFlotingList";
 import { Score } from "@/types/score";
+import Button from "@/components/Button";
 
 export default function ScoreList() {
   const [scores, setScores] = useState<Score[]>([]);
@@ -273,10 +274,10 @@ export default function ScoreList() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex sm:flex-row justify-between mb-4 sm:mb-6 gap-4"
+              className="flex sm:flex-row justify-between mb-4 sm:mb-6 gap-4 items-center"
             >
               <h1 className="text-xl font-bold text-gray-900">{t("title")}</h1>
-              <div className="flex flex-col justify-end text-right items-end-safe">
+              <div>
                 <Link
                   href={
                     isUploadButtonDisabled(usageLimits)
@@ -284,24 +285,27 @@ export default function ScoreList() {
                       : `/${locale}/scores/upload`
                   }
                 >
-                  <motion.button
-                    whileHover={{
-                      scale: isUploadButtonDisabled(usageLimits) ? 1 : 1.05,
-                    }}
-                    whileTap={{
-                      scale: isUploadButtonDisabled(usageLimits) ? 1 : 0.95,
-                    }}
+                  <Button
                     disabled={isUploadButtonDisabled(usageLimits)}
-                    className={`flex items-center space-x-2 py-2 px-4 rounded-lg shadow-md text-white font-semibold text-sm transition-all duration-300 ${
-                      isUploadButtonDisabled(usageLimits)
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 cursor-pointer"
-                    }`}
+                    style={{
+                      cursor: isUploadButtonDisabled(usageLimits)
+                        ? "not-allowed"
+                        : "pointer",
+                      transition: "background 0.2s ease", // hover 전환 효과
+                      ...(isUploadButtonDisabled(usageLimits)
+                        ? {}
+                        : {
+                            ":hover": {
+                              background:
+                                "linear-gradient(to right, #2563EB, #1D4ED8)", // hover:from-blue-600 hover:to-blue-700
+                            },
+                          }),
+                    }}
                     aria-label={t("uploadScore")}
                   >
                     <Upload className="w-5 h-5" />
                     <span>{t("uploadScore")}</span>
-                  </motion.button>
+                  </Button>
                 </Link>
                 {isUploadButtonDisabled(usageLimits) ? (
                   <span className="text-xs text-red-500 whitespace-pre-wrap mt-1">

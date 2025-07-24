@@ -581,7 +581,7 @@
     "searchPlaceholder": "タイトル、説明、歌詞、作成者、作曲者、作詞者で検索",
     "genreFilter": "ジャンル",
     "keyFilter": "キー",
-    "sharpFilter": "変化記号の有無",
+    "sharpFilter": "変化記号",
     "toneFilter": "調",
     "tempoRange": "テンポ",
     "all": "すべて",

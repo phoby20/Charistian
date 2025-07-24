@@ -47,7 +47,7 @@ export default function SearchFilters({
   const locale = useLocale();
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 space-y-2 mb-6">
+    <div className="bg-white rounded-xl shadow p-3 space-y-2 mb-6">
       {/* Search */}
       <input
         type="text"
@@ -58,11 +58,11 @@ export default function SearchFilters({
       />
 
       {/* Genre */}
-      <div className="bg-gray-50 p-3 border border-gray-200 rounded-lg flex items-center">
-        <label className="w-[70px] sm:w-[90px] text-sm font-semibold text-gray-700 block">
+      <div className="bg-gray-50 p-2 border border-gray-200 rounded-lg flex items-center">
+        <label className="w-[70px] text-sm font-semibold text-gray-700 block">
           {t("genreFilter")}
         </label>
-        <div className="flex flex-wrap gap-1 ml-4">
+        <div className="flex flex-wrap gap-1">
           {GENRES.map((genre) => {
             const label = locale === "ja" ? genre.ja : genre.ko;
             const selected = selectedGenres.includes(genre.value);
@@ -70,10 +70,10 @@ export default function SearchFilters({
               <button
                 key={genre.value}
                 onClick={() => onGenreChange(genre.value)}
-                className={`cursor-pointer px-3 py-1 rounded-full text-sm font-medium border transition ${
+                className={`cursor-pointer px-3 py-1 rounded-full text-xs font-medium border transition ${
                   selected
-                    ? "bg-blue-500 text-white border-blue-500"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                    ? "bg-[#fc089e] text-white"
+                    : "bg-white text-[#ff59bf] border-[#ff59bf] hover:bg-[#ff59bf] hover:text-white"
                 }`}
               >
                 {label}
@@ -84,11 +84,11 @@ export default function SearchFilters({
       </div>
 
       {/* Key */}
-      <div className="bg-gray-50 p-3 border border-gray-200 rounded-lg flex items-center">
-        <label className="text-sm font-semibold text-gray-700 block">
+      <div className="bg-gray-50 p-2 border border-gray-200 rounded-lg flex items-center">
+        <label className="text-sm font-semibold text-gray-700 block mr-2">
           {t("keyFilter")}
         </label>
-        <div className="flex flex-wrap gap-2 ml-5">
+        <div className="flex flex-wrap gap-2">
           {KEYS.map((key) => {
             const selected = selectedKeys.includes(key);
             return (
@@ -97,8 +97,8 @@ export default function SearchFilters({
                 onClick={() => onKeyChange(key)}
                 className={`cursor-pointer px-2.5 py-1.5 rounded-md text-sm font-medium border transition ${
                   selected
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                    ? "bg-[#fc089e] text-white"
+                    : "bg-white text-[#ff59bf] border-[#ff59bf] hover:bg-[#ff59bf] hover:text-white"
                 }`}
               >
                 {key}
@@ -109,7 +109,7 @@ export default function SearchFilters({
       </div>
 
       {/* Sharp / Flat */}
-      <div className="bg-gray-50 p-3 border border-gray-200 rounded-lg flex items-center">
+      <div className="bg-gray-50 p-2 border border-gray-200 rounded-lg flex items-center">
         <label className="text-sm font-semibold text-gray-700 block">
           {t("sharpFilter")}
         </label>
@@ -120,10 +120,10 @@ export default function SearchFilters({
               <button
                 key={type}
                 onClick={() => onSharpChange(type)}
-                className={`cursor-pointer px-4 py-1.5 rounded-lg text-sm font-medium border transition ${
+                className={`cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
                   selected
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                    ? "bg-[#fc089e] text-white"
+                    : "bg-white text-[#ff59bf] border-[#ff59bf] hover:bg-[#ff59bf] hover:text-white"
                 }`}
               >
                 {t(type)}
@@ -134,7 +134,7 @@ export default function SearchFilters({
       </div>
 
       {/* Tone */}
-      <div className="bg-gray-50 p-3 border border-gray-200 rounded-lg flex items-center">
+      <div className="bg-gray-50 p-2 border border-gray-200 rounded-lg flex items-center">
         <label className="text-sm font-semibold text-gray-700 block">
           {t("toneFilter")}
         </label>
@@ -145,10 +145,10 @@ export default function SearchFilters({
               <button
                 key={tone}
                 onClick={() => onToneChange(tone)}
-                className={`cursor-pointer px-4 py-1.5 rounded-lg text-sm font-medium border transition ${
+                className={`cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
                   selected
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                    ? "bg-[#fc089e] text-white"
+                    : "bg-white text-[#ff59bf] border-[#ff59bf] hover:bg-[#ff59bf] hover:text-white"
                 }`}
               >
                 {tone === "" ? t("all") : t(tone.toLowerCase())}

@@ -7,13 +7,11 @@ import { useRouter } from "@/utils/useRouter";
 
 interface PendingAlertsProps {
   user: User | null;
-  pendingUsers: User[];
   pendingChurches: ChurchApplication[];
 }
 
 export default function PendingAlerts({
   user,
-  pendingUsers,
   pendingChurches,
 }: PendingAlertsProps) {
   const t = useTranslations();
@@ -23,18 +21,6 @@ export default function PendingAlerts({
 
   return (
     <div className="space-y-4">
-      {pendingUsers.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mb-6 p-4 bg-yellow-400 text-yellow-900 rounded-md cursor-pointer hover:bg-yellow-600 transition-colors"
-          onClick={() => router.push(`/pending-users`)}
-          role="button"
-          aria-label={t("pendingUsersWarning")}
-        >
-          {t("pendingUsersWarning", { count: pendingUsers.length })}
-        </motion.div>
-      )}
       {user.role === "MASTER" && pendingChurches.length > 0 && (
         <motion.div
           initial={{ opacity: 0 }}

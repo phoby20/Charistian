@@ -20,7 +20,7 @@ const Button: FC<ButtonProps> = ({
     secondary: "bg-gray-200 text-black hover:bg-gray-300",
     danger: "bg-red-600 text-white hover:bg-red-700",
     outline:
-      "border border-[#ff66c4] text-[#ff66c4] hover:bg-[#ff59bf] hover:text-white",
+      "border border-[#fc089e] text-[#fc089e] hover:bg-[#fc089e] hover:text-white",
   };
 
   return (

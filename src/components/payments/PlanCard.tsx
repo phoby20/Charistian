@@ -2,6 +2,7 @@
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { Plan } from "@prisma/client";
+import Button from "../Button";
 
 interface PlanCardProps {
   title: string;
@@ -84,82 +85,31 @@ export default function PlanCard({
         ))}
       </ul>
       {currentPlan !== "FREE" && (
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4 text-sm text-gray-500 mb-4">
           {t("expirationDate")}: {expirationDate}
         </p>
       )}
-      {isCurrentPlan && title === t("free.title") ? null : isSuperAdmin ? (
+      {currentPlan === "FREE" ? null : isSuperAdmin ? (
         isCurrentPlan && buttonText === t("cancelSubscription") ? (
-          <button
+          <Button
+            variant="outline"
             onClick={onCancel}
-            disabled={isLoading}
-            className={`mt-6 w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center ${
-              isLoading
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-red-500 text-white hover:bg-red-600"
-            }`}
+            isDisabled={isLoading}
             aria-label={t("cancelSubscription")}
           >
-            {isLoading && (
-              <svg
-                className="animate-spin h-5 w-5 mr-2 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                />
-              </svg>
-            )}
             {buttonText}
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             onClick={onSubscribe}
-            disabled={disabled || isLoading}
-            className={`cursor-pointer mt-16 w-full py-2.5 px-4 rounded-lg font-extrabold transition-all duration-200 flex items-center justify-center shadow-lg ${
-              disabled || isLoading
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#ff66c4] to-[#ffde59] text-white hover:from-[#ffde59] hover:to-[#ff66c4] transition duration-300"
-            }`}
+            isDisabled={disabled || isLoading}
             aria-label={buttonText}
           >
-            {isLoading && (
-              <svg
-                className="animate-spin h-5 w-5 mr-2 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                />
-              </svg>
-            )}
             {buttonText}
-          </button>
+          </Button>
         )
       ) : (
-        <p className="mt-6 text-red-500 text-sm font-medium text-center">
+        <p className="mt-6 text-red-600 text-sm font-medium text-center">
           {t("superAdminRequired")}
         </p>
       )}

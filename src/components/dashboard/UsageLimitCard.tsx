@@ -4,11 +4,12 @@
 import { useLocale, useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { User } from "@prisma/client";
+import { Plan, User } from "@prisma/client";
 import ProgressBar from "../ProgressBar";
+import Button from "../Button";
 
 interface UsageLimit {
-  plan: "FREE" | "SMART" | "ENTERPRISE";
+  plan: Plan;
   maxUsers: number;
   remainingUsers: number;
   weeklySetlists: number;
@@ -43,11 +44,8 @@ export default function UsageLimitCard({
         <h2 className="text-lg font-semibold">{t("planAndUsage")}</h2>
         {/* 플랜 관리 링크 */}
         {(user.role === "SUPER_ADMIN" || user.role === "ADMIN") && (
-          <Link
-            href={`/${locale}/plans`}
-            className="px-4 py-2 text-white font-bold rounded-lg bg-gradient-to-r from-[#ff66c4] to-[#ffde59] hover:from-[#ffde59] hover:to-[#ff66c4] shadow-sm text-gray-900"
-          >
-            {t("managePlan")}
+          <Link href={`/${locale}/plans`}>
+            <Button aria-label={t("managePlan")}>{t("managePlan")}</Button>
           </Link>
         )}
       </div>

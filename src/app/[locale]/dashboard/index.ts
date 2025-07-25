@@ -26,7 +26,6 @@ export const fetchData = async (
   user: User | null,
   isLoading: boolean,
   setPendingChurches: Dispatch<SetStateAction<ChurchApplication[]>>,
-  setPendingUsers: Dispatch<SetStateAction<User[]>>,
   setFetchError: Dispatch<SetStateAction<string | null>>,
   setIsLoading: Dispatch<SetStateAction<boolean>>,
   t: (key: string, values?: Record<string, string | number | Date>) => string
@@ -47,25 +46,10 @@ export const fetchData = async (
     if (!pendingResponse.ok) throw new Error("Failed to fetch pending data");
     const {
       pendingChurches,
-      pendingUsers,
     }: {
       pendingChurches: ChurchApplication[];
-      pendingUsers: User[];
     } = await pendingResponse.json();
     setPendingChurches(pendingChurches);
-
-    if (["MASTER", "SUPER_ADMIN", "ADMIN"].includes(user.role)) {
-      if (user.churchId) {
-        const filteredUsers = pendingUsers.filter(
-          (userData: User) => userData.churchId === user.churchId
-        );
-        setPendingUsers(filteredUsers);
-      } else {
-        setPendingUsers([]);
-      }
-    } else {
-      setPendingUsers([]);
-    }
 
     // Fetch all members
     const membersResponse = await fetch("/api/members", {

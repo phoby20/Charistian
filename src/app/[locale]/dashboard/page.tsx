@@ -3,7 +3,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
-import { ChurchApplication, User } from "@prisma/client";
+import { ChurchApplication } from "@prisma/client";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/utils/useRouter";
 import { AnimatePresence, motion } from "framer-motion";
@@ -53,7 +53,6 @@ export default function DashboardPage() {
   const [pendingChurches, setPendingChurches] = useState<ChurchApplication[]>(
     []
   );
-  const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [attendanceStats, setAttendanceStats] = useState<AttendanceStatsData>({
     todayCount: 0,
     weekRate: 0,
@@ -93,7 +92,6 @@ export default function DashboardPage() {
         user,
         isAuthLoading,
         setPendingChurches,
-        setPendingUsers,
         setFetchError,
         setIsLoading,
         t
@@ -303,11 +301,7 @@ export default function DashboardPage() {
           )}
         </AnimatePresence>
 
-        <PendingAlerts
-          user={user}
-          pendingUsers={pendingUsers}
-          pendingChurches={pendingChurches}
-        />
+        <PendingAlerts user={user} pendingChurches={pendingChurches} />
 
         <UsageLimitCard user={user} usageLimit={usageLimit} />
 

@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
       data: {
         emailVerified: true,
         emailVerificationToken: null, // 토큰 제거
+        state: "APPROVED",
       },
     });
 

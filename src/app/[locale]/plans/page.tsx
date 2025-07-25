@@ -197,124 +197,132 @@ export default function PlansPage() {
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-100 via-white to-purple-100">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mb-12"
-        >
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight text-center">
-            {t("title")}
-          </h1>
-          <p className="mt-4 mb-20 text-center">{t("description")}</p>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-4 text-red-600 bg-red-50 p-3 rounded-lg max-w-md mx-auto"
-            >
-              {error}
-            </motion.div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200 max-w-5xl mx-auto"
+      >
+        <div className="mb-30">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="mb-12"
+          >
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight text-center">
+              {t("title")}
+            </h1>
+            <p className="mt-4 mb-20 text-center">{t("description")}</p>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-4 text-red-600 bg-red-50 p-3 rounded-lg max-w-md mx-auto"
+              >
+                {error}
+              </motion.div>
+            )}
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <PlanCard
+              title={t("free.title")}
+              description={t("free.description")}
+              price={t("free.price")}
+              month=""
+              features={[
+                t("free.features1"),
+                t("free.features2"),
+                t("free.features3"),
+              ]}
+              buttonText={
+                currentPlan === "FREE"
+                  ? t("free.currentPlan")
+                  : t("free.select")
+              }
+              disabled={
+                !isSuperAdmin ||
+                planHierarchy[currentPlan] > planHierarchy["FREE"]
+              }
+              isSuperAdmin={isSuperAdmin}
+              currentPlan={currentPlan}
+              isCurrentPlan={currentPlan === "FREE"}
+              onCancel={handleCancelClick}
+              onSubscribe={() => {}}
+              expirationDate={formatExpirationDate(currentPeriodEnd)}
+            />
+            <PlanCard
+              title={t("smart.title")}
+              description={t("smart.description")}
+              price={t("smart.price")}
+              month={t("month")}
+              features={[
+                t("smart.features1"),
+                t("smart.features2"),
+                t("smart.features3"),
+              ]}
+              buttonText={
+                currentPlan === "SMART" && isSuperAdmin && isSubscriptionId
+                  ? t("cancelSubscription")
+                  : isSuperAdmin
+                    ? t("smart.subscribe")
+                    : t("superAdminRequired")
+              }
+              disabled={
+                !isSuperAdmin ||
+                planHierarchy[currentPlan] > planHierarchy["SMART"]
+              }
+              isSuperAdmin={isSuperAdmin}
+              currentPlan={currentPlan}
+              isCurrentPlan={currentPlan === "SMART"}
+              onCancel={handleCancelClick}
+              onSubscribe={() => handleSubmit("SMART")}
+              expirationDate={formatExpirationDate(currentPeriodEnd)}
+              isLoading={isLoading && currentPlan === "SMART"}
+            />
+            <PlanCard
+              title={t("enterprise.title")}
+              description={t("enterprise.description")}
+              price={t("enterprise.price")}
+              month={t("month")}
+              features={[
+                t("enterprise.features1"),
+                t("enterprise.features2"),
+                t("enterprise.features3"),
+              ]}
+              buttonText={
+                currentPlan === "ENTERPRISE" && isSuperAdmin && isSubscriptionId
+                  ? t("cancelSubscription")
+                  : isSuperAdmin
+                    ? t("enterprise.subscribe")
+                    : t("superAdminRequired")
+              }
+              disabled={!isSuperAdmin}
+              isSuperAdmin={isSuperAdmin}
+              currentPlan={currentPlan}
+              isCurrentPlan={currentPlan === "ENTERPRISE"}
+              onCancel={handleCancelClick}
+              onSubscribe={() => handleSubmit("ENTERPRISE")}
+              expirationDate={formatExpirationDate(currentPeriodEnd)}
+              isLoading={isLoading && currentPlan === "ENTERPRISE"}
+            />
+          </div>
+
+          {isModalOpen && (
+            <SubscriptionCancelModal
+              title={t("cancel.title")}
+              message={t("cancel.confirm", {
+                expirationDate: formatExpirationDate(currentPeriodEnd),
+              })}
+              onConfirm={handleConfirmCancel}
+              onClose={() => setIsModalOpen(false)}
+              confirmText={t("cancel.submit")}
+              cancelText={t("cancel.cancel")}
+              isLoading={isLoading}
+            />
           )}
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <PlanCard
-            title={t("free.title")}
-            description={t("free.description")}
-            price={t("free.price")}
-            month=""
-            features={[
-              t("free.features1"),
-              t("free.features2"),
-              t("free.features3"),
-            ]}
-            buttonText={
-              currentPlan === "FREE" ? t("free.currentPlan") : t("free.select")
-            }
-            disabled={
-              !isSuperAdmin ||
-              planHierarchy[currentPlan] > planHierarchy["FREE"]
-            }
-            isSuperAdmin={isSuperAdmin}
-            currentPlan={currentPlan}
-            isCurrentPlan={currentPlan === "FREE"}
-            onCancel={handleCancelClick}
-            onSubscribe={() => {}}
-            expirationDate={formatExpirationDate(currentPeriodEnd)}
-          />
-          <PlanCard
-            title={t("smart.title")}
-            description={t("smart.description")}
-            price={t("smart.price")}
-            month={t("month")}
-            features={[
-              t("smart.features1"),
-              t("smart.features2"),
-              t("smart.features3"),
-            ]}
-            buttonText={
-              currentPlan === "SMART" && isSuperAdmin && isSubscriptionId
-                ? t("cancelSubscription")
-                : isSuperAdmin
-                  ? t("smart.subscribe")
-                  : t("superAdminRequired")
-            }
-            disabled={
-              !isSuperAdmin ||
-              planHierarchy[currentPlan] > planHierarchy["SMART"]
-            }
-            isSuperAdmin={isSuperAdmin}
-            currentPlan={currentPlan}
-            isCurrentPlan={currentPlan === "SMART"}
-            onCancel={handleCancelClick}
-            onSubscribe={() => handleSubmit("SMART")}
-            expirationDate={formatExpirationDate(currentPeriodEnd)}
-            isLoading={isLoading && currentPlan === "SMART"}
-          />
-          <PlanCard
-            title={t("enterprise.title")}
-            description={t("enterprise.description")}
-            price={t("enterprise.price")}
-            month={t("month")}
-            features={[
-              t("enterprise.features1"),
-              t("enterprise.features2"),
-              t("enterprise.features3"),
-            ]}
-            buttonText={
-              currentPlan === "ENTERPRISE" && isSuperAdmin && isSubscriptionId
-                ? t("cancelSubscription")
-                : isSuperAdmin
-                  ? t("enterprise.subscribe")
-                  : t("superAdminRequired")
-            }
-            disabled={!isSuperAdmin}
-            isSuperAdmin={isSuperAdmin}
-            currentPlan={currentPlan}
-            isCurrentPlan={currentPlan === "ENTERPRISE"}
-            onCancel={handleCancelClick}
-            onSubscribe={() => handleSubmit("ENTERPRISE")}
-            expirationDate={formatExpirationDate(currentPeriodEnd)}
-            isLoading={isLoading && currentPlan === "ENTERPRISE"}
-          />
         </div>
-
-        {isModalOpen && (
-          <SubscriptionCancelModal
-            title={t("cancel.title")}
-            message={t("cancel.confirm", {
-              expirationDate: formatExpirationDate(currentPeriodEnd),
-            })}
-            onConfirm={handleConfirmCancel}
-            onClose={() => setIsModalOpen(false)}
-            confirmText={t("cancel.submit")}
-            cancelText={t("cancel.cancel")}
-            isLoading={isLoading}
-          />
-        )}
-      </div>
+      </motion.div>
     </div>
   );
 }

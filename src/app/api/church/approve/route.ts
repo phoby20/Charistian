@@ -90,10 +90,10 @@ async function sendApprovalEmail(
   const emailText = `
     ${churchName} 교회 등록 완료
 
-    안녕하세요, ${churchName} 교회의 등록이 성공적으로 완료되었습니다.
+    안녕하세요, ${churchName} 교회 등록이 성공적으로 완료되었습니다.
 
     [찬양 콘티 작성 및 공유 방법]
-    1. [악보관련] > [악보 리스트] 페이지에서 악보를 등록하세요. (최대 50건, 누구나 가능)
+    1. [악보관련] > [악보 리스트] 페이지에서 악보를 등록하세요. (누구나 등록 가능)
     2. 등록된 악보를 선택하여 찬양 콘티를 작성합니다.
     3. 공유 대상자를 설정하고 [콘티 작성] 버튼을 눌러 메일로 콘티와 악보를 공유합니다.
     - 무료 플랜: 성도 10명 등록, 월 8건/주 2건 콘티 작성 가능.
@@ -103,9 +103,9 @@ async function sendApprovalEmail(
     - 이메일: ${checkerEmail}
     - 비밀번호: ${checkerPassword}
 
-    [수퍼 어드민의 역할]
+    [교회(수퍼 어드민)의 역할]
     1. 로그인 후 [설정] > [마스터 설정]에서 직분, 소속, 직책, 팀을 설정하세요.
-    2. 성도 가입 신청을 승인/거부하고, [성도관리] > [성도리스트]에서 소속, 직책, 팀, 권한을 설정하세요.
+    2. [성도관리] > [성도리스트]에서 소속, 직책, 팀, 권한을 설정하세요.
     3. 예배/이벤트 날에 CHECKER 계정으로 QR 코드를 스캔하여 출석 체크하세요.
 
     [성도의 역할]
@@ -113,7 +113,6 @@ async function sendApprovalEmail(
     2. 누구나 악보를 등록하고, 찬양 콘티를 작성/열람할 수 있습니다.
 
     [주의사항]
-    - 무료 플랜은 제한이 있으며, 추후 유료화될 수 있습니다.
     - 권한: 수퍼 어드민, 어드민, 서브 어드민, 일반, 방문자.
     - 직분/소속/직책/팀 설정과 출석 체크는 권한에 따라 제한됩니다.
 
@@ -127,7 +126,7 @@ async function sendApprovalEmail(
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${churchName} 교회 등록 완료</title>
+        <title>[카리스챤] ${churchName} 교회 등록 완료</title>
         <style>
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
@@ -232,7 +231,7 @@ async function sendApprovalEmail(
             <!-- 찬양 콘티 작성 및 공유 방법 -->
             <div class="section">
                 <h2>찬양 콘티 작성 및 공유 방법</h2>
-                <p>Charistian에서 찬양 콘티를 작성하고 공유하는 방법은 다음과 같습니다:</p>
+                <p>카리스챤에서 찬양 콘티를 작성하고 공유하는 방법은 다음과 같습니다:</p>
                 <ol>
                     <li><strong>악보 등록</strong>: [악보관련] > [악보 리스트] 페이지에서 악보를 등록하세요. 모든 성도가 악보를 등록할 수 있으며, 등록된 악보만 콘티 작성에 사용됩니다. (무료 플랜: 최대 50건)</li>
                     <li><strong>콘티 작성</strong>: 등록된 악보를 선택하여 찬양 콘티를 작성합니다.</li>
@@ -240,6 +239,7 @@ async function sendApprovalEmail(
                 </ol>
                 <p><strong>무료 플랜 제한</strong>: 성도 10명 등록, 월 8건/주 2건의 찬양 콘티 작성 가능.</p>
                 <p><strong>플랜 변경</strong>: 언제든지 Smart 또는 Enterprise 플랜으로 업그레이드하여 더 많은 기능을 이용할 수 있습니다.</p>
+                <p>플랜 변경은 수퍼 어드민, 어드민, 서브 어드민 권한만 변경이 가능합니다.</p>
             </div>
 
             <!-- CHECKER 계정 정보 -->
@@ -261,7 +261,6 @@ async function sendApprovalEmail(
                   <ol>
                       <li>로그인 후 <strong>[설정] > [마스터 설정]</strong>에서 "직분설정", "소속설정", "직책설정", "팀 설정"을 진행하세요. (기본적인 직분과 소속, 직책, 팀이 표시되며 수정/삭제/추가 할 수 있습니다.)</li>
                       <li>교회 성도들에게 <a href="https://www.charistian.com/">https://www.charistian.com/</a> 가입을 안내하세요. 성도는 재적 중인 교회의 나라, 도시, 지역을 선택하면 등록된 교회 목록에서 ${churchName}을 선택할 수 있습니다.</li>
-                      <li>회원 가입을 한 성도는 교회에서 승인을 해야 서비스 이용이 가능합니다. 성도가 회원가입을 하면 대시보드 페이지에 알림이 표시됩니다. <strong>${superAdminEmail}</strong>으로 로그인하여 등록 신청을 승인/거부하세요.</li>
                       <li>[성도관리] > [성도리스트]에서 승인된 성도의 소속, 직책, 팀, 권한을 설정하세요.</li>
                       <li>예배일 또는 이벤트 날에 스마트폰/태블릿으로 앞서 알려드린 CHECKER 유저(${checkerEmail})로 로그인한 뒤 <strong>QR스캔</strong> 버튼을 클릭하여 입장하는 성도의 QR 코드를 스캔하세요.</li>
                       <li>QR 코드가 없는 성도는 화면 상단 메뉴에서 <strong>[성도관리] > [출석체크]</strong>로 이동하여 소속된 회원을 찾아 클릭하면 출석체크가 완료됩니다.</li>
@@ -269,21 +268,20 @@ async function sendApprovalEmail(
 
                 <h3>성도의 역할</h3>
                 <ol>
-                    <li>로그인 후 <strong>[성도증]</strong> 버튼을 눌러 QR 코드를 표시하여 출석 체크하세요.</li>
                     <li>누구나 [악보관련] > [악보 리스트]에서 악보를 등록하고, 찬양 콘티를 작성 및 열람할 수 있습니다.</li>
+                    <li>로그인 후 화면 상단의 <strong>[성도증]</strong> 버튼을 눌러 QR 코드를 표시하여 출석 체크하세요.</li>
                 </ol>
 
                 <h3>주의사항</h3>
                 <ol>
-                    <li>현재 무료 플랜으로 제공되며, 추후 유료화될 수 있습니다.</li>
                     <li>권한은 수퍼 어드민, 어드민, 서브 어드민, 일반, 방문자로 나뉩니다.</li>
-                    <li>직분/소속/직책/팀 설정은 수퍼 어드민만 가능하며, 출석 체크는 수퍼 어드민, 어드민, 서브 어드민만 가능합니다.</li>
+                    <li>직분/소속/직책/팀 설정은 수퍼 어드민, 어드민만 가능하며, 출석 체크는 수퍼 어드민, 어드민, 서브 어드민 권한과 CHECKER 계정만 가능합니다.</li>
                 </ol>
             </div>
 
             <!-- 버튼 섹션 -->
             <div style="text-align: center;">
-                <a href="https://www.charistian.com/" class="button">Charistian 방문하기</a>
+                <a href="https://www.charistian.com/" class="button">카리스챤 방문하기</a>
             </div>
 
             <!-- 푸터 섹션 -->

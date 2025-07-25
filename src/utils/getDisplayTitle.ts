@@ -14,3 +14,24 @@ export const getDisplayTitle = (
     return titleEn || title || titleJa || "";
   }
 };
+
+// 새로운 보조 제목 생성 함수
+export const getSecondaryTitles = (
+  title: string,
+  titleEn: string,
+  titleJa: string,
+  locale: string
+): string[] => {
+  const titles: string[] = [];
+  if (locale === "ko") {
+    if (titleJa) titles.push(titleJa);
+    if (titleEn) titles.push(titleEn);
+  } else if (locale === "ja") {
+    if (title) titles.push(title);
+    if (titleEn) titles.push(titleEn);
+  } else {
+    if (title) titles.push(title);
+    if (titleJa) titles.push(titleJa);
+  }
+  return titles;
+};

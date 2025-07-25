@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Score, SelectedSong } from "@/types/score";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useState, useEffect, useRef } from "react";
+import { getDisplayTitle, getSecondaryTitles } from "@/utils/getDisplayTitle";
 
 interface ScoreTableProps {
   scores: Score[];
@@ -159,44 +160,24 @@ export default function ScoreTable({
                     href={`/${locale}/scores/${score.id}`}
                     className="text-blue-600 hover:underline truncate block"
                   >
-                    {locale === "ko" ? (
-                      <>
-                        <span className="block max-w-[100px] sm:max-w-[200px] text-sm truncate">
-                          {score.title}
-                        </span>
-                        <span className="flex flex-col text-gray-600 text-[10px] truncate">
-                          {score.titleJa}{" "}
-                          <span>{score.titleJa && score.titleEn && "/"} </span>
-                          <span>{score.titleEn}</span>
-                        </span>
-                      </>
-                    ) : locale === "ja" ? (
-                      <>
-                        <span className="block max-w-[100px] sm:max-w-[200px] text-sm truncate">
-                          {score.titleJa}
-                        </span>
-                        <span className="flex flex-col text-gray-600 text-[10px] truncate">
-                          <span>
-                            {score.title}{" "}
-                            {score.title && score.titleEn && "/"}{" "}
-                          </span>
-                          <span>{score.titleEn}</span>
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="block max-w-[100px] sm:max-w-[200px] text-sm truncate">
-                          {score.titleEn}
-                        </span>
-                        <span className="flex flex-col text-gray-600 text-[10px] truncate">
-                          <span>
-                            {score.title}{" "}
-                            {score.title && score.titleJa && "/"}{" "}
-                          </span>
-                          <span>{score.titleJa}</span>
-                        </span>
-                      </>
-                    )}
+                    <span className="block max-w-[100px] sm:max-w-[200px] text-sm truncate">
+                      {getDisplayTitle(
+                        score.title,
+                        score.titleEn,
+                        score.titleJa,
+                        locale
+                      )}
+                    </span>
+                    <span className="flex flex-col text-gray-600 text-[10px] truncate">
+                      {getSecondaryTitles(
+                        score.title,
+                        score.titleEn,
+                        score.titleJa,
+                        locale
+                      ).map((title, index) => (
+                        <span key={index}>{title}</span>
+                      ))}
+                    </span>
                   </Link>
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-sm truncate">

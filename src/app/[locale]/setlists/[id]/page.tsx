@@ -1,3 +1,4 @@
+// src/app/[locale]/setlists/[id]/page.tsx
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
@@ -25,6 +26,16 @@ import YouTube, { YouTubePlayer } from "react-youtube";
 import { debounce } from "lodash";
 import { toast } from "react-toastify";
 import CommentSection from "@/components/setList/CommentSection";
+import { TeamList } from "@/components/setList/TeamList";
+import { MemberList } from "@/components/setList/MemberList";
+import Button from "@/components/Button";
+
+interface Member {
+  id: string;
+  name: string;
+  profileImage: string | null;
+  teams: { id: string; name: string }[];
+}
 
 export default function SetlistDetailPage() {
   const t = useTranslations("Setlist");
@@ -40,6 +51,7 @@ export default function SetlistDetailPage() {
   const [isPlayerReady, setIsPlayerReady] = useState<boolean>(false);
   const [pendingPlay, setPendingPlay] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [members, setMembers] = useState<Member[]>([]);
   const playerRef = useRef<YouTubePlayer | null>(null);
 
   // iOS 디바이스 감지
@@ -54,6 +66,11 @@ export default function SetlistDetailPage() {
   }, [isIOS]);
 
   const dateLocale = locale === "ko" ? ko : ja;
+
+  // PDF 링크 클릭 핸들러 추가
+  const handleViewPdf = (proxyFileUrl: string) => {
+    window.open(proxyFileUrl, "_blank", "noopener,noreferrer");
+  };
 
   const getYouTubeVideoId = (url?: string): string | undefined => {
     if (!url) return undefined;
@@ -80,7 +97,6 @@ export default function SetlistDetailPage() {
 
   const handlePlayPause = useCallback(
     debounce(async (scoreId: string) => {
-      // 플레이어 준비 상태와 playerRef 확인
       if (!playerRef.current || !isPlayerReady) {
         console.warn("Player is not ready yet, adding to pending play");
         setPendingPlay(scoreId);
@@ -89,13 +105,11 @@ export default function SetlistDetailPage() {
 
       try {
         if (currentPlayingId === scoreId) {
-          // 현재 재생 중인 비디오 일시정지
           await playerRef.current.pauseVideo();
           setCurrentPlayingId(null);
           setPendingPlay(null);
           setIsMuted(false);
         } else {
-          // 새로운 비디오 재생
           if (currentPlayingId) {
             await playerRef.current.pauseVideo();
           }
@@ -257,19 +271,43 @@ export default function SetlistDetailPage() {
   }, []);
 
   useEffect(() => {
-    const fetchSetlist = async () => {
+    const fetchSetlistAndMembers = async () => {
       try {
         if (typeof id !== "string") {
           throw new Error(t("invalidId"));
         }
-        const response = await fetch(`/api/setlists/${id}`);
-        if (!response.ok) {
-          throw new Error((await response.json()).error || t("fetchError"));
+        // 콘티 정보 가져오기
+        const setlistResponse = await fetch(`/api/setlists/${id}`);
+        if (!setlistResponse.ok) {
+          throw new Error(
+            (await setlistResponse.json()).error || t("fetchError")
+          );
         }
-        const data: { setlist: SetlistResponse; appUrl: string } =
-          await response.json();
-        setSetlist(data.setlist);
-        setAppUrl(data.appUrl);
+        const setlistData: { setlist: SetlistResponse; appUrl: string } =
+          await setlistResponse.json();
+        setSetlist(setlistData.setlist);
+        setAppUrl(setlistData.appUrl);
+
+        // 멤버 정보 가져오기
+        const teamIds = setlistData.setlist.shares
+          .filter((share) => share.team)
+          .map((share) => share.team!.id);
+        if (teamIds.length > 0) {
+          const memberResponse = await fetch("/api/members", {
+            headers: { "Content-Type": "application/json" },
+          });
+          if (!memberResponse.ok) {
+            throw new Error(t("fetchMembersError"));
+          }
+          const memberData = await memberResponse.json();
+          if (!Array.isArray(memberData.members)) {
+            throw new Error(t("fetchMembersError"));
+          }
+          const filteredMembers = memberData.members.filter((member: Member) =>
+            member.teams.some((team) => teamIds.includes(team.id))
+          );
+          setMembers(filteredMembers);
+        }
       } catch (err: unknown) {
         const errorMessage =
           err instanceof Error ? err.message : t("fetchError");
@@ -277,7 +315,7 @@ export default function SetlistDetailPage() {
         toast.error(errorMessage);
       }
     };
-    fetchSetlist();
+    fetchSetlistAndMembers();
   }, [id, t]);
 
   const canEdit: boolean =
@@ -339,13 +377,13 @@ export default function SetlistDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white rounded-2xl shadow-xl p-8"
+          className="bg-white rounded-3xl shadow-lg p-8"
         >
           <div className="relative w-[1px] h-[1px] overflow-hidden">
             <YouTube
@@ -387,7 +425,7 @@ export default function SetlistDetailPage() {
                   type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="cursor-pointer flex items-center space-x-2 bg-blue-600 text-white py-2 px-4 rounded-xl shadow-sm hover:bg-blue-700 transition-colors"
+                  className="cursor-pointer flex items-center space-x-2 bg-[#fc089e] text-white py-2 px-4 rounded-xl shadow-sm hover:bg-[#ff59bf] transition-colors"
                   aria-label={t("edit")}
                 >
                   <Edit className="w-5 h-5" />
@@ -396,7 +434,7 @@ export default function SetlistDetailPage() {
               </Link>
             )}
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
             {setlist.title}
           </h1>
           <p className="text-gray-600 mb-8 text-sm">
@@ -411,14 +449,16 @@ export default function SetlistDetailPage() {
             transition={{ duration: 0.4, delay: 0.1 }}
             className="mb-8"
           >
-            <h2 className="font-semibold text-gray-800 mb-2">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
               {t("description")}
             </h2>
-            <p className="text-gray-600 bg-gray-50 p-4 rounded-xl">
+            <p className="text-gray-600 bg-gray-100 p-4 rounded-xl">
               {setlist.description || t("noDescription")}
             </p>
           </motion.div>
-          <h2 className="font-semibold text-gray-800 mb-4">{t("songs")}</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            {t("songs")}
+          </h2>
           <ul className="space-y-3 mb-8">
             {setlist.scores
               .sort((a, b) => a.order - b.order)
@@ -432,7 +472,7 @@ export default function SetlistDetailPage() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className={`flex items-center justify-between bg-gray-50 rounded-xl p-4 shadow-sm ${
+                    className={`flex items-center justify-between bg-gray-100 rounded-xl p-4 shadow-sm ${
                       currentPlayingId === score.id ? "bg-blue-100" : ""
                     }`}
                   >
@@ -440,19 +480,6 @@ export default function SetlistDetailPage() {
                       <span className="text-gray-700 font-medium">
                         {index + 1}.
                       </span>
-                      <div className="flex sm:flex-row flex-col">
-                        <Chip label={score.creation.key} />
-                        <span className="text-gray-800">
-                          {getDisplayTitle(
-                            score.creation.title,
-                            score.creation.titleEn,
-                            score.creation.titleJa,
-                            locale
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-5">
                       {youtubeVideoId && (
                         <motion.button
                           type="button"
@@ -476,11 +503,24 @@ export default function SetlistDetailPage() {
                           )}
                         </motion.button>
                       )}
+                      <div className="flex sm:flex-row flex-col gap-2">
+                        <Chip label={score.creation.key} />
+                        <span className="text-gray-800">
+                          {getDisplayTitle(
+                            score.creation.title,
+                            score.creation.titleEn,
+                            score.creation.titleJa,
+                            locale
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
                       <a
                         href={`${appUrl}/api/proxy/creation/${score.creation.id}/file`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700 transition-colors"
+                        className="text-[#fc089e] hover:text-[#ff59bf] transition-colors"
                         aria-label={`View ${score.creation.title}`}
                       >
                         <FileMusic className="w-5 h-5" />
@@ -495,7 +535,7 @@ export default function SetlistDetailPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="mt-4 bg-white shadow-lg p-4 flex items-center gap-4 rounded-lg mb-8"
+              className="mt-4 bg-white shadow-lg p-4 flex items-center gap-4 rounded-xl mb-8"
             >
               <span className="text-sm text-gray-600">
                 {formatTime(currentTime)} / {formatTime(duration)}
@@ -534,25 +574,14 @@ export default function SetlistDetailPage() {
             transition={{ duration: 0.4, delay: 0.2 }}
             className="mb-8"
           >
-            <h2 className="font-semibold text-gray-800 mb-4">
-              {t("shareWith")}
-            </h2>
-            <div className="flex flex-wrap gap-2" role="list">
-              {setlist.shares.length === 0 ? (
-                <p className="text-gray-600">{t("noShares")}</p>
-              ) : (
-                setlist.shares.map((share) => (
-                  <Chip
-                    key={share.id}
-                    label={
-                      share.group?.name ||
-                      share.team?.name ||
-                      share.user?.name ||
-                      ""
-                    }
-                  />
-                ))
-              )}
+            <div className="space-y-6">
+              <TeamList
+                teams={setlist.shares
+                  .filter((share) => share.team)
+                  .map((share) => share.team!)}
+                emptyMessage={t("noShares")}
+              />
+              <MemberList members={members} emptyMessage={t("noMembers")} />
             </div>
           </motion.div>
           {setlist.fileUrl && (
@@ -560,18 +589,16 @@ export default function SetlistDetailPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="mb-6"
+              className="mb-8"
             >
-              <a
-                href={proxyFileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center space-x-2 bg-blue-600 text-white py-4 px-4 rounded-xl shadow-sm hover:bg-blue-700 transition-colors"
+              <Button
+                variant="primary"
+                onClick={() => handleViewPdf(proxyFileUrl)}
                 aria-label={t("viewPdf")}
               >
                 <FileMusic className="w-5 h-5" />
                 <span className="text-sm font-medium">{t("viewPdf")}</span>
-              </a>
+              </Button>
             </motion.div>
           )}
           <CommentSection

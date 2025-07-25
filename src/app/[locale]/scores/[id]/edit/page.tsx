@@ -164,7 +164,6 @@ export default function ScoreEditPage() {
 
   const handleFormSubmit = async (data: ScoreFormData) => {
     if (isLoading) return; // 중복 제출 방지
-    console.log("Submitting form with data:", JSON.stringify(data, null, 2)); // 디버깅 로그
     try {
       const response = await fetch(`/api/scores/${id}`, {
         method: "PUT",

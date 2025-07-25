@@ -108,7 +108,6 @@ export default function CreateSetlistPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // 사용량 초과일 경우 콘티 작성 버튼이 동작하지 않도록 한다.
     if (isUpgrageDisabled) return;
 
     setIsLoading(true);
@@ -153,7 +152,8 @@ export default function CreateSetlistPage() {
         throw new Error((await response.json()).error || t("createError"));
       }
       sessionStorage.removeItem("selectedSongList");
-      router.push(`/setlists`);
+      // 공유된 팀 ID를 쿼리 파라미터로 전달
+      router.push(`/setlists/shared?teams=${selectedTeams.join(",")}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("createError"));
     } finally {
@@ -187,7 +187,7 @@ export default function CreateSetlistPage() {
           transition={{ duration: 0.6 }}
           className="bg-white rounded-2xl shadow-xl p-6 sm:p-8"
         >
-          <h1 className="text-xl font-bold text-gray-900 mb-6">
+          <h1 className="text-xl font-bold text-gray-900 mb-12">
             {t("pageTitle")}
           </h1>
           <AnimatePresence>

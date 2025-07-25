@@ -216,7 +216,7 @@ export async function PUT(
 
   const isAuthorized =
     payload.userId === score.creatorId ||
-    ["SUPER_ADMIN", "ADMIN"].includes(payload.role);
+    ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(payload.role);
 
   if (!isAuthorized) {
     return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });

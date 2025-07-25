@@ -696,7 +696,16 @@
     "mute": "음소거",
     "upgradePlan": "플랜 업그레이드",
     "noMakeSetlist": "주/월간 사용량 초과로 콘티를 작성할 수 없습니다.플랜을 업그레이드하세요",
-    "noComments": "댓글이 없습니다"
+    "noComments": "댓글이 없습니다",
+    "selectedTeamMembers": "선택된 팀의 멤버",
+    "loadingMembers": "멤버 정보를 불러오는 중...",
+    "noMembers": "선택된 팀의 멤버가 없습니다.",
+    "fetchMembersError": "멤버 정보를 가져오지 못했습니다.",
+    "sharedTitle": "공유 완료",
+    "sharedMessage": "콘티가 성공적으로 공유되었습니다!",
+    "sharedTeams": "공유된 팀",
+    "noTeamsShared": "공유된 팀이 없습니다.",
+    "goToSetlists": "콘티 목록으로 이동"
   },
   "scoreList": "악보리스트",
   "setlistList": "콘티리스트",

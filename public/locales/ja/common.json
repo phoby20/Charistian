@@ -686,7 +686,16 @@
     "mute": "ミュート",
     "upgradePlan": "プランをアップグレード",
     "noMakeSetlist": "週/月の使用量超過のためコンテ作成ができません。プランをアップグレードしてください",
-    "noComments": "コメントがありません"
+    "noComments": "コメントがありません",
+    "selectedTeamMembers": "選択したチームのメンバー",
+    "loadingMembers": "メンバー情報を読み込んでいます...",
+    "noMembers": "選択したチームにメンバーがいません。",
+    "fetchMembersError": "メンバー情報の取得に失敗しました。",
+    "sharedTitle": "共有完了",
+    "sharedMessage": "セットリストが正常に共有されました！",
+    "sharedTeams": "共有されたチーム",
+    "noTeamsShared": "共有されたチームがありません。",
+    "goToSetlists": "セットリスト一覧へ移動"
   },
   "scoreList": "楽譜リスト",
   "setlistList": "コンテリスト",

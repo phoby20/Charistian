@@ -81,10 +81,6 @@ export default function LandingPage() {
       title: t("usage.steps.4.title"),
       description: t("usage.steps.4.description"),
     },
-    {
-      title: t("usage.steps.5.title"),
-      description: t("usage.steps.5.description"),
-    },
   ];
 
   if (isLanding) {
@@ -506,7 +502,7 @@ export default function LandingPage() {
                     {t("cta.button")}
                   </Button>
                 )}
-                {index === 4 && (
+                {index === 3 && (
                   <Button
                     onClick={() => router.push("/terms-of-service?type=member")}
                     className="cursor-pointer bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3 rounded-full"

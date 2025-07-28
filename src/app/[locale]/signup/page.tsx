@@ -1,4 +1,3 @@
-// src/app/[locale]/signup/page.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -40,7 +39,7 @@ export default function SignupPage() {
     churchId: "",
   });
 
-  // Initial setup: Set defaults, ignore localStorage
+  // 초기 설정: 기본값 설정, localStorage 무시
   useEffect(() => {
     if (countryOptions.length > 0 && isInitialLoad) {
       const defaultCountry = countryOptions[0].value || "";
@@ -60,7 +59,7 @@ export default function SignupPage() {
     setIsInitialLoad(false);
   }, [isInitialLoad]);
 
-  // Country change: Reset City, Region, Church
+  // 국가 변경: 도시, 지역, 교회 초기화
   useEffect(() => {
     if (selectedCountry && !isInitialLoad) {
       const defaultCity = citiesByCountry[selectedCountry]?.[0]?.value || "";
@@ -81,7 +80,7 @@ export default function SignupPage() {
     }
   }, [selectedCountry, isInitialLoad, t]);
 
-  // City change: Reset Region, Church
+  // 도시 변경: 지역, 교회 초기화
   useEffect(() => {
     if (selectedCity && !isInitialLoad) {
       const defaultRegion = regionsByCity[selectedCity]?.[0]?.value || "";
@@ -100,9 +99,9 @@ export default function SignupPage() {
     }
   }, [selectedCity, isInitialLoad, t]);
 
-  // Region change: Fetch Churches
+  // 지역 변경: 교회 목록 가져오기
   useEffect(() => {
-    if (isInitialLoad) return; // Skip fetchChurches on initial mount
+    if (isInitialLoad) return;
 
     const fetchChurches = async () => {
       if (selectedCountry && selectedCity && selectedRegion) {
@@ -134,7 +133,7 @@ export default function SignupPage() {
             setError(t("noChurchesFound"));
           }
         } catch (err) {
-          console.error("Error fetching churches:", err);
+          console.error("교회 목록 가져오기 오류:", err);
           setChurches([]);
           setError(t("serverError"));
         }
@@ -150,7 +149,7 @@ export default function SignupPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Validation
+    // 검증
     if (!formData.country) {
       setError(t("pleaseFillCountryFields"));
       setIsSubmitting(false);
@@ -173,11 +172,10 @@ export default function SignupPage() {
     }
 
     try {
-      // Save form data to localStorage
       localStorage.setItem("signupFormData", JSON.stringify(formData));
       router.push("/signup/details");
     } catch (err) {
-      console.error("Navigation error:", err);
+      console.error("페이지 이동 오류:", err);
       setError(t("serverError"));
       setIsSubmitting(false);
     }
@@ -200,9 +198,22 @@ export default function SignupPage() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8 sm:p-10"
         >
-          <h1 className="text-xl font-bold text-gray-900 mb-8 text-center">
-            {t("signup.signupTitle")} (1/2)
+          <h1 className="text-xl font-bold text-gray-900 mb-6 text-center">
+            {t("signup.signupTitle")}
           </h1>
+          <div className="mb-6">
+            <p className="text-sm text-gray-600 text-center">
+              1 {t("step")} {t("of")} 2
+            </p>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <motion.div
+                className="bg-[#fc089e] h-2 rounded-full"
+                initial={{ width: "50%" }}
+                animate={{ width: "50%" }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+          </div>
           <AnimatePresence>
             {error && (
               <motion.div
@@ -280,7 +291,6 @@ export default function SignupPage() {
               <Button
                 type="submit"
                 isDisabled={isSubmitting || !selectedChurch}
-                className="cursor-pointer w-full sm:w-1/2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold text-base hover:bg-indigo-700 hover:scale-105 disabled:bg-gray-300 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">

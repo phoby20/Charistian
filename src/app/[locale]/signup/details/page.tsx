@@ -1,4 +1,3 @@
-// src/app/[locale]/signup/details/page.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -8,7 +7,7 @@ import Button from "@/components/Button";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FormEvent, useState, useEffect } from "react";
-import { X, ArrowLeft } from "lucide-react";
+import { X } from "lucide-react";
 import Loading from "@/components/Loading";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "@/utils/useRouter";
@@ -19,7 +18,7 @@ interface FormData {
   region: string;
   churchId: string;
   name: string;
-  birthDate: string; // ISO 형식 문자열 (YYYY-MM-DD)
+  birthDate: string;
   email: string;
   password: string;
   gender: string;
@@ -50,7 +49,7 @@ export default function SignupDetailsPage() {
   });
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  // Check for saved data and redirect if none
+  // 저장된 데이터 확인 및 리디렉션
   useEffect(() => {
     const savedData = localStorage.getItem("signupFormData");
     if (!savedData) {
@@ -63,13 +62,12 @@ export default function SignupDetailsPage() {
       return;
     }
     setFormData(parsedData);
-    // birthDate 문자열을 Date 객체로 변환
     if (parsedData.birthDate) {
       setSelectedDate(new Date(parsedData.birthDate));
     }
   }, [router]);
 
-  // Fetch positions based on churchId
+  // churchId 기반으로 직분 목록 가져오기
   useEffect(() => {
     const fetchPositions = async () => {
       if (formData.churchId) {
@@ -99,7 +97,7 @@ export default function SignupDetailsPage() {
             setError(t("noPositionsFound"));
           }
         } catch (err) {
-          console.error("Error fetching positions:", err);
+          console.error("직분 목록 가져오기 오류:", err);
           setPositions([]);
           setError(t("serverError"));
         }
@@ -127,27 +125,11 @@ export default function SignupDetailsPage() {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!["image/jpeg", "image/png", "image/gif"].includes(file.type)) {
-        setError(t("unsupportedFileType"));
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        setError(t("fileTooLarge"));
-        return;
-      }
-      setFormData((prev) => ({ ...prev, profileImage: file }));
-    }
-  };
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     const formDataToSubmit = new FormData();
 
-    // Append form data
     Object.entries(formData).forEach(([key, value]) => {
       if (key === "profileImage" && value) {
         formDataToSubmit.append(key, value);
@@ -156,7 +138,6 @@ export default function SignupDetailsPage() {
       }
     });
 
-    // Validation
     if (!formData.position) {
       setError(t("pleaseFillPositionFields"));
       setIsSubmitting(false);
@@ -176,10 +157,10 @@ export default function SignupDetailsPage() {
         return;
       }
 
-      localStorage.removeItem("signupFormData"); // Clear saved data on success
+      localStorage.removeItem("signupFormData");
       router.push(`/signup/complete`);
     } catch (err) {
-      console.error("Signup error:", err);
+      console.error("가입 오류:", err);
       setError(t("serverError"));
       setIsSubmitting(false);
     }
@@ -209,17 +190,20 @@ export default function SignupDetailsPage() {
         >
           <div className="relative mb-8 py-1">
             <h1 className="text-xl font-bold text-gray-900 text-center">
-              {t("signup.signupTitle")} (2/2)
+              {t("signup.signupTitle")}
             </h1>
-            <div className="absolute top-0 left-0">
-              <Button
-                type="button"
-                onClick={handleBack}
-                className="cursor-pointer flex items-center px-4 py-2 bg-gray-200 text-gray-900 rounded-xl font-semibold text-sm hover:bg-gray-300 hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg"
-              >
-                <ArrowLeft size={18} className="mr-2" />
-                {t("back")}
-              </Button>
+          </div>
+          <div className="mb-6">
+            <p className="text-sm text-gray-600 text-center">
+              2 {t("step")} {t("of")} 2
+            </p>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <motion.div
+                className="bg-[#fc089e] h-2 rounded-full"
+                initial={{ width: "100%" }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 0.3 }}
+              />
             </div>
           </div>
           <AnimatePresence>
@@ -312,21 +296,11 @@ export default function SignupDetailsPage() {
               disabled={!formData.churchId || positions.length === 0}
               className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 text-gray-900 shadow-sm hover:shadow-md disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-300"
             />
-            <div className="col-span-full">
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                {t("profileImage")}
-                <span className="text-gray-500"> ({t("optional")})</span>
-              </label>
-              <input
-                type="file"
-                name="profileImage"
-                accept="image/*"
-                className="w-full p-3 border rounded-xl border-gray-200 shadow-sm bg-gray-50 text-gray-900 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 transition-all duration-300"
-                onChange={handleFileChange}
-                aria-label={t("profileImage")}
-              />
-            </div>
-            <div className="col-span-full flex justify-center mt-8">
+
+            <div className="col-span-full flex justify-center mt-8 gap-4">
+              <Button variant="outline" type="button" onClick={handleBack}>
+                {t("back")}
+              </Button>
               <Button
                 type="submit"
                 isDisabled={
@@ -338,7 +312,6 @@ export default function SignupDetailsPage() {
                   !formData.gender ||
                   !formData.position
                 }
-                className="cursor-pointer w-full sm:w-1/2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold text-base hover:bg-indigo-700 hover:scale-105 disabled:bg-gray-300 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">

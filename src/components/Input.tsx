@@ -5,12 +5,12 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input: FC<InputProps> = ({ label, disabled, value, ...props }) => (
-  <div className="mb-4">
+  <div className="w-full">
     <label className="block text-sm font-medium text-gray-500 mb-1">
       {label}
     </label>
     <input
-      className={`mt-1 p-2 border rounded-md w-full ${disabled ? "bg-gray-200 cursor-not-allowed" : ""}`}
+      className={`p-3 border border-gray-300 rounded-md w-full ${disabled ? "bg-gray-200 cursor-not-allowed" : ""}`}
       disabled={disabled}
       defaultValue={value ?? ""}
       {...props}

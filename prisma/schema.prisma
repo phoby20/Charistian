@@ -218,12 +218,22 @@ model ChurchApplication {
   contactBirthDate  DateTime
   contactImage      String?
   churchPhone       String
-  logo              String? // buildingImage에서 logo로 변경
+  logo              String?
   plan              Plan
   state             ChurchState @default(PENDING)
   rejectionReason   String?
+  emailVerified     Boolean   @default(false) // 이메일 인증 여부
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+}
+
+model EmailVerification {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  verificationCode String
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Attendance {

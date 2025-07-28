@@ -18,6 +18,7 @@
   "city": "도시",
   "region": "지역",
   "phone": "전화번호",
+  "next": "다음",
   "managePendingUsersDescription": "승인 대기 중인 사용자를 검토하고 관리합니다.",
   "fetchError": "대기 중인 사용자 목록을 가져오지 못했습니다.",
   "approveError": "사용자 승인에 실패했습니다.",

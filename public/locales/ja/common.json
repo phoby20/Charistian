@@ -15,6 +15,8 @@
   "phone": "電話番号",
   "male": "男性",
   "female": "女性",
+  "next": "次へ",
+  "password": "パスワード",
   "pendingUsers": "承認待ちユーザー",
   "managePendingUsersDescription": "承認待ちのユーザーを確認および管理します。",
   "fetchError": "承認待ちユーザー一覧の取得に失敗しました。",

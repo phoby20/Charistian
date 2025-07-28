@@ -213,7 +213,7 @@ export default function MobileNav({
                   onClick={() => setIsMenuOpen(false)}
                   className="text-gray-600 hover:text-blue-600 px-4 py-4 rounded-md text-sm font-medium"
                 >
-                  {t("churchRegistration")}
+                  {t("churchRegistration.title")}
                 </Link>
               </>
             )}
@@ -292,7 +292,7 @@ export default function MobileNav({
                 onClick={() => setIsMenuOpen(false)}
                 className="block text-gray-600 hover:text-blue-600 px-4 py-4 rounded-md text-sm font-medium"
               >
-                {t("login")}
+                {t("login.title")}
               </Link>
             )}
           </nav>

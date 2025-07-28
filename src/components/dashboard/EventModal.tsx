@@ -71,7 +71,7 @@ export default function EventModal() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 50, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="relative bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl overflow-hidden"
+          className="relative bg-white rounded-2xl p-6 max-w-xl w-full mx-4 shadow-2xl overflow-hidden"
         >
           {/* 이미지 배너 */}
           <div className="w-full mt-4 mb-4">

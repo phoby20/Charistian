@@ -1,4 +1,4 @@
-// src/components/ChurchRegistrationStep1.tsx
+// src/components/ChurchRegistration/ChurchRegistrationStep1.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -42,7 +42,16 @@ export default function ChurchRegistrationStep1({
   handleFileReset,
   handleNextStep,
 }: ChurchRegistrationStep1Props) {
-  const t = useTranslations();
+  const t = useTranslations("churchRegistration");
+
+  // 모든 필수 입력 필드가 채워졌는지 확인
+  const isFormFilled =
+    formData.churchName.trim() !== "" &&
+    formData.country !== "" &&
+    formData.city !== "" &&
+    formData.region !== "" &&
+    formData.address.trim() !== "" &&
+    formData.churchPhone.trim() !== "";
 
   return (
     <motion.form
@@ -139,10 +148,7 @@ export default function ChurchRegistrationStep1({
         )}
       </div>
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          className="cursor-pointer px-6 py-2 bg-blue-600 text-white rounded-full font-medium text-sm hover:bg-blue-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md"
-        >
+        <Button type="submit" isDisabled={!isFormFilled}>
           {t("next")}
         </Button>
       </div>

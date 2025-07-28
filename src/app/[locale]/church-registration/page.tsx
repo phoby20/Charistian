@@ -11,12 +11,13 @@ import { ChurchFormData } from "@/types/church";
 import { regionsByCity } from "@/data/regions";
 import { citiesByCountry } from "@/data/cities";
 import { countryOptions } from "@/data/country";
-import ChurchRegistrationStep1 from "@/components/ChurchRegistrationStep1";
-import ChurchRegistrationStep2 from "@/components/ChurchRegistrationStep2";
 import Button from "@/components/Button";
+import ChurchRegistrationStep1 from "@/components/ChurchRegistration/ChurchRegistrationStep1";
+import ChurchRegistrationStep2 from "@/components/ChurchRegistration/ChurchRegistrationStep2";
+import ChurchRegistrationStep3 from "@/components/ChurchRegistration/ChurchRegistrationStep3";
 
 export default function ChurchRegistrationPage() {
-  const t = useTranslations();
+  const t = useTranslations("churchRegistration");
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +39,8 @@ export default function ChurchRegistrationPage() {
     plan: "FREE",
     logo: undefined,
     contactImage: undefined,
+    verificationCode: "",
+    isEmailVerified: false,
   });
   const [selectedCountry, setSelectedCountry] = useState<string>(
     countryOptions[0].value
@@ -49,7 +52,6 @@ export default function ChurchRegistrationPage() {
     regionsByCity[citiesByCountry[countryOptions[0].value][0].value][0].value
   );
 
-  // country 변경 시 city와 region 초기화
   useEffect(() => {
     const defaultCity = citiesByCountry[selectedCountry][0]?.value || "";
     setSelectedCity(defaultCity);
@@ -61,7 +63,6 @@ export default function ChurchRegistrationPage() {
     }));
   }, [selectedCountry]);
 
-  // city 변경 시 region 초기화
   useEffect(() => {
     const defaultRegion = regionsByCity[selectedCity][0]?.value || "";
     setSelectedRegion(defaultRegion);
@@ -72,15 +73,16 @@ export default function ChurchRegistrationPage() {
     }));
   }, [selectedCity]);
 
-  // 입력 변경 처리
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "isEmailVerified" ? value === "true" : value,
+    }));
   };
 
-  // 파일 입력 처리
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
     if (files && files[0]) {
@@ -106,12 +108,10 @@ export default function ChurchRegistrationPage() {
     }
   };
 
-  // 파일 입력 초기화
   const handleFileReset = (name: "logo" | "contactImage") => {
     setFormData((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  // 이미지 리사이즈 함수
   const resizeImage = (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -162,32 +162,48 @@ export default function ChurchRegistrationPage() {
     });
   };
 
-  // 첫 번째 스텝에서 다음 버튼 클릭 시
-  const handleNextStep = (e: FormEvent) => {
+  const handleNextStep = (e: FormEvent, nextStep: number) => {
     e.preventDefault();
-    if (
-      !formData.churchName ||
-      !formData.country ||
-      !formData.city ||
-      !formData.region ||
-      !formData.address ||
-      !formData.churchPhone
-    ) {
-      setError(t("pleaseFillAllFields"));
-      return;
+    if (step === 1) {
+      if (
+        !formData.churchName ||
+        !formData.country ||
+        !formData.city ||
+        !formData.region ||
+        !formData.address ||
+        !formData.churchPhone
+      ) {
+        setError(t("pleaseFillAllFields"));
+        return;
+      }
+    } else if (step === 2) {
+      if (
+        !formData.contactName ||
+        !formData.contactPhone ||
+        !formData.contactGender ||
+        !formData.contactBirthDate
+      ) {
+        setError(t("pleaseFillAllFields"));
+        return;
+      }
     }
-    setStep(2);
+    setStep(nextStep);
   };
 
   const handlePrevStep = () => {
-    setStep(1);
+    setStep(step - 1);
   };
 
-  // 두 번째 스텝에서 제출
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     const missingFields: string[] = [];
+    if (!formData.churchName) missingFields.push(t("churchName"));
+    if (!formData.country) missingFields.push(t("country"));
+    if (!formData.city) missingFields.push(t("city"));
+    if (!formData.region) missingFields.push(t("region"));
+    if (!formData.address) missingFields.push(t("address"));
+    if (!formData.churchPhone) missingFields.push(t("churchPhone"));
     if (!formData.superAdminEmail) missingFields.push(t("superAdminEmail"));
     if (!formData.password) missingFields.push(t("password"));
     if (!formData.contactName) missingFields.push(t("contactName"));
@@ -195,6 +211,7 @@ export default function ChurchRegistrationPage() {
     if (!formData.contactGender) missingFields.push(t("contactGender"));
     if (!formData.contactBirthDate) missingFields.push(t("contactBirthDate"));
     if (!formData.plan) missingFields.push(t("plan"));
+    if (!formData.isEmailVerified) missingFields.push(t("emailVerification"));
 
     if (missingFields.length > 0) {
       setError(`${t("pleaseFillAllFields")}: ${missingFields.join(", ")}`);
@@ -262,17 +279,21 @@ export default function ChurchRegistrationPage() {
         className="w-full max-w-lg bg-white rounded-3xl shadow-lg p-8 sm:p-10"
       >
         <h1 className="text-2xl font-semibold text-gray-800 mb-6 text-center tracking-tight">
-          {t("churchRegistration")}
+          {t("title")}
         </h1>
         <div className="mb-6">
           <p className="text-sm text-gray-600 text-center">
-            {t("step")} {step} {t("of")} 2
+            {step} {t("step")} {t("of")} 3
           </p>
           <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
             <motion.div
-              className="bg-blue-600 h-2 rounded-full"
-              initial={{ width: step === 1 ? "50%" : "100%" }}
-              animate={{ width: step === 1 ? "50%" : "100%" }}
+              className="bg-[#fc089e] h-2 rounded-full"
+              initial={{
+                width: step === 1 ? "33.33%" : step === 2 ? "66.66%" : "100%",
+              }}
+              animate={{
+                width: step === 1 ? "33.33%" : step === 2 ? "66.66%" : "100%",
+              }}
               transition={{ duration: 0.3 }}
             />
           </div>
@@ -290,14 +311,19 @@ export default function ChurchRegistrationPage() {
               handleInputChange={handleInputChange}
               handleFileChange={handleFileChange}
               handleFileReset={handleFileReset}
-              handleNextStep={handleNextStep}
+              handleNextStep={(e) => handleNextStep(e, 2)}
             />
-          ) : (
+          ) : step === 2 ? (
             <ChurchRegistrationStep2
               formData={formData}
               handleInputChange={handleInputChange}
-              handleFileChange={handleFileChange}
-              handleFileReset={handleFileReset}
+              handleNextStep={(e) => handleNextStep(e, 3)}
+              handlePrevStep={handlePrevStep}
+            />
+          ) : (
+            <ChurchRegistrationStep3
+              formData={formData}
+              handleInputChange={handleInputChange}
               handleSubmit={handleSubmit}
               handlePrevStep={handlePrevStep}
               isLoading={isLoading}

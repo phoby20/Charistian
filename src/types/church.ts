@@ -1,4 +1,3 @@
-// src/types/church.ts
 export interface ChurchFormData {
   churchName: string;
   country: string;
@@ -15,4 +14,6 @@ export interface ChurchFormData {
   plan: string;
   logo?: File;
   contactImage?: File;
+  verificationCode?: string; // 인증번호 필드 추가
+  isEmailVerified: boolean; // 이메일 인증 여부 추가
 }

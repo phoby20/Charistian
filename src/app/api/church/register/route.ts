@@ -67,6 +67,20 @@ export async function POST(req: NextRequest) {
       logo: undefined as string | undefined,
     };
 
+    // EmailVerification 테이블에서 인증 여부 확인
+    const verification = await prisma.emailVerification.findUnique({
+      where: { email: data.superAdminEmail },
+    });
+
+    // 클라이언트에서 isEmailVerified를 전달하므로 추가 확인은 생략 가능
+    // 필요 시 verification 레코드가 없는 경우 에러 처리
+    if (verification) {
+      return NextResponse.json(
+        { error: "이메일 인증이 완료되지 않았습니다." },
+        { status: 400 }
+      );
+    }
+
     // 입력 검증
     const missingFields: string[] = [];
     const contactBirthDateRaw = formData.get("contactBirthDate") as string;
@@ -203,6 +217,7 @@ export async function POST(req: NextRequest) {
         contactImage: data.contactImage,
         logo: data.logo,
         state: "PENDING",
+        emailVerified: true, // 인증 완료로 설정
       },
     });
 

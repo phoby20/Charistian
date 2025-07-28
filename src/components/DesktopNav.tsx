@@ -78,7 +78,7 @@ export default function DesktopNav({
           href={getPathname({ locale, href: "/terms-of-service?type=church" })}
           className="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
         >
-          {t("churchRegistration")}
+          {t("churchRegistration.title")}
         </Link>
       )}
       {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user?.role || "") && (

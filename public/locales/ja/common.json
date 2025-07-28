@@ -16,6 +16,8 @@
   "male": "男性",
   "female": "女性",
   "next": "次へ",
+  "step": "ステップ",
+  "of": "の",
   "password": "パスワード",
   "pendingUsers": "承認待ちユーザー",
   "managePendingUsersDescription": "承認待ちのユーザーを確認および管理します。",

@@ -2,4 +2,5 @@
 export const countryOptions = [
   { value: "Korea", label: "한국" },
   { value: "Japan", label: "日本" },
+  { value: "USA", label: "United States of America" },
 ];

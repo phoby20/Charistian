@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
+  totalScoresNum: number;
   itemsPerPage: number;
   onItemsPerPageChange: (value: number) => void;
   onPageChange: (page: number) => void;
@@ -14,6 +15,7 @@ interface PaginationControlsProps {
 export default function PaginationControls({
   currentPage,
   totalPages,
+  totalScoresNum,
   itemsPerPage,
   onItemsPerPageChange,
   onPageChange,
@@ -39,17 +41,22 @@ export default function PaginationControls({
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-      <div className="flex items-center gap-2">
-        <label className="text-sm text-gray-700">{t("itemsPerPage")}:</label>
-        <select
-          value={itemsPerPage}
-          onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-          className="cursor-pointer p-2 border border-gray-300 rounded-lg focus:ring-[#ff66c4] focus:border-[#ff66c4]"
-        >
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-        </select>
+      <div className="">
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-700">{t("itemsPerPage")}:</label>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+            className="cursor-pointer p-2 border border-gray-300 rounded-lg focus:ring-[#ff66c4] focus:border-[#ff66c4]"
+          >
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
+        <p className="text-sm text-gray-700">
+          {t("totalScoresNum")}: {totalScoresNum}
+        </p>
       </div>
       <div className="flex items-center gap-2">
         <motion.button

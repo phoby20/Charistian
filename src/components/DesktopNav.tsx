@@ -223,7 +223,7 @@ export default function DesktopNav({
               alt="header_user_img"
               width={36}
               height={36}
-              className="rounded-full"
+              className="rounded-full object-cover aspect-square border border-pink-200"
             />
           </button>
           {isUserMenuOpen && (

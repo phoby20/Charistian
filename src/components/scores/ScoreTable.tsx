@@ -126,6 +126,7 @@ export default function ScoreTable({
       <table className="w-full bg-white rounded-xl shadow-lg border border-gray-200">
         <thead className="bg-gray-100">
           <tr>
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-sm  font-semibold text-gray-700 w-12"></th>
             <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-sm  font-semibold text-gray-700 min-w-[100px] sm:min-w-[150px]">
               {t("titleHeader")}
             </th>
@@ -136,9 +137,7 @@ export default function ScoreTable({
             <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-sm  font-semibold text-gray-700 min-w-[50px] sm:min-w-[70px]">
               {t("key")}
             </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-sm  font-semibold text-gray-700 w-12">
-              {t("youtube")}
-            </th>
+
             <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-sm  font-semibold text-gray-700 w-12">
               {t("action")}
             </th>
@@ -155,6 +154,22 @@ export default function ScoreTable({
                 transition={{ duration: 0.4, delay: index * 0.1 }}
                 className="border-t border-gray-200 hover:bg-gray-50"
               >
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-center">
+                  {youtubeVideoId && (
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handlePlayPause(score.id)}
+                      className="cursor-pointer text-red-500 hover:text-red-600 p-2"
+                    >
+                      {currentPlayingId === score.id ? (
+                        <Pause className="w-5 h-5" />
+                      ) : (
+                        <Play className="w-5 h-5" />
+                      )}
+                    </motion.button>
+                  )}
+                </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4">
                   <Link
                     href={`/${locale}/scores/${score.id}`}
@@ -191,22 +206,7 @@ export default function ScoreTable({
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-sm truncate">
                   {score.key || t("none")}
                 </td>
-                <td className="py-2 sm:py-3 px-2 sm:px-4 text-center">
-                  {youtubeVideoId && (
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handlePlayPause(score.id)}
-                      className="cursor-pointer text-red-500 hover:text-red-600 p-2"
-                    >
-                      {currentPlayingId === score.id ? (
-                        <Pause className="w-5 h-5" />
-                      ) : (
-                        <Play className="w-5 h-5" />
-                      )}
-                    </motion.button>
-                  )}
-                </td>
+
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-center">
                   <motion.button
                     whileHover={{ scale: 1.1 }}

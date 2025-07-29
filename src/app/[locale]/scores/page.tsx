@@ -374,6 +374,7 @@ export default function ScoreList() {
             <PaginationControls
               currentPage={currentPage}
               totalPages={totalPages}
+              totalScoresNum={scores.length}
               itemsPerPage={itemsPerPage}
               onItemsPerPageChange={handleItemsPerPageChange}
               onPageChange={setCurrentPage}

@@ -100,7 +100,7 @@ const DesktopSelectedSongList = ({
           <motion.button
             whileHover={{ scale: isCreateDisabled ? 1 : 1.05 }}
             whileTap={{ scale: isCreateDisabled ? 1 : 0.95 }}
-            className={`mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 text-sm ${isCreateDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+            className={`mt-4 w-full bg-[#fc089e] text-white py-2 rounded-lg hover:bg-[#ff66c4] transition-colors disabled:bg-gray-400 text-sm ${isCreateDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}
             disabled={isCreateDisabled}
           >
             {t("createSetlist")}

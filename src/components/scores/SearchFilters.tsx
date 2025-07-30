@@ -64,7 +64,12 @@ export default function SearchFilters({
         </label>
         <div className="flex flex-wrap gap-1">
           {GENRES.map((genre) => {
-            const label = locale === "ja" ? genre.ja : genre.ko;
+            const label =
+              locale === "ja"
+                ? genre.ja
+                : locale === "ko"
+                  ? genre.ko
+                  : genre.en;
             const selected = selectedGenres.includes(genre.value);
             return (
               <button

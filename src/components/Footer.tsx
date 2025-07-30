@@ -39,7 +39,7 @@ export default function Footer() {
 
   const changeLanguage = (lng: string) => {
     let cleanedPathname = pathname.replace(/^\/[^/]+/, "");
-    if (cleanedPathname === "" || pathname.match(/^\/(ko|ja)$/)) {
+    if (cleanedPathname === "" || pathname.match(/^\/(ko|ja|en)$/)) {
       cleanedPathname = "/";
     }
     try {
@@ -107,7 +107,11 @@ export default function Footer() {
                 aria-expanded={isLangMenuOpen}
                 aria-haspopup="true"
               >
-                {locale === "ko" ? "한국어" : "日本語"}
+                {locale === "ko"
+                  ? "한국어"
+                  : locale === "ja"
+                    ? "日本語"
+                    : "English"}
                 <ChevronDown className="w-4 h-4 ml-1" />
               </button>
               {isLangMenuOpen && (
@@ -131,6 +135,15 @@ export default function Footer() {
                       role="menuitem"
                     >
                       日本語
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => changeLanguage("en")}
+                      className="cursor-pointer block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      role="menuitem"
+                    >
+                      English
                     </button>
                   </li>
                 </ul>

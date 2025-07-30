@@ -279,7 +279,11 @@ export default function ScoreEditPage() {
               <option value="">{t("genrePlaceholder")}</option>
               {GENRES.map((genre) => (
                 <option key={genre.value} value={genre.value}>
-                  {locale === "ja" ? genre.ja : genre.ko}
+                  {locale === "ja"
+                    ? genre.ja
+                    : locale === "ko"
+                      ? genre.ko
+                      : genre.en}
                 </option>
               ))}
             </select>

@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 });
 
 // 지원하는 로케일
-const locales = ["ko", "ja"] as const;
+const locales = ["ko", "ja", "en"] as const;
 type Locale = (typeof locales)[number];
 
 // 메시지 타입 정의

@@ -52,7 +52,11 @@ export default function ScoreDetailPage() {
   const getGenreLabel = (genreValue: string | undefined) => {
     if (!genreValue) return t("noGenre");
     const genre = GENRES.find((g) => g.value === genreValue);
-    return locale === "ja" ? genre?.ja : genre?.ko;
+    return locale === "ja"
+      ? genre?.ja
+      : locale === "ko"
+        ? genre?.ko
+        : genre?.en;
   };
 
   useEffect(() => {

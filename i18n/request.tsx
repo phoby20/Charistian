@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getRequestConfig } from "next-intl/server";
 
 // 지원하는 로케일
-const locales = ["ko", "ja"] as const;
+const locales = ["ko", "ja", "en"] as const;
 type Locale = (typeof locales)[number];
 
 export default getRequestConfig(async ({ locale }: { locale?: string }) => {

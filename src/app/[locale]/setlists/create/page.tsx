@@ -32,10 +32,12 @@ export default function CreateSetlistPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [usageLimits, setUsageLimits] = useState<UsageLimits | null>(null);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+  const [selectedKeys, setSelectedKeys] = useState<{ [index: number]: string }>(
+    {}
+  );
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // 선택된 YouTube URL 상태 추가
   const [selectedUrls, setSelectedUrls] = useState<{ [key: string]: string }>(
     {}
   );
@@ -51,15 +53,42 @@ export default function CreateSetlistPage() {
     const stored = sessionStorage.getItem("selectedSongList");
     if (stored) {
       try {
-        setSelectedSongs(JSON.parse(stored));
+        const songs = JSON.parse(stored);
+        // sessionStorage 데이터 마이그레이션
+        const migratedSongs = songs.map((song: SelectedSong) => ({
+          ...song,
+          scoreKeys: song.scoreKeys,
+          fileUrl: song.scoreKeys?.[0]?.fileUrl || "",
+          key: undefined, // key 필드 제거
+        }));
+        setSelectedSongs(migratedSongs);
+        // 초기 selectedKeys 설정
+        const initialKeys = migratedSongs.reduce(
+          (
+            acc: { [index: number]: string },
+            song: SelectedSong,
+            index: number
+          ) => {
+            acc[index] = song.scoreKeys[0]?.key || "";
+            return acc;
+          },
+          {}
+        );
+        setSelectedKeys(initialKeys);
+        sessionStorage.setItem(
+          "selectedSongList",
+          JSON.stringify(migratedSongs)
+        );
       } catch (err) {
         console.error("Error parsing selectedSongList:", err);
+        setError(t("parseError") || "Failed to load selected songs");
       }
     }
     const fetchShares = async () => {
       setIsLoading(true);
       setError(null);
       try {
+        if (!user.churchId) throw new Error(t("authError"));
         const [groupRes, teamRes, usageRes] = await Promise.all([
           fetch(`/api/groups/public?churchId=${user.churchId}`),
           fetch(`/api/teams?churchId=${user.churchId}`),
@@ -77,7 +106,6 @@ export default function CreateSetlistPage() {
         ) {
           throw new Error("Invalid response format");
         }
-        // setGroups(groupData.groups);
         setTeams(teamData.teams);
         setUsageLimits(usageData);
       } catch (err: unknown) {
@@ -88,9 +116,16 @@ export default function CreateSetlistPage() {
       }
     };
     fetchShares();
-  }, [user, t]);
+  }, [user, t, router]);
 
-  // createSetlist 버튼 비활성화 조건
+  const handleKeySelect = (index: number, key: string) => {
+    setSelectedKeys((prev) => ({ ...prev, [index]: key }));
+  };
+
+  const handleUrlSelect = (songId: string, url: string) => {
+    setSelectedUrls((prev) => ({ ...prev, [songId]: url }));
+  };
+
   const isCreateDisabled: boolean = isSetlistCreationDisabled(
     selectedSongs,
     usageLimits
@@ -100,11 +135,6 @@ export default function CreateSetlistPage() {
     isCreateDisabled,
     usageLimits
   );
-
-  // YouTube URL 선택 핸들러
-  const handleUrlSelect = (songId: string, url: string) => {
-    setSelectedUrls((prev) => ({ ...prev, [songId]: url }));
-  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -143,7 +173,9 @@ export default function CreateSetlistPage() {
               selectedUrls[song.id] ||
               song.referenceUrls.find(
                 (url) => url.includes("youtube.com") || url.includes("youtu.be")
-              ),
+              ) ||
+              "",
+            selectedKey: selectedKeys[index] || song.scoreKeys[0]?.key || "",
           })),
           shares: [...selectedTeams.map((teamId) => ({ teamId }))],
         }),
@@ -152,7 +184,6 @@ export default function CreateSetlistPage() {
         throw new Error((await response.json()).error || t("createError"));
       }
       sessionStorage.removeItem("selectedSongList");
-      // 공유된 팀 ID를 쿼리 파라미터로 전달
       router.push(`/setlists/shared?teams=${selectedTeams.join(",")}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t("createError"));
@@ -169,11 +200,33 @@ export default function CreateSetlistPage() {
       sessionStorage.setItem("selectedSongList", JSON.stringify(updated));
       return updated;
     });
+    setSelectedKeys((prev) => {
+      const updated = { ...prev };
+      delete updated[index];
+      Object.keys(updated).forEach((key, i) => {
+        if (parseInt(key) > index) {
+          updated[i] = updated[parseInt(key)];
+          delete updated[parseInt(key)];
+        }
+      });
+      return updated;
+    });
   };
 
   const handleReorderSongs = (newSongs: SelectedSong[]) => {
     setSelectedSongs(newSongs);
     sessionStorage.setItem("selectedSongList", JSON.stringify(newSongs));
+    const updatedKeys = newSongs.reduce(
+      (acc: { [index: number]: string }, song: SelectedSong, index: number) => {
+        const oldIndex = selectedSongs.findIndex(
+          (oldSong) => oldSong.id === song.id
+        );
+        acc[index] = selectedKeys[oldIndex] || song.scoreKeys[0]?.key || "";
+        return acc;
+      },
+      {}
+    );
+    setSelectedKeys(updatedKeys);
   };
 
   if (isLoading) return <Loading />;
@@ -253,7 +306,6 @@ export default function CreateSetlistPage() {
                 aria-label={t("title")}
               />
             </motion.div>
-
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -280,9 +332,10 @@ export default function CreateSetlistPage() {
               selectedSongs={selectedSongs}
               onRemoveSong={handleRemoveSong}
               onReorderSongs={handleReorderSongs}
+              onKeySelect={handleKeySelect}
               t={t}
-              onUrlSelect={handleUrlSelect} // URL 선택 핸들러 전달
-              selectedUrls={selectedUrls} // 선택된 URL 상태 전달
+              onUrlSelect={handleUrlSelect}
+              selectedUrls={selectedUrls}
             />
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-3">

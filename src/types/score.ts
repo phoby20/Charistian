@@ -18,10 +18,8 @@ export interface ScoreResponse {
   titleJa: string | null;
   description?: string;
   tempo?: string;
-  fileUrl: string;
   thumbnailUrl?: string;
   price?: number;
-  key?: string;
   referenceUrls?: string[];
   lyrics?: string;
   lyricsEn?: string;
@@ -39,6 +37,7 @@ export interface ScoreResponse {
   churchId: string;
   likes: { id: string }[];
   comments: ScoreComment[];
+  scoreKeys: { key: string; fileUrl: string }[]; // 추가
   _count: { likes: number; comments: number };
   isLiked: boolean;
   isOpen: boolean;
@@ -52,7 +51,7 @@ export interface ScoreFormData {
   titleJa?: string;
   description?: string;
   tempo?: string;
-  file: File | null;
+  scoreKeys?: { key: string; file: File | string | null }[]; // 수정: 다중 코드 키와 파일
   thumbnail?: File | null;
   price?: string;
   referenceUrls: { url: string }[];
@@ -66,8 +65,7 @@ export interface ScoreFormData {
   isPublic: boolean;
   isForSale: boolean;
   isOriginal: boolean;
-  genre?: string; // 새로 추가
-  key?: string;
+  genre?: string;
 }
 
 export interface ApiErrorResponse {
@@ -151,15 +149,13 @@ export interface Setlists {
   scores: { id: string; creation: Creation; order: number }[];
   shares: Share[];
 }
-
 export interface SelectedSong {
   id: string;
   title: string;
   titleEn: string;
   titleJa: string;
-  key: string;
-  fileUrl: string;
   referenceUrls: string[];
+  scoreKeys: { key: string; fileUrl: string }[]; // scoreKeys 추가
 }
 
 export interface SetlistResponse {
@@ -175,6 +171,7 @@ export interface SetlistResponse {
     creation: SelectedSong;
     order: number;
     selectedReferenceUrl?: string; // 선택된 YouTube URL 추가
+    selectedKey?: string;
   }[];
   comments: {
     id: string;

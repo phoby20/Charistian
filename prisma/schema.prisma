@@ -165,8 +165,19 @@ model Creation {
   likes             ScoreLike[]    // 좋아요
   comments          ScoreComment[] // 댓글
   setlistScores     SetlistScore[]   @relation("CreationSetlistScores")
+  scoreKeys         ScoreKey[]     // 추가: 여러 코드 키와 악보 파일을 관리
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
+}
+
+model ScoreKey {
+  id            String    @id @default(uuid())
+  creationId    String
+  creation      Creation  @relation(fields: [creationId], references: [id])
+  key           String    // 코드 키 (예: "C Major")
+  fileUrl       String    // 해당 코드 키의 악보 파일 URL
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model ScoreLike {
@@ -317,6 +328,7 @@ model SetlistScore {
   creationId  String
   creation    Creation  @relation("CreationSetlistScores", fields: [creationId], references: [id])
   order       Int
+  selectedKey String?
   selectedReferenceUrl String? // 선택된 YouTube URL 저장
   createdAt   DateTime  @default(now())
 }

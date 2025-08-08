@@ -56,7 +56,7 @@ export default function ScoreDetailPage() {
       ? genre?.ja
       : locale === "ko"
         ? genre?.ko
-        : genre?.en;
+        : genre?.en || t("noGenre");
   };
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function ScoreDetailPage() {
         setScore(data);
         setLikeCount(data._count?.likes || 0);
         setIsLiked(data.isLiked || false);
-        setAppUrl(data.appUrl);
+        setAppUrl(data.appUrl || "");
       } catch (error: unknown) {
         let errorMessage = t("error");
         if (error instanceof Error) {
@@ -218,9 +218,15 @@ export default function ScoreDetailPage() {
                 <span className="text-base">{t("backToList")}</span>
               </motion.button>
               <div className="flex flex-wrap gap-1">
-                <Chip label={score.key ?? ""} color="red" />
+                {score.scoreKeys.length > 0 ? (
+                  score.scoreKeys.map((sk, index) => (
+                    <Chip key={index} label={sk.key} color="red" />
+                  ))
+                ) : (
+                  <Chip label={t("noKey")} color="red" />
+                )}
                 <Chip label={(score.tempo ?? "") + " BPM"} color="yellow" />
-                <Chip label={getGenreLabel(score.genre) ?? ""} />
+                <Chip label={getGenreLabel(score.genre) ?? t("noGenre")} />
               </div>
             </div>
 
@@ -254,19 +260,17 @@ export default function ScoreDetailPage() {
                   <span className="text-base font-medium">{likeCount}</span>
                 </motion.button>
                 {canEdit && (
-                  <>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() =>
-                        (window.location.href = `/${locale}/scores/${id}/edit`)
-                      }
-                      className="flex items-center space-x-2 px-5 py-2 rounded-full shadow-md bg-gray-200 text-gray-700 hover:bg-blue-500 hover:text-white transition-all cursor-pointer"
-                      aria-label={t("editScore")}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </motion.button>
-                  </>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() =>
+                      (window.location.href = `/${locale}/scores/${id}/edit`)
+                    }
+                    className="flex items-center space-x-2 px-5 py-2 rounded-full shadow-md bg-gray-200 text-gray-700 hover:bg-blue-500 hover:text-white transition-all cursor-pointer"
+                    aria-label={t("editScore")}
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </motion.button>
                 )}
                 {canClose && (
                   <motion.button

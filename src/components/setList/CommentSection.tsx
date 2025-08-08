@@ -104,7 +104,7 @@ export default function CommentSection({
               onChange={(e) => setComment(e.target.value)}
               className="block w-full rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-300 hover:border-gray-300 resize-y"
               rows={5}
-              placeholder={user ? t("writeComment") : t("loginToComment")}
+              placeholder={t("writeComment")}
               disabled={!user || isSubmitting}
               aria-label={t("writeComment")}
               maxLength={maxCommentLength}

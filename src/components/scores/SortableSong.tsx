@@ -1,3 +1,4 @@
+// src/components/scores/SortableSong.tsx
 "use client";
 import { Trash2, Play, Pause, ChevronDown, GripVertical } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
@@ -21,6 +22,7 @@ export interface SortableSongProps {
   count: number;
   onRemoveSong: (index: number) => void;
   onPlayPause: (songId: string) => void;
+  onKeySelect: (index: number, key: string) => void;
   isOver: boolean;
   isDraggingAny: boolean;
   currentPlayingId: string | null;
@@ -55,6 +57,7 @@ export function SortableSong({
   count,
   onRemoveSong,
   onPlayPause,
+  onKeySelect,
   isOver,
   isDraggingAny,
   currentPlayingId,
@@ -76,6 +79,9 @@ export function SortableSong({
   const t = useTranslations("Setlist");
   const selectRef = useRef<HTMLSelectElement>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedKey, setSelectedKey] = useState<string>(
+    song.scoreKeys[0]?.key || "" // scoreKeys 사용
+  );
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -111,6 +117,13 @@ export function SortableSong({
     }
   };
 
+  // 키 선택 핸들러
+  const handleKeySelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newKey = e.target.value;
+    setSelectedKey(newKey);
+    onKeySelect(index, newKey);
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -138,7 +151,36 @@ export function SortableSong({
           <div className="flex justify-between p-3 sm:flex-row flex-col">
             <div className="flex items-center gap-3 grow">
               <div className="flex flex-row gap-2 items-center">
-                <Chip label={song.key} color="yellow" />
+                {song.scoreKeys.length > 1 ? ( // scoreKeys 사용
+                  <div className="relative">
+                    <select
+                      value={selectedKey}
+                      onChange={handleKeySelect}
+                      className="rounded-lg border-gray-200 bg-gray-50 text-gray-800 text-sm py-1.5 px-3 pr-8 appearance-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition-all hover:bg-gray-100"
+                      disabled={isDragging}
+                    >
+                      <option value="" disabled>
+                        {t("selectKey") || "Select Key"}
+                      </option>
+                      {song.scoreKeys.map((k) => (
+                        <option key={k.key} value={k.key}>
+                          {k.key}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  </div>
+                ) : (
+                  <Chip
+                    label={
+                      selectedKey ||
+                      song.scoreKeys[0]?.key ||
+                      t("noKey") ||
+                      "No Key"
+                    } // scoreKeys 사용
+                    color="yellow"
+                  />
+                )}
                 <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[300px]">
                   {displayTitle} {count > 1 ? `(${count})` : ""}
                 </span>
@@ -213,7 +255,7 @@ export function SortableSong({
                     value={selectedUrls[song.id] || ""}
                     onChange={(e) => {
                       handleUrlSelect(song.id, e.target.value);
-                      setIsDropdownOpen(false); // 선택 후 드롭다운 닫기
+                      setIsDropdownOpen(false);
                     }}
                     className="w-full rounded-lg border-gray-200 bg-gray-50 text-gray-800 text-sm py-2 pl-3 pr-8 appearance-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition-all hover:bg-gray-100 truncate"
                     disabled={isDragging}

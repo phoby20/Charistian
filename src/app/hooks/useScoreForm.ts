@@ -1,3 +1,4 @@
+// src/app/hooks/useScoreForm.ts
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
@@ -17,18 +18,24 @@ import {
 
 interface UseScoreFormReturn {
   form: UseFormReturn<ScoreFormData>;
-  fields: FieldArrayWithId<ScoreFormData, "referenceUrls", "id">[];
-  append: UseFieldArrayAppend<ScoreFormData, "referenceUrls">;
-  remove: UseFieldArrayRemove;
+  referenceUrlFields: FieldArrayWithId<ScoreFormData, "referenceUrls", "id">[];
+  scoreKeyFields: FieldArrayWithId<ScoreFormData, "scoreKeys", "id">[];
+  appendReferenceUrl: UseFieldArrayAppend<ScoreFormData, "referenceUrls">;
+  removeReferenceUrl: UseFieldArrayRemove;
+  appendScoreKey: UseFieldArrayAppend<ScoreFormData, "scoreKeys">;
+  removeScoreKey: UseFieldArrayRemove;
   fileError: string | null;
   setFileError: (error: string | null) => void;
-  pdfPreview: string | null;
+  pdfPreviews: { key: string; url: string | null }[];
+  setPdfPreviews: React.Dispatch<
+    React.SetStateAction<{ key: string; url: string | null }[]>
+  >;
   saleStartDate: Date | null;
   saleEndDate: Date | null;
   locale: string;
   isFormValid: () => boolean;
-  handleFileChange: (file: File | null) => void;
-  removePdfPreview: () => void;
+  handleFileChange: (index: number, file: File | null) => void;
+  removePdfPreview: (index: number) => void;
   handleDateChange: (
     date: Date | null,
     field: "saleStartDate" | "saleEndDate"
@@ -42,58 +49,66 @@ export const useScoreForm = (): UseScoreFormReturn => {
   const form: UseFormReturn<ScoreFormData> = useForm<ScoreFormData>({
     defaultValues: {
       referenceUrls: [{ url: "" }],
+      scoreKeys: [{ key: "", file: null }],
       isPublic: false,
       isForSale: false,
       isOriginal: false,
-      file: null,
       title: "",
       tempo: "",
       lyrics: "",
       description: "",
       genre: "",
-      key: "", // 추가
     },
   });
 
-  const { fields, append, remove } = useFieldArray<ScoreFormData>({
+  const {
+    fields: referenceUrlFields,
+    append: appendReferenceUrl,
+    remove: removeReferenceUrl,
+  } = useFieldArray<ScoreFormData, "referenceUrls", "id">({
     control: form.control,
     name: "referenceUrls",
   });
 
+  const {
+    fields: scoreKeyFields,
+    append: appendScoreKey,
+    remove: removeScoreKey,
+  } = useFieldArray<ScoreFormData, "scoreKeys", "id">({
+    control: form.control,
+    name: "scoreKeys",
+  });
+
   const [fileError, setFileError] = useState<string | null>(null);
-  const [pdfPreview, setPdfPreview] = useState<string | null>(null);
+  const [pdfPreviews, setPdfPreviews] = useState<
+    { key: string; url: string | null }[]
+  >([]);
   const [saleStartDate, setSaleStartDate] = useState<Date | null>(null);
   const [saleEndDate, setSaleEndDate] = useState<Date | null>(null);
   const router = useRouter();
   const params = useParams();
   const { locale } = params;
 
-  const {
-    file,
-    title,
-    tempo,
-    lyrics,
-    description,
-    price,
-    isForSale,
-    key, // 추가
-  } = form.watch();
+  const { scoreKeys, title, tempo, lyrics, description, price, isForSale } =
+    form.watch();
 
   const isFormValid = (): boolean => {
     const { errors } = form.formState;
+    if (!scoreKeys) {
+      return false; // scoreKeys가 undefined일 경우 false 반환
+    }
     const requiredFieldsFilled =
-      !!file &&
+      scoreKeys.length > 0 &&
+      scoreKeys.every((sk) => !!sk.file && !!sk.key) &&
       !!title &&
       !!tempo &&
       !!lyrics &&
       !!description &&
-      !!key && // 추가
-      !errors.file &&
+      !errors.scoreKeys &&
       !errors.title &&
       !errors.tempo &&
       !errors.lyrics &&
-      !errors.description &&
-      !errors.key; // 추가
+      !errors.description;
     const priceFilled = !isForSale || (isForSale && !!price && !errors.price);
     return requiredFieldsFilled && priceFilled;
   };
@@ -108,14 +123,31 @@ export const useScoreForm = (): UseScoreFormReturn => {
     }
   }, [isForSale, form]);
 
-  const handleFileChange = (file: File | null): void => {
-    setPdfPreview(file ? file.name : null);
+  useEffect(() => {
+    if (!form.getValues("scoreKeys")) {
+      form.setValue("scoreKeys", [{ key: "", file: null }]);
+    }
+  }, [form]);
+
+  const handleFileChange = (index: number, file: File | null): void => {
+    setPdfPreviews((prev) => {
+      const newPreviews = [...prev];
+      newPreviews[index] = {
+        key: scoreKeys?.[index]?.key ?? "",
+        url: file ? file.name : null,
+      };
+      return newPreviews;
+    });
     setFileError(null);
   };
 
-  const removePdfPreview = (): void => {
-    setPdfPreview(null);
-    form.setValue("file", null, { shouldValidate: true });
+  const removePdfPreview = (index: number): void => {
+    setPdfPreviews((prev) => {
+      const newPreviews = [...prev];
+      newPreviews[index] = { key: scoreKeys?.[index]?.key ?? "", url: null };
+      return newPreviews;
+    });
+    form.setValue(`scoreKeys.${index}.file`, null, { shouldValidate: true });
   };
 
   const handleDateChange = (
@@ -136,7 +168,14 @@ export const useScoreForm = (): UseScoreFormReturn => {
 
   const onSubmit = async (data: ScoreFormData): Promise<void> => {
     const formData = new FormData();
-    if (data.file) formData.append("file", data.file);
+    data.scoreKeys?.forEach((sk, index) => {
+      if (sk.file instanceof File) {
+        formData.append(`scoreKeys[${index}].file`, sk.file);
+      } else if (sk.file) {
+        formData.append(`scoreKeys[${index}].fileUrl`, sk.file);
+      }
+      formData.append(`scoreKeys[${index}].key`, sk.key);
+    });
     if (data.thumbnail) formData.append("thumbnail", data.thumbnail);
     formData.append("title", data.title);
     formData.append("titleEn", data.titleEn || "");
@@ -159,7 +198,6 @@ export const useScoreForm = (): UseScoreFormReturn => {
     formData.append("isForSale", String(data.isForSale));
     formData.append("isOriginal", String(data.isOriginal));
     formData.append("genre", data.genre || "");
-    formData.append("key", data.key || ""); // 추가
 
     try {
       const response = await fetch("/api/scores", {
@@ -186,12 +224,16 @@ export const useScoreForm = (): UseScoreFormReturn => {
 
   return {
     form,
-    fields,
-    append,
-    remove,
+    referenceUrlFields,
+    scoreKeyFields,
+    appendReferenceUrl,
+    removeReferenceUrl,
+    appendScoreKey,
+    removeScoreKey,
     fileError,
     setFileError,
-    pdfPreview,
+    pdfPreviews,
+    setPdfPreviews,
     saleStartDate,
     saleEndDate,
     locale: locale as string,

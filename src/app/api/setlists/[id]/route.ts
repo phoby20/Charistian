@@ -13,7 +13,12 @@ interface UpdateSetlistRequest {
   title: string;
   date: string;
   description?: string;
-  scores: { creationId: string; order: number; selectedReferenceUrl: string }[];
+  scores: {
+    creationId: string;
+    order: number;
+    selectedReferenceUrl: string | null;
+    selectedKey: string;
+  }[]; // selectedKey 추가
   shares: {
     groupId?: string | null;
     teamId?: string | null;
@@ -43,13 +48,13 @@ export async function GET(
                 title: true,
                 titleEn: true,
                 titleJa: true,
-                fileUrl: true,
                 referenceUrls: true,
-                key: true,
+                scoreKeys: true, // ScoreKey에서 selectedKey에 해당하는 fileUrl 조회를 위해 추가
               },
             },
             order: true,
             selectedReferenceUrl: true,
+            selectedKey: true, // selectedKey 포함
           },
         },
         comments: {
@@ -149,7 +154,7 @@ export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SetlistResponse | { error: string }>> {
-  console.log("PUT 메소스 시작");
+  console.log("PUT 메소드 시작");
   const authResult = await authenticateRequest(req);
   if (authResult.response) return authResult.response;
 
@@ -192,24 +197,32 @@ export async function PUT(
 
     const creations = await prisma.creation.findMany({
       where: { id: { in: scores.map((score) => score.creationId) } },
-      select: { id: true, fileUrl: true },
+      select: { id: true, fileUrl: true, scoreKeys: true }, // scoreKeys 포함
     });
 
     const sortedScores = scores
       .sort((a, b) => a.order - b.order)
       .map((score) => {
         const creation = creations.find((c) => c.id === score.creationId);
+        const selectedKeyObj = creation?.scoreKeys.find(
+          (key) => key.key === score.selectedKey
+        );
         return {
           creationId: score.creationId,
-          fileUrl: creation?.fileUrl,
+          fileUrl: selectedKeyObj?.fileUrl || creation?.fileUrl,
           order: score.order,
+          selectedKey: score.selectedKey, // selectedKey 포함
         };
       })
       .filter(
         (
           score
-        ): score is { creationId: string; fileUrl: string; order: number } =>
-          !!score.fileUrl
+        ): score is {
+          creationId: string;
+          fileUrl: string;
+          order: number;
+          selectedKey: string;
+        } => !!score.fileUrl
       );
 
     if (sortedScores.length === 0) {
@@ -225,6 +238,7 @@ export async function PUT(
         creationId: s.creationId,
         order: s.order,
         fileUrl: s.fileUrl,
+        selectedKey: s.selectedKey,
       }))
     );
 
@@ -244,6 +258,7 @@ export async function PUT(
                 creationId: s.creationId,
                 order: s.order,
                 selectedReferenceUrl: s.selectedReferenceUrl,
+                selectedKey: s.selectedKey, // selectedKey 저장
               })),
             },
             shares: {
@@ -274,7 +289,18 @@ export async function PUT(
         church: { select: { name: true } },
         scores: {
           include: {
-            creation: { select: { id: true, title: true, fileUrl: true } },
+            creation: {
+              select: {
+                id: true,
+                title: true,
+                fileUrl: true,
+                referenceUrls: true,
+                titleEn: true,
+                titleJa: true,
+                key: true,
+                scoreKeys: true, // PDF 병합에 필요한 fileUrl 조회를 위해 추가
+              },
+            },
           },
         },
         shares: {

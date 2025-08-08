@@ -7,6 +7,7 @@ interface Score {
   creationId: string;
   fileUrl: string;
   order: number;
+  selectedKey: string; // 새 필드 추가
 }
 
 export async function mergeAndUploadPdf(
@@ -26,17 +27,33 @@ export async function mergeAndUploadPdf(
 
   // PDF 병합
   const mergedPdf = await PDFDocument.create();
-  const pdfPromises = scores.map(async ({ fileUrl }) => {
+  const pdfPromises = scores.map(async ({ fileUrl, selectedKey }) => {
+    if (!fileUrl) {
+      throw new Error(
+        `PDF 파일 URL이 없습니다. | creationId: ${scores.find((s) => s.fileUrl === fileUrl)?.creationId}, selectedKey: ${selectedKey}`
+      );
+    }
     const response = await fetch(fileUrl);
-    if (!response.ok) throw new Error(`PDF 다운로드 실패 | URL: ${fileUrl}`);
+    if (!response.ok) {
+      throw new Error(
+        `PDF 다운로드 실패 | URL: ${fileUrl}, selectedKey: ${selectedKey}`
+      );
+    }
     return response.arrayBuffer();
   });
 
-  const pdfBuffers = await Promise.all(pdfPromises);
-  for (const pdfBytes of pdfBuffers) {
-    const pdf = await PDFDocument.load(pdfBytes);
-    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-    copiedPages.forEach((page) => mergedPdf.addPage(page));
+  try {
+    const pdfBuffers = await Promise.all(pdfPromises);
+    for (const pdfBytes of pdfBuffers) {
+      const pdf = await PDFDocument.load(pdfBytes);
+      const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+      copiedPages.forEach((page) => mergedPdf.addPage(page));
+    }
+  } catch (error) {
+    console.error("PDF 병합 중 오류 발생:", error);
+    throw new Error(
+      `PDF 병합 실패: ${error instanceof Error ? error.message : "알 수 없는 오류"}`
+    );
   }
 
   // 병합된 PDF를 바이트로 저장

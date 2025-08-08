@@ -67,9 +67,9 @@ export default function SetlistDetailPage() {
 
   const dateLocale = locale === "ko" ? ko : ja;
 
-  // PDF 링크 클릭 핸들러 추가
-  const handleViewPdf = (proxyFileUrl: string) => {
-    window.open(proxyFileUrl, "_blank", "noopener,noreferrer");
+  // PDF 링크 클릭 핸들러
+  const handleViewPdf = (fileUrl: string) => {
+    window.open(fileUrl, "_blank", "noopener,noreferrer");
   };
 
   const getYouTubeVideoId = (url?: string): string | undefined => {
@@ -141,7 +141,7 @@ export default function SetlistDetailPage() {
               }
             }
           } else {
-            throw new Error("No valid YouTube URL found");
+            throw new Error(t("noValidYouTubeUrl"));
           }
         }
       } catch (err: unknown) {
@@ -276,7 +276,6 @@ export default function SetlistDetailPage() {
         if (typeof id !== "string") {
           throw new Error(t("invalidId"));
         }
-        // 콘티 정보 가져오기
         const setlistResponse = await fetch(`/api/setlists/${id}`);
         if (!setlistResponse.ok) {
           throw new Error(
@@ -288,7 +287,6 @@ export default function SetlistDetailPage() {
         setSetlist(setlistData.setlist);
         setAppUrl(setlistData.appUrl);
 
-        // 멤버 정보 가져오기
         const teamIds = setlistData.setlist.shares
           .filter((share) => share.team)
           .map((share) => share.team!.id);
@@ -337,6 +335,21 @@ export default function SetlistDetailPage() {
           )
       )
     : undefined;
+
+  // scoreKeys에서 selectedKey에 해당하는 fileUrl 조회
+  const getScoreFileUrl = (
+    score: SetlistResponse["scores"][number]
+  ): string => {
+    if (score.selectedKey) {
+      const selectedKeyObj = score.creation.scoreKeys.find(
+        (key) => key.key === score.selectedKey
+      );
+      return (
+        selectedKeyObj?.fileUrl || score.creation.scoreKeys[0].fileUrl || "#"
+      );
+    }
+    return score.creation.scoreKeys[0].fileUrl || "#";
+  };
 
   if (error) {
     return (
@@ -466,6 +479,7 @@ export default function SetlistDetailPage() {
                 const youtubeVideoId = score.selectedReferenceUrl
                   ? getYouTubeVideoId(score.selectedReferenceUrl)
                   : getFirstYouTubeVideoId(score.creation.referenceUrls);
+                const scoreFileUrl = getScoreFileUrl(score);
                 return (
                   <motion.li
                     key={score.id}
@@ -485,11 +499,8 @@ export default function SetlistDetailPage() {
                           type="button"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePlayPause(score.id);
-                          }}
-                          className="text-red-500 hover:text-red-600 cursor-pointer p-2"
+                          onClick={() => handlePlayPause(score.id)}
+                          className="text-[#fc089e] hover:text-[#ff59bf] cursor-pointer p-2"
                           aria-label={
                             currentPlayingId === score.id
                               ? t("pause")
@@ -504,7 +515,10 @@ export default function SetlistDetailPage() {
                         </motion.button>
                       )}
                       <div className="flex sm:flex-row flex-col gap-2">
-                        <Chip label={score.creation.key} />
+                        <Chip
+                          label={score.selectedKey || t("noKey")}
+                          color="yellow"
+                        />
                         <span className="text-gray-800">
                           {getDisplayTitle(
                             score.creation.title,
@@ -517,11 +531,12 @@ export default function SetlistDetailPage() {
                     </div>
                     <div>
                       <a
-                        href={`${appUrl}/api/proxy/creation/${score.creation.id}/file`}
+                        href={scoreFileUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-[#fc089e] hover:text-[#ff59bf] transition-colors"
                         aria-label={`View ${score.creation.title}`}
+                        onClick={() => handleViewPdf(scoreFileUrl)}
                       >
                         <FileMusic className="w-5 h-5" />
                       </a>

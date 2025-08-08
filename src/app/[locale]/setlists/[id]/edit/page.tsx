@@ -1,3 +1,4 @@
+// src/app/[locale]/setlists/[id]/edit/page.tsx
 "use client";
 import { useState, useEffect, FormEvent } from "react";
 import { useParams } from "next/navigation";
@@ -5,14 +6,19 @@ import { useTranslations, useLocale } from "next-intl";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowLeft, AlertCircle, Trash2 } from "lucide-react"; // Trash2 아이콘 추가
+import { ArrowLeft, AlertCircle, Trash2 } from "lucide-react";
 import Loading from "@/components/Loading";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parseISO, format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
 import { CheckboxGroup } from "@/components/CheckboxGroup";
-import { SelectedSong, SetlistResponse, Team } from "@/types/score";
+import {
+  SelectedSong,
+  SelectedSong,
+  SetlistResponse,
+  Team,
+} from "@/types/score";
 import { useRouter } from "@/utils/useRouter";
 import SelectedSongsList from "@/components/scores/SelectedSongsList";
 
@@ -28,15 +34,16 @@ export default function SetlistEditPage() {
   const [selectedSongs, setSelectedSongs] = useState<SelectedSong[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+  const [selectedKeys, setSelectedKeys] = useState<{ [index: number]: string }>(
+    {}
+  ); // selectedKey 상태 추가
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
-  // 선택된 YouTube URL 상태 추가
   const [selectedUrls, setSelectedUrls] = useState<{ [key: string]: string }>(
     {}
   );
-  // 삭제 상태 추가
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const dateLocale = locale === "ko" ? ko : ja;
@@ -98,19 +105,23 @@ export default function SetlistEditPage() {
                 title: score.creation.title || "",
                 titleJa: score.creation.titleJa || "",
                 titleEn: score.creation.titleEn || "",
-                key: score.creation.key || "",
+                scoreKeys: score.creation.scoreKeys || [], // key 대신 scoreKeys 사용
                 referenceUrls: score.creation.referenceUrls || [],
-                fileUrl: score.creation.fileUrl || "",
               }))
           : [];
         setSelectedSongs(initialSongs);
         const initialUrls: { [key: string]: string } = {};
-        setlist.scores.forEach((score) => {
+        const initialKeys: { [index: number]: string } = {};
+        setlist.scores.forEach((score, index) => {
           if (score.selectedReferenceUrl) {
             initialUrls[score.creation.id] = score.selectedReferenceUrl;
           }
+          if (score.selectedKey) {
+            initialKeys[index] = score.selectedKey; // 초기 selectedKey 설정
+          }
         });
         setSelectedUrls(initialUrls);
+        setSelectedKeys(initialKeys);
         sessionStorage.setItem(
           "selectedSongList",
           JSON.stringify(initialSongs)
@@ -144,16 +155,21 @@ export default function SetlistEditPage() {
       }
     };
     fetchData();
-  }, [id, t, user]);
+  }, [id, t, user, router]);
+
+  // 키 선택 핸들러 추가
+  const handleKeySelect = (index: number, key: string) => {
+    setSelectedKeys((prev) => ({ ...prev, [index]: key }));
+  };
 
   // YouTube URL 선택 핸들러
   const handleUrlSelect = (songId: string, url: string) => {
     setSelectedUrls((prev) => ({ ...prev, [songId]: url }));
   };
 
-  // 삭제 핸들러 추가
+  // 삭제 핸들러
   const handleDelete = async () => {
-    if (!confirm(t("confirmDelete"))) return; // 삭제 확인 프롬프트
+    if (!confirm(t("confirmDelete"))) return;
     setIsDeleting(true);
     setError(null);
     try {
@@ -200,6 +216,7 @@ export default function SetlistEditPage() {
               song.referenceUrls.find(
                 (url) => url.includes("youtube.com") || url.includes("youtu.be")
               ),
+            selectedKey: selectedKeys[index] || song.scoreKeys[0]?.key || "", // selectedKey 추가
           })),
           shares: [...selectedTeams.map((teamId) => ({ teamId }))],
         }),
@@ -221,6 +238,22 @@ export default function SetlistEditPage() {
       const updated = [...prev];
       updated.splice(index, 1);
       sessionStorage.setItem("selectedSongList", JSON.stringify(updated));
+      // selectedKeys에서도 해당 인덱스 제거
+      setSelectedKeys((prev) => {
+        const updatedKeys = { ...prev };
+        delete updatedKeys[index];
+        // 인덱스 재조정
+        const newKeys: { [index: number]: string } = {};
+        Object.keys(updatedKeys).forEach((key) => {
+          const oldIndex = parseInt(key);
+          if (oldIndex > index) {
+            newKeys[oldIndex - 1] = updatedKeys[oldIndex];
+          } else if (oldIndex < index) {
+            newKeys[oldIndex] = updatedKeys[oldIndex];
+          }
+        });
+        return newKeys;
+      });
       return updated;
     });
   };
@@ -228,6 +261,17 @@ export default function SetlistEditPage() {
   const handleReorderSongs = (newSongs: SelectedSong[]) => {
     setSelectedSongs(() => {
       sessionStorage.setItem("selectedSongList", JSON.stringify(newSongs));
+      // selectedKeys 재조정
+      setSelectedKeys((prev) => {
+        const newKeys: { [index: number]: string } = {};
+        newSongs.forEach((song, newIndex) => {
+          const oldIndex = selectedSongs.findIndex((s) => s.id === song.id);
+          if (prev[oldIndex]) {
+            newKeys[newIndex] = prev[oldIndex];
+          }
+        });
+        return newKeys;
+      });
       return newSongs;
     });
   };
@@ -258,7 +302,6 @@ export default function SetlistEditPage() {
                   </span>
                 </motion.button>
               </Link>
-              {/* 삭제 버튼 추가 */}
               <motion.button
                 type="button"
                 onClick={handleDelete}
@@ -379,6 +422,7 @@ export default function SetlistEditPage() {
                 selectedSongs={selectedSongs}
                 onRemoveSong={handleRemoveSong}
                 onReorderSongs={handleReorderSongs}
+                onKeySelect={handleKeySelect} // onKeySelect prop 추가
                 t={t}
                 onUrlSelect={handleUrlSelect}
                 selectedUrls={selectedUrls}

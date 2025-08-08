@@ -13,12 +13,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { parseISO, format } from "date-fns";
 import { ko, ja } from "date-fns/locale";
 import { CheckboxGroup } from "@/components/CheckboxGroup";
-import {
-  SelectedSong,
-  SelectedSong,
-  SetlistResponse,
-  Team,
-} from "@/types/score";
+import { SelectedSong, SetlistResponse, Team } from "@/types/score";
 import { useRouter } from "@/utils/useRouter";
 import SelectedSongsList from "@/components/scores/SelectedSongsList";
 

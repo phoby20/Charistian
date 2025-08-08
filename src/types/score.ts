@@ -51,7 +51,7 @@ export interface ScoreFormData {
   titleJa?: string;
   description?: string;
   tempo?: string;
-  scoreKeys?: { key: string; file: File | string | null }[]; // 수정: 다중 코드 키와 파일
+  scoreKeys: { key: string; file: File | string | null }[]; // 수정: 다중 코드 키와 파일
   thumbnail?: File | null;
   price?: string;
   referenceUrls: { url: string }[];

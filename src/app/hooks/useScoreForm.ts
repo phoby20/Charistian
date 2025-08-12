@@ -23,7 +23,7 @@ interface UseScoreFormReturn {
   appendReferenceUrl: UseFieldArrayAppend<ScoreFormData, "referenceUrls">;
   removeReferenceUrl: UseFieldArrayRemove;
   appendScoreKey: UseFieldArrayAppend<ScoreFormData, "scoreKeys">;
-  removeScoreKey: UseFieldArrayRemove;
+  removeScoreKey: (index: number) => void;
   fileError: string | null;
   setFileError: (error: string | null) => void;
   pdfPreviews: { key: string; url: string | null }[];
@@ -72,7 +72,7 @@ export const useScoreForm = (): UseScoreFormReturn => {
   const {
     fields: scoreKeyFields,
     append: appendScoreKey,
-    remove: removeScoreKey,
+    remove: originalRemoveScoreKey,
   } = useFieldArray<ScoreFormData, "scoreKeys", "id">({
     control: form.control,
     name: "scoreKeys",
@@ -128,16 +128,47 @@ export const useScoreForm = (): UseScoreFormReturn => {
     }
   }, [form]);
 
+  useEffect(() => {
+    // scoreKeyFields와 pdfPreviews 길이 동기화
+    if (scoreKeyFields.length !== pdfPreviews.length) {
+      setPdfPreviews(
+        scoreKeyFields.map((field, index) => ({
+          key: scoreKeys?.[index]?.key ?? "",
+          url:
+            scoreKeys?.[index]?.file instanceof File
+              ? (scoreKeys[index].file?.name ?? null)
+              : (scoreKeys?.[index]?.file ?? null),
+        }))
+      );
+    }
+  }, [scoreKeyFields, scoreKeys]);
+
   const handleFileChange = (index: number, file: File | null): void => {
     setPdfPreviews((prev) => {
       const newPreviews = [...prev];
-      newPreviews[index] = {
-        key: scoreKeys?.[index]?.key ?? "",
-        url: file ? file.name : null,
-      };
+      // 인덱스가 배열 길이를 초과하면 새로운 항목 추가
+      if (index >= newPreviews.length) {
+        newPreviews.push({
+          key: file?.name ?? "",
+          url: file ? file.name : null,
+        });
+      } else {
+        newPreviews[index] = {
+          key: scoreKeys?.[index]?.key ?? "",
+          url: file ? file.name : null,
+        };
+      }
       return newPreviews;
     });
     setFileError(null);
+  };
+
+  const removeScoreKey = (index: number) => {
+    originalRemoveScoreKey(index); // react-hook-form의 필드 제거
+    setPdfPreviews((prev) => {
+      const newPreviews = prev.filter((_, i) => i !== index); // 해당 인덱스 미리보기 제거
+      return newPreviews;
+    });
   };
 
   const handleDateChange = (

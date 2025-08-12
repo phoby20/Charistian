@@ -50,9 +50,6 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
     >
       <div className="flex flex-col gap-4">
         <div className="w-full">
-          <label className="block text-sm font-semibold text-gray-800 mb-1 sm:text-base">
-            {t("keyLabel")}
-          </label>
           <select
             {...control.register(`scoreKeys.${index}.key`, {
               required: t("keyRequired"),
@@ -108,7 +105,7 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
         <button
           type="button"
           onClick={() => removeScoreKey(index)}
-          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200 shadow-sm"
+          className="cursor-pointer absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200 shadow-sm"
         >
           <X className="w-4 h-4" />
         </button>

@@ -64,8 +64,12 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
 
   // 초기 pdfPreviews를 로컬 상태로 복사
   useEffect(() => {
-    setLocalPdfPreviews([...initialPdfPreviews]);
-  }, [initialPdfPreviews]);
+    setLocalPdfPreviews(
+      initialPdfPreviews.length
+        ? initialPdfPreviews
+        : scoreKeyFields.map(() => ({ key: "", url: null }))
+    );
+  }, [initialPdfPreviews, scoreKeyFields]);
 
   const validatePdf = async (file: File): Promise<boolean> => {
     try {

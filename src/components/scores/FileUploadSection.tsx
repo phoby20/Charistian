@@ -18,7 +18,10 @@ interface FileUploadSectionProps {
   errors: FieldErrors<ScoreFormData>;
   control: Control<ScoreFormData>;
   scoreKeyFields: { id: string }[];
-  appendScoreKey: (value: { key: string; file: File | null }) => void;
+  appendScoreKey: (
+    value: { key: string; file: File | null },
+    options?: { shouldValidate?: boolean }
+  ) => void;
   removeScoreKey: (index: number) => void;
 }
 
@@ -50,13 +53,17 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
   // 클라이언트에서만 pdfjs-dist 로드
   useEffect(() => {
     (async () => {
-      const pdfjs: typeof PDFJS = await import("pdfjs-dist");
-      const workerSrc = new URL(
-        "pdfjs-dist/build/pdf.worker.min.mjs",
-        import.meta.url
-      ).toString();
-      pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
-      setPdfjsLib(pdfjs);
+      try {
+        const pdfjs: typeof PDFJS = await import("pdfjs-dist");
+        const workerSrc = new URL(
+          "pdfjs-dist/build/pdf.worker.min.mjs",
+          import.meta.url
+        ).toString();
+        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+        setPdfjsLib(pdfjs);
+      } catch (error) {
+        console.error("pdfjs-dist 로드 실패:", error);
+      }
     })();
   }, []);
 
@@ -67,11 +74,25 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
 
   const validatePdf = async (file: File): Promise<boolean> => {
     try {
+      // 파일 타입 확인
+      if (file.type !== "application/pdf") {
+        console.warn("파일 타입이 PDF가 아님:", file.type);
+        return false;
+      }
+      // 파일 크기 제한 (20MB로 완화)
+      if (file.size > 20 * 1024 * 1024) {
+        console.warn("파일 크기 초과:", file.size);
+        return false;
+      }
+      // PDF 헤더 확인 (선택적)
       const header = await file.slice(0, 5).text();
-      if (!header.startsWith("%PDF-")) return false;
-      if (file.size > 10 * 1024 * 1024) return false;
+      if (!header.startsWith("%PDF-")) {
+        console.warn("유효하지 않은 PDF 헤더:", header);
+        return false;
+      }
       return true;
-    } catch {
+    } catch (error) {
+      console.error("PDF 유효성 검사 실패:", error);
       return false;
     }
   };
@@ -83,30 +104,55 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
   ) => {
     setValidationErrors((prev) => {
       const newErrors = [...prev];
-      newErrors[index] = null;
+      newErrors[index] = null; // 파일 처리 시작 시 에러 초기화
       return newErrors;
     });
 
+    if (!pdfjsLib) {
+      console.warn("pdfjsLib이 아직 로드되지 않음");
+      setValidationErrors((prev) => {
+        const newErrors = [...prev];
+        newErrors[index] = t("pdfjsNotLoaded");
+        return newErrors;
+      });
+      if (inputElement) inputElement.value = "";
+      handleFileChange(index, null);
+      return;
+    }
+
     if (file) {
       const isValid = await validatePdf(file);
-      if (isValid && pdfjsLib) {
+      if (isValid) {
+        let objectUrl: string | undefined;
         try {
-          const previewUrl = await getPdfFirstPagePreview(file, pdfjsLib);
+          objectUrl = URL.createObjectURL(file);
+          const previewUrl = await getPdfFirstPagePreview(objectUrl, pdfjsLib);
           setLocalPdfPreviews((prev) => {
             const newPreviews = [...prev];
-            newPreviews[index] = { key: file.name, url: previewUrl };
+            if (index >= newPreviews.length) {
+              newPreviews.push({ key: file.name, url: previewUrl });
+            } else {
+              newPreviews[index] = { key: file.name, url: previewUrl };
+            }
             return newPreviews;
           });
           handleFileChange(index, file);
         } catch (error) {
-          console.error("미리보기 생성 실패:", error);
+          console.error("PDF 미리보기 생성 실패:", error);
           setValidationErrors((prev) => {
             const newErrors = [...prev];
             newErrors[index] = t("invalidPdf");
             return newErrors;
           });
+          if (inputElement) inputElement.value = "";
+          handleFileChange(index, null);
+        } finally {
+          if (objectUrl) {
+            URL.revokeObjectURL(objectUrl);
+          }
         }
       } else {
+        console.warn("유효하지 않은 PDF 파일:", file.name);
         if (inputElement) inputElement.value = "";
         handleFileChange(index, null);
         setValidationErrors((prev) => {
@@ -117,31 +163,39 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
       }
     } else {
       handleFileChange(index, null);
+      setLocalPdfPreviews((prev) => {
+        const newErrors = [...prev];
+        if (index < newErrors.length) {
+          newErrors[index] = { key: "", url: null };
+        }
+        return newErrors;
+      });
     }
   };
 
+  // 기존 PDF URL에 대한 미리보기 생성 (새 파일은 handleFile에서 처리)
   useEffect(() => {
-    if (!pdfjsLib || localPdfPreviews.length === 0) return;
+    if (!pdfjsLib || !initialPdfPreviews.length) return;
 
     const generatePreviews = async () => {
       const newPreviews = [...localPdfPreviews];
       let hasChanges = false;
 
-      for (let index = 0; index < newPreviews.length; index++) {
-        const preview = newPreviews[index];
+      for (let index = 0; index < initialPdfPreviews.length; index++) {
+        const preview = initialPdfPreviews[index];
         if (preview.url && preview.url.endsWith(".pdf")) {
           try {
             const previewUrl = await getPdfFirstPagePreview(
               preview.url,
               pdfjsLib
             );
-            newPreviews[index].url = previewUrl;
+            newPreviews[index] = { ...newPreviews[index], url: previewUrl };
             hasChanges = true;
           } catch (error) {
-            console.error("미리보기 생성 실패:", error);
+            console.error("기존 PDF 미리보기 생성 실패:", error);
             setValidationErrors((prev) => {
               const newErrors = [...prev];
-              newErrors[index] = "PDF 미리보기 생성 실패";
+              newErrors[index] = t("invalidPdf");
               return newErrors;
             });
           }
@@ -154,14 +208,14 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
     };
 
     generatePreviews();
-  }, [pdfjsLib, localPdfPreviews.length]);
+  }, [pdfjsLib, initialPdfPreviews, t]);
 
   return (
     <div className="space-y-4">
       <label className="block text-sm font-medium text-gray-700 mb-2">
         {t("label")} <span className="text-red-500">*</span>
       </label>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
         {scoreKeyFields.map((field, index) => (
           <ScoreKeyField
             key={field.id}
@@ -183,8 +237,12 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           <Button
             variant="outline"
             onClick={() => {
-              appendScoreKey({ key: "", file: null });
+              appendScoreKey(
+                { key: "", file: null },
+                { shouldValidate: false }
+              );
               setLocalPdfPreviews((prev) => [...prev, { key: "", url: null }]);
+              setValidationErrors((prev) => [...prev, null]);
             }}
           >
             <Plus className="w-6 h-6 mr-2" />

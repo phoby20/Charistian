@@ -16,7 +16,6 @@ const isValidTone = (value: string): value is (typeof TONES)[number] =>
   TONES.includes(value as (typeof TONES)[number]);
 
 export async function POST(request: NextRequest) {
-  console.log("api/scores/master start");
   try {
     // 토큰에서 사용자 정보 가져오기
     const token = request.cookies.get("token")?.value;
@@ -46,14 +45,12 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
-    const file = formData.get("file") as File;
     const title = formData.get("title") as string;
     const titleEn = formData.get("titleEn") as string | null;
     const titleJa = formData.get("titleJa") as string | null;
     const description = formData.get("description") as string | null;
     const tempo = formData.get("tempo") as string | null;
     const price = formData.get("price") as string | null;
-    const key = formData.get("key") as string | null;
     const referenceUrlsRaw = formData.get("referenceUrls") as string;
     const lyrics = formData.get("lyrics") as string | null;
     const lyricsEn = formData.get("lyricsEn") as string | null;
@@ -69,34 +66,64 @@ export async function POST(request: NextRequest) {
     const churchId = formData.get("churchId") as string;
 
     // 필수 필드 검증
-    if (!file || !title || !churchId || !key) {
+    if (!title || !churchId) {
       return NextResponse.json(
-        { error: "필수 필드(file, title, churchId, key)를 입력해야 합니다." },
+        { error: "필수 필드(title, churchId)를 입력해야 합니다." },
         { status: 400 }
       );
     }
 
-    // 파일 형식 검증
-    if (!["application/pdf"].includes(file.type)) {
+    // scoreKeys 파싱
+    const scoreKeys: { key: string; file: File | null }[] = [];
+    formData.forEach((value, key) => {
+      const match = key.match(/scoreKeys\[(\d+)\]\[(file|key)\]/);
+      if (match) {
+        const index = parseInt(match[1]);
+        const field = match[2];
+        if (!scoreKeys[index]) {
+          scoreKeys[index] = { key: "", file: null };
+        }
+        if (field === "key" && typeof value === "string") {
+          scoreKeys[index].key = value;
+        } else if (field === "file" && value instanceof File) {
+          scoreKeys[index].file = value;
+        }
+      }
+    });
+
+    // 유효한 scoreKeys 필터링
+    const validScoreKeys: { key: string; file: File }[] = scoreKeys.filter(
+      (sk): sk is { key: string; file: File } => !!sk.key && sk.file !== null
+    );
+
+    if (validScoreKeys.length === 0) {
       return NextResponse.json(
-        { error: "PDF 파일만 업로드 가능합니다." },
+        { error: "최소 하나의 코드 키와 파일을 제공해야 합니다." },
         { status: 400 }
       );
+    }
+
+    // 파일 형식 및 코드 키 유효성 검증
+    for (const { key, file } of validScoreKeys) {
+      if (!["application/pdf"].includes(file.type)) {
+        return NextResponse.json(
+          { error: "PDF 파일만 업로드 가능합니다." },
+          { status: 400 }
+        );
+      }
+      const [keyNote, tone] = key.split(" ");
+      if (!isValidKey(keyNote) || !isValidTone(tone)) {
+        return NextResponse.json(
+          { error: `유효하지 않은 코드 키입니다: ${key}` },
+          { status: 400 }
+        );
+      }
     }
 
     // 자작곡이 아닌 경우 판매 불가
     if (isForSale && !isOriginal) {
       return NextResponse.json(
         { error: "자작곡이 아닌 악보는 판매할 수 없습니다." },
-        { status: 400 }
-      );
-    }
-
-    // 코드 키 유효성 검증
-    const [keyNote, tone] = key.split(" ");
-    if (!isValidKey(keyNote) || !isValidTone(tone)) {
-      return NextResponse.json(
-        { error: "유효하지 않은 코드 키입니다." },
         { status: 400 }
       );
     }
@@ -115,13 +142,6 @@ export async function POST(request: NextRequest) {
     // 한국 시간 기준 날짜 생성
     const koreaDate = createKoreaDate();
 
-    // Vercel Blob에 파일 업로드
-    const fileBlob = await put(
-      `scores/${churchId}/${payload.userId}/${koreaDate}-${file.name}`,
-      file,
-      { access: "public", contentType: file.type }
-    );
-
     // referenceUrls 파싱
     let referenceUrls: { url: string }[] = [];
     try {
@@ -133,7 +153,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Creation 생성
+    // Creation 및 ScoreKey 생성
     const creation = await prisma.creation.create({
       data: {
         title,
@@ -141,10 +161,8 @@ export async function POST(request: NextRequest) {
         titleJa: titleJa || undefined,
         description: description || undefined,
         type: isOriginal ? CreationType.ORIGINAL_SCORE : CreationType.SCORE,
-        fileUrl: fileBlob.url,
         price: price ? parseFloat(price) : undefined,
         tempo: tempo ? parseInt(tempo) : undefined,
-        key,
         referenceUrls: referenceUrls.map((item) => item.url),
         lyrics: lyrics || undefined,
         lyricsEn: lyricsEn || undefined,
@@ -157,9 +175,30 @@ export async function POST(request: NextRequest) {
         isPublic,
         isForSale,
         isOriginal,
-        isOpen: true, // 기본값
+        fileUrl: "", // TODO: 이 부분은 사용 하지 않을 예정이므로 빈 문자열로 설정. 추후에 삭제할 예정
+        isOpen: true,
         creatorId: payload.userId,
         churchId,
+        scoreKeys: {
+          createMany: {
+            data: await Promise.all(
+              validScoreKeys.map(async ({ key, file }) => {
+                const fileBlob = await put(
+                  `scores/${churchId}/${payload.userId}/${koreaDate}-${key}-${file.name}`,
+                  file,
+                  { access: "public", contentType: file.type }
+                );
+                return {
+                  key,
+                  fileUrl: fileBlob.url,
+                };
+              })
+            ),
+          },
+        },
+      },
+      include: {
+        scoreKeys: true,
       },
     });
 

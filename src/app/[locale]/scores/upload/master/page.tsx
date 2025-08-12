@@ -12,7 +12,7 @@ import { TitleSection } from "@/components/scores/TitleSection";
 import { GENRES } from "@/data/genre";
 import { citiesByCountry } from "@/data/cities";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertCircle, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -22,15 +22,8 @@ import Loading from "@/components/Loading";
 import { countryOptions } from "@/data/country";
 import { regionsByCity } from "@/data/regions";
 import { ScoreFormData } from "@/types/score";
-import { constants } from "@/constants/intex";
-
-const { KEYS, TONES } = constants;
-
-// 타입 가드를 위한 유틸리티 함수
-const isValidKey = (value: string): value is (typeof KEYS)[number] =>
-  KEYS.includes(value as (typeof KEYS)[number]);
-const isValidTone = (value: string): value is (typeof TONES)[number] =>
-  TONES.includes(value as (typeof TONES)[number]);
+import type * as PDFJS from "pdfjs-dist"; // pdfjs-dist 타입 임포트
+import { getPdfFirstPagePreview } from "@/utils/pdf-preview"; // 미리보기 생성 함수 임포트
 
 interface ChurchOption {
   value: string;
@@ -64,8 +57,7 @@ export default function ScoreUploadPageForMaster() {
       titleJa: "",
       description: "",
       tempo: "",
-      file: null,
-      thumbnail: null,
+      scoreKeys: [{ key: "", file: null }],
       price: "",
       referenceUrls: [{ url: "" }],
       lyrics: "",
@@ -79,13 +71,25 @@ export default function ScoreUploadPageForMaster() {
       isForSale: false,
       isOriginal: false,
       genre: "",
-      key: "",
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const {
+    fields: referenceUrlFields,
+    append: appendReferenceUrl,
+    remove: removeReferenceUrl,
+  } = useFieldArray({
     control,
     name: "referenceUrls",
+  });
+
+  const {
+    fields: scoreKeyFields,
+    append: appendScoreKey,
+    remove: removeScoreKey,
+  } = useFieldArray({
+    control,
+    name: "scoreKeys",
   });
 
   // Church selection state
@@ -103,31 +107,45 @@ export default function ScoreUploadPageForMaster() {
     region: "",
     churchId: "",
   });
-  const [fileError, setFileError] = useState<string | null>(null);
-  const [pdfPreview, setPdfPreview] = useState<string | null>(null);
 
-  // File handling
-  const handleFileChange = (file: File | null) => {
-    if (file) {
-      if (file.type !== "application/pdf") {
-        setFileError(t("fileRequired"));
-        return;
+  // File handling state
+  const [fileErrors, setFileErrors] = useState<(string | null)[]>([null]);
+  const [pdfPreviews, setPdfPreviews] = useState<
+    { key: string; url: string | null }[]
+  >(scoreKeyFields.map(() => ({ key: "", url: null })));
+  // pdfjs-dist 로드 상태
+  const [pdfjsLib, setPdfjsLib] = useState<typeof PDFJS | null>(null);
+
+  // pdfjs-dist 동적 로드
+  useEffect(() => {
+    (async () => {
+      try {
+        const pdfjs: typeof PDFJS = await import("pdfjs-dist");
+        const workerSrc = new URL(
+          "pdfjs-dist/build/pdf.worker.min.mjs",
+          import.meta.url
+        ).toString();
+        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+        setPdfjsLib(pdfjs);
+      } catch (error) {
+        console.error("pdfjs-dist 로드 실패:", error);
+        setError(t("pdfjsNotLoaded"));
       }
-      setFileError(null);
-      setPdfPreview(URL.createObjectURL(file));
-      setValue("file", file); // Update form state
-    } else {
-      setFileError(t("fileRequired"));
-      setPdfPreview(null);
-      setValue("file", null);
-    }
-  };
+    })();
+  }, [t]);
 
-  const removePdfPreview = () => {
-    setPdfPreview(null);
-    setFileError(t("fileRequired"));
-    setValue("file", null);
-  };
+  // Update previews when scoreKeys change
+  useEffect(() => {
+    setPdfPreviews((prev) =>
+      scoreKeyFields.map((field, index) => ({
+        key: watch(`scoreKeys.${index}.key`) || "",
+        url: prev[index]?.url || null, // 기존 미리보기 URL 유지
+      }))
+    );
+    setFileErrors((prev) =>
+      scoreKeyFields.map((_, index) => prev[index] || null)
+    );
+  }, [scoreKeyFields, watch]);
 
   // Initialize default values for country, city, region
   useEffect(() => {
@@ -235,30 +253,96 @@ export default function ScoreUploadPageForMaster() {
     fetchChurches();
   }, [selectedRegion, isInitialLoad, selectedCountry, selectedCity, t]);
 
+  // Handle file change with PDF preview generation
+  const handleFileChange = async (index: number, file: File | null) => {
+    const newFileErrors = [...fileErrors];
+    const newPreviews = [...pdfPreviews];
+
+    if (!file) {
+      newFileErrors[index] = t("fileRequired");
+      newPreviews[index] = { key: newPreviews[index]?.key || "", url: null };
+      setFileErrors(newFileErrors);
+      setPdfPreviews(newPreviews);
+      setValue(`scoreKeys.${index}.file`, null);
+      return;
+    }
+
+    if (!pdfjsLib) {
+      newFileErrors[index] = t("pdfjsNotLoaded");
+      newPreviews[index] = { key: file.name, url: null };
+      setFileErrors(newFileErrors);
+      setPdfPreviews(newPreviews);
+      setValue(`scoreKeys.${index}.file`, null);
+      setError(t("pdfjsNotLoaded"));
+      return;
+    }
+
+    try {
+      // Validate file type
+      if (file.type !== "application/pdf") {
+        newFileErrors[index] = t("fileRequired");
+        newPreviews[index] = { key: file.name, url: null };
+        setFileErrors(newFileErrors);
+        setPdfPreviews(newPreviews);
+        setValue(`scoreKeys.${index}.file`, null);
+        return;
+      }
+
+      // Generate PDF preview
+      const previewUrl = await getPdfFirstPagePreview(file, pdfjsLib);
+      newFileErrors[index] = null;
+      newPreviews[index] = { key: file.name, url: previewUrl };
+      setFileErrors(newFileErrors);
+      setPdfPreviews(newPreviews);
+      setValue(`scoreKeys.${index}.file`, file);
+    } catch (error) {
+      console.error("PDF 미리보기 생성 실패:", error);
+      newFileErrors[index] = t("invalidPdf");
+      newPreviews[index] = { key: file.name, url: null };
+      setFileErrors(newFileErrors);
+      setPdfPreviews(newPreviews);
+      setValue(`scoreKeys.${index}.file`, null);
+      setError(t("invalidPdf"));
+    }
+  };
+
+  // Handle addKey to preserve existing previews
+  const handleAddKey = () => {
+    appendScoreKey({ key: "", file: null });
+    setPdfPreviews((prev) => [...prev, { key: "", url: null }]);
+    setFileErrors((prev) => [...prev, null]);
+  };
+
   // Submit handler
   const handleSubmitWithChurch = async (data: ScoreFormData) => {
-    console.log("handleSubmitWithChurch...");
     if (!churchFormData.churchId) {
       setError(t("pleaseFillChurchFields"));
       return;
     }
-    if (!data.file) {
-      setFileError(t("fileRequired"));
+    if (
+      !data.scoreKeys ||
+      data.scoreKeys.length === 0 ||
+      data.scoreKeys.some((sk) => !sk.file || !sk.key)
+    ) {
+      setFileErrors(scoreKeyFields.map(() => t("fileRequired")));
+      setError(t("fileRequired"));
       return;
     }
     setIsSubmitting(true);
-    console.log("isSubmitting...");
     try {
       const formData = new FormData();
-      formData.append("file", data.file);
-      if (data.thumbnail) formData.append("thumbnail", data.thumbnail);
+      data.scoreKeys.forEach((scoreKey, index) => {
+        if (scoreKey.file) {
+          formData.append(`scoreKeys[${index}][file]`, scoreKey.file);
+          formData.append(`scoreKeys[${index}][key]`, scoreKey.key);
+        }
+      });
       formData.append("title", data.title);
       if (data.titleEn) formData.append("titleEn", data.titleEn);
       if (data.titleJa) formData.append("titleJa", data.titleJa);
       if (data.description) formData.append("description", data.description);
       if (data.tempo) formData.append("tempo", data.tempo);
       if (data.price) formData.append("price", data.price);
-      if (data.key) formData.append("key", data.key);
       formData.append("referenceUrls", JSON.stringify(data.referenceUrls));
       if (data.lyrics) formData.append("lyrics", data.lyrics);
       if (data.lyricsEn) formData.append("lyricsEn", data.lyricsEn);
@@ -274,7 +358,6 @@ export default function ScoreUploadPageForMaster() {
       formData.append("isOriginal", String(data.isOriginal));
       formData.append("churchId", churchFormData.churchId);
 
-      console.log("api/scores/master start");
       const response = await fetch("/api/scores/master", {
         method: "POST",
         body: formData,
@@ -298,23 +381,11 @@ export default function ScoreUploadPageForMaster() {
   const isFormValid = () => {
     const isErrorsEmpty = Object.keys(errors).length === 0;
     const hasChurchId = !!churchFormData.churchId;
-    const hasFile = !!watch("file");
+    const scoreKeys = watch("scoreKeys", []);
+    const hasValidScoreKeys =
+      scoreKeys.length > 0 && scoreKeys.every((sk) => sk.key && sk.file);
 
-    console.log(
-      "isFormValid - Errors Empty:",
-      isErrorsEmpty,
-      "Errors:",
-      errors
-    );
-    console.log(
-      "isFormValid - Church ID Present:",
-      hasChurchId,
-      "Church ID:",
-      churchFormData.churchId
-    );
-    console.log("isFormValid - File Present:", hasFile, "File:", watch("file"));
-
-    return isErrorsEmpty && hasChurchId && hasFile;
+    return isErrorsEmpty && hasChurchId && hasValidScoreKeys;
   };
 
   return (
@@ -325,10 +396,19 @@ export default function ScoreUploadPageForMaster() {
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold text-gray-800"
+            className="text-xl font-bold text-gray-800"
           >
             {t("titleForMaster")} {/* "MASTER 악보 업로드" */}
           </motion.h1>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => router.push(`/${locale}/scores`)}
+            className="cursor-pointer flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm font-medium">{t("backToList")}</span>
+          </motion.button>
         </div>
 
         <AnimatePresence>
@@ -415,18 +495,22 @@ export default function ScoreUploadPageForMaster() {
             />
           </div>
 
-          {/* Score Upload Form */}
+          {/* Score Keys Section */}
           <FileUploadSection
-            fileError={fileError ? t("fileRequired") : ""}
-            pdfPreview={pdfPreview}
+            fileError={fileErrors.some((e) => e) ? t("fileRequired") : ""}
+            pdfPreviews={pdfPreviews}
             handleFileChange={handleFileChange}
-            removePdfPreview={removePdfPreview}
             errors={errors}
             control={control}
+            scoreKeyFields={scoreKeyFields}
+            appendScoreKey={handleAddKey} // handleAddKey 사용
+            removeScoreKey={removeScoreKey}
           />
+
+          {/* Genre Selection Section */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              {t("genreLabel")} {/* "장르" */}
+              {t("genreLabel")}
             </label>
             <select
               {...register("genre", { required: t("genreRequired") })}
@@ -446,50 +530,13 @@ export default function ScoreUploadPageForMaster() {
               </p>
             )}
           </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              {t("keyLabel")} {/* "키" */}
-            </label>
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <select
-                  {...register("key", {
-                    required: t("keyRequired"), // "키를 선택해야 합니다."
-                    validate: (value) => {
-                      if (!value) return t("keyRequired");
-                      const [key, tone] = value.split(" ");
-                      if (!isValidKey(key) || !isValidTone(tone)) {
-                        return t("keyRequired");
-                      }
-                      return true;
-                    },
-                  })}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">{t("keyPlaceholder")}</option>
-                  {KEYS.flatMap((key) =>
-                    TONES.map((tone) => (
-                      <option key={`${key} ${tone}`} value={`${key} ${tone}`}>
-                        {`${key} ${tone}`}
-                      </option>
-                    ))
-                  )}
-                </select>
-                {errors.key && (
-                  <p className="text-red-500 text-sm flex items-center space-x-1">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.key.message}</span>
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+
           <TitleSection register={register} errors={errors} />
           <TempoSection register={register} errors={errors} />
           <ReferenceUrlsSection
-            fields={fields}
-            append={append}
-            remove={remove}
+            fields={referenceUrlFields}
+            append={appendReferenceUrl}
+            remove={removeReferenceUrl}
             register={register}
           />
           <LyricsSection register={register} errors={errors} />
@@ -499,7 +546,7 @@ export default function ScoreUploadPageForMaster() {
 
           <motion.button
             type="submit"
-            // disabled={isSubmitting || !isFormValid()}
+            disabled={isSubmitting || !isFormValid()}
             whileHover={isFormValid() ? { scale: 1.05 } : {}}
             whileTap={isFormValid() ? { scale: 0.95 } : {}}
             className={`w-full p-3 rounded-md text-white transition-colors ${

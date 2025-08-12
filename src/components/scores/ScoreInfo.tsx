@@ -22,6 +22,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
   const [activeLyricsTab, setActiveLyricsTab] = useState<"ko" | "en" | "ja">(
     "ko"
   );
+  const [selectedKey, setSelectedKey] = useState<string>(""); // 선택된 키 상태 추가
 
   const toggleDescription = () => setIsDescriptionOpen(!isDescriptionOpen);
   const toggleLyrics = () => setIsLyricsOpen(!isLyricsOpen);
@@ -32,11 +33,15 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
     ja: score.lyricsJa || t("none"),
   };
 
-  // 프록시 URL 생성
-  const proxyFileUrl =
-    score.id && score.fileUrl
-      ? `${appUrl}/api/proxy/creation/${score.id}/file`
-      : "#";
+  // View PDF 버튼 클릭 시 새 창 열기
+  const handleViewPdf = () => {
+    if (selectedKey) {
+      window.open(
+        `${appUrl}/api/proxy/creation/${score.id}/file?key=${encodeURIComponent(selectedKey)}`,
+        "_blank"
+      );
+    }
+  };
 
   return (
     <div className="mx-auto">
@@ -139,7 +144,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
                 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
-                className="mt-3 overflow-hidden text-gray-700 rounded-lg border border-gray-200  p-3"
+                className="mt-3 overflow-hidden text-gray-700 rounded-lg border border-gray-200 p-3"
                 style={{ whiteSpace: "pre-wrap" }}
               >
                 {lyricsContent[activeLyricsTab]}
@@ -152,7 +157,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Composer */}
           {score.composer && (
-            <div className="flex items-center rounded-lg border border-gray-200  p-3">
+            <div className="flex items-center rounded-lg border border-gray-200 p-3">
               <span className="w-28 font-medium text-gray-900">
                 {t("composer")}
               </span>
@@ -162,7 +167,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
 
           {/* Lyricist */}
           {score.lyricist && (
-            <div className="flex items-center rounded-lg border border-gray-200  p-3">
+            <div className="flex items-center rounded-lg border border-gray-200 p-3">
               <span className="w-28 font-medium text-gray-900">
                 {t("lyricist")}
               </span>
@@ -171,7 +176,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
           )}
 
           {/* Is Original */}
-          <div className="flex items-center rounded-lg border border-gray-200  p-3">
+          <div className="flex items-center rounded-lg border border-gray-200 p-3">
             <span className="w-28 font-medium text-gray-900">
               {t("isOriginal")}
             </span>
@@ -182,7 +187,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
 
           {/* Price */}
           {score.price && (
-            <div className="flex items-center rounded-lg border border-gray-200  p-3">
+            <div className="flex items-center rounded-lg border border-gray-200 p-3">
               <span className="w-28 font-medium text-gray-900">
                 {t("price")}
               </span>
@@ -193,7 +198,7 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
           )}
 
           {/* Is Open */}
-          <div className="flex items-center rounded-lg border border-gray-200  p-3">
+          <div className="flex items-center rounded-lg border border-gray-200 p-3">
             <span className="w-28 font-medium text-gray-900">
               {t("isOpen")}
             </span>
@@ -210,18 +215,58 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex flex-col gap-4 sm:flex-row mt-20"
         >
-          {user?.churchId === score.churchId && score.fileUrl && (
-            <a
-              href={proxyFileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1"
-            >
-              <Button aria-label={t("viewPdf")}>
-                <FileMusic className="h-5 w-5" />
-                <span>{t("viewPdf")}</span>
-              </Button>
-            </a>
+          {user?.churchId === score.churchId && score.scoreKeys.length > 0 && (
+            <div className="flex-1">
+              {score.scoreKeys.length === 1 ? (
+                <a
+                  href={`${appUrl}/api/proxy/creation/${score.id}/file?key=${encodeURIComponent(score.scoreKeys[0].key)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full"
+                >
+                  <Button
+                    aria-label={`${t("viewPdf")} (${score.scoreKeys[0].key})`}
+                  >
+                    <FileMusic className="h-5 w-5" />
+                    <span>
+                      {t("viewPdf")} ({score.scoreKeys[0].key})
+                    </span>
+                  </Button>
+                </a>
+              ) : (
+                <div className="space-y-3">
+                  <label
+                    htmlFor="key-select"
+                    className="text-sm font-medium text-gray-900"
+                  >
+                    {t("selectKey")}
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-3 items-center">
+                    <select
+                      id="key-select"
+                      value={selectedKey}
+                      onChange={(e) => setSelectedKey(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    >
+                      <option value="">{t("selectKey")}</option>
+                      {score.scoreKeys.map((sk) => (
+                        <option key={sk.key} value={sk.key}>
+                          {sk.key}
+                        </option>
+                      ))}
+                    </select>
+                    <Button
+                      onClick={handleViewPdf}
+                      isDisabled={!selectedKey}
+                      aria-label={`${t("viewPdf")} ${selectedKey ? `(${selectedKey})` : ""}`}
+                    >
+                      <FileMusic className="h-5 w-5" />
+                      <span>{t("viewPdf")}</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
           {score.isForSale && score.price && (
             <Button

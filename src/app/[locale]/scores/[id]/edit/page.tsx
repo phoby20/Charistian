@@ -1,7 +1,9 @@
+// src/app/[locale]/scores/[id]/edit/page.tsx
 "use client";
 import { useScoreForm } from "@/app/hooks/useScoreForm";
 import { ComposerLyricistSection } from "@/components/scores/ComposerLyricistSection";
 import { DescriptionSection } from "@/components/scores/DescriptionSection";
+import { FileUploadSection } from "@/components/scores/FileUploadSection";
 import { LyricsSection } from "@/components/scores/LyricsSection";
 import { OptionsSection } from "@/components/scores/OptionsSection";
 import { ReferenceUrlsSection } from "@/components/scores/ReferenceUrlsSection";
@@ -11,33 +13,35 @@ import { TitleSection } from "@/components/scores/TitleSection";
 import { GENRES } from "@/data/genre";
 import { motion } from "framer-motion";
 import { ArrowLeft, AlertCircle } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import Loading from "@/components/Loading";
 import { ScoreResponse, ScoreFormData, ApiErrorResponse } from "@/types/score";
-import { constants } from "@/constants/intex";
-
-const { KEYS, TONES } = constants;
-
-// 타입 가드를 위한 유틸리티 함수
-const isValidKey = (value: string): value is (typeof KEYS)[number] =>
-  KEYS.includes(value as (typeof KEYS)[number]);
-const isValidTone = (value: string): value is (typeof TONES)[number] =>
-  TONES.includes(value as (typeof TONES)[number]);
+import Button from "@/components/Button";
 
 export default function ScoreEditPage() {
   const t = useTranslations("ScoreEdit");
   const router = useRouter();
   const params = useParams();
-  const { id, locale } = params as { id: string; locale: string };
+  const { id } = params as { id: string };
+  const locale = useLocale();
   const {
     form,
-    fields,
-    append,
-    remove,
+    referenceUrlFields,
+    scoreKeyFields,
+    appendReferenceUrl,
+    removeReferenceUrl,
+    appendScoreKey,
+    removeScoreKey,
+    fileError,
+    setFileError,
+    pdfPreviews,
+    setPdfPreviews,
     saleStartDate,
     saleEndDate,
+    isFormValid,
+    handleFileChange,
     handleDateChange,
     control,
     isLoading,
@@ -53,36 +57,12 @@ export default function ScoreEditPage() {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = form;
 
-  const { title, tempo, lyrics, description, price, isForSale, key, genre } =
-    watch();
-
-  // 폼 유효성 검사
-  const isFormValid = (): boolean => {
-    const requiredFieldsFilled =
-      !!title &&
-      !!tempo &&
-      !!lyrics &&
-      !!description &&
-      !!key &&
-      !!genre &&
-      !errors.title &&
-      !errors.tempo &&
-      !errors.lyrics &&
-      !errors.description &&
-      !errors.key &&
-      !errors.genre;
-    const priceFilled = !isForSale || (isForSale && !!price && !errors.price);
-    return requiredFieldsFilled && priceFilled;
-  };
-
-  // fetchScore를 메모이제이션
+  // fetchScore 메모이제이션
   const fetchScore = useCallback(async () => {
     if (!id) return;
 
-    // 캐시 확인
     if (cacheRef.current.id === id && cacheRef.current.data) {
       console.log("Using cached data for ID:", id);
       const data = cacheRef.current.data;
@@ -90,7 +70,6 @@ export default function ScoreEditPage() {
       form.setValue("titleEn", data.titleEn || "");
       form.setValue("titleJa", data.titleJa || "");
       form.setValue("genre", data.genre || "");
-      form.setValue("key", data.key || "");
       form.setValue("tempo", data.tempo || "");
       form.setValue("description", data.description || "");
       form.setValue("lyrics", data.lyrics || "");
@@ -104,15 +83,24 @@ export default function ScoreEditPage() {
       form.setValue("price", data.price ? String(data.price) : "");
       form.setValue("saleStartDate", data.saleStartDate || undefined);
       form.setValue("saleEndDate", data.saleEndDate || undefined);
+      if (data.scoreKeys?.length) {
+        form.setValue(
+          "scoreKeys",
+          data.scoreKeys.map((sk) => ({ key: sk.key, file: sk.fileUrl }))
+        );
+        setPdfPreviews(
+          data.scoreKeys.map((sk) => ({ key: sk.key, url: sk.fileUrl }))
+        );
+      }
       if (data.referenceUrls?.length) {
-        remove(0); // 기본 빈 URL 제거
-        data.referenceUrls.forEach((url) => append({ url }));
+        removeReferenceUrl(0);
+        data.referenceUrls.forEach((url) => appendReferenceUrl({ url }));
       }
       setIsFetching(false);
       return;
     }
 
-    console.log("Fetching score for ID:", id); // 디버깅 로그
+    console.log("Fetching score for ID:", id);
     try {
       setIsFetching(true);
       const response = await fetch(`/api/scores/${id}`);
@@ -122,15 +110,12 @@ export default function ScoreEditPage() {
       }
       const data: ScoreResponse = await response.json();
 
-      // 캐시에 저장
       cacheRef.current = { id, data };
 
-      // 폼 필드 초기화
       form.setValue("title", data.title || "");
       form.setValue("titleEn", data.titleEn || "");
       form.setValue("titleJa", data.titleJa || "");
       form.setValue("genre", data.genre || "");
-      form.setValue("key", data.key || "");
       form.setValue("tempo", data.tempo || "");
       form.setValue("description", data.description || "");
       form.setValue("lyrics", data.lyrics || "");
@@ -144,9 +129,18 @@ export default function ScoreEditPage() {
       form.setValue("price", data.price ? String(data.price) : "");
       form.setValue("saleStartDate", data.saleStartDate || undefined);
       form.setValue("saleEndDate", data.saleEndDate || undefined);
+      if (data.scoreKeys?.length) {
+        form.setValue(
+          "scoreKeys",
+          data.scoreKeys.map((sk) => ({ key: sk.key, file: sk.fileUrl }))
+        );
+        setPdfPreviews(
+          data.scoreKeys.map((sk) => ({ key: sk.key, url: sk.fileUrl }))
+        );
+      }
       if (data.referenceUrls?.length) {
-        remove(0); // 기본 빈 URL 제거
-        data.referenceUrls.forEach((url) => append({ url }));
+        removeReferenceUrl(0);
+        data.referenceUrls.forEach((url) => appendReferenceUrl({ url }));
       }
 
       setIsFetching(false);
@@ -156,44 +150,60 @@ export default function ScoreEditPage() {
       console.error("Fetch error:", error);
       setIsFetching(false);
     }
-  }, [id, form, append, remove, t]); // 최소 의존성 유지
+  }, [id, form, appendReferenceUrl, removeReferenceUrl, setPdfPreviews, t]);
 
   useEffect(() => {
     fetchScore();
-  }, [id]); // 의존성 배열에서 fetchScore 제거, id만 사용
+  }, [fetchScore]);
 
   const handleFormSubmit = async (data: ScoreFormData) => {
-    if (isLoading) return; // 중복 제출 방지
+    if (isLoading) return;
     try {
-      const response = await fetch(`/api/scores/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: data.title,
-          titleEn: data.titleEn || null,
-          titleJa: data.titleJa || null,
-          genre: data.genre || null,
-          key: data.key || null,
-          tempo: data.tempo || null,
-          description: data.description || null,
-          lyrics: data.lyrics || null,
-          lyricsEn: data.lyricsEn || null,
-          lyricsJa: data.lyricsJa || null,
-          composer: data.composer || null,
-          lyricist: data.lyricist || null,
-          isPublic: data.isPublic || false,
-          isForSale: data.isForSale || false,
-          isOriginal: data.isOriginal || false,
-          price: data.price ? Number(data.price) : null,
-          saleStartDate: data.saleStartDate || null,
-          saleEndDate: data.saleEndDate || null,
-          referenceUrls:
+      const formData = new FormData();
+      formData.append("title", data.title);
+      if (data.titleEn) formData.append("titleEn", data.titleEn);
+      if (data.titleJa) formData.append("titleJa", data.titleJa);
+      if (data.genre) formData.append("genre", data.genre);
+      if (data.tempo) formData.append("tempo", data.tempo);
+      if (data.description) formData.append("description", data.description);
+      if (data.lyrics) formData.append("lyrics", data.lyrics);
+      if (data.lyricsEn) formData.append("lyricsEn", data.lyricsEn);
+      if (data.lyricsJa) formData.append("lyricsJa", data.lyricsJa);
+      if (data.composer) formData.append("composer", data.composer);
+      if (data.lyricist) formData.append("lyricist", data.lyricist);
+      formData.append("isPublic", String(data.isPublic || false));
+      formData.append("isForSale", String(data.isForSale || false));
+      formData.append("isOriginal", String(data.isOriginal || false));
+      if (data.price) formData.append("price", data.price);
+      if (data.saleStartDate)
+        formData.append("saleStartDate", data.saleStartDate);
+      if (data.saleEndDate) formData.append("saleEndDate", data.saleEndDate);
+      if (data.referenceUrls) {
+        formData.append(
+          "referenceUrls",
+          JSON.stringify(
             data.referenceUrls
-              ?.map((r) => r.url)
+              .map((r) => r.url)
               .filter(
                 (url): url is string => url !== undefined && url.trim() !== ""
-              ) || [],
-        }),
+              )
+          )
+        );
+      }
+      if (data.scoreKeys) {
+        data.scoreKeys.forEach((sk, index) => {
+          formData.append(`scoreKeys[${index}][key]`, sk.key);
+          if (sk.file instanceof File) {
+            formData.append(`scoreKeys[${index}][file]`, sk.file);
+          } else if (sk.file) {
+            formData.append(`scoreKeys[${index}][fileUrl]`, sk.file);
+          }
+        });
+      }
+
+      const response = await fetch(`/api/scores/${id}`, {
+        method: "PUT",
+        body: formData,
       });
 
       if (!response.ok) {
@@ -201,7 +211,6 @@ export default function ScoreEditPage() {
         throw new Error(errorData.error || t("updateError"));
       }
 
-      // 캐시 초기화 (업데이트 후 최신 데이터로 갱신 필요)
       cacheRef.current = { id: null, data: null };
       router.push(`/${locale}/scores/${id}`);
     } catch (error: unknown) {
@@ -209,6 +218,7 @@ export default function ScoreEditPage() {
         error instanceof Error ? error.message : t("updateError");
       setError(errorMessage);
       console.error("Submit error:", error);
+      setFileError(errorMessage);
     }
   };
 
@@ -233,7 +243,7 @@ export default function ScoreEditPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push(`/${locale}/scores`)}
-            className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-blue-700 transition-all"
+            className="cursor-pointer flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-blue-700 transition-all"
             aria-label={t("backToList")}
           >
             <ArrowLeft className="w-5 h-5" />
@@ -252,9 +262,9 @@ export default function ScoreEditPage() {
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold text-gray-800"
+            className="text-xl font-bold text-gray-800"
           >
-            {t("title")} {/* "악보 수정" */}
+            {t("title")}
           </motion.h1>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -267,10 +277,19 @@ export default function ScoreEditPage() {
           </motion.button>
         </div>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-          <TitleSection register={register} errors={errors} />
+          <FileUploadSection
+            fileError={fileError ? t("fileRequired") : ""}
+            pdfPreviews={pdfPreviews}
+            handleFileChange={handleFileChange}
+            errors={errors}
+            control={control}
+            scoreKeyFields={scoreKeyFields}
+            appendScoreKey={appendScoreKey}
+            removeScoreKey={removeScoreKey}
+          />
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              {t("genreLabel")} {/* "장르" */}
+              {t("genreLabel")}
             </label>
             <select
               {...register("genre", { required: t("genreRequired") })}
@@ -294,49 +313,12 @@ export default function ScoreEditPage() {
               </p>
             )}
           </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              {t("keyLabel")} {/* "키" */}
-            </label>
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <select
-                  {...register("key", {
-                    required: t("keyRequired"), // "키를 선택해야 합니다."
-                    validate: (value) => {
-                      if (!value) return t("keyRequired");
-                      const [key, tone] = value.split(" ");
-                      if (!isValidKey(key) || !isValidTone(tone)) {
-                        return t("keyRequired");
-                      }
-                      return true;
-                    },
-                  })}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">{t("keyPlaceholder")}</option>
-                  {KEYS.flatMap((key) =>
-                    TONES.map((tone) => (
-                      <option key={`${key} ${tone}`} value={`${key} ${tone}`}>
-                        {`${key} ${tone}`}
-                      </option>
-                    ))
-                  )}
-                </select>
-                {errors.key && (
-                  <p className="text-red-500 text-sm flex items-center space-x-1">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.key.message}</span>
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+          <TitleSection register={register} errors={errors} />
           <TempoSection register={register} errors={errors} />
           <ReferenceUrlsSection
-            fields={fields}
-            append={append}
-            remove={remove}
+            fields={referenceUrlFields}
+            append={appendReferenceUrl}
+            remove={removeReferenceUrl}
             register={register}
           />
           <LyricsSection register={register} errors={errors} />
@@ -351,19 +333,9 @@ export default function ScoreEditPage() {
             handleDateChange={handleDateChange}
             errors={errors}
           />
-          <motion.button
-            type="submit"
-            disabled={isLoading || !isFormValid()}
-            whileHover={isFormValid() ? { scale: 1.05 } : {}}
-            whileTap={isFormValid() ? { scale: 0.95 } : {}}
-            className={`cursor-pointer w-full p-3 rounded-md text-white transition-colors ${
-              isFormValid()
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
-          >
-            {t("updateButton")} {/* "수정" */}
-          </motion.button>
+          <Button type="submit" isDisabled={isLoading || !isFormValid()}>
+            {t("updateButton")}
+          </Button>
         </form>
       </div>
     </div>

@@ -1,17 +1,16 @@
-// src/components/scores/ScoreTable.tsx
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Plus, Play, Pause } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Score, SelectedSong } from "@/types/score";
+import { ScoreResponse } from "@/types/score";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useState, useEffect, useRef } from "react";
 import { getDisplayTitle, getSecondaryTitles } from "@/utils/getDisplayTitle";
 
 interface ScoreTableProps {
-  scores: Score[];
-  onAddSong: (score: SelectedSong) => void;
+  scores: ScoreResponse[];
+  onAddSong: (score: ScoreResponse) => void; // 타입 변경
   locale: string;
   getGenreLabel: (genreValue: string) => string;
 }
@@ -59,11 +58,10 @@ export default function ScoreTable({
       await player.pauseVideo();
       setCurrentPlayingId("");
     } else {
-      // Pause other playing video
       if (currentPlayingId && playerRefs.current[currentPlayingId]) {
         await playerRefs.current[currentPlayingId].pauseVideo();
       }
-      await player.playVideo(); // 나머지는 onStateChange에서 처리
+      await player.playVideo();
     }
   };
 
@@ -126,19 +124,18 @@ export default function ScoreTable({
       <table className="w-full bg-white rounded-xl shadow-lg border border-gray-200">
         <thead className="bg-gray-100">
           <tr>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-sm  font-semibold text-gray-700 w-12"></th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-sm  font-semibold text-gray-700 min-w-[100px] sm:min-w-[150px]">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-sm font-semibold text-gray-700 w-12"></th>
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-sm font-semibold text-gray-700 min-w-[100px] sm:min-w-[150px]">
               {t("titleHeader")}
             </th>
-            <th className="flex flex-col py-2 sm:py-3 px-2 sm:px-4 text-left text-sm  font-semibold text-gray-700 min-w-[70px] sm:min-w-[90px]">
+            <th className="flex flex-col py-2 sm:py-3 px-2 sm:px-4 text-left text-sm font-semibold text-gray-700 min-w-[70px] sm:min-w-[90px]">
               <span>{t("genre")} / </span>
               <span>{t("tempo")}</span>
             </th>
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-sm  font-semibold text-gray-700 min-w-[50px] sm:min-w-[70px]">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-sm font-semibold text-gray-700 min-w-[50px] sm:min-w-[70px]">
               {t("key")}
             </th>
-
-            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-sm  font-semibold text-gray-700 w-12">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-sm font-semibold text-gray-700 w-12">
               {t("action")}
             </th>
           </tr>
@@ -204,23 +201,16 @@ export default function ScoreTable({
                   </div>
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-sm truncate">
-                  {score.key || t("none")}
+                  {score.scoreKeys.length > 0
+                    ? score.scoreKeys.map((sk) => sk.key).join(", ")
+                    : t("none")}
                 </td>
-
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-center">
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() =>
-                      onAddSong({
-                        id: score.id,
-                        title: score.title,
-                        titleEn: score.titleEn,
-                        titleJa: score.titleJa,
-                        key: score.key ?? "",
-                        referenceUrls: score.referenceUrls ?? [],
-                        fileUrl: score.fileUrl,
-                      })
+                    onClick={
+                      () => onAddSong(score) // ScoreResponse 객체 직접 전달
                     }
                     className="text-[#ff66c4] hover:text-[#ff59bf] cursor-pointer p-2 sm:p-3"
                   >

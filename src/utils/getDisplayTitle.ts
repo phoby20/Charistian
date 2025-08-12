@@ -2,8 +2,8 @@
 
 export const getDisplayTitle = (
   title: string,
-  titleEn: string,
-  titleJa: string,
+  titleEn: string | null,
+  titleJa: string | null,
   locale: string
 ): string => {
   if (locale === "ko") {
@@ -18,8 +18,8 @@ export const getDisplayTitle = (
 // 새로운 보조 제목 생성 함수
 export const getSecondaryTitles = (
   title: string,
-  titleEn: string,
-  titleJa: string,
+  titleEn: string | null,
+  titleJa: string | null,
   locale: string
 ): string[] => {
   const titles: string[] = [];

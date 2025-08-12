@@ -84,18 +84,24 @@ export async function GET(
   if (authResult.response) return authResult.response;
 
   const { id } = await context.params;
+  const key = req.nextUrl.searchParams.get("key");
 
   try {
-    // Creation 조회
-    const creation = await prisma.creation.findUnique({
-      where: { id },
+    // ScoreKey에서 특정 key에 해당하는 fileUrl 조회
+    const scoreKey = await prisma.scoreKey.findFirst({
+      where: {
+        creationId: id,
+        ...(key ? { key } : {}), // key 쿼리가 있으면 필터링, 없으면 첫 번째 key
+      },
       select: { fileUrl: true },
     });
 
-    if (!creation || !creation.fileUrl) {
-      console.error(`Creation 또는 파일을 찾을 수 없습니다. creationId: ${id}`);
+    if (!scoreKey || !scoreKey.fileUrl) {
+      console.error(
+        `ScoreKey 또는 파일을 찾을 수 없습니다. creationId: ${id}, key: ${key || "any"}`
+      );
       return NextResponse.json(
-        { error: "Creation 또는 파일을 찾을 수 없습니다." },
+        { error: "악보 파일을 찾을 수 없습니다." },
         { status: 404 }
       );
     }
@@ -110,11 +116,11 @@ export async function GET(
     }
 
     // PDF 파일 가져오기
-    console.log(`Fetching PDF from: ${creation.fileUrl}`);
-    const response = await fetch(creation.fileUrl);
+    console.log(`Fetching PDF from: ${scoreKey.fileUrl}`);
+    const response = await fetch(scoreKey.fileUrl);
     if (!response.ok) {
       console.error(
-        `PDF 다운로드 실패: ${creation.fileUrl}, status: ${response.status}`
+        `PDF 다운로드 실패: ${scoreKey.fileUrl}, status: ${response.status}`
       );
       return NextResponse.json(
         { error: "PDF 파일을 가져오는 데 실패했습니다." },
@@ -128,11 +134,14 @@ export async function GET(
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="creation_${id}.pdf"`,
+        "Content-Disposition": `inline; filename="creation_${id}_${key || "score"}.pdf"`,
       },
     });
   } catch (error) {
-    console.error(`PDF 프록시 오류 (creationId: ${id}):`, error);
+    console.error(
+      `PDF 프록시 오류 (creationId: ${id}, key: ${key || "any"}):`,
+      error
+    );
     return handleApiError(error, "PDF 파일 프록시");
   }
 }

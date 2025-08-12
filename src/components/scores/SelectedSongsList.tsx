@@ -27,6 +27,7 @@ interface SelectedSongsListProps {
   selectedSongs: SelectedSong[];
   onRemoveSong: (index: number) => void;
   onReorderSongs: (newSongs: SelectedSong[]) => void;
+  onKeySelect: (index: number, key: string) => void; // 새 prop 추가
   t: ReturnType<typeof useTranslations<"Setlist">>;
   onUrlSelect: (songId: string, url: string) => void;
   selectedUrls: { [key: string]: string };
@@ -55,6 +56,7 @@ export default function SelectedSongsList({
   selectedSongs,
   onRemoveSong,
   onReorderSongs,
+  onKeySelect, // 새 prop 추가
   t,
   onUrlSelect,
   selectedUrls,
@@ -103,7 +105,6 @@ export default function SelectedSongsList({
 
   const handlePlayPause = useCallback(
     debounce(async (scoreId: string) => {
-      // 플레이어 준비 상태와 playerRef 확인
       if (!playerRef.current || !isPlayerReady) {
         console.warn("Player is not ready yet, adding to pending play");
         setPendingPlay(scoreId);
@@ -112,13 +113,11 @@ export default function SelectedSongsList({
 
       try {
         if (currentPlayingId === scoreId) {
-          // 현재 재생 중인 비디오 일시정지
           await playerRef.current.pauseVideo();
           setCurrentPlayingId(null);
           setPendingPlay(null);
           setIsMuted(false);
         } else {
-          // 새로운 비디오 재생
           if (currentPlayingId) {
             await playerRef.current.pauseVideo();
           }
@@ -439,6 +438,7 @@ export default function SelectedSongsList({
                         count={count}
                         onRemoveSong={onRemoveSong}
                         onPlayPause={handlePlayPause}
+                        onKeySelect={onKeySelect} // 새 prop 전달
                         isOver={overIndex === index}
                         isDraggingAny={isDraggingAny}
                         currentPlayingId={currentPlayingId}

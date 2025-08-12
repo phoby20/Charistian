@@ -563,6 +563,7 @@
     "showLess": "Show Less",
     "noGenre": "No Genre",
     "viewPdf": "View PDF",
+    "selectKey": "Select a key",
     "editScore": "Edit"
   },
   "tempoRange": "Tempo Range",
@@ -691,17 +692,23 @@
     "sharedMessage": "Setlist shared successfully!",
     "sharedTeams": "Shared Teams",
     "noTeamsShared": "No teams shared.",
+    "selectKey": "Select a key",
     "goToSetlists": "Go to Setlist List"
   },
   "scoreList": "Score List",
   "setlistList": "Setlist List",
   "FileUploadSection": {
     "label": "Score File (PDF)",
+    "keyLabel": "Key",
+    "keyPlaceholder": "Please select the key of the score",
+    "keyRequired": "Selecting a key is required.",
+    "addKey": "Add Score",
     "required": "PDF file is required.",
     "selectOrDrag": "Select or drag a PDF file",
     "fileSelected": "File selected: {fileName}",
     "invalidPdf": "Not a valid PDF file.",
     "fileTooLarge": "File size cannot exceed 10MB.",
+    "loadingPreview": "Loading preview...",
     "fileReadError": "An error occurred while reading the file."
   },
   "filterByTeam": "Filter by Team",

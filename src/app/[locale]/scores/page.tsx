@@ -1,3 +1,4 @@
+// src/app/[locale]/scores/page.tsx
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -11,11 +12,11 @@ import ScoreTable from "@/components/scores/ScoreTable";
 import SearchFilters from "@/components/scores/SearchFilters";
 import PaginationControls from "@/components/scores/PaginationControls";
 import SelectedSongList from "@/components/scores/SelectedSongFlotingList";
-import { Score } from "@/types/score";
+import { ScoreResponse } from "@/types/score";
 import Button from "@/components/Button";
 
 export default function ScoreList() {
-  const [scores, setScores] = useState<Score[]>([]);
+  const [scores, setScores] = useState<ScoreResponse[]>([]);
   const [usageLimits, setUsageLimits] = useState<UsageLimits | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,7 +38,6 @@ export default function ScoreList() {
 
   // 키 정규화 함수
   const normalizeKey = (key: string): string => {
-    // 샤프(#) 또는 플랫(b)을 제거하고 기본 음계만 반환
     return key.split(" ")[0].replace(/[#b]/, "");
   };
 
@@ -98,17 +98,16 @@ export default function ScoreList() {
   }, [locale, t]);
 
   // 곡 추가 핸들러
-  const handleAddSong = (score: SelectedSong) => {
+  const handleAddSong = (score: ScoreResponse) => {
     setSelectedSongList((prev) => [
       ...prev,
       {
         id: score.id,
         title: score.title,
-        titleEn: score.titleEn,
-        titleJa: score.titleJa,
-        key: score.key,
-        referenceUrls: score.referenceUrls,
-        fileUrl: score.fileUrl,
+        titleEn: score.titleEn || "",
+        titleJa: score.titleJa || "",
+        scoreKeys: score.scoreKeys || "",
+        referenceUrls: score.referenceUrls || [],
       },
     ]);
   };
@@ -124,11 +123,11 @@ export default function ScoreList() {
 
   // 템포 범위 계산
   const maxTempoLimit = Math.max(
-    ...scores.map((score) => score.tempo ?? 0),
+    ...scores.map((score) => (score.tempo ? parseInt(score.tempo) : 0)),
     200
   );
   const minTempoLimit = Math.min(
-    ...scores.map((score) => score.tempo ?? Infinity),
+    ...scores.map((score) => (score.tempo ? parseInt(score.tempo) : Infinity)),
     0
   );
 
@@ -184,29 +183,33 @@ export default function ScoreList() {
       (score.lyricsJa?.toLowerCase().includes(searchLower) ?? false);
     const matchesGenre =
       selectedGenres.length === 0 || selectedGenres.includes(score.genre ?? "");
-    const matchesTempo =
-      score.tempo !== undefined &&
-      score.tempo >= minAvailableTempo &&
-      score.tempo <= maxAvailableTempo;
 
-    // 키 필터링: 샤프/플랫을 제거한 기본 음계로 비교
+    // 템포 필터링: tempo가 string이므로 Number로 변환
+    const matchesTempo =
+      score.tempo === undefined ||
+      (Number(score.tempo) >= minAvailableTempo &&
+        Number(score.tempo) <= maxAvailableTempo);
+
+    // 키 필터링: scoreKeys 배열을 순회하여 하나라도 일치하면 포함
     const matchesKey =
       selectedKeys.length === 0 ||
-      (score.key && selectedKeys.includes(normalizeKey(score.key)));
+      score.scoreKeys.some((sk) => selectedKeys.includes(normalizeKey(sk.key)));
 
-    // 샤프/플랫/내추럴 필터링
+    // 샤프/플랫/내추럴 필터링: scoreKeys 배열을 순회
     const matchesSharp =
       selectedSharp === "all" ||
-      (score.key &&
-        (selectedSharp === "sharp"
-          ? score.key.includes("#")
+      score.scoreKeys.some((sk) =>
+        selectedSharp === "sharp"
+          ? sk.key.includes("#")
           : selectedSharp === "flat"
-            ? score.key.includes("b")
-            : !score.key.includes("#") && !score.key.includes("b")));
+            ? sk.key.includes("b")
+            : !sk.key.includes("#") && !sk.key.includes("b")
+      );
 
-    // 조 필터링
+    // 조 필터링: scoreKeys 배열을 순회
     const matchesTone =
-      selectedTone === "" || (score.key && score.key.endsWith(selectedTone));
+      selectedTone === "" ||
+      score.scoreKeys.some((sk) => sk.key.endsWith(selectedTone));
 
     return (
       matchesSearch &&
@@ -291,13 +294,13 @@ export default function ScoreList() {
                       cursor: isUploadButtonDisabled(usageLimits)
                         ? "not-allowed"
                         : "pointer",
-                      transition: "background 0.2s ease", // hover 전환 효과
+                      transition: "background 0.2s ease",
                       ...(isUploadButtonDisabled(usageLimits)
                         ? {}
                         : {
                             ":hover": {
                               background:
-                                "linear-gradient(to right, #2563EB, #1D4ED8)", // hover:from-blue-600 hover:to-blue-700
+                                "linear-gradient(to right, #2563EB, #1D4ED8)",
                             },
                           }),
                     }}

@@ -15,31 +15,29 @@ import { motion } from "framer-motion";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import Loading from "@/components/Loading";
-import { constants } from "@/constants/intex";
-
-const { KEYS, TONES } = constants;
-
-// 타입 가드를 위한 유틸리티 함수
-const isValidKey = (value: string): value is (typeof KEYS)[number] =>
-  KEYS.includes(value as (typeof KEYS)[number]);
-const isValidTone = (value: string): value is (typeof TONES)[number] =>
-  TONES.includes(value as (typeof TONES)[number]);
+import Button from "@/components/Button";
+import type * as PDFJS from "pdfjs-dist";
+import { getPdfFirstPagePreview } from "@/utils/pdf-preview";
 
 export default function ScoreUploadPage() {
   const t = useTranslations("ScoreUpload");
   const {
     form,
-    fields,
-    append,
-    remove,
+    referenceUrlFields,
+    scoreKeyFields,
+    appendReferenceUrl,
+    removeReferenceUrl,
+    appendScoreKey,
+    removeScoreKey,
     fileError,
-    pdfPreview,
+    pdfPreviews: initialPdfPreviews,
+    setPdfPreviews,
     saleStartDate,
     saleEndDate,
     isFormValid,
-    handleFileChange,
-    removePdfPreview,
+    handleFileChange: originalHandleFileChange,
     handleDateChange,
     onSubmit,
     control,
@@ -47,6 +45,93 @@ export default function ScoreUploadPage() {
   } = useScoreForm();
   const router = useRouter();
   const locale = useLocale();
+
+  // 로컬 pdfPreviews 상태
+  const [pdfPreviews, setLocalPdfPreviews] = useState<
+    { key: string; url: string | null }[]
+  >([]);
+  // pdfjs-dist 로드 상태
+  const [pdfjsLib, setPdfjsLib] = useState<typeof PDFJS | null>(null);
+
+  // pdfjs-dist 동적 로드
+  useEffect(() => {
+    (async () => {
+      try {
+        const pdfjs: typeof PDFJS = await import("pdfjs-dist");
+        const workerSrc = new URL(
+          "pdfjs-dist/build/pdf.worker.min.mjs",
+          import.meta.url
+        ).toString();
+        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+        setPdfjsLib(pdfjs);
+      } catch (error) {
+        console.error("pdfjs-dist 로드 실패:", error);
+      }
+    })();
+  }, []);
+
+  // 초기 pdfPreviews 동기화
+  useEffect(() => {
+    setLocalPdfPreviews(
+      initialPdfPreviews.length
+        ? initialPdfPreviews
+        : scoreKeyFields.map(() => ({ key: "", url: null }))
+    );
+  }, [initialPdfPreviews, scoreKeyFields]);
+
+  // handleFileChange에서 미리보기 생성 및 동기화
+  const handleFileChange = async (index: number, file: File | null) => {
+    originalHandleFileChange(index, file);
+    if (!file || !pdfjsLib) {
+      setLocalPdfPreviews((prev) => {
+        const newPreviews = [...prev];
+        if (index >= newPreviews.length) {
+          newPreviews.push({ key: "", url: null });
+        } else {
+          newPreviews[index] = { key: "", url: null };
+        }
+        setPdfPreviews(newPreviews);
+        return newPreviews;
+      });
+      return;
+    }
+
+    try {
+      const previewUrl = await getPdfFirstPagePreview(file, pdfjsLib);
+      setLocalPdfPreviews((prev) => {
+        const newPreviews = [...prev];
+        if (index >= newPreviews.length) {
+          newPreviews.push({ key: file.name, url: previewUrl });
+        } else {
+          newPreviews[index] = { key: file.name, url: previewUrl };
+        }
+        setPdfPreviews(newPreviews);
+        return newPreviews;
+      });
+    } catch (error) {
+      console.error("PDF 미리보기 생성 실패:", error);
+      setLocalPdfPreviews((prev) => {
+        const newPreviews = [...prev];
+        if (index >= newPreviews.length) {
+          newPreviews.push({ key: file.name, url: null });
+        } else {
+          newPreviews[index] = { key: file.name, url: null };
+        }
+        setPdfPreviews(newPreviews);
+        return newPreviews;
+      });
+    }
+  };
+
+  // addKey 핸들러 추가
+  const handleAddKey = () => {
+    appendScoreKey({ key: "", file: null });
+    setLocalPdfPreviews((prev) => {
+      const newPreviews = [...prev, { key: "", url: null }]; // 기존 데이터 유지
+      setPdfPreviews(newPreviews); // 훅의 pdfPreviews 동기화
+      return newPreviews;
+    });
+  };
 
   const {
     register,
@@ -64,8 +149,7 @@ export default function ScoreUploadPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-xl font-bold text-gray-800"
           >
-            {t("title")}
-            {/* "악보 업로드" */}
+            {t("title")} {/* "악보 업로드" */}
           </motion.h1>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -78,17 +162,16 @@ export default function ScoreUploadPage() {
           </motion.button>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* 파일 업로드 섹션 */}
           <FileUploadSection
             fileError={fileError ? t("fileRequired") : ""}
-            pdfPreview={pdfPreview}
+            pdfPreviews={pdfPreviews}
             handleFileChange={handleFileChange}
-            removePdfPreview={removePdfPreview}
             errors={errors}
             control={control}
+            scoreKeyFields={scoreKeyFields}
+            appendScoreKey={handleAddKey} // handleAddKey 전달
+            removeScoreKey={removeScoreKey}
           />
-
-          {/* 장르 선택 섹션 */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               {t("genreLabel")} {/* "장르" */}
@@ -100,7 +183,11 @@ export default function ScoreUploadPage() {
               <option value="">{t("genrePlaceholder")}</option>
               {GENRES.map((genre) => (
                 <option key={genre.value} value={genre.value}>
-                  {locale === "ja" ? genre.ja : genre.ko}
+                  {locale === "ja"
+                    ? genre.ja
+                    : locale === "ko"
+                      ? genre.ko
+                      : genre.en}
                 </option>
               ))}
             </select>
@@ -111,53 +198,12 @@ export default function ScoreUploadPage() {
               </p>
             )}
           </div>
-
-          {/* 코드 키 선택 섹션 */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              {t("keyLabel")} {/* "키" */}
-            </label>
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <select
-                  {...register("key", {
-                    required: t("keyRequired"), // "키를 선택해야 합니다."
-                    validate: (value) => {
-                      if (!value) return t("keyRequired");
-                      const [key, tone] = value.split(" ");
-                      if (!isValidKey(key) || !isValidTone(tone)) {
-                        return t("keyRequired");
-                      }
-                      return true;
-                    },
-                  })}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">{t("keyPlaceholder")}</option>
-                  {KEYS.flatMap((key) =>
-                    TONES.map((tone) => (
-                      <option key={`${key} ${tone}`} value={`${key} ${tone}`}>
-                        {`${key} ${tone}`}
-                      </option>
-                    ))
-                  )}
-                </select>
-                {errors.key && (
-                  <p className="text-red-500 text-sm flex items-center space-x-1">
-                    <AlertCircle className="w-4 h-4" />
-                    <span>{errors.key.message}</span>
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
           <TitleSection register={register} errors={errors} />
           <TempoSection register={register} errors={errors} />
           <ReferenceUrlsSection
-            fields={fields}
-            append={append}
-            remove={remove}
+            fields={referenceUrlFields}
+            append={appendReferenceUrl}
+            remove={removeReferenceUrl}
             register={register}
           />
           <LyricsSection register={register} errors={errors} />
@@ -172,19 +218,9 @@ export default function ScoreUploadPage() {
             handleDateChange={handleDateChange}
             errors={errors}
           />
-          <motion.button
-            type="submit"
-            disabled={isLoading || !isFormValid()}
-            whileHover={isFormValid() ? { scale: 1.05 } : {}}
-            whileTap={isFormValid() ? { scale: 0.95 } : {}}
-            className={`cursor-pointer w-full p-3 rounded-md text-white transition-colors ${
-              isFormValid()
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
-          >
+          <Button type="submit" isDisabled={isLoading || !isFormValid()}>
             {t("uploadButton")} {/* "업로드" */}
-          </motion.button>
+          </Button>
         </form>
       </div>
     </div>

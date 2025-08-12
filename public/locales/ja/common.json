@@ -554,6 +554,7 @@
     "showLess": "もっと少なく",
     "noGenre": "ジャンルなし",
     "viewPdf": "PDFを開く",
+    "selectKey": "キーを選択",
     "editScore": "編集"
   },
   "tempoRange": "テンポ範囲",
@@ -681,17 +682,23 @@
     "sharedMessage": "セットリストが正常に共有されました！",
     "sharedTeams": "共有されたチーム",
     "noTeamsShared": "共有されたチームがありません。",
+    "selectKey": "キーを選択",
     "goToSetlists": "セットリスト一覧へ移動"
   },
   "scoreList": "楽譜リスト",
   "setlistList": "コンテリスト",
   "FileUploadSection": {
     "label": "楽譜ファイル (PDF)",
+    "keyLabel": "キー",
+    "keyPlaceholder": "楽譜のキーを選択してください",
+    "keyRequired": "キーの選択は必須です。",
+    "addKey": "楽譜を追加",
     "required": "PDFファイルは必須です。",
     "selectOrDrag": "PDFファイルを選択またはドラッグしてください",
     "fileSelected": "選択されたファイル: {fileName}",
     "invalidPdf": "有効なPDFファイルではありません。",
     "fileTooLarge": "ファイルサイズは10MBを超えることはできません。",
+    "loadingPreview": "プレビューを読み込み中...",
     "fileReadError": "ファイルの読み込み中にエラーが発生しました。"
   },
   "filterByTeam": "チームでフィルタリング",

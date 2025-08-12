@@ -1,4 +1,4 @@
-// src/app/api/setlist/route.ts
+// src/app/api/setlists/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { authenticateRequest } from "@/utils/authenticateRequest";
@@ -17,6 +17,7 @@ interface CreateSetlistRequest {
     creationId: string;
     order: number;
     selectedReferenceUrl: string | null;
+    selectedKey: string; // 새 필드 추가
   }>;
   shares: Array<{
     teamId?: string | null;
@@ -65,7 +66,7 @@ export async function GET(req: NextRequest) {
           },
         },
         orderBy: {
-          date: "desc", // date 기준으로 정렬
+          date: "desc",
         },
       });
     } else {
@@ -73,10 +74,7 @@ export async function GET(req: NextRequest) {
 
       setlists = await prisma.setlist.findMany({
         where: {
-          AND: [
-            // { shares: { some: { groupId: { in: userGroupIds } } } },
-            { shares: { some: { teamId: { in: userTeamIds } } } },
-          ],
+          AND: [{ shares: { some: { teamId: { in: userTeamIds } } } }],
         },
         include: {
           creator: { select: { name: true, id: true } },
@@ -136,18 +134,22 @@ export async function POST(
   try {
     const creations = await prisma.creation.findMany({
       where: { id: { in: scores.map((score) => score.creationId) } },
-      select: { id: true, fileUrl: true },
+      select: { id: true, fileUrl: true, scoreKeys: true }, // scoreKeys 포함
     });
 
     const sortedScores = scores
       .sort((a, b) => a.order - b.order)
       .map((score) => {
         const creation = creations.find((c) => c.id === score.creationId);
+        const selectedKeyObj = creation?.scoreKeys.find(
+          (key) => key.key === score.selectedKey
+        );
         return {
           creationId: score.creationId,
-          fileUrl: creation?.fileUrl,
+          fileUrl: selectedKeyObj?.fileUrl || creation?.fileUrl,
           order: score.order,
           selectedReferenceUrl: score.selectedReferenceUrl,
+          selectedKey: score.selectedKey, // 선택된 키 추가
         };
       })
       .filter(
@@ -158,19 +160,19 @@ export async function POST(
           fileUrl: string;
           order: number;
           selectedReferenceUrl: string | null;
-        } => !!score.fileUrl
+          selectedKey: string;
+        } => !!score.fileUrl && !!score.selectedKey
       );
 
     if (sortedScores.length === 0) {
       return NextResponse.json(
-        { error: "유효한 PDF 파일이 없습니다." },
+        { error: "유효한 PDF 파일 또는 선택된 키가 없습니다." },
         { status: 400 }
       );
     }
 
     const setlist = await prisma.$transaction(
       async (tx) => {
-        // 1. Setlist 생성
         const newSetlist = await tx.setlist.create({
           data: {
             title,
@@ -183,6 +185,7 @@ export async function POST(
                 creationId: score.creationId,
                 order: score.order,
                 selectedReferenceUrl: score.selectedReferenceUrl,
+                selectedKey: score.selectedKey, // 선택된 키 저장
               })),
             },
             shares: {
@@ -194,7 +197,6 @@ export async function POST(
           },
         });
 
-        // 2. UsageLimit 업데이트 (KST 기준)
         const nowKstString = formatInTimeZone(
           new Date(),
           "Asia/Seoul",
@@ -204,7 +206,6 @@ export async function POST(
         const oneWeekAgo = subDays(now, 7);
         const oneMonthAgo = subDays(now, 30);
 
-        // 주간 및 월간 Setlist 수 계산
         const [weeklyCount, monthlyCount] = await Promise.all([
           tx.setlist.count({
             where: {
@@ -220,7 +221,6 @@ export async function POST(
           }),
         ]);
 
-        // UsageLimit 레코드 조회 또는 생성
         const usageLimit = await tx.usageLimit.findFirst({
           where: { churchId: payload.churchId },
         });

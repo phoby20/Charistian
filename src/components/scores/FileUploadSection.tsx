@@ -1,7 +1,7 @@
 // src/components/scores/FileUploadSection.tsx
 "use client";
 import { useState, useEffect } from "react";
-import { FieldErrors, Control } from "react-hook-form";
+import { FieldErrors, Control, UseFieldArrayAppend } from "react-hook-form"; // UseFieldArrayAppend로 변경
 import { ScoreFormData } from "@/types/score";
 import { useTranslations } from "next-intl";
 import type * as PDFJS from "pdfjs-dist";
@@ -18,10 +18,7 @@ interface FileUploadSectionProps {
   errors: FieldErrors<ScoreFormData>;
   control: Control<ScoreFormData>;
   scoreKeyFields: { id: string }[];
-  appendScoreKey: (
-    value: { key: string; file: File | null },
-    options?: { shouldValidate?: boolean }
-  ) => void;
+  appendScoreKey: UseFieldArrayAppend<ScoreFormData, "scoreKeys">; // UseFieldArrayAppend 사용
   removeScoreKey: (index: number) => void;
 }
 
@@ -74,17 +71,14 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
 
   const validatePdf = async (file: File): Promise<boolean> => {
     try {
-      // 파일 타입 확인
       if (file.type !== "application/pdf") {
         console.warn("파일 타입이 PDF가 아님:", file.type);
         return false;
       }
-      // 파일 크기 제한 (20MB로 완화)
       if (file.size > 20 * 1024 * 1024) {
         console.warn("파일 크기 초과:", file.size);
         return false;
       }
-      // PDF 헤더 확인 (선택적)
       const header = await file.slice(0, 5).text();
       if (!header.startsWith("%PDF-")) {
         console.warn("유효하지 않은 PDF 헤더:", header);
@@ -104,7 +98,7 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
   ) => {
     setValidationErrors((prev) => {
       const newErrors = [...prev];
-      newErrors[index] = null; // 파일 처리 시작 시 에러 초기화
+      newErrors[index] = null;
       return newErrors;
     });
 
@@ -123,10 +117,9 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
     if (file) {
       const isValid = await validatePdf(file);
       if (isValid) {
-        let objectUrl: string | undefined;
         try {
-          objectUrl = URL.createObjectURL(file);
-          const previewUrl = await getPdfFirstPagePreview(objectUrl, pdfjsLib);
+          const previewUrl = await getPdfFirstPagePreview(file, pdfjsLib);
+
           setLocalPdfPreviews((prev) => {
             const newPreviews = [...prev];
             if (index >= newPreviews.length) {
@@ -146,10 +139,6 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           });
           if (inputElement) inputElement.value = "";
           handleFileChange(index, null);
-        } finally {
-          if (objectUrl) {
-            URL.revokeObjectURL(objectUrl);
-          }
         }
       } else {
         console.warn("유효하지 않은 PDF 파일:", file.name);
@@ -164,11 +153,11 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
     } else {
       handleFileChange(index, null);
       setLocalPdfPreviews((prev) => {
-        const newErrors = [...prev];
-        if (index < newErrors.length) {
-          newErrors[index] = { key: "", url: null };
+        const newPreviews = [...prev];
+        if (index < newPreviews.length) {
+          newPreviews[index] = { key: "", url: null };
         }
-        return newErrors;
+        return newPreviews;
       });
     }
   };
@@ -237,10 +226,7 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           <Button
             variant="outline"
             onClick={() => {
-              appendScoreKey(
-                { key: "", file: null },
-                { shouldValidate: false }
-              );
+              appendScoreKey({ key: "", file: null });
               setLocalPdfPreviews((prev) => [...prev, { key: "", url: null }]);
               setValidationErrors((prev) => [...prev, null]);
             }}

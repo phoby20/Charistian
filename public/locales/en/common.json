@@ -708,6 +708,7 @@
     "fileSelected": "File selected: {fileName}",
     "invalidPdf": "Not a valid PDF file.",
     "fileTooLarge": "File size cannot exceed 10MB.",
+    "loadingPreview": "Loading preview...",
     "fileReadError": "An error occurred while reading the file."
   },
   "filterByTeam": "Filter by Team",

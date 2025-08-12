@@ -1,4 +1,3 @@
-// src/components/ScoreKeyField.tsx
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, X, Upload } from "lucide-react";
@@ -6,7 +5,6 @@ import { Controller, Control, FieldErrors } from "react-hook-form";
 import { ScoreFormData } from "@/types/score";
 import { useTranslations } from "next-intl";
 import { constants } from "@/constants/intex";
-import Image from "next/image";
 
 const { KEYS, TONES } = constants;
 
@@ -46,10 +44,13 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
   const t = useTranslations("FileUploadSection");
 
   return (
-    <div key={field.id} className="border p-4 rounded-md relative">
-      <div className="flex gap-4 mb-4">
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700">
+    <div
+      key={field.id}
+      className="relative bg-white border border-gray-200 rounded-xl p-4 shadow-sm transition-all duration-200 hover:shadow-md sm:p-6"
+    >
+      <div className="flex flex-col gap-4">
+        <div className="w-full">
+          <label className="block text-sm font-semibold text-gray-800 mb-1 sm:text-base">
             {t("keyLabel")}
           </label>
           <select
@@ -67,7 +68,7 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
                 return true;
               },
             })}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm sm:text-base"
           >
             <option value="">{t("keyPlaceholder")}</option>
             {KEYS.flatMap((key) =>
@@ -79,10 +80,15 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
             )}
           </select>
           {errors.scoreKeys?.[index]?.key && (
-            <p className="text-red-500 text-sm flex items-center space-x-1">
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="text-red-500 text-xs sm:text-sm flex items-center space-x-1 mt-1"
+            >
               <AlertCircle className="w-4 h-4" />
               <span>{errors.scoreKeys[index]?.key?.message}</span>
-            </p>
+            </motion.p>
           )}
         </div>
       </div>
@@ -95,10 +101,10 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
           <>
             {!localPdfPreviews[index]?.url ? (
               <div
-                className={`relative w-full p-4 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                className={`relative w-full p-4 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 mt-4 ${
                   validationErrors[index]
-                    ? "border-red-500"
-                    : "border-gray-300 hover:border-blue-500"
+                    ? "border-red-400 bg-red-50"
+                    : "border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50"
                 }`}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={async (e) => {
@@ -121,10 +127,10 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
                 />
                 <label
                   htmlFor={`file-upload-${index}`}
-                  className="flex items-center justify-center w-full"
+                  className="flex items-center justify-center w-full text-gray-600 text-sm sm:text-base"
                 >
-                  <Upload className="w-6 h-6 text-gray-500 mr-2" />
-                  <span className="text-gray-600">{t("selectOrDrag")}</span>
+                  <Upload className="w-5 h-5 text-gray-500 mr-2" />
+                  <span>{t("selectOrDrag")}</span>
                 </label>
               </div>
             ) : (
@@ -132,15 +138,17 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
                 {isClient &&
                 localPdfPreviews[index]?.url &&
                 !localPdfPreviews[index]?.url.endsWith(".pdf") ? (
-                  <Image
-                    src={localPdfPreviews[index].url!}
-                    alt="PDF Preview"
-                    className="w-full rounded-md shadow"
-                    width={56}
-                    height={56}
-                  />
+                  <div className="relative w-full h-48 sm:h-56 rounded-lg overflow-hidden shadow-sm">
+                    <img
+                      src={localPdfPreviews[index].url!}
+                      alt="PDF Preview"
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
                 ) : (
-                  <div>loading Preview...</div>
+                  <div className="text-gray-500 text-sm sm:text-base text-center">
+                    {t("loadingPreview")}
+                  </div>
                 )}
                 <button
                   type="button"
@@ -148,7 +156,7 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
                     removePdfPreview(index);
                     field.onChange(null); // Form 상태 초기화
                   }}
-                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200 shadow-sm"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -163,10 +171,10 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
           errors.scoreKeys?.[index]?.file?.message ||
           validationErrors[index]) && (
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-red-500 text-sm mt-2 flex items-center"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="text-red-500 text-xs sm:text-sm mt-2 flex items-center"
           >
             <AlertCircle className="w-4 h-4 mr-1" />
             {validationErrors[index] ||
@@ -180,7 +188,7 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
         <button
           type="button"
           onClick={() => removeScoreKey(index)}
-          className="absolute top-2 right-12 p-1 bg-gray-500 text-white rounded-full hover:bg-gray-600"
+          className="absolute top-2 right-10 p-1.5 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-all duration-200 shadow-sm"
         >
           <X className="w-4 h-4" />
         </button>

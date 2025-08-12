@@ -708,6 +708,7 @@
     "fileSelected": "파일 선택됨: {fileName}",
     "invalidPdf": "유효한 PDF 파일이 아닙니다.",
     "fileTooLarge": "파일 크기는 10MB를 초과할 수 없습니다.",
+    "loadingPreview": "미리보기 로드 중...",
     "fileReadError": "파일을 읽는 중 오류가 발생했습니다."
   },
   "filterByTeam": "팀으로 필터링",

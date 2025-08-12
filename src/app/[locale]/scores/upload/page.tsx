@@ -33,7 +33,6 @@ export default function ScoreUploadPage() {
     saleEndDate,
     isFormValid,
     handleFileChange,
-    removePdfPreview,
     handleDateChange,
     onSubmit,
     control,
@@ -76,7 +75,6 @@ export default function ScoreUploadPage() {
             fileError={fileError ? t("fileRequired") : ""}
             pdfPreviews={pdfPreviews}
             handleFileChange={handleFileChange}
-            removePdfPreview={removePdfPreview}
             errors={errors}
             control={control}
             scoreKeyFields={scoreKeyFields}

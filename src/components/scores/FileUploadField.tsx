@@ -1,7 +1,7 @@
 // src/components/scores/FileUploadField.tsx
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertCircle, Upload, X } from "lucide-react";
+import { AlertCircle, Upload } from "lucide-react";
 import { Controller, Control, FieldErrors } from "react-hook-form";
 import { ScoreFormData } from "@/types/score";
 import { useTranslations } from "next-intl";
@@ -19,7 +19,6 @@ interface FileUploadFieldProps {
     file: File | null,
     inputElement: HTMLInputElement | null
   ) => void;
-  removePdfPreview: (index: number) => void;
 }
 
 export const FileUploadField: React.FC<FileUploadFieldProps> = ({
@@ -31,7 +30,6 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
   localPdfPreviews,
   isClient,
   handleFile,
-  removePdfPreview,
 }) => {
   const t = useTranslations("FileUploadSection");
 
@@ -94,16 +92,6 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
                     {t("loadingPreview")}
                   </div>
                 )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    removePdfPreview(index);
-                    field.onChange(null); // Form 상태 초기화
-                  }}
-                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200 shadow-sm"
-                >
-                  <X className="w-4 h-4" />
-                </button>
               </div>
             )}
           </>

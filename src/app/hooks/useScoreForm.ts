@@ -35,7 +35,6 @@ interface UseScoreFormReturn {
   locale: string;
   isFormValid: () => boolean;
   handleFileChange: (index: number, file: File | null) => void;
-  removePdfPreview: (index: number) => void;
   handleDateChange: (
     date: Date | null,
     field: "saleStartDate" | "saleEndDate"
@@ -141,15 +140,6 @@ export const useScoreForm = (): UseScoreFormReturn => {
     setFileError(null);
   };
 
-  const removePdfPreview = (index: number): void => {
-    setPdfPreviews((prev) => {
-      const newPreviews = [...prev];
-      newPreviews[index] = { key: scoreKeys?.[index]?.key ?? "", url: null };
-      return newPreviews;
-    });
-    form.setValue(`scoreKeys.${index}.file`, null, { shouldValidate: true });
-  };
-
   const handleDateChange = (
     date: Date | null,
     field: "saleStartDate" | "saleEndDate"
@@ -239,7 +229,6 @@ export const useScoreForm = (): UseScoreFormReturn => {
     locale: locale as string,
     isFormValid,
     handleFileChange,
-    removePdfPreview,
     handleDateChange,
     onSubmit,
     control: form.control,

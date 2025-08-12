@@ -14,7 +14,6 @@ interface FileUploadSectionProps {
   fileError: string | null;
   pdfPreviews: { key: string; url: string | null }[];
   handleFileChange: (index: number, file: File | null) => void;
-  removePdfPreview: (index: number) => void;
   errors: FieldErrors<ScoreFormData>;
   control: Control<ScoreFormData>;
   scoreKeyFields: { id: string }[];
@@ -26,7 +25,6 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
   fileError,
   pdfPreviews: initialPdfPreviews,
   handleFileChange,
-  removePdfPreview,
   errors,
   control,
   scoreKeyFields,
@@ -222,7 +220,6 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
             localPdfPreviews={localPdfPreviews}
             isClient={isClient}
             handleFile={handleFile}
-            removePdfPreview={removePdfPreview}
             removeScoreKey={removeScoreKey}
             scoreKeyFieldsLength={scoreKeyFields.length}
           />

@@ -141,18 +141,6 @@ export default function ScoreUploadPageForMaster() {
     }
   };
 
-  const removePdfPreview = (index: number) => {
-    const newPreviews = [...pdfPreviews];
-    newPreviews[index] = { key: newPreviews[index]?.key || "", url: null };
-    setPdfPreviews(newPreviews);
-    setValue(`scoreKeys.${index}.file`, null);
-    setFileErrors((prev) => {
-      const newErrors = [...prev];
-      newErrors[index] = t("fileRequired");
-      return newErrors;
-    });
-  };
-
   // Update previews when scoreKeys change
   useEffect(() => {
     setPdfPreviews((prev) =>
@@ -459,7 +447,6 @@ export default function ScoreUploadPageForMaster() {
             fileError={fileErrors.some((e) => e) ? t("fileRequired") : ""}
             pdfPreviews={pdfPreviews}
             handleFileChange={handleFileChange}
-            removePdfPreview={removePdfPreview}
             errors={errors}
             control={control}
             scoreKeyFields={scoreKeyFields}

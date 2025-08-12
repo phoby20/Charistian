@@ -41,7 +41,6 @@ export default function ScoreEditPage() {
     saleEndDate,
     isFormValid,
     handleFileChange,
-    removePdfPreview,
     handleDateChange,
     control,
     isLoading,
@@ -281,7 +280,6 @@ export default function ScoreEditPage() {
             fileError={fileError ? t("fileRequired") : ""}
             pdfPreviews={pdfPreviews}
             handleFileChange={handleFileChange}
-            removePdfPreview={removePdfPreview}
             errors={errors}
             control={control}
             scoreKeyFields={scoreKeyFields}

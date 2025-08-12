@@ -24,7 +24,6 @@ interface ScoreKeyFieldProps {
     file: File | null,
     inputElement: HTMLInputElement | null
   ) => void;
-  removePdfPreview: (index: number) => void;
   removeScoreKey: (index: number) => void;
   scoreKeyFieldsLength: number;
 }
@@ -39,7 +38,6 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
   localPdfPreviews,
   isClient,
   handleFile,
-  removePdfPreview,
   removeScoreKey,
   scoreKeyFieldsLength,
 }) => {
@@ -104,14 +102,13 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
         localPdfPreviews={localPdfPreviews}
         isClient={isClient}
         handleFile={handleFile}
-        removePdfPreview={removePdfPreview}
       />
 
       {scoreKeyFieldsLength > 1 && (
         <button
           type="button"
           onClick={() => removeScoreKey(index)}
-          className="absolute top-2 right-10 p-1.5 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-all duration-200 shadow-sm"
+          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200 shadow-sm"
         >
           <X className="w-4 h-4" />
         </button>

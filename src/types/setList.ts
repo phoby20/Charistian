@@ -1,4 +1,3 @@
-// Setlist 응답 타입 정의
 export type SetlistResponse = {
   id: string;
   title: string;
@@ -8,7 +7,11 @@ export type SetlistResponse = {
   creator: { id: string; name: string };
   church: { name: string };
   scores: Array<{
-    creation: { id: string; title: string; fileUrl: string | null };
+    creation: {
+      id: string;
+      title: string;
+      scoreKeys: { key: string; fileUrl: string }[];
+    }; // fileUrl -> scoreKeys
   }>;
   shares: Array<{
     group?: { id: string; name: string } | null;

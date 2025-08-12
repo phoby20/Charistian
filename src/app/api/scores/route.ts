@@ -193,8 +193,6 @@ export async function POST(req: NextRequest) {
       titleJa: formData.get("titleJa") as string,
       description: formData.get("description") as string,
       type: isOriginal ? CreationType.ORIGINAL_SCORE : CreationType.SCORE,
-      fileUrl: "", // 임시로 빈 문자열 설정 (마이그레이션 후 제거)
-      key: "", // 임시로 빈 문자열 설정 (마이그레이션 후 제거)
       price: isForSale
         ? parseFloat(formData.get("price") as string)
         : undefined,

@@ -18,6 +18,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import Loading from "@/components/Loading";
 import { ScoreResponse, ScoreFormData, ApiErrorResponse } from "@/types/score";
+import Button from "@/components/Button";
 
 export default function ScoreEditPage() {
   const t = useTranslations("ScoreEdit");
@@ -332,19 +333,9 @@ export default function ScoreEditPage() {
             handleDateChange={handleDateChange}
             errors={errors}
           />
-          <motion.button
-            type="submit"
-            disabled={isLoading || !isFormValid()}
-            whileHover={isFormValid() ? { scale: 1.05 } : {}}
-            whileTap={isFormValid() ? { scale: 0.95 } : {}}
-            className={`cursor-pointer w-full p-3 rounded-md text-white transition-colors ${
-              isFormValid()
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
-          >
+          <Button type="submit" isDisabled={isLoading || !isFormValid()}>
             {t("updateButton")}
-          </motion.button>
+          </Button>
         </form>
       </div>
     </div>

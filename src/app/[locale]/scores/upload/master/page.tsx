@@ -22,6 +22,8 @@ import Loading from "@/components/Loading";
 import { countryOptions } from "@/data/country";
 import { regionsByCity } from "@/data/regions";
 import { ScoreFormData } from "@/types/score";
+import type * as PDFJS from "pdfjs-dist"; // pdfjs-dist 타입 임포트
+import { getPdfFirstPagePreview } from "@/utils/pdf-preview"; // 미리보기 생성 함수 임포트
 
 interface ChurchOption {
   value: string;
@@ -111,42 +113,33 @@ export default function ScoreUploadPageForMaster() {
   const [pdfPreviews, setPdfPreviews] = useState<
     { key: string; url: string | null }[]
   >(scoreKeyFields.map(() => ({ key: "", url: null })));
+  // pdfjs-dist 로드 상태
+  const [pdfjsLib, setPdfjsLib] = useState<typeof PDFJS | null>(null);
 
-  // File handling
-  const handleFileChange = (index: number, file: File | null) => {
-    const newFileErrors = [...fileErrors];
-    const newPreviews = [...pdfPreviews];
-    if (file) {
-      if (file.type !== "application/pdf") {
-        newFileErrors[index] = t("fileRequired");
-        newPreviews[index] = { key: newPreviews[index]?.key || "", url: null };
-        setFileErrors(newFileErrors);
-        setPdfPreviews(newPreviews);
-        return;
+  // pdfjs-dist 동적 로드
+  useEffect(() => {
+    (async () => {
+      try {
+        const pdfjs: typeof PDFJS = await import("pdfjs-dist");
+        const workerSrc = new URL(
+          "pdfjs-dist/build/pdf.worker.min.mjs",
+          import.meta.url
+        ).toString();
+        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+        setPdfjsLib(pdfjs);
+      } catch (error) {
+        console.error("pdfjs-dist 로드 실패:", error);
+        setError(t("pdfjsNotLoaded"));
       }
-      newFileErrors[index] = null;
-      newPreviews[index] = {
-        key: newPreviews[index]?.key || "",
-        url: URL.createObjectURL(file),
-      };
-      setFileErrors(newFileErrors);
-      setPdfPreviews(newPreviews);
-      setValue(`scoreKeys.${index}.file`, file);
-    } else {
-      newFileErrors[index] = t("fileRequired");
-      newPreviews[index] = { key: newPreviews[index]?.key || "", url: null };
-      setFileErrors(newFileErrors);
-      setPdfPreviews(newPreviews);
-      setValue(`scoreKeys.${index}.file`, null);
-    }
-  };
+    })();
+  }, [t]);
 
   // Update previews when scoreKeys change
   useEffect(() => {
     setPdfPreviews((prev) =>
       scoreKeyFields.map((field, index) => ({
         key: watch(`scoreKeys.${index}.key`) || "",
-        url: prev[index]?.url || null,
+        url: prev[index]?.url || null, // 기존 미리보기 URL 유지
       }))
     );
     setFileErrors((prev) =>
@@ -259,6 +252,66 @@ export default function ScoreUploadPageForMaster() {
 
     fetchChurches();
   }, [selectedRegion, isInitialLoad, selectedCountry, selectedCity, t]);
+
+  // Handle file change with PDF preview generation
+  const handleFileChange = async (index: number, file: File | null) => {
+    const newFileErrors = [...fileErrors];
+    const newPreviews = [...pdfPreviews];
+
+    if (!file) {
+      newFileErrors[index] = t("fileRequired");
+      newPreviews[index] = { key: newPreviews[index]?.key || "", url: null };
+      setFileErrors(newFileErrors);
+      setPdfPreviews(newPreviews);
+      setValue(`scoreKeys.${index}.file`, null);
+      return;
+    }
+
+    if (!pdfjsLib) {
+      newFileErrors[index] = t("pdfjsNotLoaded");
+      newPreviews[index] = { key: file.name, url: null };
+      setFileErrors(newFileErrors);
+      setPdfPreviews(newPreviews);
+      setValue(`scoreKeys.${index}.file`, null);
+      setError(t("pdfjsNotLoaded"));
+      return;
+    }
+
+    try {
+      // Validate file type
+      if (file.type !== "application/pdf") {
+        newFileErrors[index] = t("fileRequired");
+        newPreviews[index] = { key: file.name, url: null };
+        setFileErrors(newFileErrors);
+        setPdfPreviews(newPreviews);
+        setValue(`scoreKeys.${index}.file`, null);
+        return;
+      }
+
+      // Generate PDF preview
+      const previewUrl = await getPdfFirstPagePreview(file, pdfjsLib);
+      newFileErrors[index] = null;
+      newPreviews[index] = { key: file.name, url: previewUrl };
+      setFileErrors(newFileErrors);
+      setPdfPreviews(newPreviews);
+      setValue(`scoreKeys.${index}.file`, file);
+    } catch (error) {
+      console.error("PDF 미리보기 생성 실패:", error);
+      newFileErrors[index] = t("invalidPdf");
+      newPreviews[index] = { key: file.name, url: null };
+      setFileErrors(newFileErrors);
+      setPdfPreviews(newPreviews);
+      setValue(`scoreKeys.${index}.file`, null);
+      setError(t("invalidPdf"));
+    }
+  };
+
+  // Handle addKey to preserve existing previews
+  const handleAddKey = () => {
+    appendScoreKey({ key: "", file: null });
+    setPdfPreviews((prev) => [...prev, { key: "", url: null }]);
+    setFileErrors((prev) => [...prev, null]);
+  };
 
   // Submit handler
   const handleSubmitWithChurch = async (data: ScoreFormData) => {
@@ -450,7 +503,7 @@ export default function ScoreUploadPageForMaster() {
             errors={errors}
             control={control}
             scoreKeyFields={scoreKeyFields}
-            appendScoreKey={appendScoreKey}
+            appendScoreKey={handleAddKey} // handleAddKey 사용
             removeScoreKey={removeScoreKey}
           />
 

@@ -1,3 +1,4 @@
+// src/app/[locale]/scores/upload/page.tsx
 "use client";
 import { useScoreForm } from "@/app/hooks/useScoreForm";
 import { ComposerLyricistSection } from "@/components/scores/ComposerLyricistSection";

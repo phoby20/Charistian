@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "dev:https": "node server.js",
-    "build": "npx prisma generate --no-engine && npx prisma migrate deploy && node migrate-data-to-scorekey.js && next build",
-    "migrate:scorekey": "node church-management/migrate-data-to-scorekey.js",
+    "build": "npx prisma generate && npx prisma migrate deploy && node migrate-data-to-scorekey.js && next build",
+    "migrate:scorekey": "node migrate-data-to-scorekey.js",
     "start": "next start",
     "lint": "next lint",
     "prisma:generate": "npx prisma generate",

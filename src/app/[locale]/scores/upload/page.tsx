@@ -1,4 +1,3 @@
-// src/app/[locale]/scores/upload/page.tsx
 "use client";
 import { useScoreForm } from "@/app/hooks/useScoreForm";
 import { ComposerLyricistSection } from "@/components/scores/ComposerLyricistSection";
@@ -15,8 +14,11 @@ import { motion } from "framer-motion";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import Loading from "@/components/Loading";
 import Button from "@/components/Button";
+import type * as PDFJS from "pdfjs-dist";
+import { getPdfFirstPagePreview } from "@/utils/pdf-preview";
 
 export default function ScoreUploadPage() {
   const t = useTranslations("ScoreUpload");
@@ -29,11 +31,12 @@ export default function ScoreUploadPage() {
     appendScoreKey,
     removeScoreKey,
     fileError,
-    pdfPreviews,
+    pdfPreviews: initialPdfPreviews,
+    setPdfPreviews,
     saleStartDate,
     saleEndDate,
     isFormValid,
-    handleFileChange,
+    handleFileChange: originalHandleFileChange,
     handleDateChange,
     onSubmit,
     control,
@@ -41,6 +44,93 @@ export default function ScoreUploadPage() {
   } = useScoreForm();
   const router = useRouter();
   const locale = useLocale();
+
+  // 로컬 pdfPreviews 상태
+  const [pdfPreviews, setLocalPdfPreviews] = useState<
+    { key: string; url: string | null }[]
+  >([]);
+  // pdfjs-dist 로드 상태
+  const [pdfjsLib, setPdfjsLib] = useState<typeof PDFJS | null>(null);
+
+  // pdfjs-dist 동적 로드
+  useEffect(() => {
+    (async () => {
+      try {
+        const pdfjs: typeof PDFJS = await import("pdfjs-dist");
+        const workerSrc = new URL(
+          "pdfjs-dist/build/pdf.worker.min.mjs",
+          import.meta.url
+        ).toString();
+        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+        setPdfjsLib(pdfjs);
+      } catch (error) {
+        console.error("pdfjs-dist 로드 실패:", error);
+      }
+    })();
+  }, []);
+
+  // 초기 pdfPreviews 동기화
+  useEffect(() => {
+    setLocalPdfPreviews(
+      initialPdfPreviews.length
+        ? initialPdfPreviews
+        : scoreKeyFields.map(() => ({ key: "", url: null }))
+    );
+  }, [initialPdfPreviews, scoreKeyFields]);
+
+  // handleFileChange에서 미리보기 생성 및 동기화
+  const handleFileChange = async (index: number, file: File | null) => {
+    originalHandleFileChange(index, file);
+    if (!file || !pdfjsLib) {
+      setLocalPdfPreviews((prev) => {
+        const newPreviews = [...prev];
+        if (index >= newPreviews.length) {
+          newPreviews.push({ key: "", url: null });
+        } else {
+          newPreviews[index] = { key: "", url: null };
+        }
+        setPdfPreviews(newPreviews);
+        return newPreviews;
+      });
+      return;
+    }
+
+    try {
+      const previewUrl = await getPdfFirstPagePreview(file, pdfjsLib);
+      setLocalPdfPreviews((prev) => {
+        const newPreviews = [...prev];
+        if (index >= newPreviews.length) {
+          newPreviews.push({ key: file.name, url: previewUrl });
+        } else {
+          newPreviews[index] = { key: file.name, url: previewUrl };
+        }
+        setPdfPreviews(newPreviews);
+        return newPreviews;
+      });
+    } catch (error) {
+      console.error("PDF 미리보기 생성 실패:", error);
+      setLocalPdfPreviews((prev) => {
+        const newPreviews = [...prev];
+        if (index >= newPreviews.length) {
+          newPreviews.push({ key: file.name, url: null });
+        } else {
+          newPreviews[index] = { key: file.name, url: null };
+        }
+        setPdfPreviews(newPreviews);
+        return newPreviews;
+      });
+    }
+  };
+
+  // addKey 핸들러 추가
+  const handleAddKey = () => {
+    appendScoreKey({ key: "", file: null });
+    setLocalPdfPreviews((prev) => {
+      const newPreviews = [...prev, { key: "", url: null }]; // 기존 데이터 유지
+      setPdfPreviews(newPreviews); // 훅의 pdfPreviews 동기화
+      return newPreviews;
+    });
+  };
 
   const {
     register,
@@ -78,7 +168,7 @@ export default function ScoreUploadPage() {
             errors={errors}
             control={control}
             scoreKeyFields={scoreKeyFields}
-            appendScoreKey={appendScoreKey}
+            appendScoreKey={handleAddKey} // handleAddKey 전달
             removeScoreKey={removeScoreKey}
           />
           <div className="space-y-2">

@@ -235,20 +235,13 @@ export default function PlansPage() {
                 t("free.features2"),
                 t("free.features3"),
               ]}
-              buttonText={
-                currentPlan === "FREE"
-                  ? t("free.currentPlan")
-                  : t("free.select")
-              }
-              disabled={
-                !isSuperAdmin ||
-                planHierarchy[currentPlan] > planHierarchy["FREE"]
-              }
+              buttonText={t("free.currentPlan")} // 항상 "현재 플랜" 또는 "선택" 텍스트
+              disabled={true} // 버튼 비활성화 (필요 없음, isFreePlan으로 렌더링 차단)
               isSuperAdmin={isSuperAdmin}
               currentPlan={currentPlan}
               isCurrentPlan={currentPlan === "FREE"}
               onCancel={handleCancelClick}
-              onSubscribe={() => {}}
+              onSubscribe={() => {}} // 동작 없음
               expirationDate={formatExpirationDate(currentPeriodEnd)}
             />
             <PlanCard

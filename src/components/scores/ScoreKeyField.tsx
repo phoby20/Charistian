@@ -7,6 +7,7 @@ import { ScoreFormData } from "@/types/score";
 import { useTranslations } from "next-intl";
 import { constants } from "@/constants/intex";
 import { FileUploadField } from "./FileUploadField";
+import Button from "../Button";
 
 const { KEYS, TONES } = constants;
 
@@ -102,13 +103,15 @@ export const ScoreKeyField: React.FC<ScoreKeyFieldProps> = ({
       />
 
       {scoreKeyFieldsLength > 1 && (
-        <button
-          type="button"
-          onClick={() => removeScoreKey(index)}
-          className="cursor-pointer absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200 shadow-sm"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <div className="mt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => removeScoreKey(index)}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
       )}
     </div>
   );

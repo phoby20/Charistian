@@ -16,6 +16,7 @@ import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
+import Button from "@/components/Button";
 
 export default function ScoreUploadPage() {
   const t = useTranslations("ScoreUpload");
@@ -70,7 +71,6 @@ export default function ScoreUploadPage() {
           </motion.button>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* 파일 업로드 및 코드 키 선택 섹션 */}
           <FileUploadSection
             fileError={fileError ? t("fileRequired") : ""}
             pdfPreviews={pdfPreviews}
@@ -81,8 +81,6 @@ export default function ScoreUploadPage() {
             appendScoreKey={appendScoreKey}
             removeScoreKey={removeScoreKey}
           />
-
-          {/* 장르 선택 섹션 */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               {t("genreLabel")} {/* "장르" */}
@@ -94,7 +92,11 @@ export default function ScoreUploadPage() {
               <option value="">{t("genrePlaceholder")}</option>
               {GENRES.map((genre) => (
                 <option key={genre.value} value={genre.value}>
-                  {locale === "ja" ? genre.ja : genre.ko}
+                  {locale === "ja"
+                    ? genre.ja
+                    : locale === "ko"
+                      ? genre.ko
+                      : genre.en}
                 </option>
               ))}
             </select>
@@ -105,7 +107,6 @@ export default function ScoreUploadPage() {
               </p>
             )}
           </div>
-
           <TitleSection register={register} errors={errors} />
           <TempoSection register={register} errors={errors} />
           <ReferenceUrlsSection
@@ -126,19 +127,9 @@ export default function ScoreUploadPage() {
             handleDateChange={handleDateChange}
             errors={errors}
           />
-          <motion.button
-            type="submit"
-            disabled={isLoading || !isFormValid()}
-            whileHover={isFormValid() ? { scale: 1.05 } : {}}
-            whileTap={isFormValid() ? { scale: 0.95 } : {}}
-            className={`cursor-pointer w-full p-3 rounded-md text-white transition-colors ${
-              isFormValid()
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
-          >
+          <Button type="submit" isDisabled={isLoading || !isFormValid()}>
             {t("uploadButton")} {/* "업로드" */}
-          </motion.button>
+          </Button>
         </form>
       </div>
     </div>

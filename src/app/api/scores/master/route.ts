@@ -175,7 +175,6 @@ export async function POST(request: NextRequest) {
         isPublic,
         isForSale,
         isOriginal,
-        fileUrl: "", // TODO: 이 부분은 사용 하지 않을 예정이므로 빈 문자열로 설정. 추후에 삭제할 예정
         isOpen: true,
         creatorId: payload.userId,
         churchId,

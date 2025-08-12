@@ -1,6 +1,6 @@
+// src/types/score.ts
 import { Plan } from "@prisma/client";
 
-// src/types/score.ts
 export interface ScoreComment {
   id: string;
   creationId: string;
@@ -37,7 +37,7 @@ export interface ScoreResponse {
   churchId: string;
   likes: { id: string }[];
   comments: ScoreComment[];
-  scoreKeys: { key: string; fileUrl: string }[]; // 추가
+  scoreKeys: { key: string; fileUrl: string }[];
   _count: { likes: number; comments: number };
   isLiked: boolean;
   isOpen: boolean;
@@ -51,7 +51,7 @@ export interface ScoreFormData {
   titleJa?: string;
   description?: string;
   tempo?: string;
-  scoreKeys: { key: string; file: File | string | null }[]; // 수정: 다중 코드 키와 파일
+  scoreKeys: { key: string; file: File | string | null }[];
   thumbnail?: File | null;
   price?: string;
   referenceUrls: { url: string }[];
@@ -85,8 +85,7 @@ export interface Score {
   thumbnailUrl?: string;
   genre?: string;
   tempo?: number;
-  key?: string;
-  fileUrl: string;
+  scoreKeys: { key: string; fileUrl: string }[]; // scoreKeys로 대체
   referenceUrls?: string[];
   creator: { name: string };
   composer?: string;
@@ -133,13 +132,6 @@ export interface User {
   name: string;
 }
 
-export interface Share {
-  id: string;
-  group?: { id: string; name: string };
-  team?: { id: string; name: string };
-  user?: { id: string; name: string };
-}
-
 export interface Setlists {
   id: string;
   title: string;
@@ -149,13 +141,14 @@ export interface Setlists {
   scores: { id: string; creation: Creation; order: number }[];
   shares: Share[];
 }
+
 export interface SelectedSong {
   id: string;
   title: string;
   titleEn: string;
   titleJa: string;
   referenceUrls: string[];
-  scoreKeys: { key: string; fileUrl: string }[]; // scoreKeys 추가
+  scoreKeys: { key: string; fileUrl: string }[];
 }
 
 export interface SetlistResponse {
@@ -170,7 +163,7 @@ export interface SetlistResponse {
     id: string;
     creation: SelectedSong;
     order: number;
-    selectedReferenceUrl?: string; // 선택된 YouTube URL 추가
+    selectedReferenceUrl?: string;
     selectedKey?: string;
   }[];
   comments: {

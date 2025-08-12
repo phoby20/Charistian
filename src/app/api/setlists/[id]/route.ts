@@ -18,7 +18,7 @@ interface UpdateSetlistRequest {
     order: number;
     selectedReferenceUrl: string | null;
     selectedKey: string;
-  }[]; // selectedKey 추가
+  }[];
   shares: {
     groupId?: string | null;
     teamId?: string | null;
@@ -49,12 +49,12 @@ export async function GET(
                 titleEn: true,
                 titleJa: true,
                 referenceUrls: true,
-                scoreKeys: true, // ScoreKey에서 selectedKey에 해당하는 fileUrl 조회를 위해 추가
+                scoreKeys: { select: { key: true, fileUrl: true } }, // fileUrl, key 제거
               },
             },
             order: true,
             selectedReferenceUrl: true,
-            selectedKey: true, // selectedKey 포함
+            selectedKey: true,
           },
         },
         comments: {
@@ -197,7 +197,7 @@ export async function PUT(
 
     const creations = await prisma.creation.findMany({
       where: { id: { in: scores.map((score) => score.creationId) } },
-      select: { id: true, fileUrl: true, scoreKeys: true }, // scoreKeys 포함
+      select: { id: true, scoreKeys: { select: { key: true, fileUrl: true } } }, // fileUrl 제거
     });
 
     const sortedScores = scores
@@ -209,9 +209,9 @@ export async function PUT(
         );
         return {
           creationId: score.creationId,
-          fileUrl: selectedKeyObj?.fileUrl || creation?.fileUrl,
+          fileUrl: selectedKeyObj?.fileUrl || creation?.scoreKeys[0]?.fileUrl, // creation.fileUrl -> creation.scoreKeys[0]?.fileUrl
           order: score.order,
-          selectedKey: score.selectedKey, // selectedKey 포함
+          selectedKey: score.selectedKey,
         };
       })
       .filter(
@@ -258,7 +258,7 @@ export async function PUT(
                 creationId: s.creationId,
                 order: s.order,
                 selectedReferenceUrl: s.selectedReferenceUrl,
-                selectedKey: s.selectedKey, // selectedKey 저장
+                selectedKey: s.selectedKey,
               })),
             },
             shares: {
@@ -293,12 +293,10 @@ export async function PUT(
               select: {
                 id: true,
                 title: true,
-                fileUrl: true,
+                scoreKeys: { select: { key: true, fileUrl: true } }, // fileUrl, key 제거
                 referenceUrls: true,
                 titleEn: true,
                 titleJa: true,
-                key: true,
-                scoreKeys: true, // PDF 병합에 필요한 fileUrl 조회를 위해 추가
               },
             },
           },

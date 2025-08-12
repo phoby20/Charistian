@@ -138,12 +138,10 @@ model Creation {
   titleJa           String?        // 일본어 제목
   description       String?
   type              CreationType
-  fileUrl           String         // 악보 파일 URL (jpg/pdf)
   thumbnailUrl      String?        // 섬네일 이미지 URL
   audioUrl          String?        // 오디오 파일 URL
   price             Float?         // 판매 가격
   tempo             Int?           // 템포
-  key               String?         // 코드 키 (예: "C Major")
   referenceUrls     String[]       // 참고 URL 배열
   lyrics            String?        // 가사 (한국어)
   lyricsEn          String?        // 가사 (영어)

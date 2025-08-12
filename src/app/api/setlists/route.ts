@@ -17,7 +17,7 @@ interface CreateSetlistRequest {
     creationId: string;
     order: number;
     selectedReferenceUrl: string | null;
-    selectedKey: string; // 새 필드 추가
+    selectedKey: string;
   }>;
   shares: Array<{
     teamId?: string | null;
@@ -54,7 +54,13 @@ export async function GET(req: NextRequest) {
           church: { select: { name: true } },
           scores: {
             include: {
-              creation: { select: { id: true, title: true, fileUrl: true } },
+              creation: {
+                select: {
+                  id: true,
+                  title: true,
+                  scoreKeys: { select: { key: true, fileUrl: true } }, // fileUrl -> scoreKeys
+                },
+              },
             },
           },
           shares: {
@@ -81,7 +87,13 @@ export async function GET(req: NextRequest) {
           church: { select: { name: true } },
           scores: {
             include: {
-              creation: { select: { id: true, title: true, fileUrl: true } },
+              creation: {
+                select: {
+                  id: true,
+                  title: true,
+                  scoreKeys: { select: { key: true, fileUrl: true } }, // fileUrl -> scoreKeys
+                },
+              },
             },
           },
           shares: {
@@ -134,7 +146,7 @@ export async function POST(
   try {
     const creations = await prisma.creation.findMany({
       where: { id: { in: scores.map((score) => score.creationId) } },
-      select: { id: true, fileUrl: true, scoreKeys: true }, // scoreKeys 포함
+      select: { id: true, scoreKeys: { select: { key: true, fileUrl: true } } }, // fileUrl 제거
     });
 
     const sortedScores = scores
@@ -146,10 +158,10 @@ export async function POST(
         );
         return {
           creationId: score.creationId,
-          fileUrl: selectedKeyObj?.fileUrl || creation?.fileUrl,
+          fileUrl: selectedKeyObj?.fileUrl || creation?.scoreKeys[0]?.fileUrl, // creation.fileUrl -> creation.scoreKeys[0]?.fileUrl
           order: score.order,
           selectedReferenceUrl: score.selectedReferenceUrl,
-          selectedKey: score.selectedKey, // 선택된 키 추가
+          selectedKey: score.selectedKey,
         };
       })
       .filter(
@@ -185,7 +197,7 @@ export async function POST(
                 creationId: score.creationId,
                 order: score.order,
                 selectedReferenceUrl: score.selectedReferenceUrl,
-                selectedKey: score.selectedKey, // 선택된 키 저장
+                selectedKey: score.selectedKey,
               })),
             },
             shares: {
@@ -271,11 +283,10 @@ export async function POST(
               select: {
                 id: true,
                 title: true,
-                fileUrl: true,
+                scoreKeys: { select: { key: true, fileUrl: true } }, // fileUrl, key 제거
                 referenceUrls: true,
                 titleEn: true,
                 titleJa: true,
-                key: true,
               },
             },
           },

@@ -1,3 +1,4 @@
+// src/components/scores/FileUploadField.tsx
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, Upload, X } from "lucide-react";

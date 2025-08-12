@@ -1,3 +1,4 @@
+// src/components/scores/ScoreKeyField.tsx
 "use client";
 import { motion } from "framer-motion";
 import { AlertCircle, X } from "lucide-react";

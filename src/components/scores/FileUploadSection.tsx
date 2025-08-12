@@ -172,7 +172,12 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
 
       for (let index = 0; index < initialPdfPreviews.length; index++) {
         const preview = initialPdfPreviews[index];
-        if (preview.url && preview.url.endsWith(".pdf")) {
+        if (
+          preview.url &&
+          preview.url.endsWith(".pdf") &&
+          (preview.url.startsWith("http://") ||
+            preview.url.startsWith("https://"))
+        ) {
           try {
             const previewUrl = await getPdfFirstPagePreview(
               preview.url,

@@ -224,6 +224,7 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
         ))}
         <div className="border border-dashed border-gray-400 p-4 rounded-md relative flex items-center justify-center">
           <Button
+            type="button" // 폼 제출 방지
             variant="outline"
             onClick={() => {
               appendScoreKey({ key: "", file: null });

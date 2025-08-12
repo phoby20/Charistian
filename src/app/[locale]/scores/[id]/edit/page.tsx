@@ -243,7 +243,7 @@ export default function ScoreEditPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push(`/${locale}/scores`)}
-            className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-blue-700 transition-all"
+            className="cursor-pointer flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-blue-700 transition-all"
             aria-label={t("backToList")}
           >
             <ArrowLeft className="w-5 h-5" />

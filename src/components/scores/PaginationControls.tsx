@@ -41,7 +41,7 @@ export default function PaginationControls({
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-      <div className="">
+      <div className="items-start w-full mb-4">
         <div className="flex items-center gap-2">
           <label className="text-sm text-gray-700">{t("itemsPerPage")}:</label>
           <select

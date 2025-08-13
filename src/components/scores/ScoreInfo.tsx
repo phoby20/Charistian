@@ -2,8 +2,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronUp, FileMusic } from "lucide-react";
+import { motion } from "framer-motion";
+import { FileMusic } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ScoreResponse } from "@/types/score";
 import { User } from "@prisma/client";
@@ -17,15 +17,10 @@ interface ScoreInfoProps {
 
 export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
   const t = useTranslations("ScoreDetail");
-  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
-  const [isLyricsOpen, setIsLyricsOpen] = useState(false);
   const [activeLyricsTab, setActiveLyricsTab] = useState<"ko" | "en" | "ja">(
     "ko"
   );
-  const [selectedKey, setSelectedKey] = useState<string>(""); // 선택된 키 상태 추가
-
-  const toggleDescription = () => setIsDescriptionOpen(!isDescriptionOpen);
-  const toggleLyrics = () => setIsLyricsOpen(!isLyricsOpen);
+  const [selectedKey, setSelectedKey] = useState<string>("");
 
   const lyricsContent = {
     ko: score.lyrics || t("none"),
@@ -55,65 +50,24 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
         {/* Description */}
         {score.description && (
           <div>
-            <button
-              onClick={toggleDescription}
-              className="flex w-full items-center justify-between text-lg font-semibold text-gray-900"
-              aria-expanded={isDescriptionOpen}
+            <h2 className="text-lg font-semibold text-gray-900">
+              {t("description")}
+            </h2>
+            <p
+              className="mt-3 text-gray-700 rounded-lg border border-gray-200 p-3"
+              style={{ whiteSpace: "pre-wrap" }}
             >
-              <span>{t("description")}</span>
-              {score.description.length > 100 && (
-                <motion.span
-                  animate={{ rotate: isDescriptionOpen ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {isDescriptionOpen ? (
-                    <ChevronUp className="h-5 w-5 text-blue-600" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-blue-600" />
-                  )}
-                </motion.span>
-              )}
-            </button>
-            <AnimatePresence>
-              <motion.p
-                initial={{ height: 0, opacity: 0 }}
-                animate={{
-                  height: isDescriptionOpen ? "auto" : "4rem",
-                  opacity: 1,
-                }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="mt-3 overflow-hidden text-gray-700 rounded-lg border border-gray-200 p-3"
-                style={{ whiteSpace: "pre-wrap" }}
-              >
-                {score.description}
-              </motion.p>
-            </AnimatePresence>
+              {score.description}
+            </p>
           </div>
         )}
 
         {/* Lyrics */}
         {(score.lyrics || score.lyricsEn || score.lyricsJa) && (
           <div>
-            <button
-              onClick={toggleLyrics}
-              className="cursor-pointer flex w-full items-center justify-between text-lg font-semibold text-gray-900"
-              aria-expanded={isLyricsOpen}
-            >
-              <span>{t("lyrics")}</span>
-              {lyricsContent[activeLyricsTab].length > 100 && (
-                <motion.span
-                  animate={{ rotate: isLyricsOpen ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {isLyricsOpen ? (
-                    <ChevronUp className="h-5 w-5 text-blue-600" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-blue-600" />
-                  )}
-                </motion.span>
-              )}
-            </button>
+            <h2 className="text-lg font-semibold text-gray-900">
+              {t("lyrics")}
+            </h2>
             <div className="mt-3 flex space-x-2 rounded-md bg-gray-100 p-1">
               {["ko", "en", "ja"].map((lang) => (
                 <button
@@ -133,23 +87,12 @@ export default function ScoreInfo({ user, score, appUrl }: ScoreInfoProps) {
                 </button>
               ))}
             </div>
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={activeLyricsTab}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  height: isLyricsOpen ? "auto" : "4rem",
-                }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="mt-3 overflow-hidden text-gray-700 rounded-lg border border-gray-200 p-3"
-                style={{ whiteSpace: "pre-wrap" }}
-              >
-                {lyricsContent[activeLyricsTab]}
-              </motion.p>
-            </AnimatePresence>
+            <p
+              className="mt-3 text-gray-700 rounded-lg border border-gray-200 p-3"
+              style={{ whiteSpace: "pre-wrap" }}
+            >
+              {lyricsContent[activeLyricsTab]}
+            </p>
           </div>
         )}
 

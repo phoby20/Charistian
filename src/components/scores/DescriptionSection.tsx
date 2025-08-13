@@ -17,12 +17,12 @@ export const DescriptionSection: React.FC<DescriptionSectionProps> = ({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-xl font-semibold text-gray-800 mb-4">
         {t("descriptionLabel")} <span className="text-red-500">*</span>
       </label>
       <textarea
         {...register("description", { required: t("descriptionRequired") })}
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm whitespace-pre-wrap"
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm whitespace-pre-wrap bg-white"
         rows={5}
         placeholder={t("descriptionPlaceholder")}
         aria-label={t("descriptionLabel")}

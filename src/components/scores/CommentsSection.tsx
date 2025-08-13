@@ -138,10 +138,10 @@ export default function CommentsSection({
             whileTap={{ scale: 0.95 }}
             type="submit"
             disabled={isCommenting || !comment.trim()}
-            className={`p-3 bg-blue-500 text-white rounded-lg flex items-center justify-center transition-all ${
+            className={`p-3 bg-[#ff66c4] text-white rounded-lg flex items-center justify-center transition-all ${
               isCommenting || !comment.trim()
                 ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-blue-600"
+                : "hover:bg-[#fc089e]"
             }`}
             aria-label={t("submitComment")}
           >

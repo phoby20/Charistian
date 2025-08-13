@@ -20,7 +20,7 @@ export const ComposerLyricistSection: React.FC<
         </label>
         <input
           {...register("composer")}
-          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm bg-white"
           placeholder={t("composerPlaceholder")}
           aria-label={t("composerLabel")}
         />
@@ -31,7 +31,7 @@ export const ComposerLyricistSection: React.FC<
         </label>
         <input
           {...register("lyricist")}
-          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm bg-white"
           placeholder={t("lyricistPlaceholder")}
           aria-label={t("lyricistLabel")}
         />

@@ -27,7 +27,7 @@ export const ReferenceUrlsSection: React.FC<ReferenceUrlsSectionProps> = ({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-xl font-semibold text-gray-800 mb-4">
         {t("referenceUrlsLabel")}
       </label>
       <AnimatePresence>
@@ -42,7 +42,7 @@ export const ReferenceUrlsSection: React.FC<ReferenceUrlsSectionProps> = ({
           >
             <input
               {...register(`referenceUrls.${index}.url` as const)}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm bg-white"
               placeholder={t("referenceUrlsPlaceholder")}
               aria-label={t("referenceUrlsLabel")}
             />

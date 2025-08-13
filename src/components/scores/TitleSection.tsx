@@ -23,7 +23,7 @@ export const TitleSection: React.FC<TitleSectionProps> = ({
         </label>
         <input
           {...register("title", { required: t("titleRequired") })}
-          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm bg-white"
           placeholder={t("titlePlaceholder")}
           aria-label={t("titleLabel")}
         />
@@ -41,7 +41,7 @@ export const TitleSection: React.FC<TitleSectionProps> = ({
           </label>
           <input
             {...register("titleEn")}
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm bg-white"
             placeholder={t("titleEnPlaceholder")}
             aria-label={t("titleEnLabel")}
           />
@@ -52,7 +52,7 @@ export const TitleSection: React.FC<TitleSectionProps> = ({
           </label>
           <input
             {...register("titleJa")}
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm bg-white"
             placeholder={t("titleJaPlaceholder")}
             aria-label={t("titleJaLabel")}
           />

@@ -266,7 +266,7 @@ export default function ScoreDetailPage() {
                     onClick={() =>
                       (window.location.href = `/${locale}/scores/${id}/edit`)
                     }
-                    className="flex items-center space-x-2 px-5 py-2 rounded-full shadow-md bg-gray-200 text-gray-700 hover:bg-blue-500 hover:text-white transition-all cursor-pointer"
+                    className="flex items-center space-x-2 px-5 py-2 rounded-full shadow-md bg-gray-200 text-gray-700 hover:bg-[#ff66c4] hover:text-white transition-all cursor-pointer"
                     aria-label={t("editScore")}
                   >
                     <Edit2 className="w-4 h-4" />

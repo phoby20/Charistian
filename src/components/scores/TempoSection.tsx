@@ -17,7 +17,7 @@ export const TempoSection: React.FC<TempoSectionProps> = ({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-xl font-semibold text-gray-800 mb-4">
         {t("tempoLabel")} <span className="text-red-500">*</span>
       </label>
       <input
@@ -26,7 +26,7 @@ export const TempoSection: React.FC<TempoSectionProps> = ({
           required: t("tempoRequired"),
           valueAsNumber: true,
         })}
-        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm bg-white"
         placeholder={t("tempoPlaceholder")}
         aria-label={t("tempoLabel")}
         min="1"

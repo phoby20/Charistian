@@ -127,8 +127,8 @@ export default function ScoreUploadPage() {
   const handleAddKey = () => {
     appendScoreKey({ key: "", file: null });
     setLocalPdfPreviews((prev) => {
-      const newPreviews = [...prev, { key: "", url: null }]; // 기존 데이터 유지
-      setPdfPreviews(newPreviews); // 훅의 pdfPreviews 동기화
+      const newPreviews = [...prev, { key: "", url: null }];
+      setPdfPreviews(newPreviews);
       return newPreviews;
     });
   };
@@ -139,15 +139,22 @@ export default function ScoreUploadPage() {
     formState: { errors },
   } = form;
 
+  // 섹션 애니메이션 설정
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
       {isLoading && <Loading />}
-      <div className="container mx-auto max-w-3xl p-6 bg-white rounded-2xl shadow-lg">
-        <div className="flex items-center justify-between mb-8">
+      <div className="container mx-auto max-w-4xl p-8 bg-white rounded-2xl shadow-xl">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between mb-10 border-b border-gray-200 pb-4">
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xl font-bold text-gray-800"
+            className="text-3xl font-bold text-gray-900"
           >
             {t("title")} {/* "악보 업로드" */}
           </motion.h1>
@@ -155,61 +162,156 @@ export default function ScoreUploadPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push(`/${locale}/scores`)}
-            className="cursor-pointer flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
+            className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm font-medium">{t("backToList")}</span>
+            <ArrowLeft className="w-6 h-6" />
+            <span className="text-base font-medium">{t("backToList")}</span>
           </motion.button>
         </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <FileUploadSection
-            fileError={fileError ? t("fileRequired") : ""}
-            pdfPreviews={pdfPreviews}
-            handleFileChange={handleFileChange}
-            errors={errors}
-            control={control}
-            scoreKeyFields={scoreKeyFields}
-            appendScoreKey={handleAddKey} // handleAddKey 전달
-            removeScoreKey={removeScoreKey}
-          />
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              {t("genreLabel")} {/* "장르" */}
-            </label>
-            <select
-              {...register("genre", { required: t("genreRequired") })}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">{t("genrePlaceholder")}</option>
-              {GENRES.map((genre) => (
-                <option key={genre.value} value={genre.value}>
-                  {locale === "ja"
-                    ? genre.ja
-                    : locale === "ko"
-                      ? genre.ko
-                      : genre.en}
-                </option>
-              ))}
-            </select>
-            {errors.genre && (
-              <p className="text-red-500 text-sm flex items-center space-x-1">
-                <AlertCircle className="w-4 h-4" />
-                <span>{errors.genre.message}</span>
-              </p>
-            )}
-          </div>
-          <TitleSection register={register} errors={errors} />
-          <TempoSection register={register} errors={errors} />
-          <ReferenceUrlsSection
-            fields={referenceUrlFields}
-            append={appendReferenceUrl}
-            remove={removeReferenceUrl}
-            register={register}
-          />
-          <LyricsSection register={register} errors={errors} />
-          <ComposerLyricistSection register={register} />
-          <DescriptionSection register={register} errors={errors} />
-          <OptionsSection register={register} control={control} />
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          {/* 파일 업로드 섹션 */}
+          <motion.section
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+          >
+            <FileUploadSection
+              fileError={fileError ? t("fileRequired") : ""}
+              pdfPreviews={pdfPreviews}
+              handleFileChange={handleFileChange}
+              errors={errors}
+              control={control}
+              scoreKeyFields={scoreKeyFields}
+              appendScoreKey={handleAddKey}
+              removeScoreKey={removeScoreKey}
+            />
+          </motion.section>
+
+          {/* 장르 섹션 */}
+          <motion.section
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+          >
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              {t("genreLabel")}
+            </h2>
+            <div className="space-y-2">
+              <select
+                {...register("genre", { required: t("genreRequired") })}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              >
+                <option value="">{t("genrePlaceholder")}</option>
+                {GENRES.map((genre) => (
+                  <option key={genre.value} value={genre.value}>
+                    {locale === "ja"
+                      ? genre.ja
+                      : locale === "ko"
+                        ? genre.ko
+                        : genre.en}
+                  </option>
+                ))}
+              </select>
+              {errors.genre && (
+                <p className="text-red-500 text-sm flex items-center space-x-1 mt-2">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{errors.genre.message}</span>
+                </p>
+              )}
+            </div>
+          </motion.section>
+
+          {/* 제목 섹션 */}
+          <motion.section
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+          >
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              {t("titleSectionTitle")}
+            </h2>
+            <TitleSection register={register} errors={errors} />
+          </motion.section>
+
+          {/* 템포 섹션 */}
+          <motion.section
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+          >
+            <TempoSection register={register} errors={errors} />
+          </motion.section>
+
+          {/* 참조 URL 섹션 */}
+          <motion.section
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+          >
+            <ReferenceUrlsSection
+              fields={referenceUrlFields}
+              append={appendReferenceUrl}
+              remove={removeReferenceUrl}
+              register={register}
+            />
+          </motion.section>
+
+          {/* 가사 섹션 */}
+          <motion.section
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+          >
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              {t("lyricsTitle")}
+            </h2>
+            <LyricsSection register={register} errors={errors} />
+          </motion.section>
+
+          {/* 작곡가/작사가 섹션 */}
+          <motion.section
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+          >
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              {t("composerLyricistTitle")}
+            </h2>
+            <ComposerLyricistSection register={register} />
+          </motion.section>
+
+          {/* 설명 섹션 */}
+          <motion.section
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+          >
+            <DescriptionSection register={register} errors={errors} />
+          </motion.section>
+
+          {/* 옵션 섹션 */}
+          <motion.section
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+          >
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              {t("optionsTitle")}
+            </h2>
+            <OptionsSection register={register} control={control} />
+          </motion.section>
+
+          {/* 판매 세부 정보 섹션 */}
           <SaleDetailsSection
             register={register}
             control={control}
@@ -218,9 +320,18 @@ export default function ScoreUploadPage() {
             handleDateChange={handleDateChange}
             errors={errors}
           />
-          <Button type="submit" isDisabled={isLoading || !isFormValid()}>
-            {t("uploadButton")} {/* "업로드" */}
-          </Button>
+
+          {/* 제출 버튼 */}
+          <motion.div
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex justify-end mt-8"
+          >
+            <Button type="submit" isDisabled={isLoading || !isFormValid()}>
+              {t("uploadButton")} {/* "업로드" */}
+            </Button>
+          </motion.div>
         </form>
       </div>
     </div>

@@ -155,22 +155,6 @@ export default function SetlistListPage() {
             </div>
           </div>
         </div>
-        <div className="mb-4">
-          <label htmlFor="itemsPerPage" className="text-sm text-gray-700 mr-2">
-            {t("itemsPerPage")}
-          </label>
-          <select
-            id="itemsPerPage"
-            value={itemsPerPage}
-            onChange={handleItemsPerPageChange}
-            className="rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-2 px-3 transition-all duration-200 hover:bg-gray-50"
-            aria-label={t("itemsPerPage")}
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-          </select>
-        </div>
         <AnimatePresence>
           {error && (
             <motion.div
@@ -192,6 +176,25 @@ export default function SetlistListPage() {
           <>
             <MobileCardLayout setlists={currentSetlists} />
             <DesktopTableLayout setlists={currentSetlists} />
+            <div className="mb-4 mt-4">
+              <label
+                htmlFor="itemsPerPage"
+                className="text-sm text-gray-700 mr-2"
+              >
+                {t("itemsPerPage")}
+              </label>
+              <select
+                id="itemsPerPage"
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+                className="rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-white text-gray-800 text-sm py-2 px-3 transition-all duration-200 hover:bg-gray-50"
+                aria-label={t("itemsPerPage")}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+              </select>
+            </div>
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

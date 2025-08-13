@@ -208,7 +208,7 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
 
   return (
     <div className="space-y-4">
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-xl font-semibold text-gray-800 mb-4">
         {t("label")} <span className="text-red-500">*</span>
       </label>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">

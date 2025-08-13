@@ -23,7 +23,7 @@ export const LyricsSection: React.FC<LyricsSectionProps> = ({
         </label>
         <textarea
           {...register("lyrics", { required: t("lyricsRequired") })}
-          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm bg-white"
           rows={4}
           placeholder={t("lyricsPlaceholder")}
           aria-label={t("lyricsLabel")}
@@ -41,7 +41,7 @@ export const LyricsSection: React.FC<LyricsSectionProps> = ({
         </label>
         <textarea
           {...register("lyricsEn")}
-          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm bg-white"
           rows={4}
           placeholder={t("lyricsEnPlaceholder")}
           aria-label={t("lyricsEnLabel")}
@@ -53,7 +53,7 @@ export const LyricsSection: React.FC<LyricsSectionProps> = ({
         </label>
         <textarea
           {...register("lyricsJa")}
-          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+          className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm bg-white"
           rows={4}
           placeholder={t("lyricsJaPlaceholder")}
           aria-label={t("lyricsJaLabel")}

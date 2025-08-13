@@ -605,6 +605,7 @@
     "noUploadScore": "楽譜アップロード制限に達しました。\nプランをアップグレードしてください。"
   },
   "Setlist": {
+    "urlCopied": "URLがクリップボードにコピーされました！",
     "pageTitle": "コンテ作成",
     "title": "コンテタイトル",
     "setlist": "コンテリスト",

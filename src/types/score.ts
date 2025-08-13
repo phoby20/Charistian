@@ -103,14 +103,21 @@ export interface Share {
   user?: { id: string; name: string };
 }
 
-export interface Setlists {
+export type Setlists = {
   id: string;
   title: string;
   date: string;
+  createdAt: string;
+  updatedAt: string;
+  churchId: string;
+  fileUrl: string;
+  description?: string;
+  creatorId: string;
   creator: { name: string; id: string };
   church: { name: string };
+  scores: Score[];
   shares: Share[];
-}
+};
 
 export interface Creation {
   id: string;
@@ -130,16 +137,6 @@ export interface Team {
 export interface User {
   id: string;
   name: string;
-}
-
-export interface Setlists {
-  id: string;
-  title: string;
-  date: string;
-  description?: string;
-  creatorId: string;
-  scores: { id: string; creation: Creation; order: number }[];
-  shares: Share[];
 }
 
 export interface SelectedSong {

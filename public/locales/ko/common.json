@@ -614,6 +614,7 @@
     "noUploadScore": "악보 업로드 제한수를 넘었습니다.\n플랜을 업그레이드하세요"
   },
   "Setlist": {
+    "urlCopied": "URL이 클립보드에 복사되었습니다!",
     "pageTitle": "콘티 작성",
     "title": "콘티 제목",
     "setlist": "콘티 리스트",

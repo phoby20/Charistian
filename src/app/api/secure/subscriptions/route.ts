@@ -361,7 +361,6 @@ export async function DELETE() {
         data: {
           stripeSubscriptionId: subscriptionIdToCancel,
           status: "CANCELED",
-          plan: "FREE",
         },
       });
     } catch (error: unknown) {

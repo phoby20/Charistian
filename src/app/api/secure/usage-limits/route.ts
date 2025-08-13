@@ -1,12 +1,14 @@
 // src/app/api/secure/usage-limits/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { startOfWeek, startOfMonth } from "date-fns";
-import { TokenPayload } from "@/lib/jwt";
+import { startOfWeek, startOfMonth, endOfMonth } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import { TokenPayload } from "@/lib/jwt";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secure-secret-key";
+const TIME_ZONE = "Asia/Seoul"; // 한국(서울) 시간대
 
 interface JwtPayload {
   userId: string;
@@ -54,7 +56,6 @@ export async function GET() {
 
     const churchId = decoded.churchId;
 
-    // churchId 검증
     if (!churchId) {
       return NextResponse.json(
         { error: "교회 ID가 없습니다." },
@@ -62,56 +63,66 @@ export async function GET() {
       );
     }
 
-    // findUnique 대신 findFirst 사용
+    // 현재 서울 시간
+    const now = toZonedTime(new Date(), TIME_ZONE);
+
+    // 구독 정보 조회
     const subscription = await prisma.subscription.findFirst({
       where: { churchId: churchId, status: "ACTIVE" },
-      orderBy: { updatedAt: "desc" }, // 최신 데이터 보장
-    });
-    const usage = await prisma.usageLimit.findFirst({
-      where: { churchId: churchId },
+      orderBy: { updatedAt: "desc" },
     });
 
     const plan = subscription?.plan || "FREE";
 
-    // 주간/월간 리셋
-    const now = new Date();
-    if (usage && usage.resetAt) {
-      if (usage.resetAt < startOfWeek(now)) {
-        await prisma.usageLimit.update({
-          where: { id: usage.id }, // usage.id로 고유 식별
-          data: { weeklySetlistCount: 0, resetAt: now },
-        });
-      }
-      if (usage.resetAt < startOfMonth(now)) {
-        await prisma.usageLimit.update({
-          where: { id: usage.id }, // usage.id로 고유 식별
-          data: { monthlySetlistCount: 0, resetAt: now },
-        });
-      }
-    }
+    // 주간 세트리스트 조회: 일요일 ~ 토요일 (KST)
+    const startOfCurrentWeek = startOfWeek(now, { weekStartsOn: 0 }); // 일요일 시작
+    const endOfCurrentWeek = new Date(startOfCurrentWeek);
+    endOfCurrentWeek.setDate(startOfCurrentWeek.getDate() + 6); // 토요일
+    endOfCurrentWeek.setHours(23, 59, 59, 999); // 토요일 23:59:59.999
 
-    const currentUsage = await prisma.usageLimit.findFirst({
+    const weeklySetlists = await prisma.setlist.count({
+      where: {
+        churchId: churchId,
+        createdAt: {
+          gte: startOfCurrentWeek,
+          lte: endOfCurrentWeek,
+        },
+      },
+    });
+
+    // 월간 세트리스트 조회: 매월 1일 ~ 월말 (KST)
+    const startOfCurrentMonth = startOfMonth(now);
+    const endOfCurrentMonth = endOfMonth(now); // 월말 (2월: 28/29일, 그 외: 30/31일)
+
+    const monthlySetlists = await prisma.setlist.count({
+      where: {
+        churchId: churchId,
+        createdAt: {
+          gte: startOfCurrentMonth,
+          lte: endOfCurrentMonth,
+        },
+      },
+    });
+
+    // 사용자 및 악보 조회
+    const currentChurchUsers = await prisma.user.count({
       where: { churchId: churchId },
     });
 
-    const currentChurchUsers = await prisma.user.findMany({
-      where: { churchId: churchId },
-    });
-
-    const currentScores = await prisma.creation.findMany({
+    const currentScores = await prisma.creation.count({
       where: { churchId: churchId },
     });
 
     return NextResponse.json({
       plan,
       maxUsers: LIMITS[plan].maxUsers,
-      remainingUsers: currentChurchUsers.length,
+      remainingUsers: currentChurchUsers,
       weeklySetlists: LIMITS[plan].weeklySetlists,
-      remainingWeeklySetlists: currentUsage?.weeklySetlistCount || 0,
+      remainingWeeklySetlists: weeklySetlists,
       monthlySetlists: LIMITS[plan].monthlySetlists,
-      remainingMonthlySetlists: currentUsage?.monthlySetlistCount || 0,
+      remainingMonthlySetlists: monthlySetlists,
       maxScores: LIMITS[plan].maxScores,
-      remainingScores: currentScores.length,
+      remainingScores: LIMITS[plan].maxScores - currentScores,
     });
   } catch (error) {
     console.error("Usage limits fetch error:", error);

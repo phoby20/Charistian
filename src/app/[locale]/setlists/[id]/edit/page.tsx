@@ -16,6 +16,7 @@ import { CheckboxGroup } from "@/components/CheckboxGroup";
 import { SelectedSong, SetlistResponse, Team } from "@/types/score";
 import { useRouter } from "@/utils/useRouter";
 import SelectedSongsList from "@/components/scores/SelectedSongsList";
+import Button from "@/components/Button";
 
 export default function SetlistEditPage() {
   const t = useTranslations("Setlist");
@@ -438,17 +439,7 @@ export default function SetlistEditPage() {
                 </div>
               </div>
             </div>
-            <motion.button
-              type="submit"
-              whileHover={{ scale: isFormInvalid || isSubmitting ? 1 : 1.05 }}
-              whileTap={{ scale: isFormInvalid || isSubmitting ? 1 : 0.95 }}
-              disabled={isSubmitting || isFormInvalid}
-              className={`cursor-pointer w-full py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center ${
-                isSubmitting || isFormInvalid
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              } transition-colors duration-200 shadow-sm`}
-            >
+            <Button type="submit" isDisabled={isSubmitting || isFormInvalid}>
               {isSubmitting ? (
                 <>
                   <svg
@@ -474,7 +465,7 @@ export default function SetlistEditPage() {
               ) : (
                 t("save")
               )}
-            </motion.button>
+            </Button>
           </form>
         </motion.div>
       </div>

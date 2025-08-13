@@ -122,7 +122,7 @@ export async function GET() {
       monthlySetlists: LIMITS[plan].monthlySetlists,
       remainingMonthlySetlists: monthlySetlists,
       maxScores: LIMITS[plan].maxScores,
-      remainingScores: LIMITS[plan].maxScores - currentScores,
+      remainingScores: currentScores,
     });
   } catch (error) {
     console.error("Usage limits fetch error:", error);

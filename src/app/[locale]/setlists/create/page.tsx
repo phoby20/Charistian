@@ -118,8 +118,8 @@ export default function CreateSetlistPage() {
     fetchShares();
   }, [user, t, router]);
 
-  const handleKeySelect = (index: number, key: string) => {
-    setSelectedKeys((prev) => ({ ...prev, [index]: key }));
+  const handleKeySelect = (songId: string, key: string) => {
+    setSelectedKeys((prev) => ({ ...prev, [songId]: key }));
   };
 
   const handleUrlSelect = (songId: string, url: string) => {
@@ -336,6 +336,7 @@ export default function CreateSetlistPage() {
               t={t}
               onUrlSelect={handleUrlSelect}
               selectedUrls={selectedUrls}
+              selectedKeys={selectedKeys}
             />
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-3">

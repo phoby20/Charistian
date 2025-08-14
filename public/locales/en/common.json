@@ -614,6 +614,7 @@
     "noUploadScore": "Score upload limit exceeded.\nUpgrade your plan"
   },
   "Setlist": {
+    "noKey": "No Key",
     "urlCopied": "URL copied to clipboard!",
     "pageTitle": "Create Setlist",
     "title": "Setlist Title",

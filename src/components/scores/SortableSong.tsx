@@ -22,7 +22,7 @@ export interface SortableSongProps {
   count: number;
   onRemoveSong: (index: number) => void;
   onPlayPause: (songId: string) => void;
-  onKeySelect: (index: number, key: string) => void;
+  onKeySelect: (songId: string, key: string) => void; // 수정: index -> songId
   isOver: boolean;
   isDraggingAny: boolean;
   currentPlayingId: string | null;
@@ -30,9 +30,9 @@ export interface SortableSongProps {
   titles: YouTubeVideo[];
   selectedUrls: { [key: string]: string };
   handleUrlSelect: (songId: string, url: string) => void;
+  selectedKeys: { [songId: string]: string }; // 수정: index -> songId
 }
 
-// YouTube URL에서 videoId 추출
 const getYouTubeVideoId = (url?: string): string | undefined => {
   if (!url) return undefined;
   const regex =
@@ -41,7 +41,6 @@ const getYouTubeVideoId = (url?: string): string | undefined => {
   return match ? match[1] : undefined;
 };
 
-// 첫 번째 YouTube URL의 videoId 가져오기
 const getFirstYouTubeVideoId = (urls?: string[]): string | null => {
   if (!urls || urls.length === 0) return null;
   for (const url of urls) {
@@ -65,6 +64,7 @@ export function SortableSong({
   titles,
   selectedUrls,
   handleUrlSelect,
+  selectedKeys, // 수정
 }: SortableSongProps) {
   const {
     attributes,
@@ -79,9 +79,6 @@ export function SortableSong({
   const t = useTranslations("Setlist");
   const selectRef = useRef<HTMLSelectElement>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedKey, setSelectedKey] = useState<string>(
-    song.scoreKeys[0]?.key || "" // scoreKeys 사용
-  );
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -117,11 +114,10 @@ export function SortableSong({
     }
   };
 
-  // 키 선택 핸들러
+  // 키 선택 핸들러 수정
   const handleKeySelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newKey = e.target.value;
-    setSelectedKey(newKey);
-    onKeySelect(index, newKey);
+    onKeySelect(song.id, newKey); // song.id로 전달
   };
 
   return (
@@ -151,10 +147,11 @@ export function SortableSong({
           <div className="flex justify-between p-3 sm:flex-row flex-col">
             <div className="flex items-center gap-3 grow">
               <div className="flex flex-row gap-2 items-center">
-                {song.scoreKeys.length > 1 ? ( // scoreKeys 사용
+                {song.scoreKeys.length > 1 ? (
                   <div className="relative">
                     <select
-                      value={selectedKey}
+                      ref={selectRef}
+                      value={selectedKeys[song.id] || ""} // song.id로 참조
                       onChange={handleKeySelect}
                       className="rounded-lg border-gray-200 bg-gray-50 text-gray-800 text-sm py-1.5 px-3 pr-8 appearance-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition-all hover:bg-gray-100"
                       disabled={isDragging}
@@ -173,11 +170,11 @@ export function SortableSong({
                 ) : (
                   <Chip
                     label={
-                      selectedKey ||
+                      selectedKeys[song.id] ||
                       song.scoreKeys[0]?.key ||
                       t("noKey") ||
                       "No Key"
-                    } // scoreKeys 사용
+                    }
                     color="yellow"
                   />
                 )}

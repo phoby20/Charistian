@@ -23,6 +23,7 @@ import DesktopFilterTabs from "@/components/dashboard/DesktopFilterTabs";
 import Link from "next/link";
 import UsageLimitCard from "@/components/dashboard/UsageLimitCard";
 import { X } from "lucide-react";
+import FrequentScoresDashboard from "@/components/dashboard/FrequentScoresDashboard";
 
 interface AttendanceRecord {
   userId: string;
@@ -304,6 +305,8 @@ export default function DashboardPage() {
         <PendingAlerts user={user} pendingChurches={pendingChurches} />
 
         <UsageLimitCard user={user} usageLimit={usageLimit} />
+
+        <FrequentScoresDashboard />
 
         {user.churchId &&
           !isKakaoEmail &&

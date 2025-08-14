@@ -1,3 +1,4 @@
+// src/utils/getDisplayTitle.ts
 // 표시할 제목 선택 헬퍼 함수
 
 export const getDisplayTitle = (

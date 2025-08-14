@@ -162,7 +162,7 @@ export default function ScoreUploadPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push(`/${locale}/scores`)}
-            className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
+            className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-6 h-6" />
             <span className="text-base font-medium">{t("backToList")}</span>
@@ -202,7 +202,7 @@ export default function ScoreUploadPage() {
             <div className="space-y-2">
               <select
                 {...register("genre", { required: t("genreRequired") })}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
               >
                 <option value="">{t("genrePlaceholder")}</option>
                 {GENRES.map((genre) => (

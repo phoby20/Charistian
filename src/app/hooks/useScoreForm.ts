@@ -15,6 +15,8 @@ import {
   ApiErrorResponse,
   ApiSuccessResponse,
 } from "@/types/score";
+import { getPdfFirstPagePreview } from "@/utils/pdf-preview";
+import * as PDFJS from "pdfjs-dist";
 
 interface UseScoreFormReturn {
   form: UseFormReturn<ScoreFormData>;
@@ -34,7 +36,7 @@ interface UseScoreFormReturn {
   saleEndDate: Date | null;
   locale: string;
   isFormValid: () => boolean;
-  handleFileChange: (index: number, file: File | null) => void;
+  handleFileChange: (index: number, file: File | null) => Promise<void>;
   handleDateChange: (
     date: Date | null,
     field: "saleStartDate" | "saleEndDate"
@@ -88,13 +90,32 @@ export const useScoreForm = (): UseScoreFormReturn => {
   const params = useParams();
   const { locale } = params;
 
+  const [pdfjsLib, setPdfjsLib] = useState<typeof PDFJS | null>(null);
+
+  // pdfjs-dist 초기화
+  useEffect(() => {
+    (async () => {
+      try {
+        const pdfjs: typeof PDFJS = await import("pdfjs-dist");
+        const workerSrc = new URL(
+          "pdfjs-dist/build/pdf.worker.min.mjs",
+          import.meta.url
+        ).toString();
+        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+        setPdfjsLib(pdfjs);
+      } catch (error) {
+        console.error("pdfjs-dist 로드 실패:", error);
+      }
+    })();
+  }, []);
+
   const { scoreKeys, title, tempo, lyrics, description, price, isForSale } =
     form.watch();
 
   const isFormValid = (): boolean => {
     const { errors } = form.formState;
     if (!scoreKeys) {
-      return false; // scoreKeys가 undefined일 경우 false 반환
+      return false;
     }
     const requiredFieldsFilled =
       scoreKeys.length > 0 &&
@@ -134,41 +155,67 @@ export const useScoreForm = (): UseScoreFormReturn => {
       setPdfPreviews(
         scoreKeyFields.map((field, index) => ({
           key: scoreKeys?.[index]?.key ?? "",
-          url:
-            scoreKeys?.[index]?.file instanceof File
-              ? (scoreKeys[index].file?.name ?? null)
-              : (scoreKeys?.[index]?.file ?? null),
+          url: scoreKeys?.[index]?.file
+            ? typeof scoreKeys[index].file === "string"
+              ? scoreKeys[index].file
+              : (scoreKeys[index].file?.name ?? null)
+            : null,
         }))
       );
     }
   }, [scoreKeyFields, scoreKeys]);
 
-  const handleFileChange = (index: number, file: File | null): void => {
-    setPdfPreviews((prev) => {
-      const newPreviews = [...prev];
-      // 인덱스가 배열 길이를 초과하면 새로운 항목 추가
-      if (index >= newPreviews.length) {
-        newPreviews.push({
-          key: file?.name ?? "",
-          url: file ? file.name : null,
-        });
-      } else {
-        newPreviews[index] = {
-          key: scoreKeys?.[index]?.key ?? "",
-          url: file ? file.name : null,
-        };
-      }
-      return newPreviews;
-    });
-    setFileError(null);
+  const handleFileChange = async (
+    index: number,
+    file: File | null
+  ): Promise<void> => {
+    if (!file || !pdfjsLib) {
+      setPdfPreviews((prev) => {
+        const newPreviews = [...prev];
+        if (index >= newPreviews.length) {
+          newPreviews.push({ key: "", url: null });
+        } else {
+          newPreviews[index] = {
+            key: scoreKeys?.[index]?.key ?? "",
+            url: null,
+          };
+        }
+        return newPreviews;
+      });
+      form.setValue(`scoreKeys.${index}.file`, file);
+      setFileError(null);
+      return;
+    }
+
+    try {
+      const previewUrl = await getPdfFirstPagePreview(file, pdfjsLib);
+      setPdfPreviews((prev) => {
+        const newPreviews = [...prev];
+        if (index >= newPreviews.length) {
+          newPreviews.push({
+            key: scoreKeys?.[index]?.key ?? "",
+            url: previewUrl,
+          });
+        } else {
+          newPreviews[index] = {
+            key: scoreKeys?.[index]?.key ?? "",
+            url: previewUrl,
+          };
+        }
+        return newPreviews;
+      });
+      form.setValue(`scoreKeys.${index}.file`, file);
+      setFileError(null);
+    } catch (error) {
+      console.error("PDF 미리보기 생성 실패:", error);
+      setFileError("invalidPdf");
+      form.setValue(`scoreKeys.${index}.file`, null);
+    }
   };
 
   const removeScoreKey = (index: number) => {
-    originalRemoveScoreKey(index); // react-hook-form의 필드 제거
-    setPdfPreviews((prev) => {
-      const newPreviews = prev.filter((_, i) => i !== index); // 해당 인덱스 미리보기 제거
-      return newPreviews;
-    });
+    originalRemoveScoreKey(index);
+    setPdfPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleDateChange = (
@@ -191,11 +238,11 @@ export const useScoreForm = (): UseScoreFormReturn => {
     const formData = new FormData();
     data.scoreKeys?.forEach((sk, index) => {
       if (sk.file instanceof File) {
-        formData.append(`scoreKeys[${index}].file`, sk.file);
+        formData.append(`scoreKeys[${index}][file]`, sk.file);
       } else if (sk.file) {
-        formData.append(`scoreKeys[${index}].fileUrl`, sk.file);
+        formData.append(`scoreKeys[${index}][fileUrl]`, sk.file);
       }
-      formData.append(`scoreKeys[${index}].key`, sk.key);
+      formData.append(`scoreKeys[${index}][key]`, sk.key);
     });
     if (data.thumbnail) formData.append("thumbnail", data.thumbnail);
     formData.append("title", data.title);

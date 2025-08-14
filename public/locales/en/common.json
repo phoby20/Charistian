@@ -614,6 +614,7 @@
     "noUploadScore": "Score upload limit exceeded.\nUpgrade your plan"
   },
   "Setlist": {
+    "noKey": "No Key",
     "urlCopied": "URL copied to clipboard!",
     "pageTitle": "Create Setlist",
     "title": "Setlist Title",
@@ -849,7 +850,27 @@
     "monthlySetlists": "Monthly Setlist Creations",
     "scoreUploads": "Remaining Score Uploads",
     "setChurchAlert": "Affiliated church and position are not set. \nClick to go to the settings page.",
-    "verifyEmailAlert": "Email is not registered. \nPlease register and verify your email."
+    "verifyEmailAlert": "Email is not registered. \nPlease register and verify your email.",
+    "popularScores": "Popular Scores",
+    "monthlyPopularScores": "Top Scores in the Last Month",
+    "weeklyPopularScores": "Top Scores in the Last Week",
+    "genreTitle": "Genre",
+    "none": "None",
+    "usageCount": "Usage Count",
+    "noData": "No data available",
+    "fetchError": "An error occurred while fetching data",
+    "viewAllScores": "View All Scores",
+    "genre": {
+      "bright": "Bright",
+      "calm": "Calm",
+      "dark": "Dark",
+      "dramatic": "Dramatic",
+      "funky": "Funky",
+      "happy": "Happy",
+      "inspirational": "Inspirational",
+      "romantic": "Romantic",
+      "sad": "Sad"
+    }
   },
   "checkout": {
     "title": "Checkout",
@@ -1195,5 +1216,37 @@
     "passwordLowercaseError": "Password must include a lowercase letter",
     "passwordNumberError": "Password must include a number",
     "passwordSpecialCharError": "Password must include a special character (!@#$%^&*)"
+  },
+  "api": {
+    "success": {
+      "privateSuccess": "Score has been successfully made private.",
+      "updateSuccess": "Score has been successfully updated."
+    },
+    "errors": {
+      "unauthenticated": "Not authenticated.",
+      "invalidToken": "Invalid token.",
+      "forbidden": "Access denied.",
+      "notFound": "Score not found.",
+      "notPublic": "Score is not public.",
+      "alreadyPrivate": "Score is already private.",
+      "privateCannotEdit": "Private scores cannot be edited.",
+      "invalidContentType": "Unsupported Content-Type.",
+      "invalidJson": "Invalid JSON format.",
+      "titleRequired": "Title is required.",
+      "invalidTempo": "Tempo must be a valid integer.",
+      "tempoOutOfRange": "Tempo must be between {min} and {max}.",
+      "invalidGenre": "Invalid genre. Valid genres: {genres}",
+      "invalidSaleStartDate": "saleStartDate must be a valid ISO date string.",
+      "invalidSaleEndDate": "saleEndDate must be a valid ISO date string.",
+      "priceRequiredForSale": "Price is required for scores for sale.",
+      "invalidPrice": "Price must be a valid number greater than or equal to 0.",
+      "scoreKeyRequired": "Key is required for scoreKeys.",
+      "invalidScoreKey": "Invalid code key: {key}",
+      "invalidFileType": "File for scoreKeys[{key}] must be PDF or JPG format.",
+      "fileSizeTooLarge": "File size for scoreKeys[{key}] must not exceed 10MB.",
+      "fileOrUrlRequired": "File or fileUrl is required for scoreKeys[{key}].",
+      "updateFailed": "An error occurred while updating the score.",
+      "privateFailed": "An error occurred while making the score private."
+    }
   }
 }

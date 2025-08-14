@@ -228,7 +228,7 @@ export const FileUploadSection: React.FC<FileUploadSectionProps> = ({
             scoreKeyFieldsLength={scoreKeyFields.length}
           />
         ))}
-        <div className="border border-dashed border-gray-400 p-4 rounded-md relative flex items-center justify-center">
+        <div className="border border-dashed border-gray-400 p-4 rounded-md relative flex items-center justify-center bg-white">
           <Button
             type="button" // 폼 제출 방지
             variant="outline"

@@ -614,6 +614,7 @@
     "noUploadScore": "악보 업로드 제한수를 넘었습니다.\n플랜을 업그레이드하세요"
   },
   "Setlist": {
+    "noKey": "등록된 키가 없습니다.",
     "urlCopied": "URL이 클립보드에 복사되었습니다!",
     "pageTitle": "콘티 작성",
     "title": "콘티 제목",
@@ -849,7 +850,27 @@
     "monthlySetlists": "월간 작성 콘티 수",
     "scoreUploads": "남은 악보 업로드",
     "setChurchAlert": "소속 교회와 직분이 미설정 상태입니다. \n클릭하여 설정 페이지로 이동합니다.",
-    "verifyEmailAlert": "이메일이 등록되어있지 않습니다. \n이메일을 등록하고 인증해 주세요."
+    "verifyEmailAlert": "이메일이 등록되어있지 않습니다. \n이메일을 등록하고 인증해 주세요.",
+    "popularScores": "인기 악보",
+    "monthlyPopularScores": "최근 한 달 인기 악보",
+    "weeklyPopularScores": "최근 일주일 인기 악보",
+    "genreTitle": "장르",
+    "none": "없음",
+    "usageCount": "사용 횟수",
+    "noData": "데이터가 없습니다",
+    "fetchError": "데이터를 가져오는 중 오류가 발생했습니다",
+    "viewAllScores": "모든 악보 보기",
+    "genre": {
+      "bright": "밝은",
+      "calm": "차분한",
+      "dark": "어두운",
+      "dramatic": "극적인",
+      "funky": "펑키",
+      "happy": "행복한",
+      "inspirational": "영감적인",
+      "romantic": "로맨틱",
+      "sad": "슬픈"
+    }
   },
   "checkout": {
     "title": "결제",
@@ -1195,5 +1216,37 @@
     "passwordLowercaseError": "비밀번호는 소문자를 포함해야 합니다",
     "passwordNumberError": "비밀번호는 숫자를 포함해야 합니다",
     "passwordSpecialCharError": "비밀번호는 특수문자(!@#$%^&*)를 포함해야 합니다"
+  },
+  "api": {
+    "success": {
+      "privateSuccess": "악보가 성공적으로 비공개 처리되었습니다.",
+      "updateSuccess": "악보가 성공적으로 수정되었습니다."
+    },
+    "errors": {
+      "unauthenticated": "인증되지 않았습니다.",
+      "invalidToken": "유효하지 않은 토큰입니다.",
+      "forbidden": "권한이 없습니다.",
+      "notFound": "악보를 찾을 수 없습니다.",
+      "notPublic": "공개되지 않은 악보입니다.",
+      "alreadyPrivate": "이미 비공개된 악보입니다.",
+      "privateCannotEdit": "비공개된 악보는 수정할 수 없습니다.",
+      "invalidContentType": "지원되지 않는 Content-Type입니다.",
+      "invalidJson": "유효하지 않은 JSON 형식입니다.",
+      "titleRequired": "제목은 필수입니다.",
+      "invalidTempo": "tempo는 유효한 정수여야 합니다.",
+      "tempoOutOfRange": "tempo는 {min}에서 {max} 사이의 값이어야 합니다.",
+      "invalidGenre": "유효하지 않은 장르입니다. 유효한 장르: {genres}",
+      "invalidSaleStartDate": "saleStartDate는 유효한 ISO 날짜 문자열이어야 합니다.",
+      "invalidSaleEndDate": "saleEndDate는 유효한 ISO 날짜 문자열이어야 합니다.",
+      "priceRequiredForSale": "판매용 악보는 가격이 필수입니다.",
+      "invalidPrice": "가격은 0 이상의 유효한 숫자여야 합니다.",
+      "scoreKeyRequired": "scoreKeys의 key는 필수입니다.",
+      "invalidScoreKey": "유효하지 않은 코드 키입니다: {key}",
+      "invalidFileType": "scoreKeys[{key}]의 파일은 PDF 또는 JPG 형식이어야 합니다.",
+      "fileSizeTooLarge": "scoreKeys[{key}]의 파일 크기는 10MB를 초과할 수 없습니다.",
+      "fileOrUrlRequired": "scoreKeys[{key}]의 file 또는 fileUrl이 필요합니다.",
+      "updateFailed": "악보 수정 중 오류가 발생했습니다.",
+      "privateFailed": "악보 비공개 처리 중 오류가 발생했습니다."
+    }
   }
 }

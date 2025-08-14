@@ -32,9 +32,9 @@ export default function CreateSetlistPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [usageLimits, setUsageLimits] = useState<UsageLimits | null>(null);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
-  const [selectedKeys, setSelectedKeys] = useState<{ [index: number]: string }>(
-    {}
-  );
+  const [selectedKeys, setSelectedKeys] = useState<{
+    [songId: string]: string;
+  }>({}); // 타입 변경
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -64,12 +64,8 @@ export default function CreateSetlistPage() {
         setSelectedSongs(migratedSongs);
         // 초기 selectedKeys 설정
         const initialKeys = migratedSongs.reduce(
-          (
-            acc: { [index: number]: string },
-            song: SelectedSong,
-            index: number
-          ) => {
-            acc[index] = song.scoreKeys[0]?.key || "";
+          (acc: { [songId: string]: string }, song: SelectedSong) => {
+            acc[song.id] = song.scoreKeys[0]?.key || "";
             return acc;
           },
           {}
@@ -118,8 +114,8 @@ export default function CreateSetlistPage() {
     fetchShares();
   }, [user, t, router]);
 
-  const handleKeySelect = (index: number, key: string) => {
-    setSelectedKeys((prev) => ({ ...prev, [index]: key }));
+  const handleKeySelect = (songId: string, key: string) => {
+    setSelectedKeys((prev) => ({ ...prev, [songId]: key }));
   };
 
   const handleUrlSelect = (songId: string, url: string) => {
@@ -175,7 +171,7 @@ export default function CreateSetlistPage() {
                 (url) => url.includes("youtube.com") || url.includes("youtu.be")
               ) ||
               "",
-            selectedKey: selectedKeys[index] || song.scoreKeys[0]?.key || "",
+            selectedKey: selectedKeys[song.id] || song.scoreKeys[0]?.key || "", // song.id로 참조
           })),
           shares: [...selectedTeams.map((teamId) => ({ teamId }))],
         }),
@@ -195,38 +191,23 @@ export default function CreateSetlistPage() {
 
   const handleRemoveSong = (index: number) => {
     setSelectedSongs((prev) => {
-      const updated = [...prev];
-      updated.splice(index, 1);
-      sessionStorage.setItem("selectedSongList", JSON.stringify(updated));
-      return updated;
-    });
-    setSelectedKeys((prev) => {
-      const updated = { ...prev };
-      delete updated[index];
-      Object.keys(updated).forEach((key, i) => {
-        if (parseInt(key) > index) {
-          updated[i] = updated[parseInt(key)];
-          delete updated[parseInt(key)];
-        }
+      const updated25 = [...prev];
+      const removedSong = updated25.splice(index, 1)[0];
+      sessionStorage.setItem("selectedSongList", JSON.stringify(updated25));
+      // selectedKeys에서 제거된 곡의 키 삭제
+      setSelectedKeys((prev) => {
+        const updatedKeys = { ...prev };
+        delete updatedKeys[removedSong.id];
+        return updatedKeys;
       });
-      return updated;
+      return updated25;
     });
   };
 
   const handleReorderSongs = (newSongs: SelectedSong[]) => {
     setSelectedSongs(newSongs);
     sessionStorage.setItem("selectedSongList", JSON.stringify(newSongs));
-    const updatedKeys = newSongs.reduce(
-      (acc: { [index: number]: string }, song: SelectedSong, index: number) => {
-        const oldIndex = selectedSongs.findIndex(
-          (oldSong) => oldSong.id === song.id
-        );
-        acc[index] = selectedKeys[oldIndex] || song.scoreKeys[0]?.key || "";
-        return acc;
-      },
-      {}
-    );
-    setSelectedKeys(updatedKeys);
+    // selectedKeys는 song.id 기반이므로 재조정 불필요
   };
 
   if (isLoading) return <Loading />;
@@ -336,6 +317,7 @@ export default function CreateSetlistPage() {
               t={t}
               onUrlSelect={handleUrlSelect}
               selectedUrls={selectedUrls}
+              selectedKeys={selectedKeys} // 수정된 selectedKeys 전달
             />
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-3">

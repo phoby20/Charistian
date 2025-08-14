@@ -839,7 +839,27 @@
     "monthlySetlists": "月間作成コンテ",
     "scoreUploads": "楽譜アップロード",
     "setChurchAlert": "所属教会と職分が未設定状態です。\nクリックして設定ページに移動します。",
-    "verifyEmailAlert": "Emailが未登録状態です。 \nEmailを登録してください。"
+    "verifyEmailAlert": "Emailが未登録状態です。 \nEmailを登録してください。",
+    "popularScores": "人気の楽譜",
+    "monthlyPopularScores": "最近1ヶ月の人気楽譜",
+    "weeklyPopularScores": "最近1週間の人気楽譜",
+    "genreTitle": "ジャンル",
+    "none": "なし",
+    "usageCount": "使用回数",
+    "noData": "データがありません",
+    "fetchError": "データの取得中にエラーが発生しました",
+    "viewAllScores": "すべての楽譜を見る",
+    "genre": {
+      "bright": "明るい",
+      "calm": "落ち着いた",
+      "dark": "暗い",
+      "dramatic": "劇的",
+      "funky": "ファンキー",
+      "happy": "楽しい",
+      "inspirational": "感動的",
+      "romantic": "ロマンチック",
+      "sad": "悲しい"
+    }
   },
   "checkout": {
     "title": "決済",
@@ -1184,5 +1204,37 @@
     "passwordLowercaseError": "パスワードには小文字を含める必要があります",
     "passwordNumberError": "パスワードには数字を含める必要があります",
     "passwordSpecialCharError": "パスワードには特殊文字(!@#$%^&*)を含める必要があります"
+  },
+  "api": {
+    "success": {
+      "privateSuccess": "楽譜が正常に非公開にされました。",
+      "updateSuccess": "楽譜が正常に更新されました。"
+    },
+    "errors": {
+      "unauthenticated": "認証されていません。",
+      "invalidToken": "無効なトークンです。",
+      "forbidden": "権限がありません。",
+      "notFound": "楽譜が見つかりません。",
+      "notPublic": "公開されていない楽譜です。",
+      "alreadyPrivate": "すでに非公開の楽譜です。",
+      "privateCannotEdit": "非公開の楽譜は編集できません。",
+      "invalidContentType": "サポートされていないContent-Typeです。",
+      "invalidJson": "無効なJSON形式です。",
+      "titleRequired": "タイトルは必須です。",
+      "invalidTempo": "tempoは有効な整数でなければなりません。",
+      "tempoOutOfRange": "tempoは{min}から{max}の間の値でなければなりません。",
+      "invalidGenre": "無効なジャンルです。有効なジャンル: {genres}",
+      "invalidSaleStartDate": "saleStartDateは有効なISO日付文字列でなければなりません。",
+      "invalidSaleEndDate": "saleEndDateは有効なISO日付文字列でなければなりません。",
+      "priceRequiredForSale": "販売用の楽譜には価格が必須です。",
+      "invalidPrice": "価格は0以上の有効な数値でなければなりません。",
+      "scoreKeyRequired": "scoreKeysのkeyは必須です。",
+      "invalidScoreKey": "無効なコードキーです: {key}",
+      "invalidFileType": "scoreKeys[{key}]のファイルはPDFまたはJPG形式でなければなりません。",
+      "fileSizeTooLarge": "scoreKeys[{key}]のファイルサイズは10MBを超えることはできません。",
+      "fileOrUrlRequired": "scoreKeys[{key}]のfileまたはfileUrlが必要です。",
+      "updateFailed": "楽譜の更新中にエラーが発生しました。",
+      "privateFailed": "楽譜の非公開処理中にエラーが発生しました。"
+    }
   }
 }

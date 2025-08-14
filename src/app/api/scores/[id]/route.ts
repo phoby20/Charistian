@@ -7,6 +7,7 @@ import { Genre } from "@prisma/client";
 import { put } from "@vercel/blob";
 import { createKoreaDate } from "@/utils/creatKoreaDate";
 import { constants } from "@/constants/intex";
+import { getTranslations } from "next-intl/server";
 
 const { KEYS, TONES } = constants;
 
@@ -20,16 +21,26 @@ const isValidTone = (value: string): value is (typeof TONES)[number] =>
 const INT4_MIN = -2147483648;
 const INT4_MAX = 2147483647;
 
+// 로케일 추출 함수
+const getLocaleFromRequest = (req: NextRequest): string => {
+  const acceptLanguage = req.headers.get("accept-language") || "";
+  console.log("Accept-Language:", acceptLanguage);
+  const preferredLocale = acceptLanguage.split(",")[0]?.split("-")[0];
+  return ["ko", "ja", "en"].includes(preferredLocale) ? preferredLocale : "ko";
+};
+
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const t = await getTranslations({
+    locale: getLocaleFromRequest(req),
+    namespace: "api.errors",
+  });
+
   const token = req.cookies.get("token")?.value;
   if (!token) {
-    return NextResponse.json(
-      { error: "인증되지 않았습니다." },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: t("unauthenticated") }, { status: 401 });
   }
 
   let payload: TokenPayload;
@@ -37,13 +48,13 @@ export async function GET(
     payload = verifyToken(token);
   } catch (error) {
     return NextResponse.json(
-      { error: `유효하지 않은 토큰입니다. ${error}` },
+      { error: `${t("invalidToken")} ${error}` },
       { status: 401 }
     );
   }
 
   if (!allowedRoles.includes(payload.role)) {
-    return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
+    return NextResponse.json({ error: t("forbidden") }, { status: 403 });
   }
 
   const { id } = await context.params;
@@ -63,10 +74,7 @@ export async function GET(
   });
 
   if (!score || (!score.isPublic && score.churchId !== payload.churchId)) {
-    return NextResponse.json(
-      { error: "악보를 찾을 수 없습니다." },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: t("notPublic") }, { status: 404 });
   }
 
   const ip = getLocalIpAddress();
@@ -88,12 +96,14 @@ export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const t = await getTranslations({
+    locale: getLocaleFromRequest(req),
+    namespace: "api.errors",
+  });
+
   const token = req.cookies.get("token")?.value;
   if (!token) {
-    return NextResponse.json(
-      { error: "인증되지 않았습니다." },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: t("unauthenticated") }, { status: 401 });
   }
 
   let payload: TokenPayload;
@@ -101,7 +111,7 @@ export async function PATCH(
     payload = verifyToken(token);
   } catch (error) {
     return NextResponse.json(
-      { error: `유효하지 않은 토큰입니다. ${error}` },
+      { error: `${t("invalidToken")} ${error}` },
       { status: 401 }
     );
   }
@@ -114,10 +124,7 @@ export async function PATCH(
   });
 
   if (!score) {
-    return NextResponse.json(
-      { error: "악보를 찾을 수 없습니다." },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: t("notFound") }, { status: 404 });
   }
 
   const isAuthorized =
@@ -125,14 +132,11 @@ export async function PATCH(
     ["SUPER_ADMIN", "ADMIN"].includes(payload.role);
 
   if (!isAuthorized) {
-    return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
+    return NextResponse.json({ error: t("forbidden") }, { status: 403 });
   }
 
   if (!score.isOpen) {
-    return NextResponse.json(
-      { error: "이미 비공개된 악보입니다." },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: t("alreadyPrivate") }, { status: 400 });
   }
 
   try {
@@ -157,16 +161,13 @@ export async function PATCH(
       {
         ...updatedScore,
         isLiked,
-        message: "악보가 성공적으로 비공개 처리되었습니다.",
+        message: t("privateSuccess", { namespace: "api.success" }),
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("악보 비공개 처리 오류:", error);
-    return NextResponse.json(
-      { error: "악보 비공개 처리 중 오류가 발생했습니다." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: t("privateFailed") }, { status: 500 });
   }
 }
 
@@ -196,12 +197,14 @@ export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const t = await getTranslations({
+    locale: getLocaleFromRequest(req),
+    namespace: "api.errors",
+  });
+
   const token = req.cookies.get("token")?.value;
   if (!token) {
-    return NextResponse.json(
-      { error: "인증되지 않았습니다." },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: t("unauthenticated") }, { status: 401 });
   }
 
   let payload: TokenPayload;
@@ -209,7 +212,7 @@ export async function PUT(
     payload = verifyToken(token);
   } catch (error) {
     return NextResponse.json(
-      { error: `유효하지 않은 토큰입니다. ${error}` },
+      { error: `${t("invalidToken")} ${error}` },
       { status: 401 }
     );
   }
@@ -222,10 +225,7 @@ export async function PUT(
   });
 
   if (!score) {
-    return NextResponse.json(
-      { error: "악보를 찾을 수 없습니다." },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: t("notFound") }, { status: 404 });
   }
 
   const isAuthorized =
@@ -233,12 +233,12 @@ export async function PUT(
     ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(payload.role);
 
   if (!isAuthorized) {
-    return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
+    return NextResponse.json({ error: t("forbidden") }, { status: 403 });
   }
 
   if (!score.isOpen) {
     return NextResponse.json(
-      { error: "비공개된 악보는 수정할 수 없습니다." },
+      { error: t("privateCannotEdit") },
       { status: 400 }
     );
   }
@@ -310,14 +310,11 @@ export async function PUT(
         data = await req.json();
       } catch (error) {
         console.error("JSON 파싱 오류:", error);
-        return NextResponse.json(
-          { error: "유효하지 않은 JSON 형식입니다." },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: t("invalidJson") }, { status: 400 });
       }
     } else {
       return NextResponse.json(
-        { error: "지원되지 않는 Content-Type입니다." },
+        { error: t("invalidContentType") },
         { status: 400 }
       );
     }
@@ -339,10 +336,7 @@ export async function PUT(
 
     // 필수 필드 검증
     if (!data.title || data.title.trim() === "") {
-      return NextResponse.json(
-        { error: "제목은 필수입니다." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: t("titleRequired") }, { status: 400 });
     }
 
     // tempo 값 검증
@@ -350,16 +344,11 @@ export async function PUT(
     if (data.tempo) {
       const parsedTempo = Number(data.tempo);
       if (isNaN(parsedTempo)) {
-        return NextResponse.json(
-          { error: "tempo는 유효한 정수여야 합니다." },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: t("invalidTempo") }, { status: 400 });
       }
       if (parsedTempo < INT4_MIN || parsedTempo > INT4_MAX) {
         return NextResponse.json(
-          {
-            error: `tempo는 ${INT4_MIN}에서 ${INT4_MAX} 사이의 값이어야 합니다.`,
-          },
+          { error: t("tempoOutOfRange", { min: INT4_MIN, max: INT4_MAX }) },
           { status: 400 }
         );
       }
@@ -370,7 +359,7 @@ export async function PUT(
     if (data.genre && !Object.values(Genre).includes(data.genre as Genre)) {
       return NextResponse.json(
         {
-          error: `유효하지 않은 장르입니다. 유효한 장르: ${Object.values(Genre).join(", ")}`,
+          error: t("invalidGenre", { genres: Object.values(Genre).join(", ") }),
         },
         { status: 400 }
       );
@@ -381,7 +370,7 @@ export async function PUT(
       const startDate = new Date(data.saleStartDate);
       if (isNaN(startDate.getTime())) {
         return NextResponse.json(
-          { error: "saleStartDate는 유효한 ISO 날짜 문자열이어야 합니다." },
+          { error: t("invalidSaleStartDate") },
           { status: 400 }
         );
       }
@@ -390,7 +379,7 @@ export async function PUT(
       const endDate = new Date(data.saleEndDate);
       if (isNaN(endDate.getTime())) {
         return NextResponse.json(
-          { error: "saleEndDate는 유효한 ISO 날짜 문자열이어야 합니다." },
+          { error: t("invalidSaleEndDate") },
           { status: 400 }
         );
       }
@@ -407,17 +396,14 @@ export async function PUT(
     let price: number | null = null;
     if (data.isForSale && data.price == null) {
       return NextResponse.json(
-        { error: "판매용 악보는 가격이 필수입니다." },
+        { error: t("priceRequiredForSale") },
         { status: 400 }
       );
     }
     if (data.price != null) {
       price = Number(data.price);
       if (isNaN(price) || price < 0) {
-        return NextResponse.json(
-          { error: "가격은 0 이상의 유효한 숫자여야 합니다." },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: t("invalidPrice") }, { status: 400 });
       }
     }
 
@@ -427,7 +413,7 @@ export async function PUT(
       for (const sk of data.scoreKeys) {
         if (!sk.key || sk.key.trim() === "") {
           return NextResponse.json(
-            { error: "scoreKeys의 key는 필수입니다." },
+            { error: t("scoreKeyRequired") },
             { status: 400 }
           );
         }
@@ -435,7 +421,7 @@ export async function PUT(
         const [keyNote, tone] = sk.key.split(" ");
         if (!isValidKey(keyNote) || !isValidTone(tone)) {
           return NextResponse.json(
-            { error: `유효하지 않은 코드 키입니다: ${sk.key}` },
+            { error: t("invalidScoreKey", { key: sk.key }) },
             { status: 400 }
           );
         }
@@ -445,9 +431,7 @@ export async function PUT(
           // 파일 형식 검증
           if (!["application/pdf", "image/jpeg"].includes(sk.file.type)) {
             return NextResponse.json(
-              {
-                error: `scoreKeys[${sk.key}]의 파일은 PDF 또는 JPG 형식이어야 합니다.`,
-              },
+              { error: t("invalidFileType", { key: sk.key }) },
               { status: 400 }
             );
           }
@@ -455,9 +439,7 @@ export async function PUT(
           // 파일 크기 제한 (10MB)
           if (sk.file.size > 10 * 1024 * 1024) {
             return NextResponse.json(
-              {
-                error: `scoreKeys[${sk.key}]의 파일 크기는 10MB를 초과할 수 없습니다.`,
-              },
+              { error: t("fileSizeTooLarge", { key: sk.key }) },
               { status: 400 }
             );
           }
@@ -472,7 +454,7 @@ export async function PUT(
           fileUrl = fileBlob.url;
         } else if (!fileUrl) {
           return NextResponse.json(
-            { error: `scoreKeys[${sk.key}]의 file 또는 fileUrl이 필요합니다.` },
+            { error: t("fileOrUrlRequired", { key: sk.key }) },
             { status: 400 }
           );
         }
@@ -540,7 +522,7 @@ export async function PUT(
       {
         ...updatedScore,
         isLiked,
-        message: "악보가 성공적으로 수정되었습니다.",
+        message: t("updateSuccess", { namespace: "api.success" }),
       },
       { status: 200 }
     );
@@ -553,7 +535,7 @@ export async function PUT(
       details: error,
     });
     return NextResponse.json(
-      { error: "악보 수정 중 오류가 발생했습니다.", details: errorMessage },
+      { error: t("updateFailed"), details: errorMessage },
       { status: 500 }
     );
   }

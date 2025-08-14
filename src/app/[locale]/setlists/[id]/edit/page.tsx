@@ -422,6 +422,7 @@ export default function SetlistEditPage() {
                 t={t}
                 onUrlSelect={handleUrlSelect}
                 selectedUrls={selectedUrls}
+                selectedKeys={selectedKeys}
               />
             </motion.div>
             <div>

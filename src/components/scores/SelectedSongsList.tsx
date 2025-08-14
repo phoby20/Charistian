@@ -31,6 +31,7 @@ interface SelectedSongsListProps {
   t: ReturnType<typeof useTranslations<"Setlist">>;
   onUrlSelect: (songId: string, url: string) => void;
   selectedUrls: { [key: string]: string };
+  selectedKeys: { [index: number]: string }; // 추가
 }
 
 interface YouTubeVideo {
@@ -60,6 +61,7 @@ export default function SelectedSongsList({
   t,
   onUrlSelect,
   selectedUrls,
+  selectedKeys, // 추가
 }: SelectedSongsListProps) {
   const [overIndex, setOverIndex] = useState<number | null>(null);
   const [isDraggingAny, setIsDraggingAny] = useState(false);
@@ -446,6 +448,7 @@ export default function SelectedSongsList({
                         titles={titles}
                         selectedUrls={selectedUrls}
                         handleUrlSelect={handleUrlSelect}
+                        selectedKeys={selectedKeys} // 추가
                       />
                     </div>
                   );

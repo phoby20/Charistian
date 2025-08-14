@@ -27,11 +27,11 @@ interface SelectedSongsListProps {
   selectedSongs: SelectedSong[];
   onRemoveSong: (index: number) => void;
   onReorderSongs: (newSongs: SelectedSong[]) => void;
-  onKeySelect: (index: number, key: string) => void; // 새 prop 추가
+  onKeySelect: (songId: string, key: string) => void; // 수정: index -> songId
   t: ReturnType<typeof useTranslations<"Setlist">>;
   onUrlSelect: (songId: string, url: string) => void;
   selectedUrls: { [key: string]: string };
-  selectedKeys: { [index: number]: string }; // 추가
+  selectedKeys: { [songId: string]: string }; // 수정: index -> songId
 }
 
 interface YouTubeVideo {
@@ -57,11 +57,11 @@ export default function SelectedSongsList({
   selectedSongs,
   onRemoveSong,
   onReorderSongs,
-  onKeySelect, // 새 prop 추가
+  onKeySelect, // 수정
   t,
   onUrlSelect,
   selectedUrls,
-  selectedKeys, // 추가
+  selectedKeys, // 수정
 }: SelectedSongsListProps) {
   const [overIndex, setOverIndex] = useState<number | null>(null);
   const [isDraggingAny, setIsDraggingAny] = useState(false);
@@ -357,7 +357,7 @@ export default function SelectedSongsList({
     onUrlSelect(songId, url);
     const videoId = getYouTubeVideoId(url);
     if (videoId) {
-      handlePlayPause(songId); // 선택 시 즉시 재생
+      handlePlayPause(songId);
     }
   };
 
@@ -440,7 +440,7 @@ export default function SelectedSongsList({
                         count={count}
                         onRemoveSong={onRemoveSong}
                         onPlayPause={handlePlayPause}
-                        onKeySelect={onKeySelect} // 새 prop 전달
+                        onKeySelect={onKeySelect} // 수정된 핸들러 전달
                         isOver={overIndex === index}
                         isDraggingAny={isDraggingAny}
                         currentPlayingId={currentPlayingId}
@@ -448,7 +448,7 @@ export default function SelectedSongsList({
                         titles={titles}
                         selectedUrls={selectedUrls}
                         handleUrlSelect={handleUrlSelect}
-                        selectedKeys={selectedKeys} // 추가
+                        selectedKeys={selectedKeys} // 수정된 selectedKeys 전달
                       />
                     </div>
                   );

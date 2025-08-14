@@ -22,7 +22,7 @@ export interface SortableSongProps {
   count: number;
   onRemoveSong: (index: number) => void;
   onPlayPause: (songId: string) => void;
-  onKeySelect: (index: number, key: string) => void;
+  onKeySelect: (songId: string, key: string) => void; // 수정: index -> songId
   isOver: boolean;
   isDraggingAny: boolean;
   currentPlayingId: string | null;
@@ -30,7 +30,7 @@ export interface SortableSongProps {
   titles: YouTubeVideo[];
   selectedUrls: { [key: string]: string };
   handleUrlSelect: (songId: string, url: string) => void;
-  selectedKeys: { [index: number]: string }; // 추가: 상위에서 전달된 selectedKeys
+  selectedKeys: { [songId: string]: string }; // 수정: index -> songId
 }
 
 const getYouTubeVideoId = (url?: string): string | undefined => {
@@ -64,7 +64,7 @@ export function SortableSong({
   titles,
   selectedUrls,
   handleUrlSelect,
-  selectedKeys, // 추가
+  selectedKeys, // 수정
 }: SortableSongProps) {
   const {
     attributes,
@@ -114,10 +114,10 @@ export function SortableSong({
     }
   };
 
-  // 키 선택 핸들러
+  // 키 선택 핸들러 수정
   const handleKeySelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newKey = e.target.value;
-    onKeySelect(index, newKey);
+    onKeySelect(song.id, newKey); // song.id로 전달
   };
 
   return (
@@ -151,7 +151,7 @@ export function SortableSong({
                   <div className="relative">
                     <select
                       ref={selectRef}
-                      value={selectedKeys[index] || ""} // 상위 selectedKeys 사용
+                      value={selectedKeys[song.id] || ""} // song.id로 참조
                       onChange={handleKeySelect}
                       className="rounded-lg border-gray-200 bg-gray-50 text-gray-800 text-sm py-1.5 px-3 pr-8 appearance-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition-all hover:bg-gray-100"
                       disabled={isDragging}
@@ -170,7 +170,7 @@ export function SortableSong({
                 ) : (
                   <Chip
                     label={
-                      selectedKeys[index] ||
+                      selectedKeys[song.id] ||
                       song.scoreKeys[0]?.key ||
                       t("noKey") ||
                       "No Key"

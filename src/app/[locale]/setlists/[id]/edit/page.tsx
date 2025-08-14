@@ -30,9 +30,9 @@ export default function SetlistEditPage() {
   const [selectedSongs, setSelectedSongs] = useState<SelectedSong[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
-  const [selectedKeys, setSelectedKeys] = useState<{ [index: number]: string }>(
-    {}
-  ); // selectedKey 상태 추가
+  const [selectedKeys, setSelectedKeys] = useState<{
+    [songId: string]: string;
+  }>({}); // 타입 변경
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -101,19 +101,19 @@ export default function SetlistEditPage() {
                 title: score.creation.title || "",
                 titleJa: score.creation.titleJa || "",
                 titleEn: score.creation.titleEn || "",
-                scoreKeys: score.creation.scoreKeys || [], // key 대신 scoreKeys 사용
+                scoreKeys: score.creation.scoreKeys || [],
                 referenceUrls: score.creation.referenceUrls || [],
               }))
           : [];
         setSelectedSongs(initialSongs);
         const initialUrls: { [key: string]: string } = {};
-        const initialKeys: { [index: number]: string } = {};
-        setlist.scores.forEach((score, index) => {
+        const initialKeys: { [songId: string]: string } = {}; // 타입 변경
+        setlist.scores.forEach((score) => {
           if (score.selectedReferenceUrl) {
             initialUrls[score.creation.id] = score.selectedReferenceUrl;
           }
           if (score.selectedKey) {
-            initialKeys[index] = score.selectedKey; // 초기 selectedKey 설정
+            initialKeys[score.creation.id] = score.selectedKey; // song.id로 설정
           }
         });
         setSelectedUrls(initialUrls);
@@ -153,9 +153,9 @@ export default function SetlistEditPage() {
     fetchData();
   }, [id, t, user, router]);
 
-  // 키 선택 핸들러 추가
-  const handleKeySelect = (index: number, key: string) => {
-    setSelectedKeys((prev) => ({ ...prev, [index]: key }));
+  // 키 선택 핸들러 수정
+  const handleKeySelect = (songId: string, key: string) => {
+    setSelectedKeys((prev) => ({ ...prev, [songId]: key }));
   };
 
   // YouTube URL 선택 핸들러
@@ -212,7 +212,7 @@ export default function SetlistEditPage() {
               song.referenceUrls.find(
                 (url) => url.includes("youtube.com") || url.includes("youtu.be")
               ),
-            selectedKey: selectedKeys[index] || song.scoreKeys[0]?.key || "", // selectedKey 추가
+            selectedKey: selectedKeys[song.id] || song.scoreKeys[0]?.key || "", // song.id로 참조
           })),
           shares: [...selectedTeams.map((teamId) => ({ teamId }))],
         }),
@@ -232,23 +232,13 @@ export default function SetlistEditPage() {
   const handleRemoveSong = (index: number) => {
     setSelectedSongs((prev) => {
       const updated = [...prev];
-      updated.splice(index, 1);
+      const removedSong = updated.splice(index, 1)[0];
       sessionStorage.setItem("selectedSongList", JSON.stringify(updated));
-      // selectedKeys에서도 해당 인덱스 제거
+      // selectedKeys에서 제거된 곡의 키 삭제
       setSelectedKeys((prev) => {
         const updatedKeys = { ...prev };
-        delete updatedKeys[index];
-        // 인덱스 재조정
-        const newKeys: { [index: number]: string } = {};
-        Object.keys(updatedKeys).forEach((key) => {
-          const oldIndex = parseInt(key);
-          if (oldIndex > index) {
-            newKeys[oldIndex - 1] = updatedKeys[oldIndex];
-          } else if (oldIndex < index) {
-            newKeys[oldIndex] = updatedKeys[oldIndex];
-          }
-        });
-        return newKeys;
+        delete updatedKeys[removedSong.id];
+        return updatedKeys;
       });
       return updated;
     });
@@ -257,17 +247,6 @@ export default function SetlistEditPage() {
   const handleReorderSongs = (newSongs: SelectedSong[]) => {
     setSelectedSongs(() => {
       sessionStorage.setItem("selectedSongList", JSON.stringify(newSongs));
-      // selectedKeys 재조정
-      setSelectedKeys((prev) => {
-        const newKeys: { [index: number]: string } = {};
-        newSongs.forEach((song, newIndex) => {
-          const oldIndex = selectedSongs.findIndex((s) => s.id === song.id);
-          if (prev[oldIndex]) {
-            newKeys[newIndex] = prev[oldIndex];
-          }
-        });
-        return newKeys;
-      });
       return newSongs;
     });
   };
@@ -418,11 +397,11 @@ export default function SetlistEditPage() {
                 selectedSongs={selectedSongs}
                 onRemoveSong={handleRemoveSong}
                 onReorderSongs={handleReorderSongs}
-                onKeySelect={handleKeySelect} // onKeySelect prop 추가
+                onKeySelect={handleKeySelect} // 수정된 핸들러 전달
                 t={t}
                 onUrlSelect={handleUrlSelect}
                 selectedUrls={selectedUrls}
-                selectedKeys={selectedKeys}
+                selectedKeys={selectedKeys} // 수정된 selectedKeys 전달
               />
             </motion.div>
             <div>

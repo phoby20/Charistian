@@ -861,6 +861,7 @@
     "noData": "데이터가 없습니다",
     "fetchError": "데이터를 가져오는 중 오류가 발생했습니다",
     "viewAllScores": "모든 악보 보기",
+    "statisticsDescription": "전국의 모든 교회의 통계입니다",
     "genre": {
       "bright": "밝은",
       "calm": "차분한",

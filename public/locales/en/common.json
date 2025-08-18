@@ -861,6 +861,7 @@
     "noData": "No data available",
     "fetchError": "An error occurred while fetching data",
     "viewAllScores": "View All Scores",
+    "statisticsDescription": "Statistics from all churches nationwide",
     "genre": {
       "bright": "Bright",
       "calm": "Calm",

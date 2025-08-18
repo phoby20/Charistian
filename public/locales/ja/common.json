@@ -851,6 +851,7 @@
     "noData": "データがありません",
     "fetchError": "データの取得中にエラーが発生しました",
     "viewAllScores": "すべての楽譜を見る",
+    "statisticsDescription": "全国のすべての教会の統計です",
     "genre": {
       "bright": "明るい",
       "calm": "落ち着いた",

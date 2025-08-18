@@ -35,7 +35,7 @@ const FrequentScoresDashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("/api/frequent-scores"); // 올바른 API 경로
+        const response = await fetch("/api/frequent-scores");
         if (!response.ok) {
           throw new Error(t("fetchError"));
         }
@@ -80,7 +80,7 @@ const FrequentScoresDashboard: React.FC = () => {
             {t("popularScores")}
           </h2>
           <span className="text-sm text-gray-500">
-            전국의 모든 교회의 통계입니다
+            {t("statisticsDescription")}
           </span>
         </div>
         <Link href={`/${locale}/scores`}>

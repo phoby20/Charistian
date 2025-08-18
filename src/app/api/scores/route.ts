@@ -46,7 +46,11 @@ export async function GET(req: NextRequest) {
 
   const scores = await prisma.creation.findMany({
     where: {
-      OR: [{ churchId: payload.churchId }, { isPublic: true }],
+      OR: [
+        { churchId: payload.churchId },
+        { isPublic: true },
+        { isGlobal: true },
+      ],
       type: { in: [CreationType.SCORE, CreationType.ORIGINAL_SCORE] },
       isOpen: true,
     },

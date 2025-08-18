@@ -504,7 +504,8 @@
     "fileRequired": "楽譜ファイルは必須です。",
     "keyLabel": "キー",
     "keyPlaceholder": "キーを選択してください",
-    "keyRequired": "キーを選択する必要があります。"
+    "keyRequired": "キーを選択する必要があります。",
+    "isGlobalLabel": "すべての教会で閲覧可能"
   },
   "ScoreDetail": {
     "error": "楽譜の読み込み中にエラーが発生しました。",

@@ -513,7 +513,8 @@
     "fileRequired": "Score file is required.",
     "keyLabel": "Key",
     "keyPlaceholder": "Select Key",
-    "keyRequired": "Key is required."
+    "keyRequired": "Key is required.",
+    "isGlobalLabel": "Accessible to All Churches"
   },
   "ScoreDetail": {
     "error": "An error occurred while loading the score.",

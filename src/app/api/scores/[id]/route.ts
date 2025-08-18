@@ -73,7 +73,10 @@ export async function GET(
     },
   });
 
-  if (!score || (!score.isPublic && score.churchId !== payload.churchId)) {
+  if (
+    !score ||
+    (!score.isPublic && score.churchId !== payload.churchId && !score.isGlobal)
+  ) {
     return NextResponse.json({ error: t("notPublic") }, { status: 404 });
   }
 

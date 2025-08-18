@@ -65,6 +65,7 @@ export interface ScoreFormData {
   isPublic: boolean;
   isForSale: boolean;
   isOriginal: boolean;
+  isGlobal: boolean;
   genre?: string;
 }
 

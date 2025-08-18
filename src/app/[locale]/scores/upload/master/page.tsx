@@ -22,8 +22,8 @@ import Loading from "@/components/Loading";
 import { countryOptions } from "@/data/country";
 import { regionsByCity } from "@/data/regions";
 import { ScoreFormData } from "@/types/score";
-import type * as PDFJS from "pdfjs-dist"; // pdfjs-dist 타입 임포트
-import { getPdfFirstPagePreview } from "@/utils/pdf-preview"; // 미리보기 생성 함수 임포트
+import * as PDFJS from "pdfjs-dist";
+import { getPdfFirstPagePreview } from "@/utils/pdf-preview";
 
 interface ChurchOption {
   value: string;
@@ -70,6 +70,7 @@ export default function ScoreUploadPageForMaster() {
       isPublic: false,
       isForSale: false,
       isOriginal: false,
+      isGlobal: false, // 모든 교회에서 열람 가능 여부
       genre: "",
     },
   });
@@ -113,8 +114,10 @@ export default function ScoreUploadPageForMaster() {
   const [pdfPreviews, setPdfPreviews] = useState<
     { key: string; url: string | null }[]
   >(scoreKeyFields.map(() => ({ key: "", url: null })));
-  // pdfjs-dist 로드 상태
   const [pdfjsLib, setPdfjsLib] = useState<typeof PDFJS | null>(null);
+
+  // isGlobal 상태 감시
+  const isGlobal = watch("isGlobal");
 
   // pdfjs-dist 동적 로드
   useEffect(() => {
@@ -139,7 +142,7 @@ export default function ScoreUploadPageForMaster() {
     setPdfPreviews((prev) =>
       scoreKeyFields.map((field, index) => ({
         key: watch(`scoreKeys.${index}.key`) || "",
-        url: prev[index]?.url || null, // 기존 미리보기 URL 유지
+        url: prev[index]?.url || null,
       }))
     );
     setFileErrors((prev) =>
@@ -209,7 +212,7 @@ export default function ScoreUploadPageForMaster() {
 
   // Fetch churches based on region
   useEffect(() => {
-    if (isInitialLoad) return;
+    if (isInitialLoad || isGlobal) return;
 
     const fetchChurches = async () => {
       if (selectedCountry && selectedCity && selectedRegion) {
@@ -251,7 +254,14 @@ export default function ScoreUploadPageForMaster() {
     };
 
     fetchChurches();
-  }, [selectedRegion, isInitialLoad, selectedCountry, selectedCity, t]);
+  }, [
+    selectedRegion,
+    isInitialLoad,
+    selectedCountry,
+    selectedCity,
+    isGlobal,
+    t,
+  ]);
 
   // Handle file change with PDF preview generation
   const handleFileChange = async (index: number, file: File | null) => {
@@ -278,7 +288,6 @@ export default function ScoreUploadPageForMaster() {
     }
 
     try {
-      // Validate file type
       if (file.type !== "application/pdf") {
         newFileErrors[index] = t("fileRequired");
         newPreviews[index] = { key: file.name, url: null };
@@ -288,7 +297,6 @@ export default function ScoreUploadPageForMaster() {
         return;
       }
 
-      // Generate PDF preview
       const previewUrl = await getPdfFirstPagePreview(file, pdfjsLib);
       newFileErrors[index] = null;
       newPreviews[index] = { key: file.name, url: previewUrl };
@@ -306,16 +314,14 @@ export default function ScoreUploadPageForMaster() {
     }
   };
 
-  // Handle addKey to preserve existing previews
   const handleAddKey = () => {
     appendScoreKey({ key: "", file: null });
     setPdfPreviews((prev) => [...prev, { key: "", url: null }]);
     setFileErrors((prev) => [...prev, null]);
   };
 
-  // Submit handler
   const handleSubmitWithChurch = async (data: ScoreFormData) => {
-    if (!churchFormData.churchId) {
+    if (!data.isGlobal && !churchFormData.churchId) {
       setError(t("pleaseFillChurchFields"));
       return;
     }
@@ -356,7 +362,10 @@ export default function ScoreUploadPageForMaster() {
       formData.append("isPublic", String(data.isPublic));
       formData.append("isForSale", String(data.isForSale));
       formData.append("isOriginal", String(data.isOriginal));
-      formData.append("churchId", churchFormData.churchId);
+      formData.append("isGlobal", String(data.isGlobal));
+      if (!data.isGlobal) {
+        formData.append("churchId", churchFormData.churchId);
+      }
 
       const response = await fetch("/api/scores/master", {
         method: "POST",
@@ -380,7 +389,7 @@ export default function ScoreUploadPageForMaster() {
 
   const isFormValid = () => {
     const isErrorsEmpty = Object.keys(errors).length === 0;
-    const hasChurchId = !!churchFormData.churchId;
+    const hasChurchId = isGlobal || !!churchFormData.churchId;
     const scoreKeys = watch("scoreKeys", []);
     const hasValidScoreKeys =
       scoreKeys.length > 0 && scoreKeys.every((sk) => sk.key && sk.file);
@@ -436,66 +445,89 @@ export default function ScoreUploadPageForMaster() {
           onSubmit={handleSubmit(handleSubmitWithChurch)}
           className="space-y-6"
         >
-          {/* Church Selection Section */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-800">
-              {t("selectChurch")}
-            </h2>
-            <Select
-              label={t("country")}
-              name="country"
-              options={countryOptions}
-              value={selectedCountry}
-              onChange={(e) => {
-                const value = e.target.value || "";
-                setSelectedCountry(value);
-                setChurchFormData((prev) => ({ ...prev, country: value }));
-              }}
-              required
-              className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-300"
-            />
-            <Select
-              label={t("city")}
-              name="city"
-              options={citiesByCountry[selectedCountry] || []}
-              value={selectedCity}
-              onChange={(e) => {
-                const value = e.target.value || "";
-                setSelectedCity(value);
-                setChurchFormData((prev) => ({ ...prev, city: value }));
-              }}
-              required
-              className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-300"
-            />
-            <Select
-              label={t("region")}
-              name="region"
-              options={regionsByCity[selectedCity] || []}
-              value={selectedRegion}
-              onChange={(e) => {
-                const value = e.target.value || "";
-                setSelectedRegion(value);
-                setChurchFormData((prev) => ({ ...prev, region: value }));
-              }}
-              required
-              className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-300"
-            />
-            <Select
-              label={t("church")}
-              name="churchId"
-              options={churches}
-              value={selectedChurch}
-              onChange={(e) => {
-                const value = e.target.value || "";
-                setSelectedChurch(value);
-                setChurchFormData((prev) => ({ ...prev, churchId: value }));
-              }}
-              required
-              className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-300"
-            />
+          {/* Global Score Checkbox */}
+          <div className="space-y-2">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                {...register("isGlobal")}
+                className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                {t("isGlobalLabel")} {/* "모든 교회에서 열람 가능" */}
+              </span>
+            </label>
           </div>
 
-          {/* Score Keys Section */}
+          {/* Church Selection Section */}
+          <AnimatePresence>
+            {!isGlobal && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-4"
+              >
+                <h2 className="text-xl font-semibold text-gray-800">
+                  {t("selectChurch")}
+                </h2>
+                <Select
+                  label={t("country")}
+                  name="country"
+                  options={countryOptions}
+                  value={selectedCountry}
+                  onChange={(e) => {
+                    const value = e.target.value || "";
+                    setSelectedCountry(value);
+                    setChurchFormData((prev) => ({ ...prev, country: value }));
+                  }}
+                  required
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-300"
+                />
+                <Select
+                  label={t("city")}
+                  name="city"
+                  options={citiesByCountry[selectedCountry] || []}
+                  value={selectedCity}
+                  onChange={(e) => {
+                    const value = e.target.value || "";
+                    setSelectedCity(value);
+                    setChurchFormData((prev) => ({ ...prev, city: value }));
+                  }}
+                  required
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-300"
+                />
+                <Select
+                  label={t("region")}
+                  name="region"
+                  options={regionsByCity[selectedCity] || []}
+                  value={selectedRegion}
+                  onChange={(e) => {
+                    const value = e.target.value || "";
+                    setSelectedRegion(value);
+                    setChurchFormData((prev) => ({ ...prev, region: value }));
+                  }}
+                  required
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-300"
+                />
+                <Select
+                  label={t("church")}
+                  name="churchId"
+                  options={churches}
+                  value={selectedChurch}
+                  onChange={(e) => {
+                    const value = e.target.value || "";
+                    setSelectedChurch(value);
+                    setChurchFormData((prev) => ({ ...prev, churchId: value }));
+                  }}
+                  required
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50 text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md transition-all duration-300"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <FileUploadSection
             fileError={fileErrors.some((e) => e) ? t("fileRequired") : ""}
             pdfPreviews={pdfPreviews}
@@ -503,11 +535,10 @@ export default function ScoreUploadPageForMaster() {
             errors={errors}
             control={control}
             scoreKeyFields={scoreKeyFields}
-            appendScoreKey={handleAddKey} // handleAddKey 사용
+            appendScoreKey={handleAddKey}
             removeScoreKey={removeScoreKey}
           />
 
-          {/* Genre Selection Section */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               {t("genreLabel")}

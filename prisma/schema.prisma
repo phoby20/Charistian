@@ -155,6 +155,7 @@ model Creation {
   isForSale         Boolean        @default(false) // 판매 허가 여부
   isOriginal        Boolean        @default(false) // 자작곡 여부
   isOpen            Boolean        @default(true) // 공개 여부
+  isGlobal          Boolean        @default(false) // 모든 교회에서 열람 가능 여부
   creatorId         String
   creator           User           @relation(fields: [creatorId], references: [id])
   churchId          String

@@ -9,7 +9,7 @@ import { constants } from "@/constants/intex";
 
 const { KEYS, TONES } = constants;
 
-// 타입 가드를 위한 유틸리티 함수
+// 타입 가드
 const isValidKey = (value: string): value is (typeof KEYS)[number] =>
   KEYS.includes(value as (typeof KEYS)[number]);
 const isValidTone = (value: string): value is (typeof TONES)[number] =>
@@ -17,7 +17,7 @@ const isValidTone = (value: string): value is (typeof TONES)[number] =>
 
 export async function POST(request: NextRequest) {
   try {
-    // 토큰에서 사용자 정보 가져오기
+    // 토큰 검증
     const token = request.cookies.get("token")?.value;
     if (!token) {
       return NextResponse.json(
@@ -45,6 +45,12 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
+    // 디버깅: FormData 내용 로깅
+    console.log("Received FormData entries:");
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${typeof value === "string" ? value : "[File]"}`);
+    }
+
     const title = formData.get("title") as string;
     const titleEn = formData.get("titleEn") as string | null;
     const titleJa = formData.get("titleJa") as string | null;
@@ -63,12 +69,21 @@ export async function POST(request: NextRequest) {
     const isPublic = formData.get("isPublic") === "true";
     const isForSale = formData.get("isForSale") === "true";
     const isOriginal = formData.get("isOriginal") === "true";
-    const churchId = formData.get("churchId") as string;
+    const isGlobal = formData.get("isGlobal") === "true";
+    const churchId = formData.get("churchId") as string | null;
 
     // 필수 필드 검증
-    if (!title || !churchId) {
+    if (!title) {
       return NextResponse.json(
-        { error: "필수 필드(title, churchId)를 입력해야 합니다." },
+        { error: "제목은 필수입니다." },
+        { status: 400 }
+      );
+    }
+
+    // isGlobal이 false일 때만 churchId 필수 검증
+    if (!isGlobal && !churchId) {
+      return NextResponse.json(
+        { error: "교회 선택은 필수입니다." },
         { status: 400 }
       );
     }
@@ -76,7 +91,22 @@ export async function POST(request: NextRequest) {
     // scoreKeys 파싱
     const scoreKeys: { key: string; file: File | null }[] = [];
     formData.forEach((value, key) => {
-      const match = key.match(/scoreKeys\[(\d+)\]\[(file|key)\]/);
+      // 기본 형식: scoreKeys[0][file]
+      let match = key.match(/scoreKeys\[(\d+)\]\[(file|key)\]/);
+      if (match) {
+        const index = parseInt(match[1]);
+        const field = match[2];
+        if (!scoreKeys[index]) {
+          scoreKeys[index] = { key: "", file: null };
+        }
+        if (field === "key" && typeof value === "string") {
+          scoreKeys[index].key = value;
+        } else if (field === "file" && value instanceof File) {
+          scoreKeys[index].file = value;
+        }
+      }
+      // 대체 형식: scoreKeys(0)(file)
+      match = key.match(/scoreKeys\((\d+)\)\[(file|key)\]/);
       if (match) {
         const index = parseInt(match[1]);
         const field = match[2];
@@ -90,6 +120,9 @@ export async function POST(request: NextRequest) {
         }
       }
     });
+
+    // 디버깅: 파싱된 scoreKeys 출력
+    console.log("Parsed scoreKeys:", scoreKeys);
 
     // 유효한 scoreKeys 필터링
     const validScoreKeys: { key: string; file: File }[] = scoreKeys.filter(
@@ -128,15 +161,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 교회 존재 여부 확인
-    const church = await prisma.church.findUnique({
-      where: { id: churchId },
-    });
-    if (!church) {
-      return NextResponse.json(
-        { error: "유효하지 않은 churchId입니다." },
-        { status: 400 }
-      );
+    // churchId가 있을 경우 교회 존재 여부 확인
+    if (churchId) {
+      const church = await prisma.church.findUnique({
+        where: { id: churchId },
+      });
+      if (!church) {
+        return NextResponse.json(
+          { error: "유효하지 않은 churchId입니다." },
+          { status: 400 }
+        );
+      }
     }
 
     // 한국 시간 기준 날짜 생성
@@ -175,15 +210,16 @@ export async function POST(request: NextRequest) {
         isPublic,
         isForSale,
         isOriginal,
+        isGlobal,
         isOpen: true,
         creatorId: payload.userId,
-        churchId,
+        churchId: churchId ? churchId : (payload.churchId ?? ""),
         scoreKeys: {
           createMany: {
             data: await Promise.all(
               validScoreKeys.map(async ({ key, file }) => {
                 const fileBlob = await put(
-                  `scores/${churchId}/${payload.userId}/${koreaDate}-${key}-${file.name}`,
+                  `scores/${isGlobal ? "global" : churchId}/${payload.userId}/${koreaDate}-${key}-${file.name}`,
                   file,
                   { access: "public", contentType: file.type }
                 );

@@ -1,1 +1,7 @@
-export const allowedRoles = ["GENERAL", "ADMIN", "SUB_ADMIN", "SUPER_ADMIN"];
+export const allowedRoles = [
+  "GENERAL",
+  "ADMIN",
+  "SUB_ADMIN",
+  "SUPER_ADMIN",
+  "MASTER",
+];

@@ -173,6 +173,9 @@ export default function ScoreTable({
                     {score.isGlobal ? (
                       <Chip label="free" color="green" />
                     ) : null}
+                    {score.isPublic ? (
+                      <Chip label="public" color="purple" />
+                    ) : null}
                     <Link
                       href={`/${locale}/scores/${score.id}`}
                       className="text-blue-600 hover:underline truncate block"

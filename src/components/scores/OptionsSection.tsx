@@ -33,7 +33,7 @@ export const OptionsSection: React.FC<OptionsSectionProps> = ({
         />
         <span className="ml-2">{t("isOriginalLabel")}</span>
       </label>
-      <label className="flex items-center text-sm font-medium text-gray-700">
+      {/* <label className="flex items-center text-sm font-medium text-gray-700">
         <input
           type="checkbox"
           {...register("isPublic")}
@@ -41,7 +41,7 @@ export const OptionsSection: React.FC<OptionsSectionProps> = ({
           aria-label={t("isPublicLabel")}
         />
         <span className="ml-2">{t("isPublicLabel")}</span>
-      </label>
+      </label> */}
       {/* TODO: 밑의 버튼은 판매기능이 추가되면 활성화 할것 */}
       {/* <label className="flex items-center text-sm font-medium text-gray-700">
         <input

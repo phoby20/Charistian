@@ -1072,7 +1072,7 @@
     "descriptionLabel": "説明",
     "descriptionPlaceholder": "楽譜の説明を入力してください",
     "descriptionRequired": "説明は必須です。",
-    "isOriginalLabel": "オリジナル曲かどうか",
+    "isOriginalLabel": "この曲は私が作曲・作詞したオリジナル曲です",
     "isPublicLabel": "他の教会との共有を許可",
     "isForSaleLabel": "販売許可",
     "composerLabel": "作曲者",

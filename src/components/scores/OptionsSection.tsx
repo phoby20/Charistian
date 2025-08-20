@@ -33,6 +33,7 @@ export const OptionsSection: React.FC<OptionsSectionProps> = ({
         />
         <span className="ml-2">{t("isOriginalLabel")}</span>
       </label>
+      {/* TODO: 다른 교회 공유시에 더 엄격한 기준으로 저작권 분쟁이 없도록 해야함 */}
       {/* <label className="flex items-center text-sm font-medium text-gray-700">
         <input
           type="checkbox"

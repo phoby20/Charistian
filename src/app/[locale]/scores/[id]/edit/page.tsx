@@ -1,4 +1,3 @@
-// src/app/[locale]/scores/[id]/edit/page.tsx
 "use client";
 import { useScoreForm } from "@/app/hooks/useScoreForm";
 import { ComposerLyricistSection } from "@/components/scores/ComposerLyricistSection";
@@ -19,6 +18,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import Loading from "@/components/Loading";
 import { ScoreResponse, ScoreFormData, ApiErrorResponse } from "@/types/score";
 import Button from "@/components/Button";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ScoreEditPage() {
   const t = useTranslations("ScoreEdit");
@@ -59,88 +59,72 @@ export default function ScoreEditPage() {
     formState: { errors },
   } = form;
 
-  // fetchScore 메모이제이션
-  const fetchScore = useCallback(async () => {
-    if (!id) return;
+  const { user } = useAuth();
 
-    if (cacheRef.current.id === id && cacheRef.current.data) {
-      console.log("Using cached data for ID:", id);
-      const data = cacheRef.current.data;
-      form.setValue("title", data.title || "");
-      form.setValue("titleEn", data.titleEn || "");
-      form.setValue("titleJa", data.titleJa || "");
-      form.setValue("genre", data.genre || "");
-      form.setValue("tempo", data.tempo || "");
-      form.setValue("description", data.description || "");
-      form.setValue("lyrics", data.lyrics || "");
-      form.setValue("lyricsEn", data.lyricsEn || "");
-      form.setValue("lyricsJa", data.lyricsJa || "");
-      form.setValue("composer", data.composer || "");
-      form.setValue("lyricist", data.lyricist || "");
-      form.setValue("isPublic", data.isPublic || false);
-      form.setValue("isForSale", data.isForSale || false);
-      form.setValue("isOriginal", data.isOriginal || false);
-      form.setValue("price", data.price ? String(data.price) : "");
-      form.setValue("saleStartDate", data.saleStartDate || undefined);
-      form.setValue("saleEndDate", data.saleEndDate || undefined);
-      if (data.scoreKeys?.length) {
-        form.setValue(
-          "scoreKeys",
-          data.scoreKeys.map((sk) => ({ key: sk.key, file: sk.fileUrl }))
-        );
-        setPdfPreviews(
-          data.scoreKeys.map((sk) => ({ key: sk.key, url: sk.fileUrl }))
-        );
-      }
-      if (data.referenceUrls?.length) {
-        removeReferenceUrl(0);
-        data.referenceUrls.forEach((url) => appendReferenceUrl({ url }));
-      }
+  // 사용자 정보와 악보 데이터를 가져와 canEdit 조건 확인
+  const checkEditPermission = useCallback(async () => {
+    if (!id) {
+      setError(t("invalidId"));
       setIsFetching(false);
       return;
     }
 
-    console.log("Fetching score for ID:", id);
     try {
       setIsFetching(true);
-      const response = await fetch(`/api/scores/${id}`);
-      if (!response.ok) {
-        const errorData: ApiErrorResponse = await response.json();
+
+      // 악보 데이터 가져오기
+      const scoreResponse = await fetch(`/api/scores/${id}`);
+      if (!scoreResponse.ok) {
+        const errorData: ApiErrorResponse = await scoreResponse.json();
         throw new Error(errorData.error || t("error"));
       }
-      const data: ScoreResponse = await response.json();
+      const score: ScoreResponse = await scoreResponse.json();
 
-      cacheRef.current = { id, data };
+      // canEdit 조건 확인
+      const canEdit =
+        user &&
+        score.isOpen &&
+        score.churchId === user.churchId &&
+        (user.id === score.creatorId ||
+          ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
 
-      form.setValue("title", data.title || "");
-      form.setValue("titleEn", data.titleEn || "");
-      form.setValue("titleJa", data.titleJa || "");
-      form.setValue("genre", data.genre || "");
-      form.setValue("tempo", data.tempo || "");
-      form.setValue("description", data.description || "");
-      form.setValue("lyrics", data.lyrics || "");
-      form.setValue("lyricsEn", data.lyricsEn || "");
-      form.setValue("lyricsJa", data.lyricsJa || "");
-      form.setValue("composer", data.composer || "");
-      form.setValue("lyricist", data.lyricist || "");
-      form.setValue("isPublic", data.isPublic || false);
-      form.setValue("isForSale", data.isForSale || false);
-      form.setValue("isOriginal", data.isOriginal || false);
-      form.setValue("price", data.price ? String(data.price) : "");
-      form.setValue("saleStartDate", data.saleStartDate || undefined);
-      form.setValue("saleEndDate", data.saleEndDate || undefined);
-      if (data.scoreKeys?.length) {
+      if (!canEdit) {
+        router.push(`/${locale}/scores/${id}`);
+        return;
+      }
+
+      // 캐시 및 폼 데이터 설정
+      cacheRef.current = { id, data: score };
+
+      form.setValue("title", score.title || "");
+      form.setValue("titleEn", score.titleEn || "");
+      form.setValue("titleJa", score.titleJa || "");
+      form.setValue("genre", score.genre || "");
+      form.setValue("tempo", score.tempo || "");
+      form.setValue("description", score.description || "");
+      form.setValue("lyrics", score.lyrics || "");
+      form.setValue("lyricsEn", score.lyricsEn || "");
+      form.setValue("lyricsJa", score.lyricsJa || "");
+      form.setValue("composer", score.composer || "");
+      form.setValue("lyricist", score.lyricist || "");
+      form.setValue("isPublic", score.isPublic || false);
+      form.setValue("isForSale", score.isForSale || false);
+      form.setValue("isOriginal", score.isOriginal || false);
+      form.setValue("price", score.price ? String(score.price) : "");
+      form.setValue("saleStartDate", score.saleStartDate || undefined);
+      form.setValue("saleEndDate", score.saleEndDate || undefined);
+      if (score.scoreKeys?.length) {
         form.setValue(
           "scoreKeys",
-          data.scoreKeys.map((sk) => ({ key: sk.key, file: sk.fileUrl }))
+          score.scoreKeys.map((sk) => ({ key: sk.key, file: sk.fileUrl }))
         );
         setPdfPreviews(
-          data.scoreKeys.map((sk) => ({ key: sk.key, url: sk.fileUrl }))
+          score.scoreKeys.map((sk) => ({ key: sk.key, url: sk.fileUrl }))
         );
       }
-      if (data.referenceUrls?.length) {
+      if (score.referenceUrls?.length) {
         removeReferenceUrl(0);
-        data.referenceUrls.forEach((url) => appendReferenceUrl({ url }));
+        score.referenceUrls.forEach((url) => appendReferenceUrl({ url }));
       }
 
       setIsFetching(false);
@@ -150,11 +134,20 @@ export default function ScoreEditPage() {
       console.error("Fetch error:", error);
       setIsFetching(false);
     }
-  }, [id, form, appendReferenceUrl, removeReferenceUrl, setPdfPreviews, t]);
+  }, [
+    id,
+    form,
+    appendReferenceUrl,
+    removeReferenceUrl,
+    setPdfPreviews,
+    t,
+    router,
+    locale,
+  ]);
 
   useEffect(() => {
-    fetchScore();
-  }, [fetchScore]);
+    checkEditPermission();
+  }, [checkEditPermission]);
 
   const handleFormSubmit = async (data: ScoreFormData) => {
     if (isLoading) return;

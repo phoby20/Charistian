@@ -513,7 +513,8 @@
     "fileRequired": "Score file is required.",
     "keyLabel": "Key",
     "keyPlaceholder": "Select Key",
-    "keyRequired": "Key is required."
+    "keyRequired": "Key is required.",
+    "isGlobalLabel": "Accessible to All Churches"
   },
   "ScoreDetail": {
     "error": "An error occurred while loading the score.",
@@ -860,6 +861,7 @@
     "noData": "No data available",
     "fetchError": "An error occurred while fetching data",
     "viewAllScores": "View All Scores",
+    "statisticsDescription": "Statistics from all churches nationwide",
     "genre": {
       "bright": "Bright",
       "calm": "Calm",
@@ -1081,7 +1083,7 @@
     "descriptionLabel": "Description",
     "descriptionPlaceholder": "Enter description for the score",
     "descriptionRequired": "Description is required.",
-    "isOriginalLabel": "Is Original",
+    "isOriginalLabel": "This song is one I composed and wrote myself",
     "isPublicLabel": "Agree to Share with Other Churches",
     "isForSaleLabel": "Allow Sale",
     "composerLabel": "Composer",

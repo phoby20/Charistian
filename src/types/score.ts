@@ -32,6 +32,7 @@ export interface ScoreResponse {
   isPublic: boolean;
   isForSale: boolean;
   isOriginal: boolean;
+  isGlobal: boolean;
   creatorId: string;
   creator: { name: string };
   churchId: string;
@@ -65,6 +66,7 @@ export interface ScoreFormData {
   isPublic: boolean;
   isForSale: boolean;
   isOriginal: boolean;
+  isGlobal: boolean;
   genre?: string;
 }
 

@@ -504,7 +504,8 @@
     "fileRequired": "楽譜ファイルは必須です。",
     "keyLabel": "キー",
     "keyPlaceholder": "キーを選択してください",
-    "keyRequired": "キーを選択する必要があります。"
+    "keyRequired": "キーを選択する必要があります。",
+    "isGlobalLabel": "すべての教会で閲覧可能"
   },
   "ScoreDetail": {
     "error": "楽譜の読み込み中にエラーが発生しました。",
@@ -850,6 +851,7 @@
     "noData": "データがありません",
     "fetchError": "データの取得中にエラーが発生しました",
     "viewAllScores": "すべての楽譜を見る",
+    "statisticsDescription": "全国のすべての教会の統計です",
     "genre": {
       "bright": "明るい",
       "calm": "落ち着いた",
@@ -1070,7 +1072,7 @@
     "descriptionLabel": "説明",
     "descriptionPlaceholder": "楽譜の説明を入力してください",
     "descriptionRequired": "説明は必須です。",
-    "isOriginalLabel": "オリジナル曲かどうか",
+    "isOriginalLabel": "この曲は私が作曲・作詞したオリジナル曲です",
     "isPublicLabel": "他の教会との共有を許可",
     "isForSaleLabel": "販売許可",
     "composerLabel": "作曲者",

@@ -179,12 +179,14 @@ export default function ScoreDetailPage() {
   const canEdit =
     user &&
     score.isOpen &&
+    score.churchId === user.churchId &&
     (user.id === score.creatorId ||
       ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
 
-  const canClose =
+  const canDelete =
     user &&
     score.isOpen &&
+    score.churchId === user.churchId &&
     (user.id === score.creatorId ||
       ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
 
@@ -272,7 +274,7 @@ export default function ScoreDetailPage() {
                     <Edit2 className="w-4 h-4" />
                   </motion.button>
                 )}
-                {canClose && (
+                {canDelete && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}

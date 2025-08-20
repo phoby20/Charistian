@@ -7,6 +7,7 @@ import { ScoreResponse } from "@/types/score";
 import YouTube, { YouTubePlayer } from "react-youtube";
 import { useState, useEffect, useRef } from "react";
 import { getDisplayTitle, getSecondaryTitles } from "@/utils/getDisplayTitle";
+import Chip from "../Chip";
 
 interface ScoreTableProps {
   scores: ScoreResponse[];
@@ -168,29 +169,37 @@ export default function ScoreTable({
                   )}
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4">
-                  <Link
-                    href={`/${locale}/scores/${score.id}`}
-                    className="text-blue-600 hover:underline truncate block"
-                  >
-                    <span className="block max-w-[100px] sm:max-w-[200px] text-sm truncate">
-                      {getDisplayTitle(
-                        score.title,
-                        score.titleEn,
-                        score.titleJa,
-                        locale
-                      )}
-                    </span>
-                    <span className="flex flex-col text-gray-600 text-[10px] truncate">
-                      {getSecondaryTitles(
-                        score.title,
-                        score.titleEn,
-                        score.titleJa,
-                        locale
-                      ).map((title, index) => (
-                        <span key={index}>{title}</span>
-                      ))}
-                    </span>
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    {score.isGlobal ? (
+                      <Chip label="free" color="green" />
+                    ) : null}
+                    {score.isPublic ? (
+                      <Chip label="public" color="purple" />
+                    ) : null}
+                    <Link
+                      href={`/${locale}/scores/${score.id}`}
+                      className="text-blue-600 hover:underline truncate block"
+                    >
+                      <span className="block max-w-[100px] sm:max-w-[200px] text-sm truncate">
+                        {getDisplayTitle(
+                          score.title,
+                          score.titleEn,
+                          score.titleJa,
+                          locale
+                        )}
+                      </span>
+                      <span className="flex flex-col text-gray-600 text-[10px] truncate">
+                        {getSecondaryTitles(
+                          score.title,
+                          score.titleEn,
+                          score.titleJa,
+                          locale
+                        ).map((title, index) => (
+                          <span key={index}>{title}</span>
+                        ))}
+                      </span>
+                    </Link>
+                  </div>
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-sm truncate">
                   <div className="flex flex-col gap-1">

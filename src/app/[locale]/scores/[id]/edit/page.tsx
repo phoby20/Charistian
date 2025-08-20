@@ -19,6 +19,7 @@ import Loading from "@/components/Loading";
 import { ScoreResponse, ScoreFormData, ApiErrorResponse } from "@/types/score";
 import Button from "@/components/Button";
 import { useAuth } from "@/context/AuthContext";
+import { User } from "@prisma/client";
 
 export default function ScoreEditPage() {
   const t = useTranslations("ScoreEdit");
@@ -52,6 +53,7 @@ export default function ScoreEditPage() {
     id: null,
     data: null,
   });
+  const { user } = useAuth();
 
   const {
     register,
@@ -59,95 +61,99 @@ export default function ScoreEditPage() {
     formState: { errors },
   } = form;
 
-  const { user } = useAuth();
-
   // 사용자 정보와 악보 데이터를 가져와 canEdit 조건 확인
-  const checkEditPermission = useCallback(async () => {
-    if (!id) {
-      setError(t("invalidId"));
-      setIsFetching(false);
-      return;
-    }
-
-    try {
-      setIsFetching(true);
-
-      // 악보 데이터 가져오기
-      const scoreResponse = await fetch(`/api/scores/${id}`);
-      if (!scoreResponse.ok) {
-        const errorData: ApiErrorResponse = await scoreResponse.json();
-        throw new Error(errorData.error || t("error"));
-      }
-      const score: ScoreResponse = await scoreResponse.json();
-
-      // canEdit 조건 확인
-      const canEdit =
-        user &&
-        score.isOpen &&
-        score.churchId === user.churchId &&
-        (user.id === score.creatorId ||
-          ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
-
-      if (!canEdit) {
-        router.push(`/${locale}/scores/${id}`);
+  const checkEditPermission = useCallback(
+    async (user: User) => {
+      if (!id) {
+        setError(t("invalidId"));
+        setIsFetching(false);
         return;
       }
 
-      // 캐시 및 폼 데이터 설정
-      cacheRef.current = { id, data: score };
+      try {
+        setIsFetching(true);
 
-      form.setValue("title", score.title || "");
-      form.setValue("titleEn", score.titleEn || "");
-      form.setValue("titleJa", score.titleJa || "");
-      form.setValue("genre", score.genre || "");
-      form.setValue("tempo", score.tempo || "");
-      form.setValue("description", score.description || "");
-      form.setValue("lyrics", score.lyrics || "");
-      form.setValue("lyricsEn", score.lyricsEn || "");
-      form.setValue("lyricsJa", score.lyricsJa || "");
-      form.setValue("composer", score.composer || "");
-      form.setValue("lyricist", score.lyricist || "");
-      form.setValue("isPublic", score.isPublic || false);
-      form.setValue("isForSale", score.isForSale || false);
-      form.setValue("isOriginal", score.isOriginal || false);
-      form.setValue("price", score.price ? String(score.price) : "");
-      form.setValue("saleStartDate", score.saleStartDate || undefined);
-      form.setValue("saleEndDate", score.saleEndDate || undefined);
-      if (score.scoreKeys?.length) {
-        form.setValue(
-          "scoreKeys",
-          score.scoreKeys.map((sk) => ({ key: sk.key, file: sk.fileUrl }))
-        );
-        setPdfPreviews(
-          score.scoreKeys.map((sk) => ({ key: sk.key, url: sk.fileUrl }))
-        );
-      }
-      if (score.referenceUrls?.length) {
-        removeReferenceUrl(0);
-        score.referenceUrls.forEach((url) => appendReferenceUrl({ url }));
-      }
+        // 악보 데이터 가져오기
+        const scoreResponse = await fetch(`/api/scores/${id}`);
+        if (!scoreResponse.ok) {
+          const errorData: ApiErrorResponse = await scoreResponse.json();
+          throw new Error(errorData.error || t("error"));
+        }
+        const score: ScoreResponse = await scoreResponse.json();
 
-      setIsFetching(false);
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : t("error");
-      setError(errorMessage);
-      console.error("Fetch error:", error);
-      setIsFetching(false);
-    }
-  }, [
-    id,
-    form,
-    appendReferenceUrl,
-    removeReferenceUrl,
-    setPdfPreviews,
-    t,
-    router,
-    locale,
-  ]);
+        // canEdit 조건 확인
+        const canEdit =
+          user &&
+          score.isOpen &&
+          score.churchId === user.churchId &&
+          (user.id === score.creatorId ||
+            ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
+
+        if (!canEdit) {
+          router.push(`/${locale}/scores/${id}`);
+          return;
+        }
+
+        // 캐시 및 폼 데이터 설정
+        cacheRef.current = { id, data: score };
+
+        form.setValue("title", score.title || "");
+        form.setValue("titleEn", score.titleEn || "");
+        form.setValue("titleJa", score.titleJa || "");
+        form.setValue("genre", score.genre || "");
+        form.setValue("tempo", score.tempo || "");
+        form.setValue("description", score.description || "");
+        form.setValue("lyrics", score.lyrics || "");
+        form.setValue("lyricsEn", score.lyricsEn || "");
+        form.setValue("lyricsJa", score.lyricsJa || "");
+        form.setValue("composer", score.composer || "");
+        form.setValue("lyricist", score.lyricist || "");
+        form.setValue("isPublic", score.isPublic || false);
+        form.setValue("isForSale", score.isForSale || false);
+        form.setValue("isOriginal", score.isOriginal || false);
+        form.setValue("price", score.price ? String(score.price) : "");
+        form.setValue("saleStartDate", score.saleStartDate || undefined);
+        form.setValue("saleEndDate", score.saleEndDate || undefined);
+        if (score.scoreKeys?.length) {
+          form.setValue(
+            "scoreKeys",
+            score.scoreKeys.map((sk) => ({ key: sk.key, file: sk.fileUrl }))
+          );
+          setPdfPreviews(
+            score.scoreKeys.map((sk) => ({ key: sk.key, url: sk.fileUrl }))
+          );
+        }
+        if (score.referenceUrls?.length) {
+          removeReferenceUrl(0);
+          score.referenceUrls.forEach((url) => appendReferenceUrl({ url }));
+        }
+
+        setIsFetching(false);
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : t("error");
+        setError(errorMessage);
+        console.error("Fetch error:", error);
+        setIsFetching(false);
+      }
+    },
+    [
+      id,
+      form,
+      appendReferenceUrl,
+      removeReferenceUrl,
+      setPdfPreviews,
+      t,
+      router,
+      locale,
+    ]
+  );
 
   useEffect(() => {
-    checkEditPermission();
-  }, [checkEditPermission]);
+    if (user) {
+      checkEditPermission(user);
+    }
+  }, [checkEditPermission, user]);
 
   const handleFormSubmit = async (data: ScoreFormData) => {
     if (isLoading) return;

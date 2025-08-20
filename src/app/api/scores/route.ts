@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
   // scoreKeys 처리
   for (const [key, value] of formData.entries()) {
     if (key.startsWith("scoreKeys[")) {
-      const match = key.match(/scoreKeys\[(\d+)\]\.(\w+)/);
+      const match = key.match(/scoreKeys\[(\d+)\]\[(\w+)\]/);
       if (match) {
         const index = parseInt(match[1]);
         const field = match[2];

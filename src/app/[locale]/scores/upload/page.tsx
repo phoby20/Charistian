@@ -150,7 +150,7 @@ export default function ScoreUploadPage() {
       {isLoading && <Loading />}
       <div className="container mx-auto max-w-4xl p-8 bg-white rounded-2xl shadow-xl">
         {/* 헤더 */}
-        <div className="flex items-center justify-between mb-10 border-b border-gray-200 pb-4">
+        <div className="flex items-center justify-between mb-10 pb-4">
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

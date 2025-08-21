@@ -24,6 +24,7 @@ export default function SetlistListPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [appUrl, setAppUrl] = useState<string>("");
 
   const dateLocale = locale === "ko" ? ko : ja;
 
@@ -35,7 +36,10 @@ export default function SetlistListPage() {
         if (!response.ok) {
           throw new Error((await response.json()).error || t("fetchError"));
         }
-        setSetlists(await response.json());
+        const responseData: { setlists: Setlists[]; appUrl: string } =
+          await response.json();
+        setSetlists(responseData.setlists);
+        setAppUrl(responseData.appUrl);
       } catch (err) {
         setError(err instanceof Error ? err.message : t("fetchError"));
       } finally {
@@ -174,8 +178,8 @@ export default function SetlistListPage() {
           <p className="text-center text-gray-500">{t("noSongs")}</p>
         ) : (
           <>
-            <MobileCardLayout setlists={currentSetlists} />
-            <DesktopTableLayout setlists={currentSetlists} />
+            <MobileCardLayout setlists={currentSetlists} appUrl={appUrl} />
+            <DesktopTableLayout setlists={currentSetlists} appUrl={appUrl} />
             <div className="mb-4 mt-4">
               <label
                 htmlFor="itemsPerPage"

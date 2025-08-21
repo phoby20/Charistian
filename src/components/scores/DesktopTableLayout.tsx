@@ -11,10 +11,12 @@ import Chip from "../Chip";
 
 interface DesktopTableLayoutProps {
   setlists: Setlists[];
+  appUrl: string;
 }
 
 export default function DesktopTableLayout({
   setlists,
+  appUrl,
 }: DesktopTableLayoutProps) {
   const t = useTranslations("Setlist");
   const locale = useLocale();
@@ -23,8 +25,11 @@ export default function DesktopTableLayout({
   );
 
   // URL 복사 함수
-  const copyToClipboard = (url: string, id: string) => {
-    navigator.clipboard.writeText(url).then(() => {
+  const copyToClipboard = (id: string) => {
+    const proxyFileUrl: string = id
+      ? `${appUrl}/api/proxy/setlist/${id}/file`
+      : "#";
+    navigator.clipboard.writeText(proxyFileUrl).then(() => {
       setToast({ id, message: t("urlCopied") });
       setTimeout(() => setToast(null), 3000); // 3초 후 토스트 제거
     });
@@ -64,7 +69,7 @@ export default function DesktopTableLayout({
             >
               <td className="py-4 px-6 text-sm text-gray-600">
                 <button
-                  onClick={() => copyToClipboard(setlist.fileUrl, setlist.id)}
+                  onClick={() => copyToClipboard(setlist.id)}
                   className="text-[#fc089e] hover:text-[#ff66c4] transition-colors cursor-pointer"
                   aria-label={t("urlCopied")}
                 >

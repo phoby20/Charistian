@@ -18,6 +18,7 @@ export interface ScoreResponse {
   titleJa: string | null;
   description?: string;
   tempo?: string;
+  timeSignature?: string;
   thumbnailUrl?: string;
   price?: number;
   referenceUrls?: string[];

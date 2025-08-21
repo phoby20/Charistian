@@ -732,7 +732,10 @@
     "keyPlaceholder": "キーを選択してください",
     "keyRequired": "キーを選択する必要があります。",
     "fileRequired": "PDFファイルをアップロードする必要があります。",
-    "backToList": "一覧に戻る"
+    "backToList": "一覧に戻る",
+    "timeSignatureLabel": "拍子",
+    "timeSignaturePlaceholder": "拍子を選択してください",
+    "timeSignatureRequired": "拍子を選択する必要があります。"
   },
   "toUserSendEmail": {
     "sendEmail": "メール送信",

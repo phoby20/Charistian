@@ -742,7 +742,10 @@
     "keyPlaceholder": "Select Key",
     "keyRequired": "Key is required.",
     "fileRequired": "PDF file is required.",
-    "backToList": "Back to List"
+    "backToList": "Back to List",
+    "timeSignatureLabel": "Time Signature",
+    "timeSignaturePlaceholder": "Select time signature",
+    "timeSignatureRequired": "Time signature is required."
   },
   "toUserSendEmail": {
     "sendEmail": "Send Email",

@@ -142,6 +142,7 @@ model Creation {
   audioUrl          String?        // 오디오 파일 URL
   price             Float?         // 판매 가격
   tempo             Int?           // 템포
+  timeSignature     String?        // 박자 정보 (예: "4/4", "3/4")
   referenceUrls     String[]       // 참고 URL 배열
   lyrics            String?        // 가사 (한국어)
   lyricsEn          String?        // 가사 (영어)

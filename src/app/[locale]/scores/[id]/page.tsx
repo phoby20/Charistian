@@ -219,17 +219,6 @@ export default function ScoreDetailPage() {
                 <ArrowLeft className="w-6 h-6" />
                 <span className="text-base">{t("backToList")}</span>
               </motion.button>
-              <div className="flex flex-wrap gap-1">
-                {score.scoreKeys.length > 0 ? (
-                  score.scoreKeys.map((sk, index) => (
-                    <Chip key={index} label={sk.key} color="red" />
-                  ))
-                ) : (
-                  <Chip label={t("noKey")} color="red" />
-                )}
-                <Chip label={(score.tempo ?? "") + " BPM"} color="yellow" />
-                <Chip label={getGenreLabel(score.genre) ?? t("noGenre")} />
-              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6">
@@ -245,6 +234,18 @@ export default function ScoreDetailPage() {
                   score.titleJa ?? score.title,
                   locale as string
                 )}
+                <div className="flex flex-wrap gap-1 mt-2">
+                  <Chip label={(score.tempo ?? "") + " BPM"} color="yellow" />
+                  <Chip label={score.timeSignature ?? ""} color="green" />
+                  <Chip label={getGenreLabel(score.genre) ?? t("noGenre")} />
+                  {score.scoreKeys.length > 0 ? (
+                    score.scoreKeys.map((sk, index) => (
+                      <Chip key={index} label={sk.key} color="red" />
+                    ))
+                  ) : (
+                    <Chip label={t("noKey")} color="red" />
+                  )}
+                </div>
               </motion.h1>
               <div className="flex space-x-4">
                 <motion.button

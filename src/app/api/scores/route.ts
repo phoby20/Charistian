@@ -95,6 +95,16 @@ export async function POST(req: NextRequest) {
   const isForSale = formData.get("isForSale") === "true";
   const isOriginal = formData.get("isOriginal") === "true";
   const genre = formData.get("genre") as Genre;
+  const timeSignature = formData.get("timeSignature") as string | null;
+
+  // 검증 (예: "3/4" 형식만 허용)
+  if (timeSignature && !/^\d+\/\d+$/.test(timeSignature)) {
+    return NextResponse.json(
+      { error: "박자는 '숫자/숫자' 형식이어야 합니다." },
+      { status: 400 }
+    );
+  }
+
   const scoreKeysRaw: { key: string; file: File | null }[] = [];
 
   // scoreKeys 처리
@@ -201,6 +211,7 @@ export async function POST(req: NextRequest) {
         ? parseFloat(formData.get("price") as string)
         : undefined,
       tempo,
+      timeSignature, // 여기에 저장
       referenceUrls: JSON.parse(formData.get("referenceUrls") as string),
       lyrics: formData.get("lyrics") as string,
       lyricsEn: formData.get("lyricsEn") as string,

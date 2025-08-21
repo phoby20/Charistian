@@ -22,6 +22,9 @@ export default function ScoreList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [selectedTimeSignatures, setSelectedTimeSignatures] = useState<
+    string[]
+  >([]);
   const [selectedSharp, setSelectedSharp] = useState<
     "all" | "sharp" | "natural" | "flat"
   >("all");
@@ -168,6 +171,15 @@ export default function ScoreList() {
     setCurrentPage(1);
   };
 
+  const handleTimeSignatureChange = (timeSignature: string) => {
+    setSelectedTimeSignatures((prev) =>
+      prev.includes(timeSignature)
+        ? prev.filter((ts) => ts !== timeSignature)
+        : [...prev, timeSignature]
+    );
+    setCurrentPage(1);
+  };
+
   // 검색 및 필터링된 악보 목록
   const filteredScores = scores.filter((score) => {
     const searchLower = searchQuery.toLowerCase();
@@ -211,13 +223,19 @@ export default function ScoreList() {
       selectedTone === "" ||
       score.scoreKeys.some((sk) => sk.key.endsWith(selectedTone));
 
+    const matchesTimeSignature =
+      selectedTimeSignatures.length === 0 ||
+      (score.timeSignature &&
+        selectedTimeSignatures.includes(score.timeSignature));
+
     return (
       matchesSearch &&
       matchesGenre &&
       matchesTempo &&
       matchesKey &&
       matchesSharp &&
-      matchesTone
+      matchesTone &&
+      matchesTimeSignature
     );
   });
 
@@ -327,6 +345,7 @@ export default function ScoreList() {
                 searchQuery={searchQuery}
                 selectedGenres={selectedGenres}
                 selectedKeys={selectedKeys}
+                selectedTimeSignatures={selectedTimeSignatures}
                 selectedSharp={selectedSharp}
                 selectedTone={selectedTone}
                 minAvailableTempo={minAvailableTempo}
@@ -338,6 +357,7 @@ export default function ScoreList() {
                 onKeyChange={handleKeyChange}
                 onSharpChange={handleSharpChange}
                 onToneChange={handleToneChange}
+                onTimeSignatureChange={handleTimeSignatureChange}
                 onMinTempoChange={handleMinTempoChange}
                 onMaxTempoChange={handleMaxTempoChange}
               />

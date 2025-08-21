@@ -3,6 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { GENRES } from "@/data/genre";
 import TempoRangeFilter from "./TempoRangeFilter";
+import { constants } from "@/constants/intex";
 
 interface SearchFiltersProps {
   searchQuery: string;
@@ -10,6 +11,7 @@ interface SearchFiltersProps {
   selectedKeys: string[];
   selectedSharp: "all" | "sharp" | "natural" | "flat";
   selectedTone: "Major" | "Minor" | "";
+  selectedTimeSignatures: string[];
   minAvailableTempo: number;
   maxAvailableTempo: number;
   minTempoLimit: number;
@@ -19,6 +21,7 @@ interface SearchFiltersProps {
   onKeyChange: (keyValue: string) => void;
   onSharpChange: (sharp: "all" | "sharp" | "natural" | "flat") => void;
   onToneChange: (tone: "Major" | "Minor" | "") => void;
+  onTimeSignatureChange: (timeSignature: string) => void;
   onMinTempoChange: (value: number) => void;
   onMaxTempoChange: (value: number) => void;
 }
@@ -31,6 +34,7 @@ export default function SearchFilters({
   selectedKeys,
   selectedSharp,
   selectedTone,
+  selectedTimeSignatures,
   minAvailableTempo,
   maxAvailableTempo,
   minTempoLimit,
@@ -40,6 +44,7 @@ export default function SearchFilters({
   onKeyChange,
   onSharpChange,
   onToneChange,
+  onTimeSignatureChange,
   onMinTempoChange,
   onMaxTempoChange,
 }: SearchFiltersProps) {
@@ -157,6 +162,31 @@ export default function SearchFilters({
                 }`}
               >
                 {tone === "" ? t("all") : t(tone.toLowerCase())}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Time Signature */}
+      <div className="bg-gray-50 p-2 border border-gray-200 rounded-lg flex items-center">
+        <label className="text-sm font-semibold text-gray-700 block">
+          {t("timeSignature")}
+        </label>
+        <div className="flex flex-wrap gap-2 ml-4">
+          {constants.TIME_SIGNATURES.map((ts) => {
+            const selected = selectedTimeSignatures.includes(ts);
+            return (
+              <button
+                key={ts}
+                onClick={() => onTimeSignatureChange(ts)}
+                className={`cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
+                  selected
+                    ? "bg-[#fc089e] text-white"
+                    : "bg-white text-[#ff59bf] border-[#ff59bf] hover:bg-[#ff59bf] hover:text-white"
+                }`}
+              >
+                {ts}
               </button>
             );
           })}

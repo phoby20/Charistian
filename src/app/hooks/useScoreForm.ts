@@ -59,6 +59,7 @@ export const useScoreForm = (): UseScoreFormReturn => {
       lyrics: "",
       description: "",
       genre: "",
+      timeSignature: "", // Added default value for timeSignature
     },
   });
 
@@ -266,6 +267,7 @@ export const useScoreForm = (): UseScoreFormReturn => {
     formData.append("isForSale", String(data.isForSale));
     formData.append("isOriginal", String(data.isOriginal));
     formData.append("genre", data.genre || "");
+    formData.append("timeSignature", data.timeSignature || ""); // Append timeSignature
 
     try {
       const response = await fetch("/api/scores", {

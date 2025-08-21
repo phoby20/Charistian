@@ -612,7 +612,8 @@
     "usageFetchError": "Failed to fetch usage information.",
     "upgradePlan": "Upgrade Plan",
     "noMakeSetlist": "Cannot create setlist due to weekly/monthly usage limit exceeded.\nUpgrade your plan",
-    "noUploadScore": "Score upload limit exceeded.\nUpgrade your plan"
+    "noUploadScore": "Score upload limit exceeded.\nUpgrade your plan",
+    "timeSignature": "Time Signature"
   },
   "Setlist": {
     "noKey": "No Key",
@@ -742,7 +743,10 @@
     "keyPlaceholder": "Select Key",
     "keyRequired": "Key is required.",
     "fileRequired": "PDF file is required.",
-    "backToList": "Back to List"
+    "backToList": "Back to List",
+    "timeSignatureLabel": "Time Signature",
+    "timeSignaturePlaceholder": "Select time signature",
+    "timeSignatureRequired": "Time signature is required."
   },
   "toUserSendEmail": {
     "sendEmail": "Send Email",
@@ -1089,7 +1093,10 @@
     "composerLabel": "Composer",
     "composerPlaceholder": "Composer Name",
     "lyricistLabel": "Lyricist",
-    "lyricistPlaceholder": "Lyricist Name"
+    "lyricistPlaceholder": "Lyricist Name",
+    "timeSignatureLabel": "Time Signature",
+    "timeSignaturePlaceholder": "Select time signature",
+    "timeSignatureRequired": "Time signature is required."
   },
   "login": {
     "title": "Login",

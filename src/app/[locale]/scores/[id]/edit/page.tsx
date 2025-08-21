@@ -1,3 +1,4 @@
+// src/app/[locale]/scores/[id]/edit/page.tsx
 "use client";
 import { useScoreForm } from "@/app/hooks/useScoreForm";
 import { ComposerLyricistSection } from "@/components/scores/ComposerLyricistSection";
@@ -20,6 +21,9 @@ import { ScoreResponse, ScoreFormData, ApiErrorResponse } from "@/types/score";
 import Button from "@/components/Button";
 import { useAuth } from "@/context/AuthContext";
 import { User } from "@prisma/client";
+import { constants } from "@/constants/intex";
+
+const { TIME_SIGNATURES } = constants;
 
 export default function ScoreEditPage() {
   const t = useTranslations("ScoreEdit");
@@ -114,6 +118,7 @@ export default function ScoreEditPage() {
         form.setValue("price", score.price ? String(score.price) : "");
         form.setValue("saleStartDate", score.saleStartDate || undefined);
         form.setValue("saleEndDate", score.saleEndDate || undefined);
+        form.setValue("timeSignature", score.timeSignature || "");
         if (score.scoreKeys?.length) {
           form.setValue(
             "scoreKeys",
@@ -199,6 +204,8 @@ export default function ScoreEditPage() {
           }
         });
       }
+      if (data.timeSignature)
+        formData.append("timeSignature", data.timeSignature);
 
       const response = await fetch(`/api/scores/${id}`, {
         method: "PUT",
@@ -333,6 +340,39 @@ export default function ScoreEditPage() {
                 <p className="text-red-500 text-sm flex items-center space-x-1 mt-2">
                   <AlertCircle className="w-4 h-4" />
                   <span>{errors.genre.message}</span>
+                </p>
+              )}
+            </div>
+          </motion.section>
+
+          {/* 박자 섹션 */}
+          <motion.section
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+          >
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              {t("timeSignatureLabel")}
+            </h2>
+            <div className="space-y-2">
+              <select
+                {...register("timeSignature", {
+                  required: t("timeSignatureRequired"),
+                })}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
+              >
+                <option value="">{t("timeSignaturePlaceholder")}</option>
+                {TIME_SIGNATURES.map((ts) => (
+                  <option key={ts} value={ts}>
+                    {ts}
+                  </option>
+                ))}
+              </select>
+              {errors.timeSignature && (
+                <p className="text-red-500 text-sm flex items-center space-x-1 mt-2">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{errors.timeSignature.message}</span>
                 </p>
               )}
             </div>

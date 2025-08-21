@@ -612,7 +612,8 @@
     "usageFetchError": "사용량 정보를 가져오지 못했습니다.",
     "upgradePlan": "플랜 업그레이드",
     "noMakeSetlist": "주/월간 사용량 초과로 콘티를 작성할 수 없습니다.\n플랜을 업그레이드하세요",
-    "noUploadScore": "악보 업로드 제한수를 넘었습니다.\n플랜을 업그레이드하세요"
+    "noUploadScore": "악보 업로드 제한수를 넘었습니다.\n플랜을 업그레이드하세요",
+    "timeSignature": "박자"
   },
   "Setlist": {
     "noKey": "등록된 키가 없습니다.",
@@ -742,7 +743,10 @@
     "keyPlaceholder": "키를 선택하세요",
     "keyRequired": "키를 선택해야 합니다.",
     "fileRequired": "PDF 파일을 업로드해야 합니다.",
-    "backToList": "목록으로 돌아가기"
+    "backToList": "목록으로 돌아가기",
+    "timeSignatureLabel": "박자",
+    "timeSignaturePlaceholder": "박자를 선택하세요",
+    "timeSignatureRequired": "박자를 선택해야 합니다."
   },
   "toUserSendEmail": {
     "sendEmail": "이메일 전송",
@@ -1089,7 +1093,10 @@
     "composerLabel": "작곡가",
     "composerPlaceholder": "작곡가 이름",
     "lyricistLabel": "작사자",
-    "lyricistPlaceholder": "작사자 이름"
+    "lyricistPlaceholder": "작사자 이름",
+    "timeSignatureLabel": "박자",
+    "timeSignaturePlaceholder": "박자를 선택하세요",
+    "timeSignatureRequired": "박자를 선택해야 합니다."
   },
   "login": {
     "title": "로그인",

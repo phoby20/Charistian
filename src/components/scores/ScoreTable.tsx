@@ -134,6 +134,9 @@ export default function ScoreTable({
               <span>{t("tempo")}</span>
             </th>
             <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-sm font-semibold text-gray-700 min-w-[50px] sm:min-w-[70px]">
+              {t("timeSignature")}
+            </th>
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-left text-sm font-semibold text-gray-700 min-w-[50px] sm:min-w-[70px]">
               {t("key")}
             </th>
             <th className="py-2 sm:py-3 px-2 sm:px-4 text-center text-sm font-semibold text-gray-700 w-12">
@@ -208,6 +211,11 @@ export default function ScoreTable({
                     </span>
                     <span>{score.tempo ? `${score.tempo}` : t("none")}</span>
                   </div>
+                </td>
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-sm truncate">
+                  <span>
+                    {score.timeSignature ? `${score.timeSignature}` : t("none")}
+                  </span>
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-sm truncate">
                   {score.scoreKeys.length > 0

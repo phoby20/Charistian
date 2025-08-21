@@ -1,3 +1,4 @@
+// src/app/api/scores/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
@@ -193,6 +194,7 @@ export interface ScoreFormData {
   saleEndDate?: string;
   referenceUrls?: string[];
   tempo?: string;
+  timeSignature?: string;
   scoreKeys?: { key: string; file?: File | string; fileUrl?: string }[];
 }
 
@@ -276,6 +278,7 @@ export async function PUT(
           ? JSON.parse(formData.get("referenceUrls") as string)
           : undefined,
         tempo: formData.get("tempo") as string | undefined,
+        timeSignature: formData.get("timeSignature") as string | undefined,
       };
 
       // scoreKeys 처리
@@ -506,6 +509,7 @@ export async function PUT(
         saleEndDate: data.saleEndDate ? new Date(data.saleEndDate) : null,
         referenceUrls: processedReferenceUrls,
         tempo,
+        timeSignature: data.timeSignature || null,
       },
       include: {
         creator: { select: { name: true } },

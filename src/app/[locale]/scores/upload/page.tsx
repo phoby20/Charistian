@@ -1,4 +1,3 @@
-// src/app/[locale]/scores/upload/page.tsx
 "use client";
 import { useScoreForm } from "@/app/hooks/useScoreForm";
 import { ComposerLyricistSection } from "@/components/scores/ComposerLyricistSection";
@@ -20,6 +19,9 @@ import Loading from "@/components/Loading";
 import Button from "@/components/Button";
 import type * as PDFJS from "pdfjs-dist";
 import { getPdfFirstPagePreview } from "@/utils/pdf-preview";
+import { constants } from "@/constants/intex";
+
+const { TIME_SIGNATURES } = constants;
 
 export default function ScoreUploadPage() {
   const t = useTranslations("ScoreUpload");
@@ -219,6 +221,39 @@ export default function ScoreUploadPage() {
                 <p className="text-red-500 text-sm flex items-center space-x-1 mt-2">
                   <AlertCircle className="w-4 h-4" />
                   <span>{errors.genre.message}</span>
+                </p>
+              )}
+            </div>
+          </motion.section>
+
+          {/* 박자 섹션 */}
+          <motion.section
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+          >
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              {t("timeSignatureLabel")}
+            </h2>
+            <div className="space-y-2">
+              <select
+                {...register("timeSignature", {
+                  required: t("timeSignatureRequired"),
+                })}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
+              >
+                <option value="">{t("timeSignaturePlaceholder")}</option>
+                {TIME_SIGNATURES.map((ts) => (
+                  <option key={ts} value={ts}>
+                    {ts}
+                  </option>
+                ))}
+              </select>
+              {errors.timeSignature && (
+                <p className="text-red-500 text-sm flex items-center space-x-1 mt-2">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{errors.timeSignature.message}</span>
                 </p>
               )}
             </div>

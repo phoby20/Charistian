@@ -11,9 +11,13 @@ import Chip from "../Chip";
 
 interface MobileCardLayoutProps {
   setlists: Setlists[];
+  appUrl: string;
 }
 
-export default function MobileCardLayout({ setlists }: MobileCardLayoutProps) {
+export default function MobileCardLayout({
+  setlists,
+  appUrl,
+}: MobileCardLayoutProps) {
   const t = useTranslations("Setlist");
   const locale = useLocale();
   const [toast, setToast] = useState<{ id: string; message: string } | null>(
@@ -21,8 +25,11 @@ export default function MobileCardLayout({ setlists }: MobileCardLayoutProps) {
   );
 
   // URL 복사 함수
-  const copyToClipboard = (url: string, id: string) => {
-    navigator.clipboard.writeText(url).then(() => {
+  const copyToClipboard = (id: string) => {
+    const proxyFileUrl: string = id
+      ? `${appUrl}/api/proxy/setlist/${id}/file`
+      : "#";
+    navigator.clipboard.writeText(proxyFileUrl).then(() => {
       setToast({ id, message: t("urlCopied") });
       setTimeout(() => setToast(null), 3000); // 3초 후 토스트 제거
     });
@@ -45,7 +52,7 @@ export default function MobileCardLayout({ setlists }: MobileCardLayoutProps) {
               </h2>
             </Link>
             <button
-              onClick={() => copyToClipboard(setlist.fileUrl, setlist.id)}
+              onClick={() => copyToClipboard(setlist.id)}
               className="text-[#fc089e] hover:text-[#fc089e]"
               aria-label={t("urlCopied")}
             >

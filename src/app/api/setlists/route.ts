@@ -8,6 +8,7 @@ import { handleApiError } from "@/utils/handleApiError";
 import { SetlistResponse } from "@/types/setList";
 import { subDays } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
+import { getLocalIpAddress } from "@/utils/getLocalIpAddress";
 
 interface CreateSetlistRequest {
   title: string;
@@ -44,7 +45,7 @@ export async function GET(req: NextRequest) {
       "SUB_ADMIN",
       "GENERAL",
     ].includes(payload.role);
-    let setlists;
+    let setlists: SetlistResponse[];
 
     if (accessAble) {
       setlists = await prisma.setlist.findMany({
@@ -107,7 +108,10 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json(setlists as SetlistResponse[], { status: 200 });
+    const ip = getLocalIpAddress();
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${ip}:3001`;
+
+    return NextResponse.json({ setlists, appUrl }, { status: 200 });
   } catch (error) {
     return handleApiError(error, "세트리스트 조회");
   }

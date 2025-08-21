@@ -612,7 +612,8 @@
     "usageFetchError": "사용량 정보를 가져오지 못했습니다.",
     "upgradePlan": "플랜 업그레이드",
     "noMakeSetlist": "주/월간 사용량 초과로 콘티를 작성할 수 없습니다.\n플랜을 업그레이드하세요",
-    "noUploadScore": "악보 업로드 제한수를 넘었습니다.\n플랜을 업그레이드하세요"
+    "noUploadScore": "악보 업로드 제한수를 넘었습니다.\n플랜을 업그레이드하세요",
+    "timeSignature": "박자"
   },
   "Setlist": {
     "noKey": "등록된 키가 없습니다.",

@@ -612,7 +612,8 @@
     "usageFetchError": "Failed to fetch usage information.",
     "upgradePlan": "Upgrade Plan",
     "noMakeSetlist": "Cannot create setlist due to weekly/monthly usage limit exceeded.\nUpgrade your plan",
-    "noUploadScore": "Score upload limit exceeded.\nUpgrade your plan"
+    "noUploadScore": "Score upload limit exceeded.\nUpgrade your plan",
+    "timeSignature": "Time Signature"
   },
   "Setlist": {
     "noKey": "No Key",

@@ -1078,7 +1078,10 @@
     "composerLabel": "作曲者",
     "composerPlaceholder": "作曲者の名前",
     "lyricistLabel": "作詞者",
-    "lyricistPlaceholder": "作詞者の名前"
+    "lyricistPlaceholder": "作詞者の名前",
+    "timeSignatureLabel": "拍子",
+    "timeSignaturePlaceholder": "拍子を選択してください",
+    "timeSignatureRequired": "拍子を選択する必要があります。"
   },
   "login": {
     "title": "ログイン",

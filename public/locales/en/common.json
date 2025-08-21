@@ -1089,7 +1089,10 @@
     "composerLabel": "Composer",
     "composerPlaceholder": "Composer Name",
     "lyricistLabel": "Lyricist",
-    "lyricistPlaceholder": "Lyricist Name"
+    "lyricistPlaceholder": "Lyricist Name",
+    "timeSignatureLabel": "Time Signature",
+    "timeSignaturePlaceholder": "Select time signature",
+    "timeSignatureRequired": "Time signature is required."
   },
   "login": {
     "title": "Login",

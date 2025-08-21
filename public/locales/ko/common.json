@@ -1089,7 +1089,10 @@
     "composerLabel": "작곡가",
     "composerPlaceholder": "작곡가 이름",
     "lyricistLabel": "작사자",
-    "lyricistPlaceholder": "작사자 이름"
+    "lyricistPlaceholder": "작사자 이름",
+    "timeSignatureLabel": "박자",
+    "timeSignaturePlaceholder": "박자를 선택하세요",
+    "timeSignatureRequired": "박자를 선택해야 합니다."
   },
   "login": {
     "title": "로그인",

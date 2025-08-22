@@ -20,14 +20,9 @@ export async function sendSetlistEmail(
     return;
   }
 
-  const isLocal =
-    process.env.NODE_ENV === "development" ||
-    req.headers.get("host")?.includes("localhost");
+  console.log("콘티 메일 발송 함수 시작");
 
   // 공유 대상 사용자 조회
-  const groupIds = setlist.shares
-    .filter((share) => share.group?.id)
-    .map((share) => share.group!.id);
   const teamIds = setlist.shares
     .filter((share) => share.team?.id)
     .map((share) => share.team!.id);
@@ -35,7 +30,6 @@ export async function sendSetlistEmail(
   const users = await prisma.user.findMany({
     where: {
       AND: [
-        { groups: { some: { id: { in: groupIds } } } },
         { teams: { some: { id: { in: teamIds } } } },
         { email: { not: "" } },
         { emailVerified: true },
@@ -75,11 +69,10 @@ export async function sendSetlistEmail(
     emailTitle
   );
 
-  if (isLocal) {
-    console.log("Local environment detected. Email content (not sent):");
-    console.log("To:", users.map((u) => u.email).join(", "));
-    console.log(`이메일 전송 완료: ${users.length}명의 사용자에게 전송`);
-  } else if (users.length > 0) {
+  console.log("이메일 내용 생성 완료");
+  console.log("users:", users);
+
+  if (users.length > 0) {
     await resend.emails.send({
       from: resendFrom,
       to: users.map((u) => u.email!),

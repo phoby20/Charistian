@@ -279,15 +279,19 @@ export async function POST(
     const finalSetlist = await prisma.setlist.findUnique({
       where: { id: setlist.id },
       include: {
-        creator: { select: { name: true, id: true } },
+        creator: { select: { id: true, name: true } },
         church: { select: { name: true } },
         scores: {
-          include: {
+          select: {
+            id: true,
+            order: true,
+            selectedReferenceUrl: true,
+            selectedKey: true,
             creation: {
               select: {
                 id: true,
                 title: true,
-                scoreKeys: { select: { key: true, fileUrl: true } }, // fileUrl, key 제거
+                scoreKeys: { select: { key: true, fileUrl: true } },
                 referenceUrls: true,
                 titleEn: true,
                 titleJa: true,
@@ -304,6 +308,8 @@ export async function POST(
         },
       },
     });
+
+    console.log("콘티 생성 완료", finalSetlist);
 
     if (!finalSetlist) {
       throw new Error("생성된 세트리스트를 찾을 수 없습니다.");

@@ -73,7 +73,7 @@ export async function sendSetlistEmail(
   const ip = getLocalIpAddress();
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${ip}:3001`;
-  const logoUrl = `${appUrl}/logo.png`;
+  const logoUrl = `${appUrl}/logo_title.png`;
   // 프록시 URL 생성
   const proxyFileUrl = `${appUrl}/api/proxy/setlist/${finalSetlist.id}/file`;
 

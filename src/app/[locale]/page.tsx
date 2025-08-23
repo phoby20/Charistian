@@ -10,7 +10,6 @@ import Image from "next/image";
 import { Gaegu } from "next/font/google";
 import FAQ from "@/components/landing/Faq";
 import Landing from "@/components/Loading";
-import EventModal from "@/components/dashboard/EventModal";
 
 const gaegu = Gaegu({
   subsets: ["latin"],
@@ -89,7 +88,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-      <EventModal />
       <section className="relative min-h-screen flex items-center justify-center border-transparent bg-gradient-to-r from-[#ffde59] to-[#ff66c4] bg-clip-border">
         <div className="py-20 px-4 sm:px-6 lg:px-8 text-center">
           <motion.h2

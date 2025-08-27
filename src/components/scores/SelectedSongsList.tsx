@@ -125,8 +125,9 @@ export default function SelectedSongsList({
           }
           setCurrentPlayingId(scoreId);
           const score = selectedSongs.find((s) => s.id === scoreId);
-          const videoId = score?.referenceUrls[0]
-            ? getYouTubeVideoId(score?.referenceUrls[0])
+          const selectedUrl = scoreId ? selectedUrls[scoreId] : undefined;
+          const videoId = selectedUrl
+            ? getYouTubeVideoId(selectedUrl)
             : getFirstYouTubeVideoId(score?.referenceUrls);
           if (videoId) {
             await playerRef.current.loadVideoById(videoId);
@@ -185,8 +186,11 @@ export default function SelectedSongsList({
       handlePlayPause(pendingPlay);
     } else if (currentPlayingId) {
       const score = selectedSongs.find((s) => s.id === currentPlayingId);
-      const videoId = score?.referenceUrls[0]
-        ? getYouTubeVideoId(score?.referenceUrls[0])
+      const selectedUrl = currentPlayingId
+        ? selectedUrls[currentPlayingId]
+        : undefined;
+      const videoId = selectedUrl
+        ? getYouTubeVideoId(selectedUrl)
         : getFirstYouTubeVideoId(score?.referenceUrls);
       if (videoId) {
         event.target.loadVideoById(videoId);
@@ -356,8 +360,10 @@ export default function SelectedSongsList({
   const handleUrlSelect = (songId: string, url: string) => {
     onUrlSelect(songId, url);
     const videoId = getYouTubeVideoId(url);
-    if (videoId) {
-      handlePlayPause(songId);
+    if (videoId && playerRef.current && isPlayerReady) {
+      playerRef.current.loadVideoById(videoId);
+      playerRef.current.playVideo();
+      setCurrentPlayingId(songId);
     }
   };
 
@@ -382,12 +388,12 @@ export default function SelectedSongsList({
 
   const currentVideoId = currentPlayingId
     ? getYouTubeVideoId(
-        selectedUrls[currentPlayingId] ||
+        (currentPlayingId && selectedUrls[currentPlayingId]) ??
           getYouTubeUrls(
             selectedSongs.find((s) => s.id === currentPlayingId)?.referenceUrls
           )[0]
-      )
-    : undefined;
+      ) || ""
+    : "";
 
   return (
     <div>

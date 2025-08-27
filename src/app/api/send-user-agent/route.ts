@@ -1,3 +1,4 @@
+// src/app/api/send-user-agent/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { createKoreaDate } from "@/utils/creatKoreaDate";
 

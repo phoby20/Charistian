@@ -1,3 +1,4 @@
+// src/app/api/login-history/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { TokenPayload, verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
@@ -91,6 +92,66 @@ export async function POST(req: NextRequest) {
         location: `${geoInfo.country}, ${geoInfo.regionName}`,
       },
     });
+
+    // ✅ Slack 알림 전송
+    try {
+      const slackBotToken = process.env.SLACK_BOT_TOKEN;
+      const slackChannelId = process.env.SLACK_CHANNEL_ID || "C0766MHSM0C";
+
+      if (slackBotToken) {
+        const slackMessage = {
+          channel: slackChannelId,
+          blocks: [
+            {
+              type: "header",
+              text: {
+                type: "plain_text",
+                text: `🔔 로그인 성공: ${user.name}`,
+                emoji: true,
+              },
+            },
+            { type: "divider" },
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: `*이메일:* ${user.email}\n*권한:* ${user.role}\n*교회:* ${user.church?.name || "N/A"}`,
+              },
+            },
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: `*⏰ 시간*\n${koreaDate}`,
+              },
+            },
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: `*🖥️ User-Agent*\n${req.headers.get("user-agent") || "Unknown"}`,
+              },
+            },
+          ],
+        };
+
+        const response = await fetch("https://slack.com/api/chat.postMessage", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${slackBotToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(slackMessage),
+        });
+
+        const responseData = await response.json();
+        if (!response.ok || !responseData.ok) {
+          console.error("Slack API error:", responseData.error || responseData);
+        }
+      }
+    } catch (slackError) {
+      console.error("Slack 전송 오류:", slackError);
+    }
 
     return NextResponse.json({ loginHistory }, { status: 201 });
   } catch (error: unknown) {

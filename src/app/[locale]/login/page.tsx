@@ -33,6 +33,14 @@ export default function LoginPage() {
         return;
       }
 
+      if (response.ok) {
+        // 로그인 성공 시 로그인 기록 저장
+        await fetch("/api/login-history", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
       window.location.href = `/${locale}/dashboard`;
     } catch (err) {
       setIsDisabled(false);

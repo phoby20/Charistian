@@ -47,6 +47,7 @@ model User {
   passwordResetTokens PasswordResetToken[] @relation("UserPasswordResetTokens")
   emailVerificationToken String?   @unique // 이메일 인증 토큰
   emailVerified      Boolean   @default(false) // 이메일 인증 여부
+  loginHistories LoginHistory[] @relation("UserLoginHistories") // LoginHistory 관계
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
@@ -72,6 +73,7 @@ model Church {
   creations         Creation[]
   events            Event[]    @relation("ChurchEvents")
   setlists          Setlist[]        @relation("ChurchSetlists")
+  loginHistories    LoginHistory[] @relation("ChurchLoginHistories") // LoginHistory 관계
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
@@ -390,6 +392,23 @@ model UsageLimit {
   resetAt       DateTime?    // 주간/월간 리셋 시각
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+}
+
+model LoginHistory {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation("UserLoginHistories", fields: [userId], references: [id])
+  userName     String
+  userGender   String
+  userPosition String?
+  userRole     Role
+  userEmail    String
+  churchId     String?
+  church       Church?   @relation("ChurchLoginHistories", fields: [churchId], references: [id])
+  churchName   String?
+  loginTime    DateTime
+  location     String?
+  createdAt    DateTime  @default(now())
 }
 
 enum SubscriptionStatus {

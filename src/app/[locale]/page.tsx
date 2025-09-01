@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { Gaegu } from "next/font/google";
-import FAQ from "@/components/landing/Faq";
+// import FAQ from "@/components/landing/Faq";
 import Landing from "@/components/Loading";
 
 const gaegu = Gaegu({
@@ -59,28 +59,28 @@ export default function LandingPage() {
     },
   ];
 
-  const usageSteps = [
-    {
-      title: t("usage.steps.0.title"),
-      description: t("usage.steps.0.description"),
-    },
-    {
-      title: t("usage.steps.1.title"),
-      description: t("usage.steps.1.description"),
-    },
-    {
-      title: t("usage.steps.2.title"),
-      description: t("usage.steps.2.description"),
-    },
-    {
-      title: t("usage.steps.3.title"),
-      description: t("usage.steps.3.description"),
-    },
-    {
-      title: t("usage.steps.4.title"),
-      description: t("usage.steps.4.description"),
-    },
-  ];
+  // const usageSteps = [
+  //   {
+  //     title: t("usage.steps.0.title"),
+  //     description: t("usage.steps.0.description"),
+  //   },
+  //   {
+  //     title: t("usage.steps.1.title"),
+  //     description: t("usage.steps.1.description"),
+  //   },
+  //   {
+  //     title: t("usage.steps.2.title"),
+  //     description: t("usage.steps.2.description"),
+  //   },
+  //   {
+  //     title: t("usage.steps.3.title"),
+  //     description: t("usage.steps.3.description"),
+  //   },
+  //   {
+  //     title: t("usage.steps.4.title"),
+  //     description: t("usage.steps.4.description"),
+  //   },
+  // ];
 
   if (isLanding) {
     return <Landing />;
@@ -113,18 +113,11 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.4 }}
           >
             <Button
-              onClick={() => router.push("/terms-of-service?type=member")}
+              onClick={() => router.push("/signup")}
               className="text-white font-extrabold cursor-pointer hover:bg-[#ff66c4] text-lg px-8 py-3 rounded-full bg-[#fc089e] shadow-lg"
               aria-label={t("hero.cta")}
             >
               {t("hero.cta")}
-            </Button>
-            <Button
-              onClick={() => router.push("/terms-of-service?type=church")}
-              className="text-white font-extrabold cursor-pointer hover:bg-[#ff66c4] text-lg px-8 py-3 rounded-full bg-[#fc089e] shadow-lg"
-              aria-label={t("usage.steps.0.title")}
-            >
-              {t("usage.steps.0.title")}
             </Button>
           </motion.div>
           <div className="flex justify-center mt-10">
@@ -417,7 +410,7 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      <FAQ />
+      {/* <FAQ /> */}
 
       <div className="bg-white text-center pt-30 text-3xl md:text-4xl font-bold text-primary text-center ">
         {t("features.title")}
@@ -459,7 +452,7 @@ export default function LandingPage() {
         );
       })}
 
-      <section
+      {/* <section
         className="py-50 bg-gradient-to-br from-blue-100 via-white to-purple-100"
         role="region"
         aria-labelledby="usage-title"
@@ -554,7 +547,7 @@ export default function LandingPage() {
             </Button>
           </motion.div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }

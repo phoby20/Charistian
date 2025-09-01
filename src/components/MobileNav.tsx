@@ -203,7 +203,7 @@ export default function MobileNav({
                 </div>
               )}
 
-            {!user && (
+            {/* {!user && (
               <>
                 <Link
                   href={getPathname({
@@ -216,7 +216,7 @@ export default function MobileNav({
                   {t("churchRegistration.title")}
                 </Link>
               </>
-            )}
+            )} */}
             {user && user.role === "SUPER_ADMIN" && (
               <div className="px-3 py-2">
                 <button

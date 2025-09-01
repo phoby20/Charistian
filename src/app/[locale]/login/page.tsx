@@ -53,9 +53,9 @@ export default function LoginPage() {
   };
 
   // 카카오 로그인 버튼 클릭 핸들러
-  const handleKakaoLogin = () => {
-    window.location.href = process.env.NEXT_PUBLIC_KAKAO_AUTH_URL!;
-  };
+  // const handleKakaoLogin = () => {
+  //   window.location.href = process.env.NEXT_PUBLIC_KAKAO_AUTH_URL!;
+  // };
 
   const resetPasswordUrl = `/${locale}/reset-password`;
 
@@ -93,7 +93,7 @@ export default function LoginPage() {
           </Button>
         </form>
         {/* 카카오 로그인 버튼 추가 */}
-        <hr className="border mt-10 mb-8 border-gray-100" />
+        {/* <hr className="border mt-10 mb-8 border-gray-100" />
         <Button
           type="button"
           isDisabled={isDisabled}
@@ -106,7 +106,7 @@ export default function LoginPage() {
             className="h-6"
           />
           <p>{t("kakaoLogin")}</p>
-        </Button>
+        </Button> */}
         {error && (
           <div className="mt-4 text-red-600 text-sm text-center">{error}</div>
         )}
@@ -122,7 +122,7 @@ export default function LoginPage() {
           <p className="mt-2">
             {t("noAccount")}{" "}
             <Link
-              href={`/${locale}/terms-of-service?type=member`}
+              href={`/${locale}/signup`}
               className="text-blue-600 hover:underline font-medium"
             >
               {t("signupTitle")}

@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
         profileImage: data.profileImage || null,
         position: data.position,
         role: "GENERAL",
-        state: "PENDING",
+        state: "APPROVED",
         emailVerificationToken: verificationToken,
         emailVerified: false,
       },
@@ -114,12 +114,15 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: `${process.env.RESEND_FROM}`, // Resend 대시보드에서 설정한 도메인
       to: data.email,
-      subject: "이메일 인증을 완료해 주세요",
+      subject: "[Charistian] 이메일 인증（Email認証）",
       html: `
-        <h1>이메일 인증</h1>
-        <p>아래 링크를 클릭하여 이메일 인증을 완료해 주세요:</p>
+        <h1>이메일 인증（Email認証）</h1>
+        <p>아래 링크를 클릭하여 이메일 인증을 완료해 주세요.</p>
+        <p>下のリンクをクリックしてemail認証を完了してください。</p>
+        <br/>
         <a href="${verificationLink}">${verificationLink}</a>
         <p>링크는 24시간 동안 유효합니다.</p>
+        <p>このリンクは24時間有効です。</p>
       `,
     });
 

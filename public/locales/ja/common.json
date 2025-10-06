@@ -779,8 +779,8 @@
       "title": "SMART",
       "description": "中小規模の教会に最適",
       "features1": "最大150名の聖徒登録",
-      "features2": "最大週10回 / 月50回のコンテ作成",
-      "features3": "最大200曲の楽譜アップロード",
+      "features2": "最大週10回 / 月100回のコンテ作成",
+      "features3": "最大800曲の楽譜アップロード",
       "price": "9,900ウォン",
       "subscribe": "サブスクリプション開始"
     },
@@ -911,10 +911,10 @@
     "memberLimitSmart": "最大150名聖徒登録",
     "memberLimitEnterprise": "聖徒登録無制限",
     "scheduleLimitFree": "週2回/月8回コンテ作成",
-    "scheduleLimitSmart": "週10回/月50回コンテ作成",
+    "scheduleLimitSmart": "週10回/月100回コンテ作成",
     "scheduleLimitEnterprise": "コンテ作成無制限",
     "sheetMusicLimitFree": "最大50曲楽譜登録",
-    "sheetMusicLimitSmart": "最大200曲楽譜登録",
+    "sheetMusicLimitSmart": "最大800曲楽譜登録",
     "sheetMusicLimitEnterprise": "楽譜アップロード無制限",
     "goHome": "ホームに戻る"
   },
@@ -939,7 +939,7 @@
       "title": "第3条（サービスプラン）",
       "item1": "当社は以下のプランを提供します：",
       "freePlan": "FREEプラン：最大10名聖徒登録、週2回/月8回コンテ作成、最大50曲楽譜登録",
-      "smartPlan": "SMARTプラン：月額9,900円、最大150名聖徒登録、週10回/月50回コンテ作成、最大200曲楽譜登録",
+      "smartPlan": "SMARTプラン：月額9,900円、最大150名聖徒登録、週10回/月100回コンテ作成、最大800曲楽譜登録",
       "enterprisePlan": "ENTERPRISEプラン：月額49,000円、聖徒登録無制限、コンテ作成無制限、楽譜アップロード無制限",
       "item2": "教会（団体）は、選択한 플랜의 제한 내에서聖徒のサービス利用을 관리합니다。"
     },

@@ -613,7 +613,8 @@
     "upgradePlan": "플랜 업그레이드",
     "noMakeSetlist": "주/월간 사용량 초과로 콘티를 작성할 수 없습니다.\n플랜을 업그레이드하세요",
     "noUploadScore": "악보 업로드 제한수를 넘었습니다.\n플랜을 업그레이드하세요",
-    "timeSignature": "박자"
+    "timeSignature": "박자",
+    "unauthorized": "권한이 없습니다"
   },
   "Setlist": {
     "noKey": "등록된 키가 없습니다.",
@@ -789,8 +790,8 @@
       "title": "SMART",
       "description": "중소규모 교회에 적합",
       "features1": "최대 150명 성도 등록",
-      "features2": "최대 주 10회 / 월 50회 콘티작성",
-      "features3": "최대 200곡 악보",
+      "features2": "최대 주 10회 / 월 100회 콘티작성",
+      "features3": "최대 800곡 악보",
       "price": "9,900원",
       "subscribe": "구독 시작"
     },
@@ -922,10 +923,10 @@
     "memberLimitSmart": "최대 150명 성도 등록",
     "memberLimitEnterprise": "성도 등록 무제한",
     "scheduleLimitFree": "주 2회/월 8회 콘티 작성",
-    "scheduleLimitSmart": "주 10회/월 50회 콘티 작성",
+    "scheduleLimitSmart": "주 10회/월 100회 콘티 작성",
     "scheduleLimitEnterprise": "콘티 작성 무제한",
     "sheetMusicLimitFree": "최대 50곡 악보 등록",
-    "sheetMusicLimitSmart": "최대 200곡 악보 등록",
+    "sheetMusicLimitSmart": "최대 800곡 악보 등록",
     "sheetMusicLimitEnterprise": "악보 업로드 무제한",
     "goHome": "홈으로 이동"
   },
@@ -950,7 +951,7 @@
       "title": "제3조 (서비스 플랜)",
       "item1": "회사는 다음과 같은 플랜을 제공합니다:",
       "freePlan": "FREE 플랜: 최대 10명 성도 등록, 주 2회/월 8회 콘티 작성, 최대 50곡 악보 등록",
-      "smartPlan": "SMART 플랜: 월 9,900원, 최대 150명 성도 등록, 주 10회/월 50회 콘티 작성, 최대 200곡 악보 등록",
+      "smartPlan": "SMART 플랜: 월 9,900원, 최대 150명 성도 등록, 주 10회/월 100회 콘티 작성, 최대 800곡 악보 등록",
       "enterprisePlan": "ENTERPRISE 플랜: 월 49,000원, 성도 등록 무제한, 콘티 작성 무제한, 악보 업로드 무제한",
       "item2": "교회(단체)는 선택한 플랜의 제한 내에서 성도의 서비스 이용을 관리합니다."
     },

@@ -147,16 +147,22 @@ export default function MobileNav({
                   </button>
                   {isScoresMenuOpen && (
                     <div className="mt-2 pl-4">
-                      <Link
-                        href={getPathname({ locale, href: "/scores" })}
-                        onClick={() => {
-                          closeAllDropdowns();
-                          setIsMenuOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        {t("scoreList")}
-                      </Link>
+                      {/* GENERAL 권한은 악보 리스트를 열람할 수 없도록 함 */}
+                      {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(
+                        user?.role || ""
+                      ) && (
+                        <Link
+                          href={getPathname({ locale, href: "/scores" })}
+                          onClick={() => {
+                            closeAllDropdowns();
+                            setIsMenuOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          {t("scoreList")}
+                        </Link>
+                      )}
+
                       <Link
                         href={getPathname({ locale, href: "/setlists" })}
                         onClick={() => {

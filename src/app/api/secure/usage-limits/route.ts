@@ -6,6 +6,9 @@ import { toZonedTime } from "date-fns-tz";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { TokenPayload } from "@/lib/jwt";
+import { constants } from "@/constants/intex";
+
+const { LIMITS } = constants;
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secure-secret-key";
 const TIME_ZONE = "Asia/Seoul"; // 한국(서울) 시간대
@@ -15,27 +18,6 @@ interface JwtPayload {
   churchId?: string;
   role: string;
 }
-
-const LIMITS = {
-  FREE: {
-    maxUsers: 10,
-    weeklySetlists: 2,
-    monthlySetlists: 8,
-    maxScores: 50,
-  },
-  SMART: {
-    maxUsers: 150,
-    weeklySetlists: 10,
-    monthlySetlists: 50,
-    maxScores: 200,
-  },
-  ENTERPRISE: {
-    maxUsers: Infinity,
-    weeklySetlists: Infinity,
-    monthlySetlists: Infinity,
-    maxScores: Infinity,
-  },
-} as const;
 
 export async function GET() {
   try {

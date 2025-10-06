@@ -14,6 +14,8 @@ import PaginationControls from "@/components/scores/PaginationControls";
 import SelectedSongList from "@/components/scores/SelectedSongFlotingList";
 import { ScoreResponse } from "@/types/score";
 import Button from "@/components/Button";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "@/utils/useRouter";
 
 export default function ScoreList() {
   const [scores, setScores] = useState<ScoreResponse[]>([]);
@@ -38,11 +40,21 @@ export default function ScoreList() {
   const [isSongListOpen, setIsSongListOpen] = useState(true);
   const locale = useLocale();
   const t = useTranslations("Score");
+  const { user } = useAuth();
+  const router = useRouter();
 
   // 키 정규화 함수
   const normalizeKey = (key: string): string => {
     return key.split(" ")[0].replace(/[#b]/, "");
   };
+
+  useEffect(() => {
+    // user.role이 "GENERAL"인 경우 dashboard로 리다이렉트
+    if (user && user.role === "GENERAL") {
+      alert(t("unauthorized"));
+      router.push(`/dashboard`);
+    }
+  }, [user, router, t]);
 
   // 세션 스토리지에서 선곡 리스트 불러오기
   useEffect(() => {

@@ -32,4 +32,24 @@ export const constants = {
     "6/8", // Compound duple (e.g., jigs)
     "12/8", // Compound quadruple
   ],
+  LIMITS: {
+    FREE: {
+      maxUsers: 10,
+      weeklySetlists: 2,
+      monthlySetlists: 8,
+      maxScores: 50,
+    },
+    SMART: {
+      maxUsers: 150,
+      weeklySetlists: 100,
+      monthlySetlists: 100,
+      maxScores: 800,
+    },
+    ENTERPRISE: {
+      maxUsers: Infinity,
+      weeklySetlists: Infinity,
+      monthlySetlists: Infinity,
+      maxScores: Infinity,
+    },
+  },
 } as const;

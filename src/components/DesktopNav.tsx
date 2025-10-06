@@ -145,13 +145,19 @@ export default function DesktopNav({
             </button>
             {isScoresMenuOpen && (
               <div className="absolute z-50 bg-white shadow-lg rounded-md mt-1">
-                <Link
-                  href={getPathname({ locale, href: "/scores" })}
-                  onClick={closeAllDropdowns}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  {t("scoreList")}
-                </Link>
+                {/* GENERAL 권한은 악보 리스트를 열람 할 수 없도록 함 */}
+                {["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(
+                  user?.role || ""
+                ) && (
+                  <Link
+                    href={getPathname({ locale, href: "/scores" })}
+                    onClick={closeAllDropdowns}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    {t("scoreList")}
+                  </Link>
+                )}
+
                 <Link
                   href={getPathname({ locale, href: "/setlists" })}
                   onClick={closeAllDropdowns}

@@ -613,7 +613,8 @@
     "upgradePlan": "Upgrade Plan",
     "noMakeSetlist": "Cannot create setlist due to weekly/monthly usage limit exceeded.\nUpgrade your plan",
     "noUploadScore": "Score upload limit exceeded.\nUpgrade your plan",
-    "timeSignature": "Time Signature"
+    "timeSignature": "Time Signature",
+    "unauthorized": "Unauthorized"
   },
   "Setlist": {
     "noKey": "No Key",
@@ -789,8 +790,8 @@
       "title": "SMART",
       "description": "Suitable for small to medium churches",
       "features1": "Up to 150 member registrations",
-      "features2": "Up to 10 weekly / 50 monthly setlist creations",
-      "features3": "Up to 200 scores",
+      "features2": "Up to 10 weekly / 800 monthly setlist creations",
+      "features3": "Up to 800 scores",
       "price": "9,900 KRW",
       "subscribe": "Start Subscription"
     },
@@ -922,10 +923,10 @@
     "memberLimitSmart": "Up to 150 member registrations",
     "memberLimitEnterprise": "Unlimited member registrations",
     "scheduleLimitFree": "2 weekly / 8 monthly setlist creations",
-    "scheduleLimitSmart": "10 weekly / 50 monthly setlist creations",
+    "scheduleLimitSmart": "10 weekly / 100 monthly setlist creations",
     "scheduleLimitEnterprise": "Unlimited setlist creations",
     "sheetMusicLimitFree": "Up to 50 score registrations",
-    "sheetMusicLimitSmart": "Up to 200 score registrations",
+    "sheetMusicLimitSmart": "Up to 800 score registrations",
     "sheetMusicLimitEnterprise": "Unlimited score uploads",
     "goHome": "Go to Home"
   },
@@ -950,7 +951,7 @@
       "title": "Article 3 (Service Plans)",
       "item1": "The Company offers the following plans:",
       "freePlan": "FREE Plan: Up to 10 member registrations, 2 weekly/8 monthly setlist creations, up to 50 score registrations",
-      "smartPlan": "SMART Plan: 9,900 KRW/month, up to 150 member registrations, 10 weekly/50 monthly setlist creations, up to 200 score registrations",
+      "smartPlan": "SMART Plan: 9,900 KRW/month, up to 150 member registrations, 10 weekly/100 monthly setlist creations, up to 800 score registrations",
       "enterprisePlan": "ENTERPRISE Plan: 49,000 KRW/month, unlimited member registrations, unlimited setlist creations, unlimited score uploads",
       "item2": "Churches (organizations) manage member usage within the limits of the selected plan."
     },

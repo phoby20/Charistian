@@ -604,7 +604,8 @@
     "upgradePlan": "プランをアップグレード",
     "noMakeSetlist": "週/月の使用量超過のためコンテ作成ができません。\nプランをアップグレードしてください。",
     "noUploadScore": "楽譜アップロード制限に達しました。\nプランをアップグレードしてください。",
-    "timeSignature": "拍子"
+    "timeSignature": "拍子",
+    "unauthorized": "権限がありません"
   },
   "Setlist": {
     "noKey": "キーが設定されていません",

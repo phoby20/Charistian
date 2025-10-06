@@ -613,7 +613,8 @@
     "upgradePlan": "Upgrade Plan",
     "noMakeSetlist": "Cannot create setlist due to weekly/monthly usage limit exceeded.\nUpgrade your plan",
     "noUploadScore": "Score upload limit exceeded.\nUpgrade your plan",
-    "timeSignature": "Time Signature"
+    "timeSignature": "Time Signature",
+    "unauthorized": "Unauthorized"
   },
   "Setlist": {
     "noKey": "No Key",

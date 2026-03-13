@@ -43,7 +43,7 @@ export default function SetlistDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const [setlist, setSetlist] = useState<SetlistResponse | null>(null);
-  const [appUrl, setAppUrl] = useState<string>("");
+  // const [appUrl, setAppUrl] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [currentPlayingId, setCurrentPlayingId] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -163,7 +163,7 @@ export default function SetlistDetailPage() {
         setIsMuted(false);
       }
     }, 300),
-    [currentPlayingId, setlist, isPlayerReady, t, isIOS]
+    [currentPlayingId, setlist, isPlayerReady, t, isIOS],
   );
 
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
@@ -279,13 +279,13 @@ export default function SetlistDetailPage() {
         const setlistResponse = await fetch(`/api/setlists/${id}`);
         if (!setlistResponse.ok) {
           throw new Error(
-            (await setlistResponse.json()).error || t("fetchError")
+            (await setlistResponse.json()).error || t("fetchError"),
           );
         }
         const setlistData: { setlist: SetlistResponse; appUrl: string } =
           await setlistResponse.json();
         setSetlist(setlistData.setlist);
-        setAppUrl(setlistData.appUrl);
+        // setAppUrl(setlistData.appUrl);
 
         const teamIds = setlistData.setlist.shares
           .filter((share) => share.team)
@@ -302,7 +302,7 @@ export default function SetlistDetailPage() {
             throw new Error(t("fetchMembersError"));
           }
           const filteredMembers = memberData.members.filter((member: Member) =>
-            member.teams.some((team) => teamIds.includes(team.id))
+            member.teams.some((team) => teamIds.includes(team.id)),
           );
           setMembers(filteredMembers);
         }
@@ -321,9 +321,12 @@ export default function SetlistDetailPage() {
     (user.id === setlist?.creatorId ||
       ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"].includes(user.role));
 
-  const proxyFileUrl: string = setlist?.id
-    ? `${appUrl}/api/proxy/setlist/${setlist.id}/file`
-    : "#";
+  // Temporary: bypass proxy and open the original PDF directly.
+  // const proxyFileUrl: string = setlist?.id
+  //   ? `${appUrl}/api/proxy/setlist/${setlist.id}/file`
+  //   : "#";
+
+  const directFileUrl: string = setlist?.fileUrl || "#";
 
   const currentVideoId: string | undefined = currentPlayingId
     ? getYouTubeVideoId(
@@ -331,18 +334,18 @@ export default function SetlistDetailPage() {
           ?.selectedReferenceUrl ||
           getFirstYouTubeVideoId(
             setlist?.scores.find((s) => s.id === currentPlayingId)?.creation
-              .referenceUrls
-          )
+              .referenceUrls,
+          ),
       )
     : undefined;
 
   // scoreKeys에서 selectedKey에 해당하는 fileUrl 조회
   const getScoreFileUrl = (
-    score: SetlistResponse["scores"][number]
+    score: SetlistResponse["scores"][number],
   ): string => {
     if (score.selectedKey) {
       const selectedKeyObj = score.creation.scoreKeys.find(
-        (key) => key.key === score.selectedKey
+        (key) => key.key === score.selectedKey,
       );
       return (
         selectedKeyObj?.fileUrl || score.creation.scoreKeys[0].fileUrl || "#"
@@ -524,7 +527,7 @@ export default function SetlistDetailPage() {
                             score.creation.title,
                             score.creation.titleEn,
                             score.creation.titleJa,
-                            locale
+                            locale,
                           )}
                         </span>
                       </div>
@@ -606,9 +609,11 @@ export default function SetlistDetailPage() {
               transition={{ duration: 0.4, delay: 0.1 }}
               className="mb-8"
             >
+              {/* Temporary: open PDF directly without proxy.
+                  To restore proxy behavior later, change directFileUrl back to proxyFileUrl. */}
               <Button
                 variant="primary"
-                onClick={() => handleViewPdf(proxyFileUrl)}
+                onClick={() => handleViewPdf(directFileUrl)}
                 aria-label={t("viewPdf")}
               >
                 <FileMusic className="w-5 h-5" />

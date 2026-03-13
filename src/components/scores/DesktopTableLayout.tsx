@@ -21,18 +21,26 @@ export default function DesktopTableLayout({
   const t = useTranslations("Setlist");
   const locale = useLocale();
   const [toast, setToast] = useState<{ id: string; message: string } | null>(
-    null
+    null,
   );
 
   // URL 복사 함수
-  const copyToClipboard = (id: string) => {
-    const proxyFileUrl: string = id
-      ? `${appUrl}/api/proxy/setlist/${id}/file`
-      : "#";
-    navigator.clipboard.writeText(proxyFileUrl).then(() => {
-      setToast({ id, message: t("urlCopied") });
-      setTimeout(() => setToast(null), 3000); // 3초 후 토스트 제거
-    });
+  // 아래 코드는 플록시 서버를 다시 사용할 때 활성화 예정
+  // const copyToClipboard = (id: string) => {
+  //   const proxyFileUrl: string = id
+  //     ? `${appUrl}/api/proxy/setlist/${id}/file`
+  //     : "#";
+  //   navigator.clipboard.writeText(proxyFileUrl).then(() => {
+  //     setToast({ id, message: t("urlCopied") });
+  //     setTimeout(() => setToast(null), 3000); // 3초 후 토스트 제거
+  //   });
+  // };
+
+  // 아래 코드는 플록시 서버를 다시 사용할 때 삭제 예정
+  const directFileUrl = (id: string, fileUrl: string) => {
+    console.log(appUrl);
+    setToast({ id, message: t("urlCopied") });
+    window.open(fileUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -69,7 +77,7 @@ export default function DesktopTableLayout({
             >
               <td className="py-4 px-6 text-sm text-gray-600">
                 <button
-                  onClick={() => copyToClipboard(setlist.id)}
+                  onClick={() => directFileUrl(setlist.id, setlist.fileUrl)}
                   className="text-[#fc089e] hover:text-[#ff66c4] transition-colors cursor-pointer"
                   aria-label={t("urlCopied")}
                 >

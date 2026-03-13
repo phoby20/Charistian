@@ -12,7 +12,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function sendSetlistEmail(
   req: NextRequest,
   finalSetlist: SetlistsResponse,
-  emailTitle: string
+  emailTitle: string,
 ): Promise<void> {
   const resendFrom = process.env.RESEND_FROM;
   if (!resendFrom) {
@@ -75,16 +75,17 @@ export async function sendSetlistEmail(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${ip}:3001`;
   const logoUrl = `${appUrl}/logo_title.png`;
   // 프록시 URL 생성
-  const proxyFileUrl = `${appUrl}/api/proxy/setlist/${finalSetlist.id}/file`;
+  // const proxyFileUrl = `${appUrl}/api/proxy/setlist/${finalSetlist.id}/file`;
 
   // createEmailContent에 프록시 URL 전달
   const emailContent = createEmailContent(
     logoUrl,
-    { ...finalSetlist, fileUrl: proxyFileUrl }, // setlist의 fileUrl을 프록시 URL로 대체
+    // { ...finalSetlist, fileUrl: proxyFileUrl }, // setlist의 fileUrl을 프록시 URL로 대체. 플록시 서버를 통해서 파일에 접근 하도록 하려면 이 버전을 사용
+    { ...finalSetlist }, // setlist의 fileUrl을 프록시 URL을 사용하지 않는 버전
     scoresList,
     sharesList,
     koreaDate,
-    emailTitle
+    emailTitle,
   );
 
   console.log("이메일 내용 생성 완료");
